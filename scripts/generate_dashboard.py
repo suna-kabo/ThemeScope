@@ -8,6 +8,9 @@ import csv
 import json
 import sys
 import zipfile
+import tempfile
+import shutil
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -17,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from src.themescope.collect import build_snapshot  # noqa: E402
+from src.themescope.presentation import enrich, validate
 
 
 def _write_json(path: Path, data: Any) -> None:
@@ -81,12 +85,12 @@ def make_source_matrix(snapshot: dict[str, Any], raw: dict[str, Any], root: Path
             "Daily raw close, volume, adjusted close, split events, dividend events",
             "SPY, QQQ, theme anchors, parent ETFs, reviewed stocks, anchor alternatives",
             "Yahoo Finance chart endpoint",
-            "HTTPS JSON chart endpoint via stdlib urllib; 1-day interval, events=div,splits, includeAdjustedClose=true",
+            "HTTPS JSON chart endpoint via stdlib urllib; 1-day interval, events=div,splits, includeAdjustedClose=true; sequential requests spaced 1.5 seconds apart to reduce throttling",
             history_desc,
             "Daily bars; the current session is accepted only after 16:30 America/New_York and a same-date provider market timestamp. Otherwise the prior completed session is used. No guaranteed publication delay.",
             "Endpoint is undocumented. Provider adjustment and publication semantics can change. It is not an exchange feed or a licensed data guarantee.",
-            "None. Failed series and dependent metrics remain unavailable; older snapshots are not reused.",
-            f"{len(charts) - chart_error_count}/{len(charts) + chart_error_count} requested chart series retrieved; {chart_error_count} error(s).",
+            "Query2 uses the same Yahoo schema and adjustment convention. Hosts stop receiving requests after HTTP 429. If retrieval still fails, publication is rejected and a last successful export is retained with its original date.",
+            f"{len(charts)}/{len(charts) + chart_error_count} requested chart series retrieved; {chart_error_count} error(s).",
             max((chart.get("retrieved_at") for chart in charts.values()), default=None),
             next((chart.get("url") for chart in charts.values() if chart.get("symbol") == "SPY"), "https://query1.finance.yahoo.com/v8/finance/chart/SPY"),
         )
@@ -111,7 +115,7 @@ def make_source_matrix(snapshot: dict[str, Any], raw: dict[str, Any], root: Path
     matrix.append(
         _source_row(
             "Market capitalization, listing exchange, sector, industry",
-            f"{len(raw.get('quotes', {}))} reviewed candidate tickers",
+            f"{len(raw.get('quotes', {}))} securities, including industry-only XBI screening",
             "Nasdaq quote summary API",
             "HTTPS JSON summary response; MarketCap, Exchange, Sector, Industry",
             "Current quote-summary retrieval on this run; per-field observation date is not supplied by provider.",
@@ -195,7 +199,7 @@ def make_source_matrix(snapshot: dict[str, Any], raw: dict[str, Any], root: Path
                 f"As of {holdings.get('as_of') or 'unavailable'}; {len(holdings.get('rows', [])) if holdings else 0} equity rows" if holdings else "No current holdings rows",
                 "Issuer publication cadence varies; use the embedded source as-of date, not retrieval time, for freshness. A retrieval can contain an old snapshot.",
                 "Complete-snapshot behavior is provider-specific. Parser failure is surfaced; no historical holdings list is substituted.",
-                "None. Holdings status becomes unavailable; ETF price metrics may still be valid, while membership coverage is unavailable.",
+                "VanEck can use its verified direct official dataset if fund-page discovery fails. An unrecovered retrieval failure rejects publication.",
                 holding_test,
                 holdings.get("retrieved_at") if holdings else None,
                 theme_cfg_row["holdings_source"]["url"],
@@ -283,7 +287,7 @@ def _all_selected(snapshot: dict[str, Any], limit: int) -> list[dict[str, Any]]:
 def _write_csv(path: Path, rows: list[dict[str, Any]], columns: list[str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8-sig") as handle:
-        writer = csv.DictWriter(handle, fieldnames=columns, extrasaction="ignore")
+        writer = csv.DictWriter(handle, fieldnames=columns, extrasaction="ignore", lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 
@@ -350,9 +354,9 @@ def _run_report(snapshot: dict[str, Any], raw: dict[str, Any], matrix: list[dict
         f"- A current day bar is accepted only after the 16:30 America/New_York cutoff and a same-date Yahoo regular-market timestamp. Before then the prior verified session is used. The completed session is `{snapshot.get('session_date') or 'unavailable'}`.",
         "- Nasdaq's quote summary supplies market cap, listing exchange, sector, and industry, but exposes no timestamp for the market-cap field. The value is retrieved on this run; its field age cannot be independently proven. It is therefore a provisional eligibility input.",
         "- SEC submissions feeds are checked on each run for newer 10-K, 20-F, or 40-F filings than the cited evidence. Newer filings and unavailable checks block provisional selection. 8-K disclosure content is not automatically reviewed.",
-        "- ETF holdings are retrieved from each fund issuer and retain the actual as-of date. Retrieval does not make an old snapshot current. No failed retrieval is replaced with an earlier stored snapshot.",
+        "- ETF holdings are retrieved from each fund issuer and retain the actual as-of date. Retrieval does not make an old snapshot current. Failed refreshes do not mix in old fields; the entire last successful dashboard is preserved with its original data date.",
         "- Theme evidence review is incomplete for every configured theme. The present curated lists are not full eligible universes; pending issuers, foreign mappings, and broader segment judgments remain unresolved.",
-        "- XBI provides ETF-level data only in this prototype. Issuer industry screening was not run across its holdings; the dashboard does not claim an empty eligible biotech stock universe.",
+        "- XBI industry screening runs for mapped tickers. Biotechnology classifications are excluded by the default rule; non-biotechnology and unmapped holdings remain pending business-evidence review. Zero selections is not a claim that its eligible universe is empty.",
         "- Themes can overlap. Stock versus ETF excess is mechanically related where the fund owns the company; it is not independent alpha. No point-in-time membership, backtest, prediction, or execution quality assessment is provided.",
         "",
         "## Exports",
@@ -417,20 +421,8 @@ def _write_run_bundle(output_dir: Path) -> Path:
     return bundle_path
 
 
-def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Fetch current ThemeScope data and create local dashboard downloads.")
-    parser.add_argument(
-        "--output-dir",
-        default="output",
-        help="where to save this run's files (default: output/ under the repository root)",
-    )
-    args = parser.parse_args(argv)
-    output_dir = Path(args.output_dir).expanduser()
-    if not output_dir.is_absolute():
-        output_dir = ROOT / output_dir
-
-    snapshot, raw = build_snapshot(ROOT)
-    matrix = make_source_matrix(snapshot, raw, ROOT)
+def _generate(snapshot, raw, output_dir):
+    matrix = snapshot.get("source_matrix") or make_source_matrix(snapshot, raw, ROOT)
     snapshot["source_matrix"] = matrix
     output_dir.mkdir(parents=True, exist_ok=True)
     _write_json(output_dir / "latest_snapshot.json", snapshot)
@@ -458,12 +450,86 @@ def main(argv: list[str] | None = None) -> int:
     (output_dir / "dashboard.html").write_text(html, encoding="utf-8")
     bundle_path = _write_run_bundle(output_dir)
 
-    print(f"Generated {len(snapshot['themes'])} themes for session {snapshot['session_date']} at {snapshot['generated_at']}.")
-    print(f"Source errors: {raw['retrieval_error_count']}. Dashboard: {output_dir / 'dashboard.html'}")
-    print(f"Run files: {output_dir} (bundle: {bundle_path})")
-    for theme in snapshot["themes"]:
-        print(f"{theme['id']}: {theme['official_holdings_count']} holdings, {theme['eligible_reviewed_count']} provisional eligible, {len(theme['selected'])} selected, {theme['pending_count']} pending.")
-    return 0
+    return bundle_path
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Explicitly refresh the offline ThemeScope dashboard.")
+    parser.add_argument('--output-dir', default='output')
+    parser.add_argument('--import-run', type=Path, help='Import a dated real run directory containing latest_snapshot.json and raw_inputs.json; no network requests')
+    args = parser.parse_args(argv)
+    output = Path(args.output_dir).expanduser()
+    if not output.is_absolute():
+        output = ROOT / output
+    output = output.resolve()
+    if output == ROOT or ROOT.is_relative_to(output):
+        parser.error('Output must be a dedicated directory, not the project or its parent')
+    output.parent.mkdir(parents=True, exist_ok=True)
+    snapshot, raw = {}, {}
+    attempted = datetime.now(timezone.utc).isoformat(timespec='seconds')
+    try:
+        if args.import_run:
+            print('Importing dated real data; no collection will run.', flush=True)
+            snapshot = json.loads((args.import_run / 'latest_snapshot.json').read_text(encoding='utf-8'))
+            raw = json.loads((args.import_run / 'raw_inputs.json').read_text(encoding='utf-8'))
+            if not snapshot.get('generated_at') or not snapshot.get('session_date'):
+                raise ValueError('Imported run must retain its original generation time and session date')
+            snapshot['imported_at'] = attempted
+        else:
+            print('Collecting official holdings, paced prices, quotes and filing checks. Please wait.', flush=True)
+            snapshot, raw = build_snapshot(ROOT)
+        enrich(snapshot, raw)
+        validate(snapshot, raw)
+        with tempfile.TemporaryDirectory(prefix='.themescope-stage-', dir=output.parent) as tmp:
+            stage = Path(tmp) / 'run'
+            stage.mkdir()
+            _generate(snapshot, raw, stage)
+            _write_json(stage / 'refresh_status.json', {'status': 'success', 'attempted_at': attempted, 'data_date': snapshot['session_date'], 'imported': bool(args.import_run)})
+            # Commit only generated files; preserve unrelated files in a custom output directory.
+            # Dashboard is published last, after every dependent download is ready.
+            output.mkdir(parents=True, exist_ok=True)
+            backup = Path(tmp) / 'previous'
+            backup.mkdir()
+            changed = []
+            files = sorted(stage.iterdir(), key=lambda p: p.name == 'dashboard.html')
+            try:
+                for source in files:
+                    target = output / source.name
+                    if target.exists():
+                        shutil.copy2(target, backup / source.name)
+                    os.replace(source, target)
+                    changed.append(source.name)
+            except BaseException:
+                for name in reversed(changed):
+                    old = backup / name
+                    if old.exists():
+                        os.replace(old, output / name)
+                    else:
+                        (output / name).unlink(missing_ok=True)
+                raise
+            (output / 'failed_refresh.md').unlink(missing_ok=True)
+        print(f"SUCCESS: data date {snapshot['session_date']}; {len(snapshot['themes'])} themes; {sum(len(t['selected']) for t in snapshot['themes'])} provisional stock selections.")
+        print(f"Open {output / 'dashboard.html'}\nDownload bundle: {output / 'run_bundle.zip'}")
+        return 0
+    except Exception as exc:
+        output.mkdir(parents=True, exist_ok=True)
+        preserved = False
+        preserved_date = None
+        if (output / 'dashboard.html').exists():
+            try:
+                old_snapshot = json.loads((output / 'latest_snapshot.json').read_text(encoding='utf-8'))
+                old_raw = json.loads((output / 'raw_inputs.json').read_text(encoding='utf-8'))
+                validate(enrich(old_snapshot, old_raw), old_raw)
+                preserved = True
+                preserved_date = old_snapshot.get("session_date")
+            except Exception:
+                # Retain an invalid old export for diagnosis without presenting it as usable.
+                os.replace(output / 'dashboard.html', output / 'rejected_dashboard.html')
+        status = {'status': 'failed', 'attempted_at': attempted, 'reason': str(exc), 'source_errors': raw.get('errors', {}), 'dashboard_preserved': preserved, 'preserved_data_date': preserved_date}
+        _write_json(output / 'refresh_status.json', status)
+        (output / 'failed_refresh.md').write_text(f"# Refresh failed\n\nAttempt: {attempted}\n\n{exc}\n\n" + ('Existing dashboard and its original date were preserved.' if preserved else 'No dashboard was generated. No successful snapshot exists in this directory.') + '\n', encoding='utf-8')
+        print(f"GENERATION FAILED: {exc}\n" + ('Existing dashboard preserved with its original data date.' if preserved else 'No successful dashboard was generated.') + f"\nDetails: {output / 'refresh_status.json'}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":

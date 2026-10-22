@@ -26,7 +26,7 @@
     },
     "biotechnology": {
       "review_complete": false,
-      "reason": "Issuer-level industry screening was not run. The default rule excludes biotechnology-classified stocks; ETF-level returns remain available."
+      "reason": "Industry screening runs on mapped XBI tickers. Biotechnology classifications are excluded by the default rule; other industries and unmapped identifiers still require business-evidence review."
     }
   },
   "members": [

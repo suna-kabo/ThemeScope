@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import math
 import statistics
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -42,11 +43,26 @@ def _metric_values(metrics: dict[str, Any]) -> dict[str, float | None]:
     return {str(window): metrics[str(window)].get("value") for window in WINDOWS}
 
 
-def _fetch_many(symbols: set[str], fetcher: Any, workers: int = 4) -> tuple[dict[str, Any], dict[str, str]]:
+def _fetch_many(
+    symbols: set[str],
+    fetcher: Any,
+    workers: int = 4,
+    request_interval_seconds: float = 0.0,
+) -> tuple[dict[str, Any], dict[str, str]]:
     results: dict[str, Any] = {}
     errors: dict[str, str] = {}
+    ordered_symbols = sorted(symbols)
+    if workers <= 1:
+        for index, symbol in enumerate(ordered_symbols):
+            if index and request_interval_seconds > 0:
+                time.sleep(request_interval_seconds)
+            try:
+                results[symbol] = fetcher(symbol)
+            except Exception as exc:  # retain per-symbol failures as explicit unavailable data
+                errors[symbol] = f"{type(exc).__name__}: {exc}"
+        return results, errors
     with ThreadPoolExecutor(max_workers=workers) as pool:
-        jobs = {pool.submit(fetcher, symbol): symbol for symbol in sorted(symbols)}
+        jobs = {pool.submit(fetcher, symbol): symbol for symbol in ordered_symbols}
         for future in as_completed(jobs):
             symbol = jobs[future]
             try:
@@ -326,9 +342,9 @@ def _anchor_summary(theme: dict[str, Any], chart: dict[str, Any] | None, spy_cha
 
 
 def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
-    theme_cfg = json.loads((root / "config/themes.json").read_text())
-    evidence_cfg = json.loads((root / "config/evidence_reviews.json").read_text())
-    comparison_cfg = json.loads((root / "config/anchor_comparisons.json").read_text())
+    theme_cfg = json.loads((root / "config/themes.json").read_text(encoding="utf-8"))
+    evidence_cfg = json.loads((root / "config/evidence_reviews.json").read_text(encoding="utf-8"))
+    comparison_cfg = json.loads((root / "config/anchor_comparisons.json").read_text(encoding="utf-8"))
     settings = theme_cfg["settings"]
     themes = theme_cfg["themes"]
     evidence_by_theme: dict[str, dict[str, dict[str, Any]]] = {}
@@ -364,15 +380,23 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
             if member.get("category") == "Core business"
         )
     chart_symbols.update(item["ticker"] for item in comparison_cfg["comparisons"])
-    charts, chart_errors = _fetch_many(chart_symbols, fetch_yahoo_chart, workers=4)
+    # Yahoo throttles bursts of chart requests. Keep these sequential with a
+    # short pause so a normal on-demand run is less likely to receive HTTP 429.
+    print(f"Collecting {len(chart_symbols)} price histories sequentially (1.5s pacing).", flush=True)
+    charts, chart_errors = _fetch_many(
+        chart_symbols, fetch_yahoo_chart, workers=1, request_interval_seconds=1.5
+    )
 
+    print(f"Price histories: {len(charts)} retrieved, {len(chart_errors)} unavailable. Checking quote and filing sources.", flush=True)
     member_symbols = {
         ticker
         for entries in evidence_by_theme.values()
         for ticker, member in entries.items()
         if member.get("category") == "Core business"
     }
-    quotes, quote_errors = _fetch_many(member_symbols, fetch_nasdaq_summary, workers=4)
+    # Industry-only review of XBI: non-stock identifiers remain unmapped, never guessed.
+    industry_symbols = {row['ticker'] for row in holdings.get('XBI', {}).get('rows', []) if row.get('ticker', '').isalpha()}
+    quotes, quote_errors = _fetch_many(member_symbols | industry_symbols, fetch_nasdaq_summary, workers=2)
 
     ciks = {
         str(member.get("evidence", {}).get("cik"))
@@ -481,8 +505,12 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
         excluded: list[dict[str, Any]] = []
         for ticker, held in holdings_lookup.items():
             member = member_records.get(ticker)
+            industry_quote = quotes.get(ticker) if theme['id'] == 'biotechnology' else None
+            if industry_quote and 'biotech' in str(industry_quote.get('industry', '')).lower():
+                excluded.append({**held, 'reasons': ['Industry classified as biotechnology; excluded by the default stock-universe rule'], 'industry': industry_quote.get('industry'), 'source_url': industry_quote.get('url'), 'retrieved_at': industry_quote.get('retrieved_at')})
+                continue
             if member is None:
-                pending.append({**held, "status": "Pending evidence review", "reason": "Current official holding has no completed issuer business-evidence review."})
+                pending.append({**held, "status": "Pending evidence review", "reason": "Non-stock or unmapped holding identifier; no ticker mapping invented." if not ticker.isalpha() and theme["id"] == "biotechnology" else "Current official holding has no completed issuer business-evidence review."})
                 continue
             if member.get("category") != "Core business":
                 pending.append({
@@ -507,7 +535,7 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
         # Evidence records whose ticker is no longer present in the official snapshot are not current members.
         for ticker, member in member_records.items():
             if ticker not in holdings_lookup:
-                excluded.append({"ticker": ticker, "company": member.get("company", ticker), "reasons": ["Not present in the retrieved current official holdings snapshot"], "weight_pct": None, "evidence": member.get("evidence")})
+                excluded.append({"ticker": ticker, "company": member.get("company", ticker), "reasons": ["Official holdings retrieval unavailable; membership cannot be determined" if anchor in holdings_errors else "Not present in the retrieved current official holdings snapshot"], "weight_pct": None, "evidence": member.get("evidence")})
 
         eligible = [row for row in member_rows if row["eligibility"] == "eligible_provisional"]
         # Deduplicate company identifiers. Keep the security with highest ADV$30 and aggregate fund weights.
