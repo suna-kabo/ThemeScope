@@ -29,9 +29,14 @@ with sync_playwright() as p:
     assert page.locator('html').get_attribute('data-mode')=='dark'
     page.screenshot(path='/tmp/themescope-dark.png',full_page=True)
     # Numeric sorting, stable ranks through filters, and missing-last are also unit tested.
+    assert page.locator('#theme-sort').input_value()=='theme_score'
+    page.select_option('#theme-sort','excess21')
     first=page.locator('#theme-body tr').first.inner_text()
     page.click('#theme-direction')
     assert page.locator('#theme-body tr').first.inner_text()!=first
+    page.select_option('#level','Industry')
+    assert page.locator('#theme-body tr[data-theme]').count()==3
+    page.select_option('#level','All')
     page.fill('#theme-search','cloud')
     assert page.locator('#theme-body tr[data-theme]').count()==1
     page.click('#theme-body tr[data-theme]')
@@ -41,6 +46,7 @@ with sync_playwright() as p:
     page.select_option('#stock-trend','Downtrend');page.select_option('#stock-trend','All')
     page.select_option('#stock-relative','Outperforming');page.select_option('#stock-relative','All')
     page.fill('#stock-search','MSFT');page.fill('#stock-search','')
+    page.select_option('#ema-filter','above21');page.select_option('#ema-filter','all')
     page.click('#stock-direction')
     assert page.locator('#stock-body a').first.get_attribute('href').startswith('https://www.tradingview.com/chart/?symbol=')
     for button in ['#csv','#tv','a[href="run_bundle.zip"]']:
@@ -50,7 +56,7 @@ with sync_playwright() as p:
         if button.startswith('a['):
             with zipfile.ZipFile(download.value.path()) as bundle:
                 assert 'dashboard.html' in bundle.namelist()
-                assert len(bundle.namelist()) == 9
+                assert len(bundle.namelist()) == 11
     page.click('#mode');assert page.locator('html').get_attribute('data-mode')=='light'
     page.screenshot(path='/tmp/themescope-light.png',full_page=True)
     page.reload();page.wait_for_timeout(400)

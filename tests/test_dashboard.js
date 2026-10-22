@@ -90,3 +90,49 @@ assert.deepEqual(
   [1, 1, 3, null],
 );
 assert.equal(ui.filterRows(ranked, { query: "D" })[0].display_rank, 3);
+const scores = [
+  { id: "z", theme_score: null },
+  { id: "b", theme_score: 60 },
+  { id: "a", theme_score: 60 },
+  { id: "c", theme_score: 10 },
+];
+assert.deepEqual(
+  ui.sortRows(scores, "theme_score", "desc").map((r) => r.id),
+  ["a", "b", "c", "z"],
+);
+assert.deepEqual(
+  ui.sortRows(scores, "theme_score", "asc").map((r) => r.id),
+  ["c", "a", "b", "z"],
+);
+assert.equal(
+  ui.ranked(scores, "theme_score", "desc").at(-1).display_rank,
+  null,
+);
+const pool = Array.from({ length: 25 }, (_, i) => ({
+  ticker: "S" + i,
+  selection_slot: i + 1,
+  adv30_usd: 25 - i,
+}));
+const compact = ui.limitSelection(pool, 15),
+  expanded = ui.limitSelection(pool, 20);
+assert.equal(compact.length, 15);
+assert.equal(expanded.length, 20);
+assert.deepEqual(compact, expanded.slice(0, 15));
+assert.deepEqual(
+  ui
+    .sortRows(compact, "adv30_usd", "asc")
+    .map((r) => r.ticker)
+    .sort(),
+  compact.map((r) => r.ticker).sort(),
+);
+assert.match(
+  ui.rowsToCsv([
+    {
+      ticker: "X",
+      membership_tag: "Related",
+      is_anchor_holding: false,
+      etf_weight_pct: null,
+    },
+  ]),
+  /membership_tag/,
+);

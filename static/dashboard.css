@@ -339,3 +339,18 @@ footer {
 #coverage {
   max-width: 1100px;
 }
+
+.market-condition {
+  border-top: 1px solid var(--line);
+  padding-top: 6px;
+  margin-top: 6px;
+  font-size: 12px;
+}
+#theme-body td:nth-child(3) {
+  text-align: left;
+}
+#themes details p {
+  font-size: 12px;
+  color: var(--muted);
+  max-width: 900px;
+}

@@ -6,6 +6,7 @@ import json
 import math
 import statistics
 import time
+import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -224,11 +225,13 @@ def _stock_row(
         reasons.append("Price source did not identify an equity instrument")
     if price_currency != "USD":
         reasons.append("Price currency is not confirmed as USD")
-    if member.get("security_type") not in ("common_share", "sponsored_ADS"):
+    if member.get("security_type") not in ("common_share", "sponsored_ADS", "listed_REIT_common_share"):
         reasons.append("Security type is outside the eligible stock set")
     evidence_check = member.get("_evidence_freshness", {})
-    if evidence_check.get("status") != "current":
-        reasons.append(evidence_check.get("reason") or "Latest annual-filing freshness check unavailable")
+    if member.get('membership_tag') not in ('Core', 'Related') or not member.get('membership_source') or not member.get('membership_rationale'):
+        reasons.append('Supported Core/Related membership decision is missing')
+    if member.get('requires_filing_review', False) and evidence_check.get('status') != 'current':
+        reasons.append(evidence_check.get('reason') or 'Ambiguous membership needs current filing review')
     if cap is None:
         reasons.append("Market capitalization is unavailable")
     elif cap < float(settings["market_cap_floor_usd"]):
@@ -251,6 +254,10 @@ def _stock_row(
     company_id = str(member.get("evidence", {}).get("cik") or ticker)
     return {
         "ticker": ticker,
+        "membership_tag": member.get('membership_tag'),
+        "membership_source": member.get('membership_source'),
+        "membership_rationale": member.get('membership_rationale'),
+        "is_anchor_holding": holding.get('_is_anchor_holding', True),
         "company": holding.get("company") or member.get("company") or ticker,
         "company_id": company_id,
         "security_type": member.get("security_type"),
@@ -377,7 +384,7 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
         chart_symbols.update(
             ticker
             for ticker, member in evidence_by_theme.get(theme["id"], {}).items()
-            if member.get("category") == "Core business"
+            if member.get("membership_tag") in ("Core", "Related")
         )
     chart_symbols.update(item["ticker"] for item in comparison_cfg["comparisons"])
     # Yahoo throttles bursts of chart requests. Keep these sequential with a
@@ -392,7 +399,7 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
         ticker
         for entries in evidence_by_theme.values()
         for ticker, member in entries.items()
-        if member.get("category") == "Core business"
+        if member.get("membership_tag") in ("Core", "Related")
     }
     # Industry-only review of XBI: non-stock identifiers remain unmapped, never guessed.
     industry_symbols = {row['ticker'] for row in holdings.get('XBI', {}).get('rows', []) if row.get('ticker', '').isalpha()}
@@ -402,17 +409,20 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
         str(member.get("evidence", {}).get("cik"))
         for entries in evidence_by_theme.values()
         for member in entries.values()
-        if member.get("category") == "Core business" and member.get("evidence", {}).get("cik")
+        if member.get("membership_tag") in ("Core", "Related") and member.get("evidence", {}).get("cik") and member.get("requires_filing_review", False)
     }
     sec_latest, sec_errors = _fetch_many(ciks, fetch_sec_latest_annual, workers=4)
     sec_freshness: dict[str, dict[str, Any]] = {}
     for entries in evidence_by_theme.values():
         for ticker, member in entries.items():
+            if not member.get('requires_filing_review', False):
+                sec_freshness[f"{member['theme_id']}:{ticker}"] = {'status': 'not_required', 'reason': 'v5 supported classification; mandatory filing freshness review not requested', 'checked_at': None}
+                continue
             evidence = member.get("evidence", {})
             cik = str(evidence.get("cik") or "")
             checked = sec_latest.get(cik)
             if checked is None:
-                if member.get("category") != "Core business":
+                if member.get("membership_tag") not in ("Core", "Related"):
                     sec_freshness[f"{member['theme_id']}:{ticker}"] = {
                         "status": "not_checked",
                         "reason": "Evidence remains unresolved; annual-filing freshness was not checked for stock eligibility.",
@@ -503,7 +513,11 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
         member_rows: list[dict[str, Any]] = []
         pending: list[dict[str, Any]] = []
         excluded: list[dict[str, Any]] = []
-        for ticker, held in holdings_lookup.items():
+        discovery = {ticker: {**held, '_is_anchor_holding': True} for ticker, held in holdings_lookup.items()}
+        for ticker, member in member_records.items():
+            if member.get('membership_tag') in ('Core', 'Related') and ticker not in discovery:
+                discovery[ticker] = {'ticker': ticker, 'company': member.get('company'), 'weight_pct': None, '_is_anchor_holding': False}
+        for ticker, held in discovery.items():
             member = member_records.get(ticker)
             industry_quote = quotes.get(ticker) if theme['id'] == 'biotechnology' else None
             if industry_quote and 'biotech' in str(industry_quote.get('industry', '')).lower():
@@ -512,7 +526,7 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
             if member is None:
                 pending.append({**held, "status": "Pending evidence review", "reason": "Non-stock or unmapped holding identifier; no ticker mapping invented." if not ticker.isalpha() and theme["id"] == "biotechnology" else "Current official holding has no completed issuer business-evidence review."})
                 continue
-            if member.get("category") != "Core business":
+            if member.get("membership_tag") not in ("Core", "Related"):
                 pending.append({
                     **held,
                     "status": "Unresolved",
@@ -532,11 +546,6 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
             if row["eligibility"] != "eligible_provisional":
                 excluded.append({"ticker": ticker, "company": row["company"], "reasons": row["eligibility_reasons"], "weight_pct": row["etf_weight_pct"], "evidence": row.get("evidence"), "evidence_freshness": row.get("evidence_freshness")})
 
-        # Evidence records whose ticker is no longer present in the official snapshot are not current members.
-        for ticker, member in member_records.items():
-            if ticker not in holdings_lookup:
-                excluded.append({"ticker": ticker, "company": member.get("company", ticker), "reasons": ["Official holdings retrieval unavailable; membership cannot be determined" if anchor in holdings_errors else "Not present in the retrieved current official holdings snapshot"], "weight_pct": None, "evidence": member.get("evidence")})
-
         eligible = [row for row in member_rows if row["eligibility"] == "eligible_provisional"]
         # Deduplicate company identifiers. Keep the security with highest ADV$30 and aggregate fund weights.
         by_company: dict[str, list[dict[str, Any]]] = {}
@@ -547,7 +556,7 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
             company_rows.sort(key=lambda row: (-(row.get("adv30_usd") or 0.0), row["ticker"]))
             chosen = dict(company_rows[0])
             chosen["share_classes"] = [row["ticker"] for row in company_rows]
-            chosen["etf_weight_pct"] = sum(row.get("etf_weight_pct") or 0.0 for row in company_rows)
+            chosen["etf_weight_pct"] = sum(row["etf_weight_pct"] for row in company_rows if row.get("etf_weight_pct") is not None) if any(row.get("etf_weight_pct") is not None for row in company_rows) else None
             eligible_companies.append(chosen)
         for row in eligible_companies:
             row["anchor"] = anchor
@@ -608,11 +617,12 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
             "excluded_count": len(excluded),
             "review_complete": bool(review_theme_cfg.get(theme["id"], {}).get("review_complete", False)),
             "review_reason": review_theme_cfg.get(theme["id"], {}).get("reason"),
-            "evidence_freshness_check_count": sum(1 for ticker, member in member_records.items() if member.get("category") == "Core business" and f"{theme['id']}:{ticker}" in sec_freshness),
-            "stale_evidence_count": sum(1 for ticker, member in member_records.items() if member.get("category") == "Core business" and sec_freshness.get(f"{theme['id']}:{ticker}", {}).get("status") == "stale"),
-            "unavailable_evidence_freshness_count": sum(1 for ticker, member in member_records.items() if member.get("category") == "Core business" and sec_freshness.get(f"{theme['id']}:{ticker}", {}).get("status") == "unavailable"),
+            "evidence_freshness_check_count": sum(1 for ticker, member in member_records.items() if member.get("membership_tag") in ("Core", "Related") and f"{theme['id']}:{ticker}" in sec_freshness),
+            "stale_evidence_count": sum(1 for ticker, member in member_records.items() if member.get("membership_tag") in ("Core", "Related") and sec_freshness.get(f"{theme['id']}:{ticker}", {}).get("status") == "stale"),
+            "unavailable_evidence_freshness_count": sum(1 for ticker, member in member_records.items() if member.get("membership_tag") in ("Core", "Related") and sec_freshness.get(f"{theme['id']}:{ticker}", {}).get("status") == "unavailable"),
             "unresolved_evidence_count": sum(1 for row in pending if row.get("status") == "Unresolved"),
             "pending_evidence_count": sum(1 for row in pending if row.get("status") == "Pending evidence review"),
+            "level": theme.get("level", "Theme"),
             "anchor_screen": anchor_summary,
             "parent_comparison": parent_summary,
             "returns": theme_returns,
@@ -698,5 +708,8 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
     raw_inputs["run_session"] = run_session
     raw_inputs["evidence_freshness"] = sec_freshness
     raw_inputs["retrieval_error_count"] = len(chart_errors) + len(quote_errors) + len(holdings_errors) + len(sec_errors)
+    from .v5 import collect_inputs
+    raw_inputs['v5'] = collect_inputs(holdings, charts, interval=max(.5, float(os.environ.get('THEMESCOPE_CHART_INTERVAL', '1.5'))))
+    snapshot['generated_at'] = datetime.now(timezone.utc).isoformat(timespec='seconds')
     return snapshot, raw_inputs
 

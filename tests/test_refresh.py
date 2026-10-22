@@ -65,6 +65,30 @@ class RefreshTests(unittest.TestCase):
                 self.assertEqual(main(['--output-dir', str(out)]), 1)
             self.assertFalse((out / 'dashboard.html').exists())
 
+    def test_mandatory_holdings_failure_rejects_refresh(self):
+        raw = copy.deepcopy(self.raw)
+        raw['errors']['holdings']['SMH'] = 'HTTP 503'
+        with self.assertRaisesRegex(ValueError, 'Mandatory'):
+            validate(enrich(copy.deepcopy(self.snapshot), raw), raw)
+
+    def test_run_zip_import_and_export_values_match_snapshot(self):
+        import csv
+        with tempfile.TemporaryDirectory() as tmp:
+            first, second = Path(tmp) / 'first', Path(tmp) / 'second'
+            with patch('scripts.generate_dashboard.build_snapshot', return_value=(copy.deepcopy(self.snapshot), self.raw)):
+                self.assertEqual(main(['--output-dir', str(first)]), 0)
+            with patch('scripts.generate_dashboard.build_snapshot', side_effect=AssertionError('Must not collect')):
+                self.assertEqual(main(['--import-run',str(first/'run_bundle.zip'),'--output-dir',str(second)]),0)
+            snapshot = json.loads((second/'latest_snapshot.json').read_text())
+            with (second/'themes.csv').open(encoding='utf-8-sig') as handle:
+                rows = list(csv.DictReader(handle))
+            by_id = {t['id']:t for t in snapshot['themes']}
+            for row in rows:
+                self.assertEqual(row['session_date'],snapshot['session_date'])
+                self.assertAlmostEqual(float(row['return21']),by_id[row['id']]['returns']['21']['value'])
+                self.assertEqual(row['theme_score'],'')
+                self.assertEqual(row['theme_score_status'],'unavailable')
+
     def test_misaligned_metrics_fail_validation(self):
         snapshot = enrich(copy.deepcopy(self.snapshot), self.raw)
         snapshot['context'][0]['returns']['21']['session_date'] = '1999-01-01'

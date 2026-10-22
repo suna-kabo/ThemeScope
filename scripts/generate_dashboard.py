@@ -21,6 +21,7 @@ sys.path.insert(0, str(ROOT))
 
 from src.themescope.collect import build_snapshot  # noqa: E402
 from src.themescope.presentation import enrich, validate
+from src.themescope.v5 import apply as apply_v5
 
 
 def _write_json(path: Path, data: Any) -> None:
@@ -57,191 +58,26 @@ def _source_row(
 
 
 def make_source_matrix(snapshot: dict[str, Any], raw: dict[str, Any], root: Path) -> list[dict[str, str | None]]:
-    theme_cfg = json.loads((root / "config/themes.json").read_text(encoding="utf-8"))
-    evidence_cfg = json.loads((root / "config/evidence_reviews.json").read_text(encoding="utf-8"))
-    errors = raw.get("errors", {})
-    matrix: list[dict[str, str | None]] = []
-    charts = raw.get("charts", {})
-    chart_counts = [len(chart.get("observations", [])) for chart in charts.values()]
-    chart_dates = [
-        (chart.get("observations") or [])[0].get("date")
-        for chart in charts.values()
-        if chart.get("observations")
-    ]
-    latest_chart_dates = [
-        (chart.get("observations") or [])[-1].get("date")
-        for chart in charts.values()
-        if chart.get("observations")
-    ]
-    history_desc = (
-        f"{len(charts)} symbols; {min(chart_counts)}–{max(chart_counts)} daily bars, "
-        f"source span {min(chart_dates)} to {max(latest_chart_dates)}"
-        if chart_counts
-        else "No history retrieved"
-    )
-    chart_error_count = len(errors.get("charts", {}))
-    matrix.append(
-        _source_row(
-            "Daily raw close, volume, adjusted close, split events, dividend events",
-            "SPY, QQQ, theme anchors, parent ETFs, reviewed stocks, anchor alternatives",
-            "Yahoo Finance chart endpoint",
-            "HTTPS JSON chart endpoint via stdlib urllib; 1-day interval, events=div,splits, includeAdjustedClose=true; sequential requests spaced 1.5 seconds apart to reduce throttling",
-            history_desc,
-            "Daily bars; the current session is accepted only after 16:30 America/New_York and a same-date provider market timestamp. Otherwise the prior completed session is used. No guaranteed publication delay.",
-            "Endpoint is undocumented. Provider adjustment and publication semantics can change. It is not an exchange feed or a licensed data guarantee.",
-            "Query2 uses the same Yahoo schema and adjustment convention. Hosts stop receiving requests after HTTP 429. If retrieval still fails, publication is rejected and a last successful export is retained with its original date.",
-            f"{len(charts)}/{len(charts) + chart_error_count} requested chart series retrieved; {chart_error_count} error(s).",
-            max((chart.get("retrieved_at") for chart in charts.values()), default=None),
-            next((chart.get("url") for chart in charts.values() if chart.get("symbol") == "SPY"), "https://query1.finance.yahoo.com/v8/finance/chart/SPY"),
-        )
-    )
-    calendar_symbol = raw.get("calendar_source_symbol")
-    calendar_chart = charts.get(calendar_symbol) if calendar_symbol else None
-    matrix.append(
-        _source_row(
-            "Shared US-session calendar and completed-session date",
-            f"Selected reference {calendar_symbol or 'unavailable'}; benchmark remains SPY",
-            "Yahoo Finance chart endpoint",
-            "Use SPY session dates when available; otherwise QQQ, then the first available configured ETF anchor. SPY benchmark returns are never substituted.",
-            f"{len(raw.get('session_calendar', []))} sessions through {raw.get('run_session') or 'unavailable'}" if raw.get("session_calendar") else "No calendar available",
-            "Same-date bar is treated as final only after the 16:30 New York cutoff and a provider regular-market timestamp on that date.",
-            "If SPY is unavailable, other price returns can remain valid but SPY-relative excess is unavailable. A fallback calendar does not replace the benchmark.",
-            "No forward-fill or inferred sessions. If no ETF calendar is retrieved, session-dependent values stay unavailable.",
-            f"Reference {calendar_symbol or 'unavailable'} retrieved." if calendar_chart else "No usable session-calendar history.",
-            calendar_chart.get("retrieved_at") if calendar_chart else None,
-            calendar_chart.get("url") if calendar_chart else None,
-        )
-    )
-    matrix.append(
-        _source_row(
-            "Market capitalization, listing exchange, sector, industry",
-            f"{len(raw.get('quotes', {}))} securities, including industry-only XBI screening",
-            "Nasdaq quote summary API",
-            "HTTPS JSON summary response; MarketCap, Exchange, Sector, Industry",
-            "Current quote-summary retrieval on this run; per-field observation date is not supplied by provider.",
-            "On-demand retrieval; the source publishes no separate cap-field timestamp or guaranteed refresh delay.",
-            "A current summary response does not prove the market-cap field itself is no older than 35 days. Such values are provisional and timestamp uncertainty is shown.",
-            "None. Missing cap, exchange, or industry blocks provisional stock eligibility.",
-            f"{len(raw.get('quotes', {}))} ticker summaries retrieved; {len(errors.get('quotes', {}))} error(s).",
-            max((quote.get("retrieved_at") for quote in raw.get("quotes", {}).values()), default=None),
-            "https://api.nasdaq.com/api/quote/NVDA/summary?assetclass=stocks",
-        )
-    )
-    sec = raw.get("sec_annual_checks", {})
-    core_keys = {
-        f"{member.get('theme_id')}:{member.get('ticker')}"
-        for member in evidence_cfg.get("members", [])
-        if member.get("category") == "Core business"
-    }
-    sec_statuses = [entry.get("status") for key, entry in raw.get("evidence_freshness", {}).items() if key in core_keys]
-    sec_error_count = len(errors.get("sec", {}))
-    filing_dates = [member.get("evidence", {}).get("filed_date") for member in evidence_cfg.get("members", []) if member.get("evidence", {}).get("filed_date")]
-    matrix.append(
-        _source_row(
-            "Issuer business evidence and latest annual filing date check",
-            f"{len(evidence_cfg.get('members', []))} dated evidence records; {len(sec)} unique CIK annual-feed checks",
-            "SEC EDGAR company filings and submissions",
-            "Retained annual-filing excerpt/source in config/evidence_reviews.json; latest 10-K/20-F/40-F rechecked through data.sec.gov submissions on every run",
-            f"Evidence filing dates {min(filing_dates)} to {max(filing_dates)}; {sum(1 for status in sec_statuses if status == 'current')} current, {sum(1 for status in sec_statuses if status == 'stale')} stale, {sum(1 for status in sec_statuses if status == 'unavailable')} check unavailable.",
-            "SEC submissions are available on demand; SEC feed publication may lag filing acceptance. This adapter checks annual forms only.",
-            "Newer 8-K and other material disclosure content is not automatically classified. The theme-wide business review is explicitly incomplete; retained evidence remains provisional.",
-            "None. A newer annual filing or unavailable freshness check excludes the issuer from provisional selection pending review.",
-            f"{len(sec)} annual feeds checked; {sec_error_count} request error(s). Each evidence record links to its filing in config/evidence_reviews.json.",
-            max((entry.get("retrieved_at") for entry in sec.values()), default=None),
-            "https://www.sec.gov/edgar/search/",
-        )
-    )
-    checks_by_cik = raw.get("sec_annual_checks", {})
-    freshness_by_key = raw.get("evidence_freshness", {})
-    for member in evidence_cfg.get("members", []):
-        evidence = member.get("evidence") or {}
-        cik = str(evidence.get("cik") or "")
-        key = f"{member.get('theme_id')}:{member.get('ticker')}"
-        freshness = freshness_by_key.get(key, {})
-        latest = checks_by_cik.get(cik, {})
-        if freshness.get("status") == "current":
-            last_test = f"Pass: latest annual form {freshness.get('latest_annual_form')} filed {freshness.get('latest_annual_filed_date')} is not newer than the cited filing."
-        elif freshness.get("status") == "stale":
-            last_test = freshness.get("reason", "A newer annual filing needs review.")
-        elif member.get("category") != "Core business":
-            last_test = "Freshness check not run for unresolved evidence; issuer remains pending."
-        else:
-            last_test = freshness.get("reason", "Latest annual filing check unavailable.")
-        matrix.append(
-            _source_row(
-                f"Business evidence filing: {member.get('ticker')}",
-                f"{member.get('theme_id')} · {member.get('company')} · {member.get('category')}",
-                "SEC EDGAR",
-                f"{evidence.get('form') or 'No filing form'} company filing; sourced excerpt in config/evidence_reviews.json; annual form freshness check during run",
-                f"Cited filing {evidence.get('filed_date') or 'date unavailable'}; latest annual form {freshness.get('latest_annual_form') or 'not checked'} {freshness.get('latest_annual_filed_date') or ''}".strip(),
-                "Company filing and submissions feed are public; SEC acceptance and feed-update timing may vary.",
-                "Evidence is limited to the cited excerpt and selected annual filing. 8-Ks are not automatically reviewed; theme membership screening is incomplete.",
-                "None. Unresolved issuers stay pending; stale or unavailable annual freshness checks block provisional selection.",
-                last_test,
-                freshness.get("checked_at") or latest.get("retrieved_at"),
-                evidence.get("url"),
-            )
-        )
-    for theme_cfg_row in theme_cfg["themes"]:
-        theme = next((item for item in snapshot["themes"] if item["id"] == theme_cfg_row["id"]), None)
-        holdings = raw.get("holdings", {}).get(theme_cfg_row["anchor"])
-        error = errors.get("holdings", {}).get(theme_cfg_row["anchor"])
-        if holdings:
-            holding_test = f"Retrieved {len(holdings.get('rows', []))} rows; as of {holdings.get('as_of') or 'date unavailable'}"
-        else:
-            holding_test = f"Unavailable: {error or 'no current holdings response'}"
-        matrix.append(
-            _source_row(
-                "Official ETF holdings, tickers, weights, as-of date",
-                f"{theme_cfg_row['name']} · {theme_cfg_row['anchor']}",
-                theme_cfg_row["holdings_source"]["provider"],
-                theme_cfg_row["holdings_source"]["method"],
-                f"As of {holdings.get('as_of') or 'unavailable'}; {len(holdings.get('rows', [])) if holdings else 0} equity rows" if holdings else "No current holdings rows",
-                "Issuer publication cadence varies; use the embedded source as-of date, not retrieval time, for freshness. A retrieval can contain an old snapshot.",
-                "Complete-snapshot behavior is provider-specific. Parser failure is surfaced; no historical holdings list is substituted.",
-                "VanEck can use its verified direct official dataset if fund-page discovery fails. An unrecovered retrieval failure rejects publication.",
-                holding_test,
-                holdings.get("retrieved_at") if holdings else None,
-                theme_cfg_row["holdings_source"]["url"],
-            )
-        )
-        matrix.append(
-            _source_row(
-                "ETF mandate, index, geography, weighting, plain-vanilla instrument review",
-                f"{theme_cfg_row['name']} · {theme_cfg_row['anchor']}",
-                theme_cfg_row["holdings_source"]["provider"],
-                "Official fund page and mandate reviewed in the theme registry; no performance-weighted anchor score",
-                "Mandate rationale and instrument review in config/themes.json",
-                "Fund pages update on provider publication schedules; this prototype does not crawl a revision history.",
-                "Mandate review is documented reviewer judgment and should be revisited if the fund objective changes.",
-                "None. If the anchor mandate becomes unsuitable, its use requires a configuration review.",
-                "Configured source and rationale; current instrument metadata checked with price retrieval." if theme else "Configuration source present; runtime price data unavailable.",
-                snapshot.get("generated_at"),
-                theme_cfg_row["anchor_url"],
-            )
-        )
-    for comparison in snapshot.get("comparisons", []):
-        holding = raw.get("comparison_holdings", {}).get(comparison["ticker"])
-        error = errors.get("holdings", {}).get(comparison["ticker"])
-        matrix.append(
-            _source_row(
-                "Alternative anchor holdings used for mandate/concentration comparison",
-                f"{comparison['theme_id']} · {comparison['ticker']}",
-                comparison["provider"],
-                comparison["method"],
-                f"As of {holding.get('as_of') or 'unavailable'}; {len(holding.get('rows', []))} holdings" if holding else "No current holdings rows",
-                "Issuer publication cadence varies; displayed date is the source holdings as-of date.",
-                comparison["comparison_note"],
-                "None; comparison details are omitted when the source fails.",
-                f"Retrieved {len(holding.get('rows', []))} rows; as of {holding.get('as_of') or 'unknown'}" if holding else f"Unavailable: {error or 'no response'}",
-                holding.get("retrieved_at") if holding else None,
-                comparison["holdings_url"],
-            )
-        )
-    return matrix
+    rows = []
+    def add(field, scope, provider, method, source, limitations):
+        rows.append(dict(field=field, scope=scope, provider=provider, method=method, as_of=source.get('as_of'), retrieved_at=source.get('retrieved_at'), url=source.get('url'), limitations=limitations))
+    add('Adjusted returns and split-adjusted closes/EMA; split events for ADV', 'SPY, QQQ, ETF anchors and accepted stocks', 'Yahoo Finance', 'Daily chart endpoint; sequential 1.5s default pacing, query2 fallback; stop host after HTTP 429', raw.get('charts', {}).get('SPY', {}), 'Undocumented provider convention. Only completed common US sessions. No silent adjustment substitution.')
+    add('Breadth price histories', 'Mapped index and anchor constituents', 'Yahoo Finance', 'Same chart schema and EMA warmups as core; count companies once', next(iter(raw.get('v5', {}).get('charts', {}).values()), {}), 'Unmapped foreign listings remain missing in coverage; no guessed listing substitutions.')
+    for symbol, source in raw.get('v5', {}).get('index_universes', {}).items():
+        add('Index constituent universe', symbol, 'Nasdaq' if symbol == 'QQQ' else 'Wikipedia current S&P 500 constituent table', 'Reproducible constituent list; source rows retained', source, source.get('asof_basis', ''))
+    add('Verified issuer/listing map', 'Company deduplication and ticker mapping', 'SEC', 'company_tickers_exchange.json; deterministic primary share class', raw.get('v5', {}).get('security_mapping', {}), 'SEC CIK identifies issuers. Unverified mappings are not invented; common company IDs are deduplicated.')
+    for symbol, source in raw.get('holdings', {}).items():
+        add('Official equity holdings', symbol, 'Fund issuer', 'Official JSON/HTML/CSV/XLSX adapter; actual as-of date retained', source, 'Breadth is equal-company participation, independent of watchlist curation. Excluded and unmapped rows recorded.')
+    add('Market capitalization and stock eligibility', 'Accepted watchlist candidates', 'Nasdaq', 'Quote summary endpoint', next(iter(raw.get('quotes', {}).values()), {}), 'No separate market-cap field timestamp; stock eligibility remains provisional.')
+    for theme in snapshot.get('themes', []):
+        for member in theme.get('reviewed_universe', theme.get('selected', [])):
+            source = {'url': member.get('membership_source') or member.get('evidence', {}).get('url'), 'as_of': member.get('reviewed_date')}
+            add('Membership rationale', theme['id']+':'+member['ticker'], 'Recorded issuer/evidence source', member.get('membership_tag') or member.get('evidence_category'), source, member.get('membership_rationale') or member.get('evidence_note', ''))
+    return rows
 
 
 EXPORT_COLUMNS = [
+    "membership_tag", "membership_source", "membership_rationale", "is_anchor_holding", "price_close", "return5", "excess5_pp", "above_ema21", "above_ema50",
     "theme", "theme_id", "anchor", "selection_slot", "selection_queue", "selection_queue_rank",
     "selection_reason", "ticker", "company", "exchange", "security_type", "evidence_category",
     "evidence_note", "evidence_url", "evidence_filed_date", "reviewed_date", "etf_weight_pct",
@@ -265,6 +101,11 @@ def _all_selected(snapshot: dict[str, Any], limit: int) -> list[dict[str, Any]]:
             chart_url = f"https://www.tradingview.com/chart/?symbol={prefix}:{stock['ticker']}" if prefix else None
             evidence = stock.get("evidence") or {}
             rows.append({
+                **{key: stock.get(key) for key in ('membership_tag','membership_source','membership_rationale','is_anchor_holding','price_close')},
+                'return5': _number(stock.get('returns', {}).get('5')),
+                'excess5_pp': (value*100 if (value := _number(stock.get('excess_returns', {}).get('5'))) is not None else None),
+                'above_ema21': stock.get('price_close') > stock['ema21'] if stock.get('price_close') is not None and stock.get('ema21') is not None else None,
+                'above_ema50': stock.get('price_close') > stock['ema50'] if stock.get('price_close') is not None and stock.get('ema50') is not None else None,
                 "theme": theme["name"], "theme_id": theme["id"], "anchor": theme["anchor"],
                 "selection_slot": stock.get("selection_slot"), "selection_queue": stock.get("selection_queue"),
                 "selection_queue_rank": stock.get("selection_queue_rank"), "selection_reason": stock.get("selection_reason"),
@@ -314,90 +155,26 @@ def _tradingview_text(rows: list[dict[str, Any]]) -> tuple[str, dict[str, int]]:
 
 
 def _run_report(snapshot: dict[str, Any], raw: dict[str, Any], matrix: list[dict[str, Any]], tv15: dict[str, int], tv20: dict[str, int]) -> str:
-    lines = [
-        "# ThemeScope run report",
-        "",
-        f"- **Run ID:** `{snapshot['run_id']}`",
-        f"- **Generated:** {snapshot['generated_at']} UTC",
-        f"- **Run date:** {snapshot['run_date']} (America/New_York)",
-        f"- **Market session:** {snapshot['session_date'] or 'Unavailable'}",
-        f"- **Registry:** `{snapshot['registry_version']}`",
-        f"- **Source retrieval status:** {'Partial; see failures below.' if snapshot['sources']['partial'] else 'No retrieval failures reported.'}",
-        "",
-        "This is an on-demand snapshot. It does not refresh when the HTML is reopened. It is a watchlist organization tool, not a trading model or signal. The 15/20 selection convention is configurable and has not been validated as an investment strategy.",
-        "",
-        "## Theme coverage",
-        "",
-        "| Theme | Anchor | Official position rows / unique tickers | As of / status | Reviewed-subset eligible | Selected | Pending / unresolved | Excluded | Breadth summary | Eligible / selected / compact weight |",
-        "|---|---|---:|---|---:|---:|---:|---:|---|---|",
-    ]
-    for theme in snapshot["themes"]:
-        breadth = theme["breadth"]["above_ema21"]
-        btext = breadth["label"]
-        if breadth.get("fraction") is not None:
-            btext += f" ({breadth.get('count')}/{breadth['valid_count']}, reviewed subset only)"
-        else:
-            btext += f" ({breadth.get('label_reason') or 'no valid denominator'})"
-        weight_text = f"{theme['eligible_weight_pct']:.2f}% / {theme['selected_weight_pct']:.2f}% / {theme['visible15_weight_pct']:.2f}%"
-        lines.append(
-            f"| {theme['name']} | {theme['anchor']} | {theme['official_holdings_count']} / {theme['official_unique_ticker_count']} | {theme['holdings_source'].get('as_of') or 'unavailable'} / {theme['holdings_status']} | {theme['eligible_reviewed_count']} | {len(theme['selected'])} | {theme['pending_count']} ({theme['unresolved_evidence_count']} unresolved evidence) | {theme['excluded_count']} | {btext} | {weight_text} |"
-        )
-    lines += [
-        "",
-        f"Complete membership evidence screens: {sum(1 for theme in snapshot['themes'] if theme['review_complete'])}/{len(snapshot['themes'])}. Full-universe breadth summary labels are therefore unavailable. Subset fractions, where present, are selection-biased and do not replace full breadth.",
-        "",
-        "ETF holdings weights are fund net-asset weights and are not renormalized. Current holdings not reviewed or mapped remain in the pending table. Data eligibility failures remain in the exclusions table. ETF-only performance remains available separately when stock screening is incomplete.",
-        "",
-        "## Source and data limits",
-        "",
-        "- Yahoo chart is an accessible but undocumented endpoint. Adjusted close is used for total-return-compatible endpoint returns using Yahoo's provider convention; split-adjusted close is used for trend; raw contemporaneous close and volume are reconstructed from Yahoo split events for ADV$30. Provider definitions and publication behavior are not guaranteed.",
-        f"- A current day bar is accepted only after the 16:30 America/New_York cutoff and a same-date Yahoo regular-market timestamp. Before then the prior verified session is used. The completed session is `{snapshot.get('session_date') or 'unavailable'}`.",
-        "- Nasdaq's quote summary supplies market cap, listing exchange, sector, and industry, but exposes no timestamp for the market-cap field. The value is retrieved on this run; its field age cannot be independently proven. It is therefore a provisional eligibility input.",
-        "- SEC submissions feeds are checked on each run for newer 10-K, 20-F, or 40-F filings than the cited evidence. Newer filings and unavailable checks block provisional selection. 8-K disclosure content is not automatically reviewed.",
-        "- ETF holdings are retrieved from each fund issuer and retain the actual as-of date. Retrieval does not make an old snapshot current. Failed refreshes do not mix in old fields; the entire last successful dashboard is preserved with its original data date.",
-        "- Theme evidence review is incomplete for every configured theme. The present curated lists are not full eligible universes; pending issuers, foreign mappings, and broader segment judgments remain unresolved.",
-        "- XBI industry screening runs for mapped tickers. Biotechnology classifications are excluded by the default rule; non-biotechnology and unmapped holdings remain pending business-evidence review. Zero selections is not a claim that its eligible universe is empty.",
-        "- Themes can overlap. Stock versus ETF excess is mechanically related where the fund owns the company; it is not independent alpha. No point-in-time membership, backtest, prediction, or execution quality assessment is provided.",
-        "",
-        "## Exports",
-        "",
-        f"- `watchlist_15.csv` / `watchlist_20.csv`: each theme's current compact or expanded selected list, with theme, selection reason, filing, weight, and metrics columns. CSV retains repeated tickers under different theme IDs.",
-        f"- `tradingview_15.txt`: {tv15['unique']} unique exchange-qualified symbols; {tv15['duplicates']} cross-theme/listing duplicates collapsed; {tv15['omitted']} rows without confirmed NYSE/Nasdaq exchange omitted.",
-        f"- `tradingview_20.txt`: {tv20['unique']} unique exchange-qualified symbols; {tv20['duplicates']} duplicates collapsed; {tv20['omitted']} rows without confirmed exchange omitted.",
-        "- Browser exports use the active theme's filtered selected scope. CSV includes the theme field. TradingView text is flat and does not retain theme sections.",
-        "- TradingView text uses one `EXCHANGE:TICKER` symbol per line and passed local syntax/mapping checks. The platform's import dialog was not exercised in this environment, so confirm behavior with the current TradingView client.",
-        "",
-        "## Retrieval failures",
-        "",
-    ]
-    error_groups = raw.get("errors", {})
-    any_errors = False
-    for group, errors in error_groups.items():
-        if not errors:
-            continue
-        any_errors = True
-        lines.append(f"### {group.title()}")
-        lines.append("")
-        for symbol, error in sorted(errors.items()):
-            lines.append(f"- `{symbol}`: {error}")
-        lines.append("")
-    if not any_errors:
-        lines.append("No chart, quote, holdings, or SEC submissions retrieval errors were reported in this run.")
-        lines.append("")
-    lines += [
-        "## Source matrix",
-        "",
-        "Download `source_matrix.csv` from this run for the field-level provider, access method, adjustment or as-of definition, history/delay, limitations, fallback, last test, and URL for each consumed source.",
-        "",
-        "## Regeneration",
-        "",
-        "From the repository root, run `python3 scripts/generate_dashboard.py` with network access. The script performs a fresh retrieval and writes the dashboard, JSON input snapshots, CSV and TradingView exports, source matrix, this report, and a ZIP bundle to the local `output/` directory. That directory is ignored by Git; generated runs are not committed or pushed to a branch. No database, service, secret, scheduled job, or paid package is used.",
-        "",
-    ]
-    return "\n".join(lines)
+    lines = ['# ThemeScope v5 run report', '', f"Data session: {snapshot['session_date']}", f"Collected: {snapshot['generated_at']}", '', '## Market/index participation']
+    for row in snapshot['context']:
+        lines.append(f"- {row['ticker']}: {row.get('market_condition21', 'Unavailable')} / {row.get('market_condition50', 'Unavailable')}")
+        for period in (21,50):
+            m = row.get('index_breadth', {}).get(str(period), {})
+            lines.append(f"  - EMA{period}: {m.get('above_count')}/{m.get('valid_count')}, eligible {m.get('eligible_count')}, coverage {m.get('coverage_pct')}%, as of {m.get('as_of')}; {m.get('status')}: {m.get('reason') or 'valid'}")
+    lines += ['', '## Primary ETF registry']
+    for row in snapshot['themes']:
+        lines.append(f"- {row['name']} ({row['anchor']}), {row.get('level')}: score {row.get('theme_score')}; {row.get('theme_state')}; {len(row['selected'])} selected stocks.")
+        for field in ('percentile_excess21','percentile_excess63','etf_breadth21_pct','etf_breadth50_pct','current_strength_score','medium_strength_score','theme_score'):
+            item = row.get('field_status', {}).get(field, {})
+            lines.append(f"  - {field}: {row.get(field)}; {item.get('status')}; {item.get('reason') or 'valid'}")
+        universe = raw.get('v5', {}).get('mapped_universes', {}).get(row['anchor'], {})
+        lines.append(f"  - {len(universe.get('excluded_rows', []))} excluded source rows; {len(universe.get('unresolved_mappings', []))} unresolved equity mappings remain in coverage denominator.")
+    lines += ['', '## Methodology and limits', '- Scores require 10 valid primary ETF peers. Six registry ETFs are retained; no padding to manufacture percentile scores.', '- 70/30 relative-percentile/breadth horizon scores; 60/40 current/medium final score. Fixed conventions, not optimized or validated trading signals.', '- ETF and index breadth use complete sourced equity universes independently of curated watchlists; price coverage thresholds are 8 valid companies, 80%, 35-day freshness.', '- Nasdaq cap field timestamp is unavailable. Supported membership rationale is required; filings are mandatory only for records marked requires_filing_review.', '- Current constituents are observed snapshots, not point-in-time historical membership. Wikipedia S&P 500 as-of is the retrieval observation date, not an official rebalance date.', '- Unverified foreign listing mappings remain missing; no substitution with a US ticker sharing the same letters.', '- Optional constituent/stock metrics can be unavailable without invalidating core ETF returns. Mandatory core return/holdings or index-universe collection failures reject refresh publication.', '', '## Source errors', '```json', json.dumps({'core': raw.get('errors', {}), 'constituent_histories':raw.get('v5', {}).get('chart_errors', {})}, indent=2), '```', '', '## Local files', 'dashboard.html, market.csv, themes.csv, latest_snapshot.json, raw_inputs.json, source_matrix.csv, watchlist_15.csv, watchlist_20.csv, tradingview_15.txt, tradingview_20.txt, run_bundle.zip.', 'Opening HTML never retrieves data. Explicitly run python scripts/generate_dashboard.py. Failed refreshes preserve existing valid exports and write refresh_status.json/failed_refresh.md separately.']
+    return '\n'.join(lines)+'\n'
 
 
 RUN_OUTPUT_FILES = (
+    "market.csv", "themes.csv",
     "dashboard.html",
     "latest_snapshot.json",
     "raw_inputs.json",
@@ -422,13 +199,29 @@ def _write_run_bundle(output_dir: Path) -> Path:
 
 
 def _generate(snapshot, raw, output_dir):
-    matrix = snapshot.get("source_matrix") or make_source_matrix(snapshot, raw, ROOT)
+    matrix = make_source_matrix(snapshot, raw, ROOT)
     snapshot["source_matrix"] = matrix
     output_dir.mkdir(parents=True, exist_ok=True)
     _write_json(output_dir / "latest_snapshot.json", snapshot)
     _write_json(output_dir / "raw_inputs.json", raw)
     _write_csv(output_dir / "source_matrix.csv", matrix, list(matrix[0].keys()) if matrix else [])
 
+    for filename, records in [('market.csv', snapshot.get('context', [])), ('themes.csv', snapshot.get('themes', []))]:
+        flat = []
+        for record in records:
+            row = {k:v for k,v in record.items() if v is None or isinstance(v, (str,int,float,bool))}
+            row['session_date'] = snapshot['session_date']
+            row['generated_at'] = snapshot['generated_at']
+            for key, item in record.get('field_status', {}).items():
+                for part in ('status','reason','observation_count','session_date','input_version','above_count','valid_count','eligible_count','coverage_pct','peer_count'):
+                    row[key+'_'+part] = item.get(part)
+            for window in ('5','21','63'):
+                row['return'+window] = _number(record.get('returns', {}).get(window))
+                value = _number(record.get('excess_returns', {}).get(window))
+                row['excess'+window+'_pp'] = value*100 if value is not None else None
+            flat.append(row)
+        columns = list(dict.fromkeys(k for row in flat for k in row))
+        _write_csv(output_dir / filename, flat, columns)
     rows15 = _all_selected(snapshot, 15)
     rows20 = _all_selected(snapshot, 20)
     _write_csv(output_dir / "watchlist_15.csv", rows15, EXPORT_COLUMNS)
@@ -456,7 +249,7 @@ def _generate(snapshot, raw, output_dir):
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Explicitly refresh the offline ThemeScope dashboard.")
     parser.add_argument('--output-dir', default='output')
-    parser.add_argument('--import-run', type=Path, help='Import a dated real run directory containing latest_snapshot.json and raw_inputs.json; no network requests')
+    parser.add_argument('--import-run', type=Path, help='Import a dated real run directory or run_bundle.zip; no network requests')
     args = parser.parse_args(argv)
     output = Path(args.output_dir).expanduser()
     if not output.is_absolute():
@@ -470,15 +263,29 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.import_run:
             print('Importing dated real data; no collection will run.', flush=True)
-            snapshot = json.loads((args.import_run / 'latest_snapshot.json').read_text(encoding='utf-8'))
-            raw = json.loads((args.import_run / 'raw_inputs.json').read_text(encoding='utf-8'))
+            if args.import_run.is_file():
+                with zipfile.ZipFile(args.import_run) as bundle:
+                    for name in ('latest_snapshot.json','raw_inputs.json'):
+                        if bundle.getinfo(name).file_size > 250_000_000:
+                            raise ValueError('Imported JSON exceeds 250 MB limit')
+                    snapshot = json.loads(bundle.read('latest_snapshot.json').decode('utf-8'))
+                    raw = json.loads(bundle.read('raw_inputs.json').decode('utf-8'))
+            else:
+                snapshot = json.loads((args.import_run / 'latest_snapshot.json').read_text(encoding='utf-8'))
+                raw = json.loads((args.import_run / 'raw_inputs.json').read_text(encoding='utf-8'))
             if not snapshot.get('generated_at') or not snapshot.get('session_date'):
                 raise ValueError('Imported run must retain its original generation time and session date')
             snapshot['imported_at'] = attempted
         else:
             print('Collecting official holdings, paced prices, quotes and filing checks. Please wait.', flush=True)
             snapshot, raw = build_snapshot(ROOT)
+        registry = json.loads((ROOT / 'config/themes.json').read_text(encoding='utf-8'))
+        for theme in snapshot.get('themes', []):
+            configured = next((t for t in registry['themes'] if t['id'] == theme['id'] and t['anchor'] == theme['anchor']), {})
+            theme.setdefault('level', configured.get('level', 'Theme'))
         enrich(snapshot, raw)
+        if snapshot.get("context") and snapshot.get("session_date"):
+            apply_v5(snapshot, raw)
         validate(snapshot, raw)
         with tempfile.TemporaryDirectory(prefix='.themescope-stage-', dir=output.parent) as tmp:
             stage = Path(tmp) / 'run'

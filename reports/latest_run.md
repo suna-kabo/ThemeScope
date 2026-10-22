@@ -1,56 +1,94 @@
-# ThemeScope run report
+# ThemeScope v5 run report
 
-- **Run ID:** `themescope-20261022T220415Z`
-- **Generated:** 2026-10-22T22:04:15+00:00 UTC
-- **Run date:** 2026-10-22 (America/New_York)
-- **Market session:** 2026-10-22
-- **Registry:** `2026-10-22.1`
-- **Source retrieval status:** No retrieval failures reported.
+Data session: 2026-10-22
+Collected: 2026-10-22T23:27:51+00:00
 
-This is an on-demand snapshot. It does not refresh when the HTML is reopened. It is a watchlist organization tool, not a trading model or signal. The 15/20 selection convention is configurable and has not been validated as an investment strategy.
+## Market/index participation
+- SPY: Internal strength, index below EMA21 / Internal strength, index below EMA50
+  - EMA21: 355/499, eligible 500, coverage 99.8%, as of 2026-10-22; valid: valid
+  - EMA50: 320/497, eligible 500, coverage 99.4%, as of 2026-10-22; valid: valid
+- QQQ: Broad short-term weakness / Internal strength, index below EMA50
+  - EMA21: 47/100, eligible 100, coverage 100.0%, as of 2026-10-22; valid: valid
+  - EMA50: 51/98, eligible 100, coverage 98.0%, as of 2026-10-22; valid: valid
 
-## Theme coverage
+## Primary ETF registry
+- Semiconductors (SMH), Industry: score None; Unavailable; 13 selected stocks.
+  - percentile_excess21: None; unavailable; Requires 10 valid ETF peers; 6 available
+  - percentile_excess63: None; unavailable; Requires 10 valid ETF peers; 6 available
+  - etf_breadth21_pct: 0.0; valid; valid
+  - etf_breadth50_pct: 4.3478260869565215; valid; valid
+  - current_strength_score: None; unavailable; Requires 10 valid ETF peers; 6 available
+  - medium_strength_score: None; unavailable; Requires 10 valid ETF peers; 6 available
+  - theme_score: None; unavailable; CurrentStrength and MediumStrength must both be valid
+  - 2 excluded source rows; 1 unresolved equity mappings remain in coverage denominator.
+- Cybersecurity (CIBR), Theme: score None; Unavailable; 10 selected stocks.
+  - percentile_excess21: None; unavailable; Requires 10 valid ETF peers; 6 available
+  - percentile_excess63: None; unavailable; Requires 10 valid ETF peers; 6 available
+  - etf_breadth21_pct: 51.21951219512195; valid; valid
+  - etf_breadth50_pct: 73.17073170731707; valid; valid
+  - current_strength_score: None; unavailable; Requires 10 valid ETF peers; 6 available
+  - medium_strength_score: None; unavailable; Requires 10 valid ETF peers; 6 available
+  - theme_score: None; unavailable; CurrentStrength and MediumStrength must both be valid
+  - 0 excluded source rows; 4 unresolved equity mappings remain in coverage denominator.
+- Clean Energy (ICLN), Theme: score None; Unavailable; 4 selected stocks.
+  - percentile_excess21: None; unavailable; Requires 10 valid ETF peers; 6 available
+  - percentile_excess63: None; unavailable; Requires 10 valid ETF peers; 6 available
+  - etf_breadth21_pct: 14.285714285714286; unavailable; Price coverage 14/103 below 80%
+  - etf_breadth50_pct: 7.142857142857143; unavailable; Price coverage 14/103 below 80%
+  - current_strength_score: None; unavailable; Requires 10 valid ETF peers; 6 available; Price coverage 14/103 below 80%
+  - medium_strength_score: None; unavailable; Requires 10 valid ETF peers; 6 available; Price coverage 14/103 below 80%
+  - theme_score: None; unavailable; CurrentStrength and MediumStrength must both be valid
+  - 34 excluded source rows; 89 unresolved equity mappings remain in coverage denominator.
+- Aerospace & Defense (XAR), Industry: score None; Unavailable; 10 selected stocks.
+  - percentile_excess21: None; unavailable; Requires 10 valid ETF peers; 6 available
+  - percentile_excess63: None; unavailable; Requires 10 valid ETF peers; 6 available
+  - etf_breadth21_pct: 28.0; valid; valid
+  - etf_breadth50_pct: 17.391304347826086; valid; valid
+  - current_strength_score: None; unavailable; Requires 10 valid ETF peers; 6 available
+  - medium_strength_score: None; unavailable; Requires 10 valid ETF peers; 6 available
+  - theme_score: None; unavailable; CurrentStrength and MediumStrength must both be valid
+  - 2 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Cloud Computing (SKYY), Theme: score None; Unavailable; 10 selected stocks.
+  - percentile_excess21: None; unavailable; Requires 10 valid ETF peers; 6 available
+  - percentile_excess63: None; unavailable; Requires 10 valid ETF peers; 6 available
+  - etf_breadth21_pct: 60.0; valid; valid
+  - etf_breadth50_pct: 69.23076923076923; valid; valid
+  - current_strength_score: None; unavailable; Requires 10 valid ETF peers; 6 available
+  - medium_strength_score: None; unavailable; Requires 10 valid ETF peers; 6 available
+  - theme_score: None; unavailable; CurrentStrength and MediumStrength must both be valid
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Biotechnology (XBI), Industry: score None; Unavailable; 0 selected stocks.
+  - percentile_excess21: None; unavailable; Requires 10 valid ETF peers; 6 available
+  - percentile_excess63: None; unavailable; Requires 10 valid ETF peers; 6 available
+  - etf_breadth21_pct: 35.6687898089172; valid; valid
+  - etf_breadth50_pct: 24.836601307189543; valid; valid
+  - current_strength_score: None; unavailable; Requires 10 valid ETF peers; 6 available
+  - medium_strength_score: None; unavailable; Requires 10 valid ETF peers; 6 available
+  - theme_score: None; unavailable; CurrentStrength and MediumStrength must both be valid
+  - 10 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
 
-| Theme | Anchor | Official position rows / unique tickers | As of / status | Reviewed-subset eligible | Selected | Pending / unresolved | Excluded | Breadth summary | Eligible / selected / compact weight |
-|---|---|---:|---|---:|---:|---:|---:|---|---|
-| Semiconductors | SMH | 25 / 25 | 2026-10-21 / current | 13 | 13 | 12 (0 unresolved evidence) | 0 | Unavailable (0/13, reviewed subset only) | 79.85% / 79.85% / 79.85% |
-| Cybersecurity | CIBR | 45 / 45 | 2026-10-21 / current | 10 | 10 | 35 (0 unresolved evidence) | 0 | Unavailable (5/10, reviewed subset only) | 37.92% / 37.92% / 37.92% |
-| Clean Energy | ICLN | 137 / 130 | 2026-10-21 / current | 4 | 4 | 126 (0 unresolved evidence) | 0 | Unavailable (0/4, reviewed subset only) | 21.55% / 21.55% / 21.55% |
-| Aerospace & Defense | XAR | 52 / 51 | 2026-10-21 / current | 10 | 10 | 41 (0 unresolved evidence) | 0 | Unavailable (8/10, reviewed subset only) | 30.96% / 30.96% / 30.96% |
-| Cloud Computing | SKYY | 65 / 65 | 2026-10-21 / current | 9 | 9 | 55 (2 unresolved evidence) | 1 | Unavailable (3/9, reviewed subset only) | 18.59% / 18.59% / 18.59% |
-| Biotechnology | XBI | 167 / 160 | 2026-10-21 / current | 0 | 0 | 10 (0 unresolved evidence) | 150 | Unavailable (No eligible companies) | 0.00% / 0.00% / 0.00% |
+## Methodology and limits
+- Scores require 10 valid primary ETF peers. Six registry ETFs are retained; no padding to manufacture percentile scores.
+- 70/30 relative-percentile/breadth horizon scores; 60/40 current/medium final score. Fixed conventions, not optimized or validated trading signals.
+- ETF and index breadth use complete sourced equity universes independently of curated watchlists; price coverage thresholds are 8 valid companies, 80%, 35-day freshness.
+- Nasdaq cap field timestamp is unavailable. Supported membership rationale is required; filings are mandatory only for records marked requires_filing_review.
+- Current constituents are observed snapshots, not point-in-time historical membership. Wikipedia S&P 500 as-of is the retrieval observation date, not an official rebalance date.
+- Unverified foreign listing mappings remain missing; no substitution with a US ticker sharing the same letters.
+- Optional constituent/stock metrics can be unavailable without invalidating core ETF returns. Mandatory core return/holdings or index-universe collection failures reject refresh publication.
 
-Complete membership evidence screens: 0/6. Full-universe breadth summary labels are therefore unavailable. Subset fractions, where present, are selection-biased and do not replace full breadth.
+## Source errors
+```json
+{
+  "core": {
+    "charts": {},
+    "quotes": {},
+    "holdings": {},
+    "sec": {}
+  },
+  "constituent_histories": {}
+}
+```
 
-ETF holdings weights are fund net-asset weights and are not renormalized. Current holdings not reviewed or mapped remain in the pending table. Data eligibility failures remain in the exclusions table. ETF-only performance remains available separately when stock screening is incomplete.
-
-## Source and data limits
-
-- Yahoo chart is an accessible but undocumented endpoint. Adjusted close is used for total-return-compatible endpoint returns using Yahoo's provider convention; split-adjusted close is used for trend; raw contemporaneous close and volume are reconstructed from Yahoo split events for ADV$30. Provider definitions and publication behavior are not guaranteed.
-- A current day bar is accepted only after the 16:30 America/New_York cutoff and a same-date Yahoo regular-market timestamp. Before then the prior verified session is used. The completed session is `2026-10-22`.
-- Nasdaq's quote summary supplies market cap, listing exchange, sector, and industry, but exposes no timestamp for the market-cap field. The value is retrieved on this run; its field age cannot be independently proven. It is therefore a provisional eligibility input.
-- SEC submissions feeds are checked on each run for newer 10-K, 20-F, or 40-F filings than the cited evidence. Newer filings and unavailable checks block provisional selection. 8-K disclosure content is not automatically reviewed.
-- ETF holdings are retrieved from each fund issuer and retain the actual as-of date. Retrieval does not make an old snapshot current. Failed refreshes do not mix in old fields; the entire last successful dashboard is preserved with its original data date.
-- Theme evidence review is incomplete for every configured theme. The present curated lists are not full eligible universes; pending issuers, foreign mappings, and broader segment judgments remain unresolved.
-- XBI industry screening runs for mapped tickers. Biotechnology classifications are excluded by the default rule; non-biotechnology and unmapped holdings remain pending business-evidence review. Zero selections is not a claim that its eligible universe is empty.
-- Themes can overlap. Stock versus ETF excess is mechanically related where the fund owns the company; it is not independent alpha. No point-in-time membership, backtest, prediction, or execution quality assessment is provided.
-
-## Exports
-
-- `watchlist_15.csv` / `watchlist_20.csv`: each theme's current compact or expanded selected list, with theme, selection reason, filing, weight, and metrics columns. CSV retains repeated tickers under different theme IDs.
-- `tradingview_15.txt`: 46 unique exchange-qualified symbols; 0 cross-theme/listing duplicates collapsed; 0 rows without confirmed NYSE/Nasdaq exchange omitted.
-- `tradingview_20.txt`: 46 unique exchange-qualified symbols; 0 duplicates collapsed; 0 rows without confirmed exchange omitted.
-- Browser exports use the active theme's filtered selected scope. CSV includes the theme field. TradingView text is flat and does not retain theme sections.
-- TradingView text uses one `EXCHANGE:TICKER` symbol per line and passed local syntax/mapping checks. The platform's import dialog was not exercised in this environment, so confirm behavior with the current TradingView client.
-
-## Retrieval failures
-
-No chart, quote, holdings, or SEC submissions retrieval errors were reported in this run.
-
-## Source matrix
-
-Download `source_matrix.csv` from this run for the field-level provider, access method, adjustment or as-of definition, history/delay, limitations, fallback, last test, and URL for each consumed source.
-
-## Regeneration
-
-From the repository root, run `python3 scripts/generate_dashboard.py` with network access. The script performs a fresh retrieval and writes the dashboard, JSON input snapshots, CSV and TradingView exports, source matrix, this report, and a ZIP bundle to the local `output/` directory. That directory is ignored by Git; generated runs are not committed or pushed to a branch. No database, service, secret, scheduled job, or paid package is used.
+## Local files
+dashboard.html, market.csv, themes.csv, latest_snapshot.json, raw_inputs.json, source_matrix.csv, watchlist_15.csv, watchlist_20.csv, tradingview_15.txt, tradingview_20.txt, run_bundle.zip.
+Opening HTML never retrieves data. Explicitly run python scripts/generate_dashboard.py. Failed refreshes preserve existing valid exports and write refresh_status.json/failed_refresh.md separately.

@@ -37,8 +37,10 @@ def validate(snapshot, raw):
     session = snapshot.get('session_date')
     if not session:
         problems.append('No completed market session was retrieved')
-    if raw.get('retrieval_error_count') or any(raw.get('errors', {}).values()):
-        problems.append('One or more sources failed; see source_errors in refresh_status.json')
+    mandatory = {'SPY', 'QQQ'} | {t.get('anchor') for t in snapshot.get('themes', [])}
+    failures = raw.get('errors', {}).get('charts', {})
+    if mandatory.intersection(failures) or mandatory.intersection(raw.get('errors', {}).get('holdings', {})):
+        problems.append('Mandatory market/anchor retrieval failed; see source_errors in refresh_status.json')
     def valid_number(x):
         return isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x)
     rows = snapshot.get('context', []) + snapshot.get('themes', [])
@@ -82,7 +84,6 @@ def validate(snapshot, raw):
         for stock in theme.get('selected', []):
             if stock.get('session_date') != session:
                 problems.append(f"{stock.get('ticker')}: selected stock date is misaligned")
-    if not any(t.get('selected') for t in snapshot.get('themes', [])):
-        problems.append('No stocks passed the documented provisional selection rules')
+
     if problems:
         raise ValueError('; '.join(problems))

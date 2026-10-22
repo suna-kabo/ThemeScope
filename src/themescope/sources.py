@@ -150,9 +150,11 @@ def _vaneck_holdings(theme: dict[str, Any]) -> dict[str, Any]:
     if any(item.get('Ticker') != theme['anchor'] for item in data['Holdings']):
         raise RuntimeError('VanEck dataset fund identity mismatch')
     rows = []
+    excluded_rows = []
     for item in data.get("Holdings", []):
         ticker = str(item.get("Label") or item.get("HoldingTicker") or "").strip()
         if not ticker or str(item.get("AssetClass", "")).lower() not in ("stock", "equity"):
+            excluded_rows.append({'ticker': ticker, 'company': item.get('HoldingName'), 'security_type': item.get('AssetClass'), 'reason': 'Non-equity or unresolved source row'})
             continue
         rows.append(
             {
@@ -164,7 +166,7 @@ def _vaneck_holdings(theme: dict[str, Any]) -> dict[str, Any]:
             }
         )
     as_of = str(data.get("AsOfDate") or "")[:10] or None
-    return {"as_of": as_of, "url": url, "rows": rows, "discovery_error": discovery_error}
+    return {"as_of": as_of, "url": url, "rows": rows, "discovery_error": discovery_error, "excluded_rows": excluded_rows}
 
 
 def _first_trust_holdings(theme: dict[str, Any]) -> dict[str, Any]:
@@ -220,7 +222,7 @@ def _ishares_holdings(theme: dict[str, Any]) -> dict[str, Any]:
         if len(row) < len(header):
             continue
         ticker = row[index["ticker"]].strip()
-        if not ticker or ticker == "-":
+        if not ticker:
             continue
         type_column = index.get("type", index.get("asset class"))
         results.append(
@@ -309,11 +311,14 @@ def _spdr_holdings(theme: dict[str, Any]) -> dict[str, Any]:
     if header_index is None:
         raise RuntimeError("SPDR workbook did not contain the expected holdings columns")
     results = []
+    excluded_rows = []
     for row in table[header_index + 1 :]:
         if len(row) < 5:
             continue
         ticker = str(row[1] or "").strip()
         if not ticker:
+            if _number(row[4]) is not None:
+                excluded_rows.append({'company': str(row[0]), 'reason': 'Source row has no equity ticker'})
             continue
         results.append(
             {
@@ -323,7 +328,7 @@ def _spdr_holdings(theme: dict[str, Any]) -> dict[str, Any]:
                 "weight_pct": _number(row[4]),
             }
         )
-    return {"as_of": as_of, "url": theme["holdings_source"]["url"], "rows": results}
+    return {"as_of": as_of, "url": theme["holdings_source"]["url"], "rows": results, "excluded_rows": excluded_rows}
 
 
 HOLDINGS_PARSERS = {

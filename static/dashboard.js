@@ -64,8 +64,8 @@
       if (aMissing !== bMissing) return aMissing ? 1 : -1;
       if (!aMissing && Number(av) !== Number(bv))
         return sign * (Number(av) - Number(bv));
-      return String(a.ticker || a.id || "").localeCompare(
-        String(b.ticker || b.id || ""),
+      return String(a.id || a.ticker || "").localeCompare(
+        String(b.id || b.ticker || ""),
       );
     });
   }
@@ -97,6 +97,12 @@
       "ticker",
       "company",
       "exchange",
+      "membership_tag",
+      "membership_source",
+      "membership_rationale",
+      "is_anchor_holding",
+      "above_ema21",
+      "above_ema50",
       "evidence_category",
       "evidence_note",
       "etf_weight_pct",
@@ -124,6 +130,18 @@
         ticker: row.ticker,
         company: row.company,
         exchange: row.exchange,
+        membership_tag: row.membership_tag,
+        membership_source: row.membership_source,
+        membership_rationale: row.membership_rationale,
+        is_anchor_holding: row.is_anchor_holding,
+        above_ema21:
+          row.price_close != null && row.ema21 != null
+            ? row.price_close > row.ema21
+            : null,
+        above_ema50:
+          row.price_close != null && row.ema50 != null
+            ? row.price_close > row.ema50
+            : null,
         evidence_category: row.evidence_category,
         evidence_note: row.evidence_note,
         etf_weight_pct: row.etf_weight_pct,
@@ -232,6 +250,87 @@
             esc(reason || "Input unavailable; see diagnostic export") +
             '">—</span>';
     }
+    function score(row, key) {
+      const m = row.field_status?.[key];
+      return finite(row[key])
+        ? '<span title="Fixed v5 ranking convention">' +
+            row[key].toFixed(1) +
+            "</span>"
+        : '<span title="' + esc(m?.reason || "Unavailable") + '">—</span>';
+    }
+    function breadth(row, period, index = false) {
+      const m = (index ? row.index_breadth : row.holdings_breadth)?.[
+        String(period)
+      ];
+      if (!m || m.value === null)
+        return (
+          '<span title="' +
+          esc(m?.reason || "Constituent data unavailable") +
+          '">—</span>'
+        );
+      return (
+        '<span class="' +
+        (m.status === "valid" ? "" : "warning") +
+        '" title="' +
+        esc(
+          (m.reason || "Valid") +
+            "; price coverage " +
+            m.valid_count +
+            "/" +
+            m.eligible_count +
+            "; holdings as of " +
+            m.as_of,
+        ) +
+        '">' +
+        m.value.toFixed(1) +
+        "% <small>(" +
+        m.above_count +
+        "/" +
+        m.valid_count +
+        ") · " + (finite(m.coverage_pct) ? m.coverage_pct.toFixed(1) : "—") + "% coverage</small>" +
+        (m.status === "valid" ? "" : " ⚠") +
+        "</span>"
+      );
+    }
+    function ema(row, period) {
+      let fact = row["above_ema" + period];
+      if (
+        fact === undefined &&
+        finite(row.price_close) &&
+        finite(row["ema" + period])
+      )
+        fact = row.price_close > row["ema" + period];
+      return fact === true
+        ? '<span class="positive">Above</span>'
+        : fact === false
+          ? '<span class="negative">At/below</span>'
+          : missing;
+    }
+    function conditions(row) {
+      return (
+        [21, 50]
+          .map(
+            (period) =>
+              '<div class="market-condition"><small>EMA' +
+              period +
+              " " +
+              ema(row, period) +
+              " · Index breadth " +
+              breadth(row, period, true) +
+              '</small><br><b title="' +
+              esc(
+                row.field_status?.["market_condition" + period]?.reason || "",
+              ) +
+              '">' +
+              esc(row["market_condition" + period] || "Unavailable") +
+              "</b></div>",
+          )
+          .join("") +
+        "<small>Constituents as of " +
+        esc(row.index_constituent_asof || "unavailable") +
+        "</small>"
+      );
+    }
     function money(n, compact) {
       return finite(n)
         ? "$" +
@@ -313,8 +412,9 @@
     };
     $("date").textContent = data.session_date || "Unavailable";
     $("generated").textContent =
-      "Collected " +
+      "Snapshot created " +
       (data.generated_at || "unknown") +
+      (data.last_source_retrieved_at ? " · Last price retrieval " + data.last_source_retrieved_at : "") +
       (data.imported_at
         ? " · Imported " + data.imported_at + " (original data date retained)"
         : "");
@@ -336,7 +436,11 @@
       return;
     }
     $("status").textContent =
-      "Dated snapshot · provisional reviewed stock subset; membership screening is incomplete.";
+      "v5 · End-of-day snapshot · " +
+      (data.sources?.partial
+        ? "Core data verified; optional source gaps. "
+        : "Core data retrieved. ") +
+      "ETF holdings participation is independent of curated watchlists.";
     $("cards").innerHTML = data.context
       .map(
         (r) =>
@@ -375,10 +479,17 @@
               r.ema21_slope_5.toFixed(2) +
               " USD"
             : "—") +
-          "</small></article>",
+          "</small>" +
+          conditions(r) +
+          "</article>",
       )
       .join("");
     var metrics = {
+      theme_score: "ThemeScore",
+      current_strength_score: "CurrentStrength",
+      medium_strength_score: "MediumStrength",
+      etf_breadth21_pct: "ETF breadth EMA21",
+      etf_breadth50_pct: "ETF breadth EMA50",
       return5: "1W return",
       return21: "1M return",
       return63: "3M return",
@@ -389,7 +500,7 @@
     };
     var state = {
       theme: data.themes[0]?.id,
-      themeKey: "excess21",
+      themeKey: "theme_score",
       themeDir: "desc",
       stockKey: "excess21",
       stockDir: "desc",
@@ -413,7 +524,13 @@
         options(
           Object.entries(metrics).filter(([k]) =>
             stock
-              ? k !== "excess63"
+              ? ![
+                  "theme_score",
+                  "current_strength_score",
+                  "medium_strength_score",
+                  "etf_breadth21_pct",
+                  "etf_breadth50_pct",
+                ].includes(k)
               : !["price_close", "adv30_usd"].includes(k),
           ),
         ) +
@@ -427,21 +544,18 @@
         prefix +
         '-relative">' +
         options(
-          ["All", "Outperforming", "Underperforming"].map((v) => [
-            v,
-            v,
-          ]),
+          ["All", "Outperforming", "Underperforming"].map((v) => [v, v]),
         ) +
         "</select></label>" +
         (stock
-          ? '<label>Pool <select id="pool"><option value="15">Selected 15</option><option value="20">Selected 20</option><option value="all">All reviewed eligible (incomplete)</option></select></label>'
+          ? '<label>Pool <select id="pool"><option value="15">Selected 15</option><option value="20">Selected 20</option><option value="all">All accepted eligible</option></select></label>'
           : "")
       );
     }
     $("theme-controls").innerHTML = controls("theme", false);
     $("stock-controls").innerHTML = controls("stock", true);
     ["theme", "stock"].forEach(function (p) {
-      $(p + "-sort").value = "excess21";
+      $(p + "-sort").value = p === "theme" ? "theme_score" : "excess21";
       $(p + "-sort").onchange = function () {
         state[p + "Key"] = this.value;
         render();
@@ -454,14 +568,37 @@
         $(p + "-" + k).addEventListener("input", render),
       );
     });
+    $("theme-controls").insertAdjacentHTML(
+      "beforeend",
+      '<label>Level <select id="level"><option>All</option><option>Sector</option><option>Industry</option><option>Theme</option></select></label>',
+    );
+    $("level").onchange = render;
+    $("stock-controls").insertAdjacentHTML(
+      "beforeend",
+      '<label>EMA <select id="ema-filter"><option value="all">All</option><option value="above21">Above EMA21</option><option value="below21">At/below EMA21</option><option value="above50">Above EMA50</option><option value="below50">At/below EMA50</option></select></label>',
+    );
+    $("ema-filter").onchange = render;
     $("pool").onchange = render;
     function filtered(rows, p) {
       return filterRows(rows, {
         query: $(p + "-search").value,
         trend: $(p + "-trend").value,
         relative: $(p + "-relative").value,
-      });
+      }).filter((r) =>
+        p === "theme"
+          ? $("level").value === "All" || r.level === $("level").value
+          : (() => {
+              let f = $("ema-filter").value;
+              if (f === "all") return true;
+              let n = f.endsWith("21") ? 21 : 50;
+              if (!finite(r.price_close) || !finite(r["ema" + n])) return false;
+              return f.startsWith("above")
+                ? r.price_close > r["ema" + n]
+                : r.price_close <= r["ema" + n];
+            })(),
+      );
     }
+
     function head(p, columns) {
       $(p + "-head").innerHTML =
         "<tr>" +
@@ -529,21 +666,32 @@
       $("theme-basis").textContent =
         "Rank: " +
         metrics[state.themeKey] +
-        (state.themeKey.startsWith("excess") ? " versus SPY (pp)" : " (%)") +
         " · " +
         state.themeDir +
-        " · ranks retained across filters";
+        " · full dated registry ranks retained across filters · " +
+        data.session_date +
+        " · " +
+        (data.themes[0]?.ranking_peer_count21 ?? data.themes.length) +
+        " valid 1M peers (10 required for scores)";
       head("theme", [
         ["Rank"],
+        ["Level"],
         ["Theme"],
         ["ETF"],
+        ["ThemeScore", "theme_score"],
+        ["Current", "current_strength_score"],
+        ["Medium", "medium_strength_score"],
+        ["State"],
         ["1W %", "return5"],
         ["1M %", "return21"],
         ["3M %", "return63"],
         ["1M vs SPY (pp)", "excess21"],
         ["3M vs SPY (pp)", "excess63"],
-        ["Trend"],
-        ["64-session close"],
+        ["Breadth21", "etf_breadth21_pct"],
+        ["Breadth50", "etf_breadth50_pct"],
+        ["EMA21"],
+        ["EMA50"],
+        ["Data status"],
       ]);
       $("theme-body").innerHTML =
         themes
@@ -555,35 +703,56 @@
               (t.id === state.theme ? "active" : "") +
               '"><td>' +
               (t.display_rank || "—") +
-              '</td><td><button class="theme-select" data-id="' +
-              esc(t.id) +
-              '">' +
+              "</td><td>" +
+              esc(t.level || "Theme") +
+              '</td><td><button class="theme-select">' +
               esc(t.name) +
               "</button></td><td>" +
-              esc(t.anchor) +
+              (t.chart_url ? '<a href="'+esc(t.chart_url)+'" target="_blank" rel="noopener noreferrer">'+esc(t.anchor)+' ↗</a>' : esc(t.anchor)) +
+              "</td>" +
+              ["theme_score", "current_strength_score", "medium_strength_score"]
+                .map((k) => "<td>" + score(t, k) + "</td>")
+                .join("") +
+              "<td>" +
+              esc(t.theme_state || "Unavailable") +
               "</td>" +
               ["return5", "return21", "return63", "excess21", "excess63"]
                 .map(
                   (k) =>
                     "<td>" +
-                    pct(
-                      valueAt(t, k),
-                      k.startsWith("excess"),
-                      (k.startsWith("excess") ? t.excess_returns : t.returns)?.[
-                        k.replace(/\D/g, "")
-                      ]?.reason,
-                    ) +
+                    pct(valueAt(t, k), k.startsWith("excess")) +
                     "</td>",
                 )
                 .join("") +
               "<td>" +
-              trend(t) +
+              breadth(t, 21) +
               "</td><td>" +
-              spark(t.history) +
-              "</td></tr>",
+              breadth(t, 50) +
+              "</td><td>" +
+              ema(t, 21) +
+              "</td><td>" +
+              ema(t, 50) +
+              "</td><td><details><summary>" +
+              esc(t.stock_scope || "ETF-only") +
+              " · " +
+              (finite(t.theme_score) ? "Score valid" : "Score unavailable") +
+              '</summary><div class="stock-details">' +
+              esc(t.field_status?.theme_score?.reason || "Valid score") +
+              "<br>1M percentile: " +
+              esc(t.field_status?.percentile_excess21?.reason || "valid") +
+              "<br>Anchor ETF holdings breadth, not whole-industry breadth. As of " +
+              esc(t.holdings_asof || "unavailable") +
+              "<br>" +
+              esc(
+                t.holdings_breadth?.["21"]?.reason || "Valid EMA21 coverage",
+              ) +
+              "<br>" +
+              esc(
+                t.holdings_breadth?.["50"]?.reason || "Valid EMA50 coverage",
+              ) +
+              "</div></details></td></tr>",
           )
-          .join("") ||
-        '<tr><td colspan="10">No themes match these filters.</td></tr>';
+          .join("") || '<tr><td colspan="18">No matching themes.</td></tr>';
       $("theme-body")
         .querySelectorAll("tr[data-theme]")
         .forEach((r) => (r.onclick = () => select(r.dataset.theme)));
@@ -596,7 +765,19 @@
         " · 3M " +
         pct(valueAt(t, "return63")) +
         " · " +
-        trend(t);
+        trend(t) +
+        " · ThemeScore " +
+        score(t, "theme_score") +
+        " · Current " +
+        score(t, "current_strength_score") +
+        " · Medium " +
+        score(t, "medium_strength_score") +
+        " · " +
+        esc(t.theme_state || "Unavailable") +
+        "<br>Anchor ETF holdings breadth: EMA21 " +
+        breadth(t, 21) +
+        " · EMA50 " +
+        breadth(t, 50);
       var pool = $("pool").value,
         base =
           pool === "all"
@@ -619,12 +800,10 @@
         (pool === "all" ? "reviewed eligible subset" : "selected pool") +
         " only. Sorting does not change selection.";
       $("coverage").textContent =
-        t.pending_count +
-        " holdings pending review · " +
-        t.eligible_reviewed_count +
-        " provisional eligible. " +
-        (t.review_reason || "") +
-        " Market-cap timestamps are unverified. 15/20 is a browsing convention.";
+        (base.length
+          ? "Curated eligible stocks"
+          : "ETF-only: no curated stock drilldown") +
+        " · 15/20 is a browsing convention. Market-cap field timestamps remain unverified.";
       head("stock", [
         ["Rank"],
         ["Ticker / company"],
@@ -633,6 +812,10 @@
         ["1M %", "return21"],
         ["3M %", "return63"],
         ["1M vs theme (pp)", "excess21"],
+        ["3M vs theme (pp)", "excess63"],
+        ["EMA21"],
+        ["EMA50"],
+        ["Membership"],
         ["Trend"],
         ["ADV$30", "adv30_usd"],
         ["Chart"],
@@ -661,21 +844,21 @@
               '">' +
               esc(r.company) +
               '</span><details><summary>Evidence & selection</summary><div class="stock-details">' +
-              esc(r.evidence_note || "") +
+              esc(r.membership_rationale || r.evidence_note || "") +
               "<br>" +
               esc(r.selection_reason || "Reviewed eligible subset") +
               "<br>" +
-              esc(r.evidence?.url || "") +
+              esc(r.membership_source || r.evidence?.url || "") +
               "</div></details></td><td>" +
               money(r.price_close) +
               "</td>" +
-              ["return5", "return21", "return63", "excess21"]
+              ["return5", "return21", "return63", "excess21", "excess63"]
                 .map(
                   (k) =>
                     "<td>" +
                     pct(
                       valueAt(r, k),
-                      k === "excess21",
+                      k.startsWith("excess"),
                       (k.startsWith("excess") ? r.excess_returns : r.returns)?.[
                         k.replace(/\D/g, "")
                       ]?.reason,
@@ -684,6 +867,12 @@
                 )
                 .join("") +
               "<td>" +
+              ema(r, 21) +
+              "</td><td>" +
+              ema(r, 50) +
+              "</td><td>" +
+              esc(r.membership_tag || "Unavailable") +
+              "</td><td>" +
               trend(r) +
               "</td><td>" +
               money(r.adv30_usd, true) +
@@ -700,8 +889,7 @@
         '<tr><td colspan="10">' +
           (base.length
             ? "No stocks match these filters."
-            : "No reviewed stocks passed selection. " +
-              esc(t.review_reason || "See diagnostics for pending evidence.")) +
+            : "ETF-only. Valid ETF returns and holdings breadth remain independent of stock curation.") +
           "</td></tr>";
       var points = data.themes.filter(
           (t) =>
