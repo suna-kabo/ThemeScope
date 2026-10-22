@@ -3,9 +3,11 @@
 
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 import sys
+import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -381,23 +383,70 @@ def _run_report(snapshot: dict[str, Any], raw: dict[str, Any], matrix: list[dict
     lines += [
         "## Source matrix",
         "",
-        "See [`data/source_matrix.csv`](../data/source_matrix.csv) for the field-level provider, access method, adjustment or as-of definition, history/delay, limitations, fallback, last test, and URL for each consumed source.",
+        "Download `source_matrix.csv` from this run for the field-level provider, access method, adjustment or as-of definition, history/delay, limitations, fallback, last test, and URL for each consumed source.",
         "",
         "## Regeneration",
         "",
-        "From the repository root, run `python3 scripts/generate_dashboard.py` with network access. The script performs a fresh retrieval and regenerates the static HTML, JSON input snapshots, CSV and TradingView exports, source matrix, and this report. No database, service, secret, scheduled job, or paid package is used.",
+        "From the repository root, run `python3 scripts/generate_dashboard.py` with network access. The script performs a fresh retrieval and writes the dashboard, JSON input snapshots, CSV and TradingView exports, source matrix, this report, and a ZIP bundle to the local `output/` directory. That directory is ignored by Git; generated runs are not committed or pushed to a branch. No database, service, secret, scheduled job, or paid package is used.",
         "",
     ]
     return "\n".join(lines)
 
 
-def main() -> int:
+RUN_OUTPUT_FILES = (
+    "dashboard.html",
+    "latest_snapshot.json",
+    "raw_inputs.json",
+    "source_matrix.csv",
+    "watchlist_15.csv",
+    "watchlist_20.csv",
+    "tradingview_15.txt",
+    "tradingview_20.txt",
+    "latest_run.md",
+)
+
+
+def _write_run_bundle(output_dir: Path) -> Path:
+    bundle_path = output_dir / "run_bundle.zip"
+    with zipfile.ZipFile(bundle_path, "w", compression=zipfile.ZIP_DEFLATED) as bundle:
+        for filename in RUN_OUTPUT_FILES:
+            source = output_dir / filename
+            if not source.is_file():
+                raise FileNotFoundError(f"Missing run output required for bundle: {source}")
+            bundle.write(source, arcname=filename)
+    return bundle_path
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Fetch current ThemeScope data and create local dashboard downloads.")
+    parser.add_argument(
+        "--output-dir",
+        default="output",
+        help="where to save this run's files (default: output/ under the repository root)",
+    )
+    args = parser.parse_args(argv)
+    output_dir = Path(args.output_dir).expanduser()
+    if not output_dir.is_absolute():
+        output_dir = ROOT / output_dir
+
     snapshot, raw = build_snapshot(ROOT)
     matrix = make_source_matrix(snapshot, raw, ROOT)
     snapshot["source_matrix"] = matrix
-    _write_json(ROOT / "data/latest_snapshot.json", snapshot)
-    _write_json(ROOT / "data/raw_inputs.json", raw)
-    _write_csv(ROOT / "data/source_matrix.csv", matrix, list(matrix[0].keys()) if matrix else [])
+    output_dir.mkdir(parents=True, exist_ok=True)
+    _write_json(output_dir / "latest_snapshot.json", snapshot)
+    _write_json(output_dir / "raw_inputs.json", raw)
+    _write_csv(output_dir / "source_matrix.csv", matrix, list(matrix[0].keys()) if matrix else [])
+
+    rows15 = _all_selected(snapshot, 15)
+    rows20 = _all_selected(snapshot, 20)
+    _write_csv(output_dir / "watchlist_15.csv", rows15, EXPORT_COLUMNS)
+    _write_csv(output_dir / "watchlist_20.csv", rows20, EXPORT_COLUMNS)
+    text15, stats15 = _tradingview_text(rows15)
+    text20, stats20 = _tradingview_text(rows20)
+    (output_dir / "tradingview_15.txt").write_text(text15, encoding="utf-8")
+    (output_dir / "tradingview_20.txt").write_text(text20, encoding="utf-8")
+    report = _run_report(snapshot, raw, matrix, stats15, stats20)
+    (output_dir / "latest_run.md").write_text(report, encoding="utf-8")
 
     template = (ROOT / "static/dashboard_template.html").read_text(encoding="utf-8")
     style = (ROOT / "static/dashboard.css").read_text(encoding="utf-8")
@@ -406,23 +455,12 @@ def main() -> int:
     html = template.replace("{{STYLE}}", style).replace("{{SCRIPT}}", script).replace("{{SNAPSHOT_JSON}}", payload)
     if "{{STYLE}}" in html or "{{SCRIPT}}" in html or "{{SNAPSHOT_JSON}}" in html:
         raise RuntimeError("Dashboard template placeholder replacement failed")
-    dist = ROOT / "dist"
-    dist.mkdir(parents=True, exist_ok=True)
-    (dist / "dashboard.html").write_text(html, encoding="utf-8")
+    (output_dir / "dashboard.html").write_text(html, encoding="utf-8")
+    bundle_path = _write_run_bundle(output_dir)
 
-    rows15 = _all_selected(snapshot, 15)
-    rows20 = _all_selected(snapshot, 20)
-    _write_csv(ROOT / "exports/watchlist_15.csv", rows15, EXPORT_COLUMNS)
-    _write_csv(ROOT / "exports/watchlist_20.csv", rows20, EXPORT_COLUMNS)
-    text15, stats15 = _tradingview_text(rows15)
-    text20, stats20 = _tradingview_text(rows20)
-    (ROOT / "exports/tradingview_15.txt").write_text(text15, encoding="utf-8")
-    (ROOT / "exports/tradingview_20.txt").write_text(text20, encoding="utf-8")
-    report = _run_report(snapshot, raw, matrix, stats15, stats20)
-    (ROOT / "reports").mkdir(parents=True, exist_ok=True)
-    (ROOT / "reports/latest_run.md").write_text(report, encoding="utf-8")
     print(f"Generated {len(snapshot['themes'])} themes for session {snapshot['session_date']} at {snapshot['generated_at']}.")
-    print(f"Source errors: {raw['retrieval_error_count']}. Dashboard: dist/dashboard.html")
+    print(f"Source errors: {raw['retrieval_error_count']}. Dashboard: {output_dir / 'dashboard.html'}")
+    print(f"Run files: {output_dir} (bundle: {bundle_path})")
     for theme in snapshot["themes"]:
         print(f"{theme['id']}: {theme['official_holdings_count']} holdings, {theme['eligible_reviewed_count']} provisional eligible, {len(theme['selected'])} selected, {theme['pending_count']} pending.")
     return 0

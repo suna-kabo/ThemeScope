@@ -2,29 +2,35 @@
 
 An on-demand, end-of-day dashboard for comparing themed equity ETFs and reviewing sourced company watchlists. The 15/20 stock pool is a configurable browsing convention, not a validated trading model. The dashboard does not identify entries or issue buy/sell signals.
 
-## Open the current snapshot
+## Run it on your device
 
-Open [`dist/dashboard.html`](dist/dashboard.html) in a current browser. It is self-contained: HTML, CSS, JavaScript, and the generated snapshot are embedded in one file. Reopening or reloading it does not fetch new data.
-
-## Regenerate
-
-Requirements: Python 3.10 or newer and network access. Collection uses only Python's standard library; Node.js 18 or newer is needed only for the optional JavaScript helper test. No database, backend, secret, paid package, or scheduled automation is needed.
-
-From the repository root:
+Requirements: Python 3.10 or newer and an internet connection. From a clone of this repository, run:
 
 ```sh
 python3 scripts/generate_dashboard.py
 ```
 
-The script makes fresh requests to fund issuers, Yahoo Finance chart, Nasdaq quote summary, and SEC EDGAR submissions. It regenerates:
+Open `output/dashboard.html` in a browser. Each run writes its dashboard, actual retrieved inputs, source matrix, report, CSVs, TradingView lists, and `run_bundle.zip` into `output/` on that device. The dashboard's **Download run files (.zip)** button saves the run's files through the browser to the user's normal Downloads location. The output directory is ignored by Git, so running the program does not create or update a branch.
 
-- `dist/dashboard.html` — standalone interactive dashboard
-- `data/latest_snapshot.json` — calculated current snapshot
-- `data/raw_inputs.json` — retrieved source payloads and per-source errors for reproducibility
-- `data/source_matrix.csv` — consumed fields, sources, methods, dates, limits, fallbacks, and last-run results
-- `exports/watchlist_15.csv` and `exports/watchlist_20.csv` — theme-preserving selections
-- `exports/tradingview_15.txt` and `exports/tradingview_20.txt` — flat exchange-qualified symbol lists
-- `reports/latest_run.md` — run dates, coverage, source failures, and limitations
+To choose another local output directory, pass `--output-dir`, for example `python3 scripts/generate_dashboard.py --output-dir ~/Downloads/themescope-run`.
+
+`dist/dashboard.html` is the checked-in demonstration snapshot from the implementation run. Reopening it does not fetch new data. To get current data, run the generator locally as above.
+
+## Regenerate
+
+Collection uses only Python's standard library; Node.js 18 or newer is needed only for the optional JavaScript helper test. No database, hosted backend, secret, paid package, or scheduled automation is needed.
+
+The script makes fresh requests to fund issuers, Yahoo Finance chart, Nasdaq quote summary, and SEC EDGAR submissions. It creates locally under `output/`:
+
+- `dashboard.html` — standalone interactive dashboard for that run
+- `latest_snapshot.json` and `raw_inputs.json` — calculated snapshot, retrieved source payloads, and per-source errors
+- `source_matrix.csv` — consumed fields, sources, methods, dates, limits, fallbacks, and last-run results
+- `watchlist_15.csv` and `watchlist_20.csv` — theme-preserving selections
+- `tradingview_15.txt` and `tradingview_20.txt` — flat exchange-qualified symbol lists
+- `latest_run.md` — run dates, coverage, source failures, and limitations
+- `run_bundle.zip` — all the run files above, ready to save or share
+
+The dashboard also downloads the active theme's filtered CSV and TradingView text directly through the browser. `output/` is excluded from Git. The program never commits or pushes run outputs.
 
 If a source is unavailable, dependent values are marked unavailable; the generator does not silently reuse an older snapshot. The SEC freshness check blocks a provisional stock candidate when a newer annual report is found or its feed cannot be checked. The check does not classify 8-K disclosures.
 
@@ -40,6 +46,10 @@ TradingView text is written as one `EXCHANGE:TICKER` symbol per line and checked
 - `src/themescope/collect.py` — retrieval, eligibility, provisional breadth, and snapshot assembly
 - `static/dashboard_template.html`, `static/dashboard.css`, `static/dashboard.js` — standalone presentation assets
 - `tests/` — Python metric acceptance checks and Node dashboard/export checks
+
+## Open-source distribution
+
+To make the program open source, publish the source repository publicly and add a license you choose. Without a license, other people generally do not have permission to reuse or redistribute the code. MIT is a short permissive option; Apache-2.0 adds an express patent grant; GPL-3.0 requires distributed derivative works to keep the same license. A GitHub Pages site can host a demonstration snapshot, but it cannot run this Python data collector on each visitor's click. The documented local run keeps retrieval and generated files on each user's device, and the dashboard downloads the run bundle to that user's browser.
 
 ## Current scope and limits
 
