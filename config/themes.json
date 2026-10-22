@@ -1,0 +1,186 @@
+{
+  "registry_version": "2026-10-22.1",
+  "reviewer": "Codex implementation review",
+  "decision_date": "2026-10-22",
+  "effective_date": "2026-10-22",
+  "market_benchmark": "SPY",
+  "context_symbols": [
+    "SPY",
+    "QQQ"
+  ],
+  "settings": {
+    "return_sessions": [
+      5,
+      21,
+      63,
+      126
+    ],
+    "market_cap_floor_usd": 2000000000,
+    "raw_close_floor_usd": 15,
+    "adv30_floor_usd": 20000000,
+    "anchor_adv30_floor_usd": 1000000,
+    "max_candidates": 20,
+    "compact_candidates": 15,
+    "ema_periods": [
+      21,
+      50
+    ],
+    "ema_slope_sessions": 5,
+    "ema21_warmup_sessions": 84,
+    "ema21_slope_warmup_sessions": 89,
+    "ema50_warmup_sessions": 200,
+    "minimum_breadth_sample": 8,
+    "minimum_breadth_coverage": 0.8,
+    "maximum_holdings_age_days": 35,
+    "minimum_percentile_peers": 10,
+    "business_revenue_materiality_percent": 20
+  },
+  "themes": [
+    {
+      "id": "semiconductors",
+      "name": "Semiconductors",
+      "scope": "Semiconductor design, foundry manufacturing, memory, and fabrication equipment.",
+      "included": [
+        "Chip design and production",
+        "Foundries and memory",
+        "Semiconductor fabrication equipment"
+      ],
+      "excluded": [
+        "General software and electronics customers without an established semiconductor business"
+      ],
+      "anchor": "SMH",
+      "parent_sector": "XLK",
+      "anchor_rationale": "VanEck describes SMH as tracking the MVIS US Listed Semiconductor 25 Index and its index semiconductor-revenue screen. That is a direct mandate match to this registry scope. The fund is concentrated, so top weights are shown; anchor choice is not switched based on recent return.",
+      "anchor_url": "https://www.vaneck.com/us/en/investments/semiconductor-etf-smh/",
+      "holdings_source": {
+        "provider": "VanEck",
+        "method": "vaneck_dataset",
+        "url": "https://www.vaneck.com/us/en/investments/semiconductor-etf-smh/"
+      },
+      "representation_limit": "SMH may hold non-US issuers and ADRs. The stock subset is limited to verified NYSE/Nasdaq listings; any ADR mapping is labeled.",
+      "unleveraged_equity_etf_review": true,
+      "anchor_instrument_review": "Plain-vanilla long-only USD equity ETF; official fund mandate checked for inverse or leveraged objective."
+    },
+    {
+      "id": "cybersecurity",
+      "name": "Cybersecurity",
+      "scope": "Companies whose established products directly protect networks, endpoints, identities, applications, or enterprise data.",
+      "included": [
+        "Dedicated security products and platforms",
+        "Established reportable cybersecurity businesses"
+      ],
+      "excluded": [
+        "Generic technology adoption, customer association, pilots, and incidental security features"
+      ],
+      "anchor": "CIBR",
+      "parent_sector": null,
+      "anchor_rationale": "First Trust's Nasdaq CTA Cybersecurity ETF has an explicit cybersecurity mandate, current holdings, and published index materials. Cybersecurity spans several industries, so no single parent-sector ETF is assigned.",
+      "anchor_url": "https://www.ftportfolios.com/Retail/Etf/EtfSummary.aspx?Ticker=CIBR",
+      "holdings_source": {
+        "provider": "First Trust",
+        "method": "first_trust_html",
+        "url": "https://www.ftportfolios.com/Retail/Etf/EtfHoldings.aspx?Ticker=CIBR"
+      },
+      "representation_limit": "The fund includes non-US securities and companies with adjacent technology businesses. Each issuer still needs independent business evidence.",
+      "unleveraged_equity_etf_review": true,
+      "anchor_instrument_review": "Plain-vanilla long-only USD equity ETF; official fund mandate checked for inverse or leveraged objective."
+    },
+    {
+      "id": "clean_energy",
+      "name": "Clean Energy",
+      "scope": "Renewable electricity generation and established equipment or services directly used to generate or manage renewable power.",
+      "included": [
+        "Solar, wind, and geothermal generation",
+        "Established renewable generation equipment and power-control systems"
+      ],
+      "excluded": [
+        "General utilities without material renewable exposure",
+        "EVs, batteries, and broad electrification without a directly matching established activity"
+      ],
+      "anchor": "ICLN",
+      "parent_sector": null,
+      "anchor_rationale": "The iShares Global Clean Energy ETF tracks a global clean-energy mandate and its dated holdings are downloadable. QCLN is a U.S.-tilted alternative with broader clean-technology exposure; ICLN better fits this narrower renewable-generation scope. The comparison is about mandate fit, not recent return.",
+      "anchor_url": "https://www.ishares.com/us/products/239738/ishares-global-clean-energy-etf",
+      "holdings_source": {
+        "provider": "iShares",
+        "method": "ishares_csv",
+        "url": "https://www.ishares.com/us/products/239738/ishares-global-clean-energy-etf/latest-holdings.csv"
+      },
+      "representation_limit": "ICLN is global. The formal stock universe contains only verified eligible U.S.-listed securities, so it is a U.S.-listed subset of the fund.",
+      "unleveraged_equity_etf_review": true,
+      "anchor_instrument_review": "Plain-vanilla long-only USD equity ETF; official fund mandate checked for inverse or leveraged objective."
+    },
+    {
+      "id": "aerospace_defense",
+      "name": "Aerospace & Defense",
+      "scope": "U.S.-listed companies with established aerospace manufacturing, defense systems, or mission-critical components as a core business.",
+      "included": [
+        "Defense contractors and systems",
+        "Commercial and military aerospace equipment and components"
+      ],
+      "excluded": [
+        "General industrial companies without a material aerospace or defense business"
+      ],
+      "anchor": "XAR",
+      "parent_sector": "XLI",
+      "anchor_rationale": "XAR follows the S&P Aerospace & Defense Select Industry Index and uses a more even holding-weight profile than ITA. In the retrieved 2026-10-21 snapshots, XAR's top five weights sum to about 16%, while ITA's top five sum to about 55%; XAR is selected for broader constituent representation. Both are accessible and have sufficient history.",
+      "anchor_url": "https://www.ssga.com/us/en/intermediary/etfs/spdr-sp-aerospace-defense-etf-xar",
+      "holdings_source": {
+        "provider": "State Street SPDR",
+        "method": "spdr_xlsx",
+        "url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xar.xlsx"
+      },
+      "representation_limit": "XAR holdings can include component suppliers and non-defense aerospace businesses; each company is reviewed against the stated scope.",
+      "unleveraged_equity_etf_review": true,
+      "anchor_instrument_review": "Plain-vanilla long-only USD equity ETF; official fund mandate checked for inverse or leveraged objective."
+    },
+    {
+      "id": "cloud_computing",
+      "name": "Cloud Computing",
+      "scope": "Public cloud infrastructure, cloud platforms, and established software services primarily delivered through cloud deployment.",
+      "included": [
+        "Public and hosted cloud services",
+        "Cloud-native platforms and established SaaS businesses"
+      ],
+      "excluded": [
+        "Companies that merely use cloud services",
+        "Hardware suppliers without a direct established cloud business"
+      ],
+      "anchor": "SKYY",
+      "parent_sector": "XLK",
+      "anchor_rationale": "First Trust's ISE Cloud Computing ETF has an explicit cloud-computing mandate and a current dated holdings table. Its holdings include platform, infrastructure, and software companies; only issuers with a direct established cloud business pass the separate evidence review.",
+      "anchor_url": "https://www.ftportfolios.com/Retail/Etf/EtfSummary.aspx?Ticker=SKYY",
+      "holdings_source": {
+        "provider": "First Trust",
+        "method": "first_trust_html",
+        "url": "https://www.ftportfolios.com/Retail/Etf/EtfHoldings.aspx?Ticker=SKYY"
+      },
+      "representation_limit": "The index's cloud categories are broader than this watchlist's business-evidence rule. Unreviewed holdings are shown separately and excluded from formal selection.",
+      "unleveraged_equity_etf_review": true,
+      "anchor_instrument_review": "Plain-vanilla long-only USD equity ETF; official fund mandate checked for inverse or leveraged objective."
+    },
+    {
+      "id": "biotechnology",
+      "name": "Biotechnology",
+      "scope": "Biotechnology industry ETF performance context.",
+      "included": [
+        "ETF return and trend metrics"
+      ],
+      "excluded": [
+        "Biotechnology-classified stocks, per the default stock-universe rule"
+      ],
+      "anchor": "XBI",
+      "parent_sector": "XLV",
+      "anchor_rationale": "XBI tracks the S&P Biotechnology Select Industry Index and provides a valid ETF-level comparison. The specification excludes companies classified as biotechnology from the stock universe, so holdings are not promoted into stock candidates; no empty stock universe is claimed without screening.",
+      "anchor_url": "https://www.ssga.com/us/en/intermediary/etfs/spdr-sp-biotech-etf-xbi",
+      "holdings_source": {
+        "provider": "State Street SPDR",
+        "method": "spdr_xlsx",
+        "url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xbi.xlsx"
+      },
+      "representation_limit": "Stock selection is intentionally withheld until issuer-level industry screening is complete; the biotechnology exclusion applies to stocks, not the ETF's own returns.",
+      "unleveraged_equity_etf_review": true,
+      "anchor_instrument_review": "Plain-vanilla long-only USD equity ETF; official fund mandate checked for inverse or leveraged objective."
+    }
+  ]
+}

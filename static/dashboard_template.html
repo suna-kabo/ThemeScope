@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>ThemeScope · On-demand watchlist</title>
+  <style>
+{{STYLE}}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="ThemeScope home"><span class="brand-mark">TS</span><span>THEME<span class="brand-slash">/</span>SCOPE</span></a>
+    <nav aria-label="Main navigation"><a href="#themes">Themes</a><a href="#watchlist">Watchlist</a><a href="#coverage">Coverage</a><a href="#sources">Sources</a></nav>
+    <div class="header-pill">ON-DEMAND SNAPSHOT</div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="eyebrow-dot"></span> MARKET RESEARCH WORKSPACE</div>
+        <h1>Follow the theme.<br><em>Inspect the evidence.</em></h1>
+        <p>ETF context and a sourced, sortable company watchlist. This dashboard organizes candidates for chart review; it does not produce entry, exit, or buy/sell signals.</p>
+      </div>
+      <aside class="snapshot-card" aria-label="Snapshot status">
+        <div class="snapshot-top"><span>DATA SESSION</span><span id="globalStatus"></span></div>
+        <div id="sessionDate" class="snapshot-date">Unavailable</div>
+        <div class="snapshot-grid"><div><small>GENERATED</small><b id="generatedAt">—</b></div><div><small>RUN DATE</small><b id="runDate">—</b></div></div>
+        <div class="snapshot-foot">Run <span id="runId">—</span> · Registry <span id="registryVersion">—</span></div>
+      </aside>
+    </section>
+
+    <div class="coverage-banner"><span class="banner-icon">i</span><div><b id="coverageSummary">Loading review coverage…</b><p>Membership evidence is incomplete in the current prototype. Pending holdings are shown separately; breadth fractions are limited to the provisional reviewed subset and summary labels are withheld.</p></div></div>
+
+    <section class="context-section" aria-labelledby="contextHeading">
+      <div class="section-heading"><div><span class="kicker">MARKET CONTEXT</span><h2 id="contextHeading">Broad market reference</h2></div><p>ETF returns use adjusted closes; trend uses split-adjusted price closes.</p></div>
+      <div id="contextCards" class="context-grid"></div>
+    </section>
+
+    <section id="themes" class="section-block" aria-labelledby="themeHeading">
+      <div class="section-heading"><div><span class="kicker">01 / THEME MAP</span><h2 id="themeHeading">Theme performance</h2></div><p>Choose a row to inspect its holdings, membership coverage, and reviewed company subset. Sorting does not change the watchlist.</p></div>
+      <div class="table-wrap theme-wrap">
+        <table class="data-table theme-table">
+          <thead><tr>
+            <th>Theme / anchor</th>
+            <th><button data-theme-sort="return21">Return21 ↕</button></th>
+            <th><button data-theme-sort="excess21">Excess21 ↕</button></th>
+            <th><button data-theme-sort="return63">Return63 ↕</button></th>
+            <th><button data-theme-sort="excess63">Excess63 ↕</button></th>
+            <th>Relative state</th><th>Price trend</th><th>Breadth</th><th>Holdings / stock coverage</th><th>Data notes</th>
+          </tr></thead>
+          <tbody id="themeRows"></tbody>
+        </table>
+      </div>
+      <p class="table-note">Excess return is asset return minus SPY return, shown in percentage points. It is distinct from relative wealth change. A stock compared with a fund that owns it has a mechanically related benchmark; excess return is not independent alpha.</p>
+    </section>
+
+    <section class="section-block detail-section" aria-labelledby="activeThemeName">
+      <div class="detail-heading">
+        <div><span class="kicker">SELECTED THEME</span><h2 id="activeThemeName">Loading…</h2><p id="activeThemeSubtitle" class="muted"></p></div>
+        <div class="detail-status"><span id="holdingsFreshness"></span><span id="activeThemeReview"></span></div>
+      </div>
+      <div class="detail-grid">
+        <article class="detail-card rationale-card"><span class="kicker">THEME SCOPE</span><p id="activeThemeScope"></p><span class="kicker">ANCHOR RATIONALE</span><p id="activeThemeRationale"></p><div id="parentComparison" class="parent-comparison"></div><div id="anchorComparisons" class="comparison-list"></div></article>
+        <article class="detail-card breadth-card"><div class="card-heading"><div><span class="kicker">REVIEWED-SUBSET PARTICIPATION</span><h3>Coverage and trend detail</h3></div><span class="mini-label">NOT FULL-UNIVERSE BREADTH</span></div><div id="activeBreadth"></div><div id="coverageWeights" class="coverage-weights"></div></article>
+      </div>
+      <div class="anchor-screen" id="anchorScreenNote"><b>Anchor screen:</b> Price history and ETF returns are assessed separately from company screening. See the source matrix and run report for instrument, history, dollar-volume, and source checks.</div>
+    </section>
+
+    <section id="watchlist" class="section-block" aria-labelledby="stockHeading">
+      <div class="section-heading"><div><span class="kicker">02 / COMPANY WATCHLIST</span><h2 id="stockHeading">Selected candidates</h2></div><p>The 15/20 pool is a configurable browsing convention. It is not a validated trading model. Sort and filter the fixed pool, or search the reviewed universe below.</p></div>
+      <div class="toolbar">
+        <div class="toggle-group" role="group" aria-label="Displayed selected candidates"><button class="active" data-limit="15">Compact · 15</button><button data-limit="20">Expanded · 20</button></div>
+        <label class="search-label">Search selected list<input id="stockSearch" type="search" placeholder="Ticker, company, evidence…"></label>
+        <label class="filter-label">Relative state<select id="relativeFilter"><option>All</option><option>Outperforming</option><option>Underperforming</option><option>Mixed</option><option>Short-term outperformance / medium-term underperformance</option><option>Short-term underperformance / medium-term outperformance</option><option>Unavailable</option></select></label>
+        <label class="filter-label">Price trend<select id="trendFilter"><option>All</option><option>Uptrend</option><option>Downtrend</option><option>Mixed</option><option>Unavailable</option></select></label>
+        <button id="resetFilters" class="button-quiet">Reset</button>
+      </div>
+      <div class="selection-meta"><span id="stockCount"></span><span id="stockReviewNotice"></span></div>
+      <div class="table-wrap">
+        <table class="data-table stock-table">
+          <thead><tr><th>Ticker / company / theme</th><th>Business relevance</th><th><button data-stock-sort="adv30_usd">ADV$30 ↕</button></th><th><button data-stock-sort="return21">Return21 ↕</button></th><th><button data-stock-sort="return63">Return63 ↕</button></th><th><button data-stock-sort="excess21">Excess21 ↕</button></th><th><button data-stock-sort="excess63">Excess63 ↕</button></th><th>Relative state</th><th>Price trend</th><th>Market cap / industry</th><th>Evidence and selection</th></tr></thead>
+          <tbody id="stockRows"></tbody>
+        </table>
+      </div>
+      <div class="export-bar"><div><b>Export this theme's visible scope</b><small>CSV retains the theme column. TradingView text uses one exchange-qualified symbol per line; its import dialog was not exercised here.</small><span id="exportStatus" aria-live="polite"></span></div><div><button id="exportCsv" class="button-secondary">Download CSV</button><button id="exportTradingView" class="button-primary">TradingView text</button></div></div>
+      <p class="table-note">The displayed list is selected once using the Liquid, Liquid, Strong, Weak queue. Sorting, filtering, and the 15/20 toggle never replace a selected member. Liquidity is an activity proxy, not evidence of spread, execution quality, popularity, or investment quality.</p>
+    </section>
+
+    <section class="section-block explorer-section" aria-labelledby="explorerHeading">
+      <div class="section-heading"><div><span class="kicker">03 / SEARCH THE PROVISIONAL UNIVERSE</span><h2 id="explorerHeading">Reviewed and data-eligible holdings</h2></div><p>This table is not capped at 20. It includes only reviewed current ETF holdings that passed the provisional data gates; it is not the complete theme universe.</p></div>
+      <p id="explorerCount" class="selection-meta"></p>
+      <div class="table-wrap"><table class="data-table"><thead><tr><th>Ticker</th><th>Company</th><th>Market cap</th><th>ADV$30</th><th>Excess21</th><th>Relative state</th><th>Price trend</th><th>Share classes</th></tr></thead><tbody id="explorerRows"></tbody></table></div>
+    </section>
+
+    <section id="coverage" class="section-block coverage-section" aria-labelledby="coverageHeading">
+      <div class="section-heading"><div><span class="kicker">04 / MEMBERSHIP AUDIT</span><h2 id="coverageHeading">Pending holdings and exclusions</h2></div><p>Absence from the selected list is not itself an exclusion. The tables distinguish unreviewed holdings from a reviewed issuer that fails stock data gates.</p></div>
+      <div class="audit-grid">
+        <article class="audit-card"><div class="card-heading"><div><h3>Pending or unresolved official holdings</h3><p id="pendingCount"></p></div><span class="audit-symbol">…</span></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Ticker</th><th>Company</th><th>Fund weight</th><th>Status</th><th>Reason</th></tr></thead><tbody id="pendingRows"></tbody></table></div></article>
+        <article class="audit-card"><div class="card-heading"><div><h3>Reviewed membership or data exclusions</h3><p id="excludedCount"></p></div><span class="audit-symbol">−</span></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Ticker</th><th>Company</th><th>Fund weight</th><th>Reason</th></tr></thead><tbody id="excludedRows"></tbody></table></div></article>
+      </div>
+      <p class="table-note">Reviewed-but-unquantified businesses are controlled judgment calls, not fully objective classifications. The run report lists incomplete evidence-review scope and the SEC freshness check. A later annual filing or unavailable check prevents that issuer from entering provisional selection until reviewed.</p>
+    </section>
+
+    <section id="sources" class="section-block sources-section" aria-labelledby="sourcesHeading">
+      <div class="section-heading"><div><span class="kicker">05 / PROVENANCE</span><h2 id="sourcesHeading">Source matrix and availability</h2></div><p>Every generated value comes from the current retrieval or a dated evidence record. No failed source is silently filled from an older run.</p></div>
+      <p id="sourceMatrixNote" class="source-note"></p>
+      <div class="table-wrap source-wrap"><table class="data-table source-table"><thead><tr><th>Field</th><th>Provider / method</th><th>History / as-of</th><th>Delay / availability</th><th>Limits</th><th>Fallback</th><th>Last test</th><th>Retrieved</th><th>Source</th></tr></thead><tbody id="sourceRows"></tbody></table></div>
+      <details class="methodology"><summary>Calculation and interpretation notes</summary><div class="methodology-grid"><article><h3>Return and excess</h3><p>For an n-session return, the price source uses adjusted closes at benchmark-session endpoints t and t−n. Exact endpoints are sufficient; any interior gaps are disclosed. Excess is asset return minus benchmark return in percentage points. Relative wealth change is a separate ratio and is not substituted for excess.</p></article><article><h3>Price trend and liquidity</h3><p>EMA trend uses split-adjusted closes, 21- and 50-session recursive EMAs, five-session EMA21 slope, and a 200-consecutive-session warm-up for full classification. ADV$30 is the mean of raw contemporaneous close × raw share volume across 30 sessions; later split adjustments are reversed to keep dollars consistent.</p></article><article><h3>Corporate actions and coverage</h3><p>Yahoo adjusted close supplies the total-return-compatible series, including cash dividend reinvestment as defined by the provider. Ordinary dividends are not added a second time. Holdings weights remain percentages of fund net assets and are not renormalized. Global fund holdings only contribute where the issuer and US listing pass evidence and data checks.</p></article><article><h3>Limits</h3><p>Labels describe observed price behavior, not expected returns. Themes overlap, constituent versus ETF returns are mechanically related, and current holdings cannot establish point-in-time historical membership. The prototype has no persistent database, scheduled task, backtest, or trade signal.</p></article></div></details>
+    </section>
+
+    <section class="export-bar run-download-bar" aria-label="Download files from this run">
+      <div><b>Keep this run on your device</b><small>Download the complete set of files produced by this run. The ZIP is built locally beside this dashboard; it is not uploaded to a branch or server.</small></div>
+      <a class="button-primary run-download-link" href="run_bundle.zip" download>Download run files (.zip)</a>
+    </section>
+
+    <footer class="site-footer"><div class="brand"><span class="brand-mark">TS</span><span>THEME<span class="brand-slash">/</span>SCOPE</span></div><p>Static snapshot. To refresh, rerun the documented generator with network access. Reloading this file does not retrieve new market data.</p><p id="footerRun"></p></footer>
+  </main>
+
+  <script id="snapshot-data" type="application/json">{{SNAPSHOT_JSON}}</script>
+  <script>
+{{SCRIPT}}
+  </script>
+  <script>ThemeScopeUI.init(JSON.parse(document.getElementById("snapshot-data").textContent));</script>
+</body>
+</html>
