@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import math
 import statistics
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -42,11 +43,26 @@ def _metric_values(metrics: dict[str, Any]) -> dict[str, float | None]:
     return {str(window): metrics[str(window)].get("value") for window in WINDOWS}
 
 
-def _fetch_many(symbols: set[str], fetcher: Any, workers: int = 4) -> tuple[dict[str, Any], dict[str, str]]:
+def _fetch_many(
+    symbols: set[str],
+    fetcher: Any,
+    workers: int = 4,
+    request_interval_seconds: float = 0.0,
+) -> tuple[dict[str, Any], dict[str, str]]:
     results: dict[str, Any] = {}
     errors: dict[str, str] = {}
+    ordered_symbols = sorted(symbols)
+    if workers <= 1:
+        for index, symbol in enumerate(ordered_symbols):
+            if index and request_interval_seconds > 0:
+                time.sleep(request_interval_seconds)
+            try:
+                results[symbol] = fetcher(symbol)
+            except Exception as exc:  # retain per-symbol failures as explicit unavailable data
+                errors[symbol] = f"{type(exc).__name__}: {exc}"
+        return results, errors
     with ThreadPoolExecutor(max_workers=workers) as pool:
-        jobs = {pool.submit(fetcher, symbol): symbol for symbol in sorted(symbols)}
+        jobs = {pool.submit(fetcher, symbol): symbol for symbol in ordered_symbols}
         for future in as_completed(jobs):
             symbol = jobs[future]
             try:
@@ -364,7 +380,11 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
             if member.get("category") == "Core business"
         )
     chart_symbols.update(item["ticker"] for item in comparison_cfg["comparisons"])
-    charts, chart_errors = _fetch_many(chart_symbols, fetch_yahoo_chart, workers=4)
+    # Yahoo throttles bursts of chart requests. Keep these sequential with a
+    # short pause so a normal on-demand run is less likely to receive HTTP 429.
+    charts, chart_errors = _fetch_many(
+        chart_symbols, fetch_yahoo_chart, workers=1, request_interval_seconds=1.5
+    )
 
     member_symbols = {
         ticker

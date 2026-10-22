@@ -22,6 +22,8 @@ Collection uses only Python's standard library; Node.js 18 or newer is needed on
 
 The script makes fresh requests to fund issuers, Yahoo Finance chart, Nasdaq quote summary, and SEC EDGAR submissions. It creates locally under `output/`:
 
+Yahoo chart requests are serialized with a 1.5-second pause to reduce HTTP 429 rate-limit responses. A full run may take around two minutes, depending on provider response times and retries.
+
 - `dashboard.html` — standalone interactive dashboard for that run
 - `latest_snapshot.json` and `raw_inputs.json` — calculated snapshot, retrieved source payloads, and per-source errors
 - `source_matrix.csv` — consumed fields, sources, methods, dates, limits, fallbacks, and last-run results

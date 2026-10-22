@@ -81,7 +81,7 @@ def make_source_matrix(snapshot: dict[str, Any], raw: dict[str, Any], root: Path
             "Daily raw close, volume, adjusted close, split events, dividend events",
             "SPY, QQQ, theme anchors, parent ETFs, reviewed stocks, anchor alternatives",
             "Yahoo Finance chart endpoint",
-            "HTTPS JSON chart endpoint via stdlib urllib; 1-day interval, events=div,splits, includeAdjustedClose=true",
+            "HTTPS JSON chart endpoint via stdlib urllib; 1-day interval, events=div,splits, includeAdjustedClose=true; sequential requests spaced 1.5 seconds apart to reduce throttling",
             history_desc,
             "Daily bars; the current session is accepted only after 16:30 America/New_York and a same-date provider market timestamp. Otherwise the prior completed session is used. No guaranteed publication delay.",
             "Endpoint is undocumented. Provider adjustment and publication semantics can change. It is not an exchange feed or a licensed data guarantee.",
