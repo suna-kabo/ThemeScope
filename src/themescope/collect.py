@@ -326,9 +326,9 @@ def _anchor_summary(theme: dict[str, Any], chart: dict[str, Any] | None, spy_cha
 
 
 def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
-    theme_cfg = json.loads((root / "config/themes.json").read_text())
-    evidence_cfg = json.loads((root / "config/evidence_reviews.json").read_text())
-    comparison_cfg = json.loads((root / "config/anchor_comparisons.json").read_text())
+    theme_cfg = json.loads((root / "config/themes.json").read_text(encoding="utf-8"))
+    evidence_cfg = json.loads((root / "config/evidence_reviews.json").read_text(encoding="utf-8"))
+    comparison_cfg = json.loads((root / "config/anchor_comparisons.json").read_text(encoding="utf-8"))
     settings = theme_cfg["settings"]
     themes = theme_cfg["themes"]
     evidence_by_theme: dict[str, dict[str, dict[str, Any]]] = {}
