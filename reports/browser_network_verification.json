@@ -1,0 +1,12 @@
+{
+  "file_scheme_note": "Managed Chromium policy blocks file://; exact exported bytes served on loopback for verification",
+  "method": "Chromium DevTools Protocol Network.requestWillBeSent (Network panel backend)",
+  "open_and_reload_external_requests": [],
+  "requests": [
+    "http://127.0.0.1:44429/dashboard.html",
+    "http://127.0.0.1:44429/dashboard.html",
+    "http://127.0.0.1:44429/dashboard.html"
+  ],
+  "javascript_errors": [],
+  "interaction_checks": "passed"
+}

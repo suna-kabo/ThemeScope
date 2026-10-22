@@ -22,6 +22,13 @@ USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/128 Safa
 TIMEOUT_SECONDS = 30
 
 
+class RateLimited(RuntimeError):
+    pass
+
+
+_YAHOO_BLOCKED_HOSTS: set[str] = set()
+
+
 def _request(url: str, accept: str = "*/*", user_agent: str | None = None) -> bytes:
     """Fetch a public source with TLS verification and bounded transient retries."""
     last_error: Exception | None = None
@@ -39,6 +46,8 @@ def _request(url: str, accept: str = "*/*", user_agent: str | None = None) -> by
                 return response.read()
         except urllib.error.HTTPError as exc:
             last_error = exc
+            if exc.code == 429:
+                raise RateLimited(f"HTTP 429 from {url}; no immediate retry") from exc
             if exc.code not in (429, 500, 502, 503, 504) or attempt == 2:
                 break
             retry_after = exc.headers.get("Retry-After")
@@ -121,18 +130,25 @@ def _date_from_text(value: str) -> str | None:
 
 
 def _vaneck_holdings(theme: dict[str, Any]) -> dict[str, Any]:
-    page = _text(_request(theme["holdings_source"]["url"], "text/html"))
-    page = html.unescape(page)
-    match = re.search(
-        rf"GetDataset/\?blockId=(\d+)&pageId=(\d+)&ticker={re.escape(theme['anchor'])}",
-        page,
-        flags=re.IGNORECASE,
-    )
-    if not match:
-        raise RuntimeError("VanEck holdings dataset link was not present on the fund page")
-    block_id, page_id = match.groups()
-    url = f"https://www.vaneck.com/Main/HoldingsBlock/GetDataset/?blockId={block_id}&pageId={page_id}&ticker={theme['anchor']}"
-    data = request_json(url)
+    discovery_error = None
+    try:
+        page = html.unescape(_text(_request(theme["holdings_source"]["url"], "text/html")))
+        match = re.search(rf"GetDataset/\?blockId=(\d+)&pageId=(\d+)&ticker={re.escape(theme['anchor'])}", page, flags=re.IGNORECASE)
+        if not match:
+            raise RuntimeError("VanEck holdings dataset link absent")
+        block_id, page_id = match.groups()
+        url = f"https://www.vaneck.com/Main/HoldingsBlock/GetDataset/?blockId={block_id}&pageId={page_id}&ticker={theme['anchor']}"
+        data = request_json(url)
+    except Exception as exc:
+        discovery_error = str(exc)
+        url = theme['holdings_source'].get('dataset_fallback_url')
+        if not url:
+            raise
+        data = request_json(url)
+    if not data.get('AsOfDate') or not data.get('Holdings'):
+        raise RuntimeError('VanEck dataset lacks dated holdings')
+    if any(item.get('Ticker') != theme['anchor'] for item in data['Holdings']):
+        raise RuntimeError('VanEck dataset fund identity mismatch')
     rows = []
     for item in data.get("Holdings", []):
         ticker = str(item.get("Label") or item.get("HoldingTicker") or "").strip()
@@ -148,7 +164,7 @@ def _vaneck_holdings(theme: dict[str, Any]) -> dict[str, Any]:
             }
         )
     as_of = str(data.get("AsOfDate") or "")[:10] or None
-    return {"as_of": as_of, "url": url, "rows": rows}
+    return {"as_of": as_of, "url": url, "rows": rows, "discovery_error": discovery_error}
 
 
 def _first_trust_holdings(theme: dict[str, Any]) -> dict[str, Any]:
@@ -331,15 +347,29 @@ def fetch_yahoo_chart(symbol: str, years: int = 2) -> dict[str, Any]:
     now = datetime.now(timezone.utc)
     start = int((now - timedelta(days=365 * years + 2)).timestamp())
     end = int(now.timestamp()) + 86400
-    url = (
-        f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
-        f"?period1={start}&period2={end}&interval=1d&events=div%2Csplits&includeAdjustedClose=true"
-    )
-    data = request_json(url)
+    failures = []
+    for host in ('query1.finance.yahoo.com', 'query2.finance.yahoo.com'):
+        if host in _YAHOO_BLOCKED_HOSTS:
+            failures.append(f'{host}: circuit open after HTTP 429 in this run')
+            continue
+        url = f"https://{host}/v8/finance/chart/{symbol}?period1={start}&period2={end}&interval=1d&events=div%2Csplits&includeAdjustedClose=true"
+        try:
+            data = request_json(url)
+            if not data.get('chart', {}).get('result'):
+                raise RuntimeError(f'No chart result: {data.get("chart", {}).get("error")}')
+            break
+        except Exception as exc:
+            if isinstance(exc, RateLimited):
+                _YAHOO_BLOCKED_HOSTS.add(host)
+            failures.append(str(exc))
+    else:
+        raise RuntimeError('; '.join(failures))
     chart = data.get("chart", {})
     if chart.get("error") or not chart.get("result"):
         raise RuntimeError(f"Yahoo chart returned no data for {symbol}: {chart.get('error')}")
     result = chart["result"][0]
+    if result.get("meta", {}).get("symbol", "").upper() != symbol.upper():
+        raise RuntimeError("Yahoo chart symbol identity mismatch")
     exchange_tz_name = result.get("meta", {}).get("exchangeTimezoneName") or "America/New_York"
     try:
         exchange_tz = ZoneInfo(exchange_tz_name)
@@ -364,6 +394,7 @@ def fetch_yahoo_chart(symbol: str, years: int = 2) -> dict[str, Any]:
         )
     return {
         "symbol": symbol,
+        "fallback_attempts": failures,
         "url": url,
         "retrieved_at": now.isoformat(timespec="seconds"),
         "meta": result.get("meta", {}),

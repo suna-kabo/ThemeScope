@@ -382,17 +382,21 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
     chart_symbols.update(item["ticker"] for item in comparison_cfg["comparisons"])
     # Yahoo throttles bursts of chart requests. Keep these sequential with a
     # short pause so a normal on-demand run is less likely to receive HTTP 429.
+    print(f"Collecting {len(chart_symbols)} price histories sequentially (1.5s pacing).", flush=True)
     charts, chart_errors = _fetch_many(
         chart_symbols, fetch_yahoo_chart, workers=1, request_interval_seconds=1.5
     )
 
+    print(f"Price histories: {len(charts)} retrieved, {len(chart_errors)} unavailable. Checking quote and filing sources.", flush=True)
     member_symbols = {
         ticker
         for entries in evidence_by_theme.values()
         for ticker, member in entries.items()
         if member.get("category") == "Core business"
     }
-    quotes, quote_errors = _fetch_many(member_symbols, fetch_nasdaq_summary, workers=4)
+    # Industry-only review of XBI: non-stock identifiers remain unmapped, never guessed.
+    industry_symbols = {row['ticker'] for row in holdings.get('XBI', {}).get('rows', []) if row.get('ticker', '').isalpha()}
+    quotes, quote_errors = _fetch_many(member_symbols | industry_symbols, fetch_nasdaq_summary, workers=2)
 
     ciks = {
         str(member.get("evidence", {}).get("cik"))
@@ -501,8 +505,12 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
         excluded: list[dict[str, Any]] = []
         for ticker, held in holdings_lookup.items():
             member = member_records.get(ticker)
+            industry_quote = quotes.get(ticker) if theme['id'] == 'biotechnology' else None
+            if industry_quote and 'biotech' in str(industry_quote.get('industry', '')).lower():
+                excluded.append({**held, 'reasons': ['Industry classified as biotechnology; excluded by the default stock-universe rule'], 'industry': industry_quote.get('industry'), 'source_url': industry_quote.get('url'), 'retrieved_at': industry_quote.get('retrieved_at')})
+                continue
             if member is None:
-                pending.append({**held, "status": "Pending evidence review", "reason": "Current official holding has no completed issuer business-evidence review."})
+                pending.append({**held, "status": "Pending evidence review", "reason": "Non-stock or unmapped holding identifier; no ticker mapping invented." if not ticker.isalpha() and theme["id"] == "biotechnology" else "Current official holding has no completed issuer business-evidence review."})
                 continue
             if member.get("category") != "Core business":
                 pending.append({
@@ -527,7 +535,7 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
         # Evidence records whose ticker is no longer present in the official snapshot are not current members.
         for ticker, member in member_records.items():
             if ticker not in holdings_lookup:
-                excluded.append({"ticker": ticker, "company": member.get("company", ticker), "reasons": ["Not present in the retrieved current official holdings snapshot"], "weight_pct": None, "evidence": member.get("evidence")})
+                excluded.append({"ticker": ticker, "company": member.get("company", ticker), "reasons": ["Official holdings retrieval unavailable; membership cannot be determined" if anchor in holdings_errors else "Not present in the retrieved current official holdings snapshot"], "weight_pct": None, "evidence": member.get("evidence")})
 
         eligible = [row for row in member_rows if row["eligibility"] == "eligible_provisional"]
         # Deduplicate company identifiers. Keep the security with highest ADV$30 and aggregate fund weights.

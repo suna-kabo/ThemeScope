@@ -1,0 +1,46 @@
+{
+  "tested_at": "2026-10-22T22:04:03.738185+00:00",
+  "provider": "Yahoo query2 alternative host",
+  "results": [
+    {
+      "symbol": "SMH",
+      "url": "https://query2.finance.yahoo.com/v8/finance/chart/SMH?range=2y&interval=1d&events=div%2Csplits&includeAdjustedClose=true",
+      "observations": 501,
+      "adjusted_observations": 501,
+      "events": [
+        "dividends"
+      ],
+      "returned_symbol": "SMH"
+    },
+    {
+      "symbol": "CIBR",
+      "url": "https://query2.finance.yahoo.com/v8/finance/chart/CIBR?range=2y&interval=1d&events=div%2Csplits&includeAdjustedClose=true",
+      "observations": 501,
+      "adjusted_observations": 501,
+      "events": [
+        "dividends"
+      ],
+      "returned_symbol": "CIBR"
+    },
+    {
+      "symbol": "ICLN",
+      "url": "https://query2.finance.yahoo.com/v8/finance/chart/ICLN?range=2y&interval=1d&events=div%2Csplits&includeAdjustedClose=true",
+      "observations": 501,
+      "adjusted_observations": 501,
+      "events": [
+        "dividends"
+      ],
+      "returned_symbol": "ICLN"
+    },
+    {
+      "symbol": "XAR",
+      "url": "https://query2.finance.yahoo.com/v8/finance/chart/XAR?range=2y&interval=1d&events=div%2Csplits&includeAdjustedClose=true",
+      "observations": 501,
+      "adjusted_observations": 501,
+      "events": [
+        "dividends"
+      ],
+      "returned_symbol": "XAR"
+    }
+  ]
+}

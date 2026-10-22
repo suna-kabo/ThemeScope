@@ -5,20 +5,49 @@
   "use strict";
 
   function valueAt(row, key) {
-    if (key === "return21") return row.returns && row.returns["21"] && row.returns["21"].value;
-    if (key === "return63") return row.returns && row.returns["63"] && row.returns["63"].value;
-    if (key === "excess21") return row.excess_returns && row.excess_returns["21"] && row.excess_returns["21"].value;
-    if (key === "excess63") return row.excess_returns && row.excess_returns["63"] && row.excess_returns["63"].value;
+    if (key === "return5")
+      return row.returns && row.returns["5"] && row.returns["5"].value;
+    if (key === "return21")
+      return row.returns && row.returns["21"] && row.returns["21"].value;
+    if (key === "return63")
+      return row.returns && row.returns["63"] && row.returns["63"].value;
+    if (key === "excess21")
+      return (
+        row.excess_returns &&
+        row.excess_returns["21"] &&
+        row.excess_returns["21"].value
+      );
+    if (key === "excess63")
+      return (
+        row.excess_returns &&
+        row.excess_returns["63"] &&
+        row.excess_returns["63"].value
+      );
     return row[key];
   }
 
   function filterRows(rows, filters) {
-    var query = String(filters.query || "").trim().toLowerCase();
+    var query = String(filters.query || "")
+      .trim()
+      .toLowerCase();
     return rows.filter(function (row) {
-      var textMatch = !query || [row.ticker, row.company, row.theme_name, row.evidence_note]
-        .some(function (value) { return String(value || "").toLowerCase().includes(query); });
-      var relativeMatch = !filters.relative || filters.relative === "All" || row.relative_state === filters.relative;
-      var trendMatch = !filters.trend || filters.trend === "All" || row.trend === filters.trend;
+      var textMatch =
+        !query ||
+        [row.ticker, row.company, row.theme_name, row.evidence_note].some(
+          function (value) {
+            return String(value || "")
+              .toLowerCase()
+              .includes(query);
+          },
+        );
+      var relativeMatch =
+        !filters.relative ||
+        filters.relative === "All" ||
+        row.relative_state === filters.relative;
+      var trendMatch =
+        !filters.trend ||
+        filters.trend === "All" ||
+        row.trend === filters.trend;
       return textMatch && relativeMatch && trendMatch;
     });
   }
@@ -28,16 +57,26 @@
     return rows.slice().sort(function (a, b) {
       var av = valueAt(a, key);
       var bv = valueAt(b, key);
-      var aMissing = av === null || av === undefined || Number.isNaN(Number(av));
-      var bMissing = bv === null || bv === undefined || Number.isNaN(Number(bv));
+      var aMissing =
+        av === null || av === undefined || !Number.isFinite(Number(av));
+      var bMissing =
+        bv === null || bv === undefined || !Number.isFinite(Number(bv));
       if (aMissing !== bMissing) return aMissing ? 1 : -1;
-      if (!aMissing && Number(av) !== Number(bv)) return sign * (Number(av) - Number(bv));
-      return String(a.ticker || a.id || "").localeCompare(String(b.ticker || b.id || ""));
+      if (!aMissing && Number(av) !== Number(bv))
+        return sign * (Number(av) - Number(bv));
+      return String(a.ticker || a.id || "").localeCompare(
+        String(b.ticker || b.id || ""),
+      );
     });
   }
 
   function limitSelection(selected, limit) {
-    return selected.slice().sort(function (a, b) { return a.selection_slot - b.selection_slot; }).slice(0, limit);
+    return selected
+      .slice()
+      .sort(function (a, b) {
+        return a.selection_slot - b.selection_slot;
+      })
+      .slice(0, limit);
   }
 
   function csvEscape(value) {
@@ -46,12 +85,39 @@
   }
 
   function rowsToCsv(rows) {
-    var header = ["theme", "theme_id", "selection_slot", "selection_queue", "ticker", "company", "exchange", "evidence_category", "evidence_note", "etf_weight_pct", "adv30_usd", "return21", "return63", "excess21_pp", "excess63_pp", "relative_state", "price_trend", "chart_url"];
+    var header = [
+      "theme",
+      "theme_id",
+      "session_date",
+      "visible_rank",
+      "price_close",
+      "return5",
+      "selection_slot",
+      "selection_queue",
+      "ticker",
+      "company",
+      "exchange",
+      "evidence_category",
+      "evidence_note",
+      "etf_weight_pct",
+      "adv30_usd",
+      "return21",
+      "return63",
+      "excess21_pp",
+      "excess63_pp",
+      "relative_state",
+      "price_trend",
+      "chart_url",
+    ];
     var columns = header;
     var lines = [header.map(csvEscape).join(",")];
     rows.forEach(function (row) {
       var values = {
         theme: row.theme_name,
+        session_date: row.session_date,
+        visible_rank: row.display_rank,
+        price_close: row.price_close,
+        return5: valueAt(row, "return5"),
         theme_id: row.theme_id,
         selection_slot: row.selection_slot,
         selection_queue: row.selection_queue,
@@ -64,13 +130,27 @@
         adv30_usd: row.adv30_usd,
         return21: valueAt(row, "return21"),
         return63: valueAt(row, "return63"),
-        excess21_pp: valueAt(row, "excess21") === null || valueAt(row, "excess21") === undefined ? null : valueAt(row, "excess21") * 100,
-        excess63_pp: valueAt(row, "excess63") === null || valueAt(row, "excess63") === undefined ? null : valueAt(row, "excess63") * 100,
+        excess21_pp:
+          valueAt(row, "excess21") === null ||
+          valueAt(row, "excess21") === undefined
+            ? null
+            : valueAt(row, "excess21") * 100,
+        excess63_pp:
+          valueAt(row, "excess63") === null ||
+          valueAt(row, "excess63") === undefined
+            ? null
+            : valueAt(row, "excess63") * 100,
         relative_state: row.relative_state,
         price_trend: row.trend,
-        chart_url: row.chart_url
+        chart_url: row.chart_url,
       };
-      lines.push(columns.map(function (key) { return csvEscape(values[key]); }).join(","));
+      lines.push(
+        columns
+          .map(function (key) {
+            return csvEscape(values[key]);
+          })
+          .join(","),
+      );
     });
     return lines.join("\r\n");
   }
@@ -82,276 +162,627 @@
     var duplicates = 0;
     rows.forEach(function (row) {
       var exchange = String(row.exchange || "").toUpperCase();
-      var prefix = exchange.indexOf("NASDAQ") === 0 ? "NASDAQ" : (exchange.indexOf("NYSE") === 0 ? "NYSE" : "");
-      if (!prefix) { omitted += 1; return; }
+      var prefix =
+        exchange.indexOf("NASDAQ") === 0
+          ? "NASDAQ"
+          : exchange.indexOf("NYSE") === 0
+            ? "NYSE"
+            : "";
+      if (!prefix) {
+        omitted += 1;
+        return;
+      }
       var key = prefix + ":" + row.ticker;
-      if (seen.has(key)) { duplicates += 1; return; }
+      if (seen.has(key)) {
+        duplicates += 1;
+        return;
+      }
       seen.add(key);
       symbols.push(key);
     });
-    return { text: symbols.join("\n") + (symbols.length ? "\n" : ""), count: symbols.length, omitted: omitted, duplicates: duplicates };
+    return {
+      text: symbols.join("\n") + (symbols.length ? "\n" : ""),
+      count: symbols.length,
+      omitted: omitted,
+      duplicates: duplicates,
+    };
   }
 
   function escapeHtml(value) {
     return String(value === null || value === undefined ? "" : value)
-      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
 
+  function ranked(rows, key, direction) {
+    var sorted = sortRows(rows, key, direction),
+      last,
+      rank;
+    return sorted.map(function (row, i) {
+      var n = valueAt(row, key),
+        valid = n !== null && n !== undefined && Number.isFinite(Number(n));
+      if (valid && n !== last) rank = i + 1;
+      last = n;
+      return Object.assign({}, row, { display_rank: valid ? rank : null });
+    });
+  }
   function init(data) {
-    var byId = new Map(data.themes.map(function (theme) { return [theme.id, theme]; }));
-    var state = { themeId: data.themes[0] && data.themes[0].id, limit: 15, query: "", relative: "All", trend: "All", stockSort: "selection_slot", stockDirection: "asc", themeSort: "excess21", themeDirection: "desc" };
-    var $ = function (selector) { return document.querySelector(selector); };
-    var $$ = function (selector) { return Array.prototype.slice.call(document.querySelectorAll(selector)); };
-    var fmtPct = function (metric) {
-      if (!metric || metric.status !== "valid" || metric.value === null || metric.value === undefined) return '<span class="unavailable" title="' + escapeHtml(metric && metric.reason || "Unavailable") + '">Unavailable</span>';
-      return (metric.value * 100).toFixed(1) + "%";
+    var $ = function (id) {
+        return document.getElementById(id);
+      },
+      esc = escapeHtml;
+    var finite = function (n) {
+      return typeof n === "number" && Number.isFinite(n);
     };
-    var fmtExcess = function (metric) {
-      if (!metric || metric.status !== "valid" || metric.value === null || metric.value === undefined) return '<span class="unavailable" title="' + escapeHtml(metric && metric.reason || "Unavailable") + '">Unavailable</span>';
-      var n = metric.value * 100;
-      return (n > 0 ? "+" : "") + n.toFixed(1) + " pp";
+    var missing =
+      '<span title="Input unavailable; see diagnostic export">—</span>';
+    function pct(n, pp, reason) {
+      return finite(n)
+        ? '<span class="' +
+            (n > 0 ? "positive" : n < 0 ? "negative" : "") +
+            '">' +
+            (n > 0 ? "+" : "") +
+            (100 * n).toFixed(2) +
+            (pp ? " pp" : "%") +
+            "</span>"
+        : '<span title="' +
+            esc(reason || "Input unavailable; see diagnostic export") +
+            '">—</span>';
+    }
+    function money(n, compact) {
+      return finite(n)
+        ? "$" +
+            (compact && n >= 1e9
+              ? (n / 1e9).toFixed(2) + "B"
+              : compact && n >= 1e6
+                ? (n / 1e6).toFixed(1) + "M"
+                : n.toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }))
+        : missing;
+    }
+    function trend(r) {
+      return r.trend_status !== "valid"
+        ? '<span title="' +
+            esc(r.trend_reason || "Insufficient price history") +
+            '">—</span>'
+        : '<span class="badge ' +
+            (r.trend === "Uptrend"
+              ? "positive"
+              : r.trend === "Downtrend"
+                ? "negative"
+                : "") +
+            '" title="Uptrend: price > EMA21 > EMA50 and EMA21 rising over 5 sessions. Downtrend: all reversed. Otherwise Mixed.">' +
+            esc(r.trend) +
+            "</span>";
+    }
+    function spark(history) {
+      var values = (history || []).filter((r) => finite(r.close));
+      if (values.length < 2) return missing;
+      var lo = Math.min(...values.map((r) => r.close)),
+        hi = Math.max(...values.map((r) => r.close)),
+        span = hi - lo || 1;
+      var segments = [],
+        current = [];
+      (history || []).forEach(function (r, i) {
+        if (!finite(r.close)) {
+          if (current.length) segments.push(current.join(" "));
+          current = [];
+        } else
+          current.push(
+            ((i / Math.max(1, history.length - 1)) * 108 + 1).toFixed(1) +
+              "," +
+              (32 - ((r.close - lo) / span) * 30).toFixed(1),
+          );
+      });
+      if (current.length) segments.push(current.join(" "));
+      return (
+        '<svg class="spark" viewBox="0 0 110 34" role="img" aria-label="Retrieved split-adjusted closing prices"><title>' +
+        esc(values[0].date + " to " + values[values.length - 1].date) +
+        "</title>" +
+        segments
+          .map(
+            (s) =>
+              '<polyline points="' +
+              s +
+              '" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+          )
+          .join("") +
+        "</svg>"
+      );
+    }
+    var mode = "dark";
+    try {
+      mode = localStorage.getItem("themescope-mode") || "dark";
+    } catch (e) {}
+    function setMode() {
+      document.documentElement.dataset.mode = mode;
+      $("mode").textContent = mode === "dark" ? "Light mode" : "Dark mode";
+    }
+    setMode();
+    $("mode").onclick = function () {
+      mode = mode === "dark" ? "light" : "dark";
+      setMode();
+      try {
+        localStorage.setItem("themescope-mode", mode);
+      } catch (e) {}
     };
-    var fmtMoney = function (value) {
-      if (value === null || value === undefined || !Number.isFinite(Number(value))) return '<span class="unavailable">Unavailable</span>';
-      var n = Number(value);
-      if (n >= 1e12) return "$" + (n / 1e12).toFixed(2) + "T";
-      if (n >= 1e9) return "$" + (n / 1e9).toFixed(1) + "B";
-      if (n >= 1e6) return "$" + (n / 1e6).toFixed(1) + "M";
-      return "$" + n.toLocaleString(undefined, { maximumFractionDigits: 0 });
+    $("date").textContent = data.session_date || "Unavailable";
+    $("generated").textContent =
+      "Collected " +
+      (data.generated_at || "unknown") +
+      (data.imported_at
+        ? " · Imported " + data.imported_at + " (original data date retained)"
+        : "");
+    if (
+      !data.session_date ||
+      !["SPY", "QQQ"].every((t) =>
+        (data.context || []).some(
+          (r) => r.ticker === t && finite(r.price_close),
+        ),
+      )
+    ) {
+      $("status").textContent =
+        "Market data unavailable: " +
+        (Object.values(data.sources?.source_errors?.charts || {})
+          .slice(0, 1)
+          .join(" ") || "Required dated SPY/QQQ prices are missing.") +
+        " Run the generation script; reopening this file cannot retry collection.";
+      document.querySelectorAll("section").forEach((s) => (s.hidden = true));
+      return;
+    }
+    $("status").textContent =
+      "Dated snapshot · provisional reviewed stock subset; membership screening is incomplete.";
+    $("cards").innerHTML = data.context
+      .map(
+        (r) =>
+          '<article class="card"><div class="card-top"><b>' +
+          esc(r.ticker) +
+          "</b>" +
+          trend(r) +
+          '</div><div class="card-content"><div><span class="price">' +
+          money(r.price_close) +
+          '</span><span title="Latest regular-session change; split-adjusted closing prices">' +
+          pct(r.daily_change) +
+          '</span><div class="returns">' +
+          [
+            ["5", "1W"],
+            ["21", "1M"],
+            ["63", "3M"],
+          ]
+            .map(
+              (w) =>
+                '<span><small title="Total return over 5 / 21 / 63 trading sessions, using adjusted close">' +
+                w[1] +
+                "</small>" +
+                pct(r.returns[w[0]]?.value) +
+                "</span>",
+            )
+            .join("") +
+          "</div></div>" +
+          spark(r.history) +
+          '</div><small title="(Split-adjusted close / EMA − 1) × 100; same close series for price and EMA">Distance to EMA21 ' +
+          pct(r.ema21_distance) +
+          " · EMA50 " +
+          pct(r.ema50_distance) +
+          "</small><br><small>EMA21 five-session slope: " +
+          (finite(r.ema21_slope_5)
+            ? (r.ema21_slope_5 > 0 ? "+" : "") +
+              r.ema21_slope_5.toFixed(2) +
+              " USD"
+            : "—") +
+          "</small></article>",
+      )
+      .join("");
+    var metrics = {
+      return5: "1W return",
+      return21: "1M return",
+      return63: "3M return",
+      excess21: "1M excess",
+      excess63: "3M excess",
+      price_close: "Price",
+      adv30_usd: "ADV$30",
     };
-    var badge = function (text, kind) { return '<span class="badge badge-' + escapeHtml(kind || "neutral") + '">' + escapeHtml(text || "Unavailable") + '</span>'; };
-    var chartUrl = function (row) {
-      var exchange = String(row.exchange || "").toUpperCase();
-      var prefix = exchange.indexOf("NASDAQ") === 0 ? "NASDAQ" : (exchange.indexOf("NYSE") === 0 ? "NYSE" : "");
-      return prefix ? "https://www.tradingview.com/chart/?symbol=" + encodeURIComponent(prefix + ":" + row.ticker) : "";
+    var state = {
+      theme: data.themes[0]?.id,
+      themeKey: "excess21",
+      themeDir: "desc",
+      stockKey: "excess21",
+      stockDir: "desc",
     };
-
-    function selectedRows(theme) {
-      return theme.selected.map(function (row) { return Object.assign({}, row, { theme_id: theme.id, theme_name: theme.name, chart_url: chartUrl(row) }); });
+    function options(list) {
+      return list
+        .map(
+          (v) => '<option value="' + esc(v[0]) + '">' + esc(v[1]) + "</option>",
+        )
+        .join("");
     }
-
-    function activeRows() {
-      var theme = byId.get(state.themeId);
-      if (!theme) return [];
-      var base = limitSelection(selectedRows(theme), state.limit);
-      return sortRows(filterRows(base, { query: state.query, relative: state.relative, trend: state.trend }), state.stockSort, state.stockDirection);
+    function controls(prefix, stock) {
+      return (
+        '<label>Search <input id="' +
+        prefix +
+        '-search" placeholder="' +
+        (stock ? "Ticker or company" : "Theme or ETF") +
+        '"></label><label>Sort by <select id="' +
+        prefix +
+        '-sort">' +
+        options(
+          Object.entries(metrics).filter(([k]) =>
+            stock
+              ? k !== "excess63"
+              : !["price_close", "adv30_usd"].includes(k),
+          ),
+        ) +
+        '</select></label><button id="' +
+        prefix +
+        '-direction">Descending ↓</button><label>Trend <select id="' +
+        prefix +
+        '-trend">' +
+        options(["All", "Uptrend", "Downtrend", "Mixed"].map((v) => [v, v])) +
+        '</select></label><label>Relative state <select id="' +
+        prefix +
+        '-relative">' +
+        options(
+          ["All", "Outperforming", "Underperforming"].map((v) => [
+            v,
+            v,
+          ]),
+        ) +
+        "</select></label>" +
+        (stock
+          ? '<label>Pool <select id="pool"><option value="15">Selected 15</option><option value="20">Selected 20</option><option value="all">All reviewed eligible (incomplete)</option></select></label>'
+          : "")
+      );
     }
-
-    function renderHeader() {
-      var status = data.sources && data.sources.partial ? "Partial source retrieval" : "Live-source snapshot";
-      $("#generatedAt").textContent = new Date(data.generated_at).toLocaleString();
-      $("#sessionDate").textContent = data.session_date || "Unavailable";
-      $("#runDate").textContent = data.run_date || "Unavailable";
-      $("#globalStatus").innerHTML = badge(status, data.sources && data.sources.partial ? "warning" : "good");
-      $("#registryVersion").textContent = data.registry_version || "—";
-      $("#runId").textContent = data.run_id || "—";
-      var complete = data.themes.filter(function (theme) { return theme.review_complete; }).length;
-      $("#coverageSummary").textContent = data.themes.length + " ETF themes · " + complete + " complete membership reviews · full-universe breadth labels withheld where membership review is incomplete";
-    }
-
-    function renderContext() {
-      $("#contextCards").innerHTML = data.context.map(function (item) {
-        return '<article class="context-card"><div class="context-top"><span class="symbol">' + escapeHtml(item.ticker) + '</span>' + badge(item.trend, item.trend === "Uptrend" ? "positive" : item.trend === "Downtrend" ? "negative" : "neutral") + '</div>' +
-          '<div class="context-values"><span>21 session <b>' + fmtPct(item.returns["21"]) + '</b></span><span>63 session <b>' + fmtPct(item.returns["63"]) + '</b></span></div><small>Absolute price trend · ' + escapeHtml(data.session_date || "") + '</small></article>';
-      }).join("");
-    }
-
-    function renderThemes() {
-      var sorted = sortRows(data.themes, state.themeSort, state.themeDirection);
-      var html = sorted.map(function (theme) {
-        var warning = theme.review_complete ? "Reviewed" : "Review incomplete";
-        var b = theme.breadth.above_ema21;
-        var breadth = b.valid_count ? b.count + "/" + b.valid_count + " (" + (b.fraction * 100).toFixed(0) + "%) · reviewed subset" : "Unavailable";
-        var warnings = [warning];
-        if (theme.holdings_status !== "current") warnings.push("Holdings " + theme.holdings_status);
-        if (!theme.anchor_screen.anchor_screen_valid) warnings.push("Anchor screen incomplete");
-        return '<tr class="theme-row ' + (theme.id === state.themeId ? 'is-selected' : '') + '" data-theme-id="' + escapeHtml(theme.id) + '" tabindex="0">' +
-          '<td><b>' + escapeHtml(theme.name) + '</b><small>' + escapeHtml(theme.anchor) + (theme.parent_sector ? ' · parent ' + escapeHtml(theme.parent_sector) : '') + '</small></td>' +
-          '<td>' + fmtPct(theme.returns["21"]) + '</td><td>' + fmtExcess(theme.excess_returns["21"]) + '</td><td>' + fmtPct(theme.returns["63"]) + '</td><td>' + fmtExcess(theme.excess_returns["63"]) + '</td>' +
-          '<td>' + badge(theme.relative_state, theme.relative_state === "Outperforming" ? "positive" : theme.relative_state === "Underperforming" ? "negative" : "neutral") + '</td>' +
-          '<td>' + badge(theme.trend, theme.trend === "Uptrend" ? "positive" : theme.trend === "Downtrend" ? "negative" : "neutral") + '</td>' +
-          '<td>' + escapeHtml(breadth) + '<small>' + escapeHtml(b.label === "Unavailable" ? b.label_reason || "Summary label unavailable" : b.label) + '</small></td>' +
-          '<td class="count-cell">' + theme.official_holdings_count + ' position rows / ' + theme.official_unique_ticker_count + ' tickers · ' + theme.eligible_reviewed_count + ' provisional eligible · ' + theme.selected.length + ' pool / ' + Math.min(15, theme.selected.length) + ' compact</td>' +
-          '<td>' + warnings.map(function (v) { return badge(v, v === "Reviewed" ? "good" : "warning"); }).join(" ") + '</td></tr>';
-      }).join("");
-      $("#themeRows").innerHTML = html || '<tr><td colspan="10">No theme data was retrieved.</td></tr>';
-      $$(".theme-row").forEach(function (row) {
-        var choose = function () { state.themeId = row.dataset.themeId; renderThemes(); renderActiveTheme(); };
-        row.addEventListener("click", choose);
-        row.addEventListener("keydown", function (event) { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); choose(); } });
+    $("theme-controls").innerHTML = controls("theme", false);
+    $("stock-controls").innerHTML = controls("stock", true);
+    ["theme", "stock"].forEach(function (p) {
+      $(p + "-sort").value = "excess21";
+      $(p + "-sort").onchange = function () {
+        state[p + "Key"] = this.value;
+        render();
+      };
+      $(p + "-direction").onclick = function () {
+        state[p + "Dir"] = state[p + "Dir"] === "desc" ? "asc" : "desc";
+        render();
+      };
+      ["search", "trend", "relative"].forEach((k) =>
+        $(p + "-" + k).addEventListener("input", render),
+      );
+    });
+    $("pool").onchange = render;
+    function filtered(rows, p) {
+      return filterRows(rows, {
+        query: $(p + "-search").value,
+        trend: $(p + "-trend").value,
+        relative: $(p + "-relative").value,
       });
     }
-
-    function renderBreadth(theme) {
-      var b = theme.breadth;
-      function one(label, item, percent) {
-        var value = item.fraction === null || item.fraction === undefined ? "Unavailable" : item.count + "/" + item.valid_count + " · " + (item.fraction * 100).toFixed(1) + "%";
-        var cov = item.coverage === null || item.coverage === undefined ? "No eligible denominator" : "Coverage " + (item.coverage * 100).toFixed(0) + "% of " + item.eligible_count;
-        var unquantified = "Reviewed, unquantified: " + (item.reviewed_unquantified_valid_count || 0) + " valid / " + (item.reviewed_unquantified_eligible_count || 0) + " eligible";
-        return '<div class="breadth-item"><span>' + escapeHtml(label) + '</span><b>' + escapeHtml(value) + '</b><small>' + escapeHtml(cov) + '</small><small>' + escapeHtml(unquantified) + '</small></div>';
-      }
-      var median = b.median_return21.value === null ? "Unavailable" : (b.median_return21.value * 100).toFixed(1) + "%";
-      return '<div class="breadth-grid">' + one("Above EMA21", b.above_ema21, true) + one("Above EMA50", b.above_ema50, true) + one("Uptrend", b.uptrend, true) + '<div class="breadth-item"><span>Median Return21</span><b>' + escapeHtml(median) + '</b><small>' + b.median_return21.valid_count + "/" + b.median_return21.eligible_count + ' returns · reviewed subset</small></div></div>' +
-        '<div class="breadth-warning">' + badge("Summary label: " + (b.above_ema21.label || "Unavailable"), "warning") + ' ' + escapeHtml(b.above_ema21.label_reason || theme.review_reason || "Membership review is incomplete") + '</div>';
+    function head(p, columns) {
+      $(p + "-head").innerHTML =
+        "<tr>" +
+        columns
+          .map(
+            (c) =>
+              "<th>" +
+              (c[1]
+                ? '<button data-sort="' +
+                  c[1] +
+                  '" title="' +
+                  esc(
+                    c[2] || "Sort numeric values; missing values remain last",
+                  ) +
+                  '">' +
+                  c[0] +
+                  (state[p + "Key"] === c[1]
+                    ? state[p + "Dir"] === "desc"
+                      ? " ↓"
+                      : " ↑"
+                    : "") +
+                  "</button>"
+                : c[0]) +
+              "</th>",
+          )
+          .join("") +
+        "</tr>";
+      $(p + "-head")
+        .querySelectorAll("button")
+        .forEach(
+          (b) =>
+            (b.onclick = function () {
+              var key = this.dataset.sort;
+              state[p + "Dir"] =
+                state[p + "Key"] === key && state[p + "Dir"] === "desc"
+                  ? "asc"
+                  : "desc";
+              state[p + "Key"] = key;
+              $(p + "-sort").value = key;
+              render();
+            }),
+        );
     }
-
-    function renderActiveTheme() {
-      var theme = byId.get(state.themeId);
-      if (!theme) return;
-      $("#activeThemeName").textContent = theme.name;
-      $("#activeThemeSubtitle").textContent = theme.anchor + " · holdings as of " + (theme.holdings_source.as_of || "unavailable") + " · " + theme.official_holdings_count + " position rows / " + theme.official_unique_ticker_count + " unique tickers";
-      $("#activeThemeRationale").textContent = theme.anchor_rationale;
-      $("#activeThemeScope").textContent = theme.scope;
-      $("#activeThemeReview").innerHTML = badge(theme.review_complete ? "Complete membership review" : "Incomplete membership review", theme.review_complete ? "good" : "warning") + ' ' + escapeHtml(theme.review_reason || "Only the provisional reviewed subset is in candidate selection.");
-      var criteria = theme.anchor_screen.anchor_criteria || {};
-      $("#anchorScreenNote").innerHTML = '<b>Anchor checks:</b> 64 consecutive sessions ' + badge(criteria.history_64_sessions ? "pass" : "unavailable", criteria.history_64_sessions ? "good" : "warning") + ' · ADV$30 ≥ $1M ' + badge(criteria.adv30_at_least_1m ? "pass" : "unavailable", criteria.adv30_at_least_1m ? "good" : "warning") + ' · USD equity ETF / mandate review ' + badge(criteria.usd_unleveraged_equity_etf_mandate ? "pass" : "unavailable", criteria.usd_unleveraged_equity_etf_mandate ? "good" : "warning") + '<small> ' + escapeHtml(theme.anchor_screen.mandate_review_note || "Mandate review detail unavailable") + '</small>';
-      $("#activeBreadth").innerHTML = renderBreadth(theme);
-      $("#holdingsFreshness").textContent = theme.holdings_status === "current" ? "Current · " + theme.holdings_age_days + " days old" : "Unavailable or stale";
-      $("#coverageWeights").innerHTML = '<span>Reviewed eligible holdings <b>' + (theme.eligible_weight_pct || 0).toFixed(1) + '%</b></span><span>Selected pool <b>' + (theme.selected_weight_pct || 0).toFixed(1) + '%</b></span><span>Visible first 15 <b>' + (theme.visible15_weight_pct || 0).toFixed(1) + '%</b></span><span>Largest / top five holding <b>' + (theme.largest_holding_weight_pct === null ? "Unavailable" : theme.largest_holding_weight_pct.toFixed(1) + "%") + ' / ' + (theme.top5_holding_weight_pct === null ? "Unavailable" : theme.top5_holding_weight_pct.toFixed(1) + "%") + '</b></span><small>Fund net-asset weights, not renormalized; reviewed subset only. ' + theme.pending_count + ' holdings pending; ' + theme.stale_evidence_count + ' newer annual filings require review; ' + theme.unavailable_evidence_freshness_count + ' SEC checks unavailable.</small>';
-      var comps = theme.anchor_comparisons || [];
-      $("#anchorComparisons").innerHTML = comps.length ? comps.map(function (c) {
-        return '<article class="comparison-card"><b>' + escapeHtml(c.ticker) + '</b> ' + escapeHtml(c.provider) + '<p>' + escapeHtml(c.comparison_note) + '</p><small>Holdings ' + escapeHtml(c.holdings_as_of || "unavailable") + ' · ' + c.holdings_count + ' holdings · Return21 ' + fmtPct(c.returns["21"]) + ' · ADV$30 ' + fmtMoney(c.adv30_usd) + ' · top-five weight ' + (c.top5_weight_pct === null ? "Unavailable" : c.top5_weight_pct.toFixed(1) + "%") + '</small></article>';
-      }).join("") : '<span class="muted">No alternate anchor was included in this run.</span>';
-      if (theme.parent_comparison) {
-        var p = theme.parent_comparison;
-        $("#parentComparison").innerHTML = '<b>' + escapeHtml(p.ticker) + '</b> parent-sector context · Return21 ' + fmtPct(p.returns["21"]) + ' · Return63 ' + fmtPct(p.returns["63"]) + ' · Excess21 vs theme ' + fmtExcess(p.excess_returns["21"]) + ' · price trend ' + badge(p.trend, "neutral");
-      } else {
-        $("#parentComparison").textContent = "No parent-sector ETF is assigned for this theme.";
-      }
-      renderStocks();
-      renderExplorer(theme);
-      renderPending(theme);
+    function select(id) {
+      state.theme = id;
+      render();
     }
-
-    function renderStocks() {
-      var theme = byId.get(state.themeId);
-      var rows = activeRows();
-      $("#stockCount").textContent = rows.length + " visible of " + Math.min(state.limit, theme.selected.length) + " selected slots · " + theme.eligible_reviewed_count + " eligible in the reviewed subset";
-      $("#stockReviewNotice").innerHTML = badge("Provisional candidates", "warning") + ' Filters and sorting do not add or remove selections. The pool is limited to screened current ETF holdings; ' + theme.pending_count + ' holdings remain pending.';
-      $("#stockRows").innerHTML = rows.map(function (row) {
-        var isState = row.relative_state;
-        var ret21 = row.returns && row.returns["21"];
-        var ret63 = row.returns && row.returns["63"];
-        var ex21 = row.excess_returns && row.excess_returns["21"];
-        var ex63 = row.excess_returns && row.excess_returns["63"];
-        var chart = row.chart_url ? '<a class="chart-link" target="_blank" rel="noopener" href="' + escapeHtml(row.chart_url) + '">Chart ↗</a>' : '<span class="unavailable">No exchange map</span>';
-        var why = row.eligibility_reasons && row.eligibility_reasons.length ? row.eligibility_reasons.join("; ") : row.evidence_note;
-        return '<tr><td><b>' + escapeHtml(row.ticker) + '</b><small>' + escapeHtml(row.company) + '</small><small>' + escapeHtml(row.theme_name) + ' · ' + escapeHtml(row.anchor) + '</small><small>Selection: ' + escapeHtml(row.selection_reason || "Queue order browsing convention") + '</small>' + chart + '</td>' +
-          '<td>' + escapeHtml(row.evidence_category) + '<small>' + escapeHtml(row.evidence_note) + '</small></td>' +
-          '<td class="num" title="' + escapeHtml(row.adv30_metric && row.adv30_metric.reason) + '">' + fmtMoney(row.adv30_usd) + '</td>' +
-          '<td class="num" title="' + escapeHtml(ret21 && ret21.reason) + '">' + fmtPct(ret21) + '</td><td class="num" title="' + escapeHtml(ret63 && ret63.reason) + '">' + fmtPct(ret63) + '</td>' +
-          '<td class="num" title="' + escapeHtml(ex21 && ex21.reason) + '">' + fmtExcess(ex21) + '</td><td class="num" title="' + escapeHtml(ex63 && ex63.reason) + '">' + fmtExcess(ex63) + '</td>' +
-          '<td>' + badge(isState, isState === "Outperforming" ? "positive" : isState === "Underperforming" ? "negative" : "neutral") + '</td>' +
-          '<td>' + badge(row.trend, row.trend === "Uptrend" ? "positive" : row.trend === "Downtrend" ? "negative" : "neutral") + '<small>' + escapeHtml(row.trend_reason || "") + '</small></td>' +
-          '<td title="' + escapeHtml(row.market_cap_freshness) + '">' + (row.market_cap_usd === null ? '<span class="unavailable">Unavailable</span>' : fmtMoney(row.market_cap_usd)) + '<small>' + escapeHtml(row.industry || "Industry unavailable") + '</small><small class="data-caveat">Field timestamp unavailable · retrieved ' + escapeHtml(row.market_cap_retrieved_at || "unavailable") + '</small></td>' +
-          '<td><details><summary>Evidence</summary><p>' + escapeHtml(row.evidence_note) + '</p><p>' + escapeHtml(row.evidence && row.evidence.excerpt || "") + '</p><a target="_blank" rel="noopener" href="' + escapeHtml(row.evidence && row.evidence.url || "#") + '">' + escapeHtml(row.evidence && row.evidence.form || "SEC filing") + ' · filed ' + escapeHtml(row.evidence && row.evidence.filed_date || "") + '</a><small>Evidence checked ' + escapeHtml(row.reviewed_date || "date unavailable") + ' · membership weight ' + (row.etf_weight_pct === null ? "Unavailable" : row.etf_weight_pct.toFixed(2) + "%") + ' · ' + escapeHtml(row.security_type) + '</small><small>' + escapeHtml(row.security_mapping_note || "") + '</small><small>Annual filing check: ' + escapeHtml(row.evidence_freshness && row.evidence_freshness.reason || "Unavailable") + '</small></details></td></tr>';
-      }).join("") || '<tr><td colspan="11" class="empty-state">No stock rows pass the current reviewed-subset filters. ETF return data remains separate.</td></tr>';
+    var visible = [];
+    function render() {
+      ["theme", "stock"].forEach(
+        (p) =>
+          ($(p + "-direction").textContent =
+            state[p + "Dir"] === "desc" ? "Descending ↓" : "Ascending ↑"),
+      );
+      var all = ranked(
+          data.themes.map((t) =>
+            Object.assign({}, t, { ticker: t.anchor, theme_name: t.name }),
+          ),
+          state.themeKey,
+          state.themeDir,
+        ),
+        themes = filtered(all, "theme");
+      $("theme-count").textContent =
+        themes.length + " / " + all.length + " visible";
+      $("theme-basis").textContent =
+        "Rank: " +
+        metrics[state.themeKey] +
+        (state.themeKey.startsWith("excess") ? " versus SPY (pp)" : " (%)") +
+        " · " +
+        state.themeDir +
+        " · ranks retained across filters";
+      head("theme", [
+        ["Rank"],
+        ["Theme"],
+        ["ETF"],
+        ["1W %", "return5"],
+        ["1M %", "return21"],
+        ["3M %", "return63"],
+        ["1M vs SPY (pp)", "excess21"],
+        ["3M vs SPY (pp)", "excess63"],
+        ["Trend"],
+        ["64-session close"],
+      ]);
+      $("theme-body").innerHTML =
+        themes
+          .map(
+            (t) =>
+              '<tr data-theme="' +
+              esc(t.id) +
+              '" class="' +
+              (t.id === state.theme ? "active" : "") +
+              '"><td>' +
+              (t.display_rank || "—") +
+              '</td><td><button class="theme-select" data-id="' +
+              esc(t.id) +
+              '">' +
+              esc(t.name) +
+              "</button></td><td>" +
+              esc(t.anchor) +
+              "</td>" +
+              ["return5", "return21", "return63", "excess21", "excess63"]
+                .map(
+                  (k) =>
+                    "<td>" +
+                    pct(
+                      valueAt(t, k),
+                      k.startsWith("excess"),
+                      (k.startsWith("excess") ? t.excess_returns : t.returns)?.[
+                        k.replace(/\D/g, "")
+                      ]?.reason,
+                    ) +
+                    "</td>",
+                )
+                .join("") +
+              "<td>" +
+              trend(t) +
+              "</td><td>" +
+              spark(t.history) +
+              "</td></tr>",
+          )
+          .join("") ||
+        '<tr><td colspan="10">No themes match these filters.</td></tr>';
+      $("theme-body")
+        .querySelectorAll("tr[data-theme]")
+        .forEach((r) => (r.onclick = () => select(r.dataset.theme)));
+      var t = data.themes.find((t) => t.id === state.theme);
+      if (!t) return;
+      $("active-name").textContent = "Watchlist · " + t.name + " / " + t.anchor;
+      $("active-summary").innerHTML =
+        "ETF 1M " +
+        pct(valueAt(t, "return21")) +
+        " · 3M " +
+        pct(valueAt(t, "return63")) +
+        " · " +
+        trend(t);
+      var pool = $("pool").value,
+        base =
+          pool === "all"
+            ? t.reviewed_universe
+            : limitSelection(t.selected, Number(pool));
+      base = base.map((r) =>
+        Object.assign({}, r, { theme_id: t.id, theme_name: t.name }),
+      );
+      visible = filtered(ranked(base, state.stockKey, state.stockDir), "stock");
+      $("stock-basis").textContent =
+        visible.length +
+        " / " +
+        base.length +
+        " visible · Rank: " +
+        metrics[state.stockKey] +
+        (state.stockKey.startsWith("excess")
+          ? " versus " + t.anchor + " (pp)"
+          : "") +
+        " · within " +
+        (pool === "all" ? "reviewed eligible subset" : "selected pool") +
+        " only. Sorting does not change selection.";
+      $("coverage").textContent =
+        t.pending_count +
+        " holdings pending review · " +
+        t.eligible_reviewed_count +
+        " provisional eligible. " +
+        (t.review_reason || "") +
+        " Market-cap timestamps are unverified. 15/20 is a browsing convention.";
+      head("stock", [
+        ["Rank"],
+        ["Ticker / company"],
+        ["Price", "price_close"],
+        ["1W %", "return5"],
+        ["1M %", "return21"],
+        ["3M %", "return63"],
+        ["1M vs theme (pp)", "excess21"],
+        ["Trend"],
+        ["ADV$30", "adv30_usd"],
+        ["Chart"],
+      ]);
+      $("stock-body").innerHTML =
+        visible
+          .map((r) => {
+            var exchange = String(r.exchange || "").toUpperCase(),
+              prefix = exchange.startsWith("NASDAQ")
+                ? "NASDAQ"
+                : exchange.startsWith("NYSE")
+                  ? "NYSE"
+                  : null;
+            var url = prefix
+              ? "https://www.tradingview.com/chart/?symbol=" +
+                encodeURIComponent(prefix + ":" + r.ticker)
+              : null;
+            r.chart_url = url;
+            return (
+              "<tr><td>" +
+              (r.display_rank || "—") +
+              "</td><td><b>" +
+              esc(r.ticker) +
+              '</b><span class="company" title="' +
+              esc(r.company) +
+              '">' +
+              esc(r.company) +
+              '</span><details><summary>Evidence & selection</summary><div class="stock-details">' +
+              esc(r.evidence_note || "") +
+              "<br>" +
+              esc(r.selection_reason || "Reviewed eligible subset") +
+              "<br>" +
+              esc(r.evidence?.url || "") +
+              "</div></details></td><td>" +
+              money(r.price_close) +
+              "</td>" +
+              ["return5", "return21", "return63", "excess21"]
+                .map(
+                  (k) =>
+                    "<td>" +
+                    pct(
+                      valueAt(r, k),
+                      k === "excess21",
+                      (k.startsWith("excess") ? r.excess_returns : r.returns)?.[
+                        k.replace(/\D/g, "")
+                      ]?.reason,
+                    ) +
+                    "</td>",
+                )
+                .join("") +
+              "<td>" +
+              trend(r) +
+              "</td><td>" +
+              money(r.adv30_usd, true) +
+              "</td><td>" +
+              (url
+                ? '<a target="_blank" rel="noopener noreferrer" href="' +
+                  esc(url) +
+                  '">Open ↗</a>'
+                : missing) +
+              "</td></tr>"
+            );
+          })
+          .join("") ||
+        '<tr><td colspan="10">' +
+          (base.length
+            ? "No stocks match these filters."
+            : "No reviewed stocks passed selection. " +
+              esc(t.review_reason || "See diagnostics for pending evidence.")) +
+          "</td></tr>";
+      var points = data.themes.filter(
+          (t) =>
+            finite(valueAt(t, "excess21")) && finite(valueAt(t, "excess63")),
+        ),
+        extent =
+          Math.max(
+            0.01,
+            ...points.flatMap((t) => [
+              Math.abs(valueAt(t, "excess21")),
+              Math.abs(valueAt(t, "excess63")),
+            ]),
+          ) * 1.15;
+      $("scatter").innerHTML =
+        '<svg viewBox="0 0 600 260" role="img" aria-label="Theme excess-return scatter"><line x1="40" y1="130" x2="560" y2="130"/><line x1="300" y1="20" x2="300" y2="240"/><text x="43" y="16">1M negative / 3M positive</text><text x="350" y="16">Both positive</text><text x="43" y="255">Both negative</text><text x="350" y="255">1M positive / 3M negative</text>' +
+        points
+          .map(
+            (t) =>
+              '<circle tabindex="0" role="button" data-id="' +
+              esc(t.id) +
+              '" cx="' +
+              (300 + (valueAt(t, "excess21") / extent) * 250) +
+              '" cy="' +
+              (130 - (valueAt(t, "excess63") / extent) * 105) +
+              '" r="6" aria-label="' +
+              esc(t.name) +
+              '"><title>' +
+              esc(t.name + " / " + t.anchor) +
+              ": 1M " +
+              (valueAt(t, "excess21") * 100).toFixed(2) +
+              " pp; 3M " +
+              (valueAt(t, "excess63") * 100).toFixed(2) +
+              " pp</title></circle>",
+          )
+          .join("") +
+        "</svg>";
+      $("scatter")
+        .querySelectorAll("circle")
+        .forEach((c) => {
+          c.onclick = () => select(c.dataset.id);
+          c.onkeydown = (e) => {
+            if (e.key === "Enter") select(c.dataset.id);
+          };
+        });
     }
-
-    function renderExplorer(theme) {
-      var rows = theme.reviewed_universe.map(function (row) { return Object.assign({}, row, { theme_id: theme.id, theme_name: theme.name }); });
-      var filtered = filterRows(rows, { query: state.query, relative: "All", trend: "All" });
-      $("#explorerCount").textContent = filtered.length + " eligible reviewed companies · full theme universe not screened";
-      $("#explorerRows").innerHTML = filtered.map(function (row) {
-        return '<tr><td>' + escapeHtml(row.ticker) + '</td><td>' + escapeHtml(row.company) + '</td><td>' + fmtMoney(row.market_cap_usd) + '</td><td>' + fmtMoney(row.adv30_usd) + '</td><td>' + fmtExcess(row.excess_returns && row.excess_returns["21"]) + '</td><td>' + badge(row.relative_state, "neutral") + '</td><td>' + badge(row.trend, "neutral") + '</td><td>' + escapeHtml((row.share_classes || []).join(", ")) + '</td></tr>';
-      }).join("") || '<tr><td colspan="8" class="empty-state">No eligible reviewed companies.</td></tr>';
-    }
-
-    function renderPending(theme) {
-      var rows = theme.pending_holdings || [];
-      $("#pendingCount").textContent = rows.length + " official holdings pending issuer review or mapping";
-      $("#pendingRows").innerHTML = rows.map(function (row) {
-        var evidence = row.evidence ? '<details><summary>Evidence</summary><p>' + escapeHtml(row.evidence.excerpt || "") + '</p><a target="_blank" rel="noopener" href="' + escapeHtml(row.evidence.url || "#") + '">' + escapeHtml(row.evidence.form || "SEC filing") + ' · filed ' + escapeHtml(row.evidence.filed_date || "") + '</a><small>Reviewed ' + escapeHtml(row.reviewed_date || "date unavailable") + ' · category ' + escapeHtml(row.evidence_category || "") + '</small></details>' : '';
-        return '<tr><td>' + escapeHtml(row.ticker) + '</td><td>' + escapeHtml(row.company) + '</td><td>' + (row.weight_pct === null ? "Unavailable" : Number(row.weight_pct).toFixed(2) + "%") + '</td><td>' + escapeHtml(row.status) + '</td><td>' + escapeHtml(row.reason) + evidence + '</td></tr>';
-      }).join("") || '<tr><td colspan="5" class="empty-state">No unresolved official holdings in this snapshot.</td></tr>';
-      var exclusions = theme.exclusions || [];
-      $("#excludedCount").textContent = exclusions.length + " reviewed membership/data exclusions";
-      $("#excludedRows").innerHTML = exclusions.map(function (row) {
-        var evidence = row.evidence ? '<details><summary>Evidence / freshness</summary><p>' + escapeHtml(row.evidence.excerpt || "") + '</p><a target="_blank" rel="noopener" href="' + escapeHtml(row.evidence.url || "#") + '">' + escapeHtml(row.evidence.form || "SEC filing") + ' · filed ' + escapeHtml(row.evidence.filed_date || "") + '</a><small>' + escapeHtml(row.evidence_freshness && row.evidence_freshness.reason || "") + '</small></details>' : '';
-        return '<tr><td>' + escapeHtml(row.ticker) + '</td><td>' + escapeHtml(row.company) + '</td><td>' + (row.weight_pct === null ? "Unavailable" : Number(row.weight_pct).toFixed(2) + "%") + '</td><td>' + escapeHtml((row.reasons || []).join("; ")) + evidence + '</td></tr>';
-      }).join("") || '<tr><td colspan="4" class="empty-state">No exclusions recorded for the reviewed subset.</td></tr>';
-    }
-
     function download(name, text, type) {
-      var blob = new Blob([text], { type: type || "text/plain;charset=utf-8" });
-      var url = URL.createObjectURL(blob);
-      var link = document.createElement("a");
-      link.href = url;
-      link.download = name;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
+      var url = URL.createObjectURL(new Blob([text], { type: type })),
+        a = document.createElement("a");
+      a.href = url;
+      a.download = name;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
-
-    function renderActiveThemeAndCounts() {
-      renderThemes();
-      renderActiveTheme();
-    }
-
-    $$("[data-theme-sort]").forEach(function (button) {
-      button.addEventListener("click", function () {
-        var key = button.dataset.themeSort;
-        state.themeDirection = state.themeSort === key && state.themeDirection === "desc" ? "asc" : "desc";
-        state.themeSort = key;
-        renderThemes();
-      });
-    });
-    $$("[data-stock-sort]").forEach(function (button) {
-      button.addEventListener("click", function () {
-        var key = button.dataset.stockSort;
-        state.stockDirection = state.stockSort === key && state.stockDirection === "asc" ? "desc" : "asc";
-        state.stockSort = key;
-        renderStocks();
-      });
-    });
-    $$("[data-limit]").forEach(function (button) {
-      button.addEventListener("click", function () {
-        state.limit = Number(button.dataset.limit);
-        $$("[data-limit]").forEach(function (other) { other.classList.toggle("active", other === button); });
-        renderStocks();
-      });
-    });
-    $("#stockSearch").addEventListener("input", function (event) { state.query = event.target.value; renderStocks(); renderExplorer(byId.get(state.themeId)); });
-    $("#relativeFilter").addEventListener("change", function (event) { state.relative = event.target.value; renderStocks(); });
-    $("#trendFilter").addEventListener("change", function (event) { state.trend = event.target.value; renderStocks(); });
-    $("#resetFilters").addEventListener("click", function () {
-      state.query = ""; state.relative = "All"; state.trend = "All"; state.limit = 15; state.stockSort = "selection_slot"; state.stockDirection = "asc";
-      $("#stockSearch").value = ""; $("#relativeFilter").value = "All"; $("#trendFilter").value = "All";
-      $$("[data-limit]").forEach(function (button) { button.classList.toggle("active", Number(button.dataset.limit) === 15); });
-      renderStocks(); renderExplorer(byId.get(state.themeId));
-    });
-    $("#exportCsv").addEventListener("click", function () {
-      var rows = activeRows();
-      download("themescope-filtered-watchlist.csv", rowsToCsv(rows), "text/csv;charset=utf-8");
-      $("#exportStatus").textContent = "CSV exported: " + rows.length + " filtered rows from the active theme; the theme column is retained.";
-    });
-    $("#exportTradingView").addEventListener("click", function () {
-      var result = tradingViewExport(activeRows());
-      download("themescope-tradingview-watchlist.txt", result.text, "text/plain;charset=utf-8");
-      $("#exportStatus").textContent = "TradingView text exported: " + result.count + " exchange-qualified symbols; " + result.duplicates + " duplicate rows collapsed and " + result.omitted + " rows without a verified exchange were omitted. Text import is flat; it does not preserve theme sections.";
-    });
-
-    renderHeader();
-    renderContext();
-    renderActiveThemeAndCounts();
-    var sourceRows = (data.source_matrix || []).map(function (source) {
-      var url = source.url ? '<a target="_blank" rel="noopener" href="' + escapeHtml(source.url) + '">Open source ↗</a>' : 'Unavailable';
-      return '<tr><td><b>' + escapeHtml(source.field) + '</b><small>' + escapeHtml(source.scope || "") + '</small></td><td>' + escapeHtml(source.provider) + '<small>' + escapeHtml(source.method) + '</small></td><td>' + escapeHtml(source.history_or_as_of) + '</td><td>' + escapeHtml(source.delay_and_availability) + '</td><td>' + escapeHtml(source.limitations) + '</td><td>' + escapeHtml(source.fallback) + '</td><td>' + escapeHtml(source.last_test) + '</td><td>' + escapeHtml(source.retrieved_at || "Not retrieved this run") + '</td><td>' + url + '</td></tr>';
-    }).join("");
-    $("#sourceRows").innerHTML = sourceRows;
-    $("#sourceMatrixNote").textContent = "Source retrievals that fail are shown as unavailable in the tables and run report; the generator never reuses an old snapshot as current. SEC annual filing dates are rechecked on every run. SEC 8-K disclosures are not automatically classified.";
-    $("#footerRun").textContent = "Run " + (data.run_id || "—") + " · session " + (data.session_date || "Unavailable") + " · generated " + (data.generated_at || "Unavailable");
+    $("csv").onclick = () => {
+      download(
+        "themescope-" + state.theme + "-" + data.session_date + ".csv",
+        rowsToCsv(visible),
+        "text/csv;charset=utf-8",
+      );
+      $("export-status").textContent =
+        visible.length + " visible rows exported.";
+    };
+    $("tv").onclick = () => {
+      var result = tradingViewExport(visible);
+      download("themescope-" + state.theme + ".txt", result.text, "text/plain");
+      $("export-status").textContent =
+        result.count +
+        " symbols exported; " +
+        result.omitted +
+        " without verified exchange omitted.";
+    };
+    render();
   }
-
   return {
+    init: init,
     valueAt: valueAt,
     filterRows: filterRows,
     sortRows: sortRows,
     limitSelection: limitSelection,
     rowsToCsv: rowsToCsv,
     tradingViewExport: tradingViewExport,
-    init: init
+    ranked: ranked,
   };
 });

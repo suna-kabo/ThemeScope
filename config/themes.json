@@ -55,7 +55,8 @@
       "holdings_source": {
         "provider": "VanEck",
         "method": "vaneck_dataset",
-        "url": "https://www.vaneck.com/us/en/investments/semiconductor-etf-smh/"
+        "url": "https://www.vaneck.com/us/en/investments/semiconductor-etf-smh/",
+        "dataset_fallback_url": "https://www.vaneck.com/Main/HoldingsBlock/GetDataset/?blockId=144458&pageId=233107&ticker=SMH"
       },
       "representation_limit": "SMH may hold non-US issuers and ADRs. The stock subset is limited to verified NYSE/Nasdaq listings; any ADR mapping is labeled.",
       "unleveraged_equity_etf_review": true,
