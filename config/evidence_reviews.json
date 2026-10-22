@@ -1,0 +1,916 @@
+{
+  "review_date": "2026-10-22",
+  "reviewer": "Codex",
+  "decision_log": "Provisional issuer evidence review based on the latest annual SEC filing retrieved for each listed issuer. Only current anchor holdings with an evidence record and passing security/data filters enter the reviewed subset. Other current holdings remain pending. More recent material disclosures were not exhaustively screened; all theme reviews therefore remain incomplete and no full-universe breadth label is available.",
+  "complete_review_required_for_formal_breadth": true,
+  "themes": {
+    "semiconductors": {
+      "review_complete": false,
+      "reason": "Only the listed direct semiconductor and equipment businesses were screened; remaining ETF holdings and non-U.S. security mappings are pending."
+    },
+    "cybersecurity": {
+      "review_complete": false,
+      "reason": "Only the listed direct security businesses were screened; remaining holdings, adjacent providers, and foreign securities are pending."
+    },
+    "clean_energy": {
+      "review_complete": false,
+      "reason": "Only four U.S.-listed renewable generation and equipment businesses were screened; non-U.S. holdings and remaining candidates are pending."
+    },
+    "aerospace_defense": {
+      "review_complete": false,
+      "reason": "Only the listed aerospace and defense businesses were screened; remaining holdings and component-supplier boundaries are pending."
+    },
+    "cloud_computing": {
+      "review_complete": false,
+      "reason": "Only direct cloud platform and SaaS businesses were screened; other holdings and some broad multi-segment issuers remain unresolved."
+    },
+    "biotechnology": {
+      "review_complete": false,
+      "reason": "Issuer-level industry screening was not run. The default rule excludes biotechnology-classified stocks; ETF-level returns remain available."
+    }
+  },
+  "members": [
+    {
+      "theme_id": "semiconductors",
+      "ticker": "NVDA",
+      "company": "NVIDIA CORP",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Accelerated-computing and GPU platforms for data center and AI markets.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-02-25",
+        "cik": 1045810,
+        "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000021/nvda-20260125.htm",
+        "excerpt": "lvable. We work to deliver continued performance leaps that outpace Moore’s Law by leveraging innovation across the architecture, chip design, system, interconnect, algorithm, and software layers. This full-stack innovation approach allows us to deliver order-of-magnitude performance advantages relative to legacy approaches in our target markets, which include Data Center, Gaming, Professional Visualization, and Automotive. While the computing requirements of these end markets are diverse, we address them with a unified underlying architecture"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "semiconductors",
+      "ticker": "TSM",
+      "company": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Semiconductor foundry manufacturing; the holding maps directly to the NYSE-listed ADS.",
+      "evidence": {
+        "form": "20-F",
+        "filed_date": "2026-04-16",
+        "cik": 1046179,
+        "url": "https://www.sec.gov/Archives/edgar/data/1046179/000162828026025362/tsm-20251231.htm",
+        "excerpt": "As a foundry, we manufacture semiconductors using our manufacturing processes for our customers based on proprietary integrated circuit designs provided by them. Our American Depositary Shares are listed on the New York Stock Exchange."
+      },
+      "security_type": "sponsored_ADS",
+      "security_mapping_note": "The VanEck snapshot holds ticker TSM directly; the SEC 20-F identifies NYSE-listed ADSs representing TSMC common shares. No underlying-share conversion is applied."
+    },
+    {
+      "theme_id": "semiconductors",
+      "ticker": "AMD",
+      "company": "ADVANCED MICRO DEVICES INC",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Processor, graphics, and data-center accelerator products.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-02-04",
+        "cik": 2488,
+        "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm",
+        "excerpt": "With our compute engines, intellectual property, software enablement and deep expertise, AMD is positioned to lead in this next computing era. Our broad portfolio spans supercomputing, cloud, edge, embedded and end devices; in 2025, demand for our data center AI accelerator products was strong."
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "semiconductors",
+      "ticker": "AVGO",
+      "company": "Broadcom Inc.",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Semiconductor and semiconductor-based solutions are a principal reportable business.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2025-12-18",
+        "cik": 1730168,
+        "url": "https://www.sec.gov/Archives/edgar/data/1730168/000173016825000121/avgo-20251102.htm",
+        "excerpt": "ITEM 1. BUSINESS Overview We are a global technology leader that designs, develops and supplies a broad range of semiconductor and semiconductor-based solutions and infrastructure software solutions. Our more than 60-year history of innovation dates back to our diverse origins from AT&T/Bell Labs, Lucent and Hewlett-Packard Company, and has evolved through acquisitions, including LSI Corporation, Broadcom Corporation, Brocade Communications Systems, Inc., CA, Inc., Symantec Enterprise Security, and VMware, Inc. (“VMware”). Over"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "semiconductors",
+      "ticker": "TXN",
+      "company": "TEXAS INSTRUMENTS INC",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Designs and manufactures semiconductors.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-02-06",
+        "cik": 97476,
+        "url": "https://www.sec.gov/Archives/edgar/data/97476/000009747626000059/txn-20251231.htm",
+        "excerpt": "ITEM 1. Business We design and manufacture semiconductors that we sell to electronics designers and manufacturers all over the world. Our operations began in 1930, and we are incorporated in Delaware. With headquarters in Dallas, Texas, we have design, manufacturing or sales operations in more than 30 countries. Our two reportable segments are Analog and Embedded Processing, and we report the results of our remaining business activities in Other. In 2025, we"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "semiconductors",
+      "ticker": "MU",
+      "company": "MICRON TECHNOLOGY INC",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Semiconductor memory and storage products.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-10-09",
+        "cik": 723125,
+        "url": "https://www.sec.gov/Archives/edgar/data/723125/000072312526000023/mu-20260903.htm",
+        "excerpt": "ITEM 1. BUSINESS Overview We are a global leader in semiconductor memory and storage, powering AI and compute-intensive applications from cloud to edge. With a relentless focus on our customers, technology and product leadership, and manufacturing and operational excellence, our comprehensive portfolio of high-performance DRAM, NAND, and NOR solutions deliver the speed, efficiency, and scale today’s workloads demand, accelerating intelligence to enrich life for all. W"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "semiconductors",
+      "ticker": "ADI",
+      "company": "ANALOG DEVICES INC",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Analog semiconductor products and technologies.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2025-11-25",
+        "cik": 6281,
+        "url": "https://www.sec.gov/Archives/edgar/data/6281/000000628125000153/adi-20251101.htm",
+        "excerpt": "ITEM 1. BUSINESS Company Overview, Strategy and Mission Analog Devices, Inc. (we, Analog Devices or the Company) is a global semiconductor leader dedicated to solving our customers’ most complex engineering challenges. We deliver innovations that connect technology to human breakthroughs and play a critical role at the intersection of the physical and digital worlds by providing the building blocks to sense, measure, interpret, connect and power. We design, manufacture, test and market a broad portfolio of solutions, including integrated c"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "semiconductors",
+      "ticker": "MRVL",
+      "company": "Marvell Technology, Inc.",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Data-infrastructure semiconductor solutions.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-03-11",
+        "cik": 1835632,
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm",
+        "excerpt": "with its consolidated subsidiaries (“Marvell,” “MTI,” the “Company,” “we,” or “us”) is a leading supplier of data infrastructure semiconductor solutions, spanning the data center core to network edge. We are a fabless supplier of high-performance semiconductor products with core strengths in developing and scaling complex System-on-a-Chip architectures, integrating analog, mixed-signal and digital signal processing functionality. Leveraging leading intellectual property and deep system-level expertise, as well as highly innovative security fir"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "semiconductors",
+      "ticker": "KLAC",
+      "company": "KLA CORP",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Semiconductor process-control and capital equipment.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-08-06",
+        "cik": 319201,
+        "url": "https://www.sec.gov/Archives/edgar/data/319201/000031920126000027/klac-20260630.htm",
+        "excerpt": "Corporation in April 1997 through the merger of KLA Instruments Corporation and Tencor Instruments, two long-time leaders in the semiconductor capital equipment industry that began operations in 1975 and 1976, respectively. We are organized into three reportable segments: Semiconductor Process Control, Specialty Semiconductor Process and PCB and Component Inspection. Within the Semiconductor Process Control segment, our comprehensive portfolio of inspection, metrology and software products, as well as related services, help IC, wafer, reticle/"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "semiconductors",
+      "ticker": "INTC",
+      "company": "INTEL CORP",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Designs and manufactures semiconductor products.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-01-23",
+        "cik": 50863,
+        "url": "https://www.sec.gov/Archives/edgar/data/50863/000005086326000011/intc-20251227.htm",
+        "excerpt": "Intel is a designer and manufacturer of semiconductor products. The CPUs and other semiconductor solutions that we design, manufacture, market, sell and service are incorporated in computing and related end products."
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "semiconductors",
+      "ticker": "AMAT",
+      "company": "APPLIED MATERIALS INC /DE",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Materials-engineering equipment used in semiconductor manufacturing.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2025-12-12",
+        "cik": 6951,
+        "url": "https://www.sec.gov/Archives/edgar/data/6951/000162828025056742/amat-20251026.htm",
+        "excerpt": "Item 1: Business Applied Materials, Inc. is the leader in the materials engineering solutions used to produce virtually every semiconductor in the world. Semiconductors provide the foundation for advances in technology that are reshaping the global economy, including artificial intelligence, the internet of things, robotics, electric and autonomous vehicles, and clean energy. We are experts in the design, development, production, and servicing of the critical wafer fabrication tools our customers need to manufacture semiconductors. Our cust"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "semiconductors",
+      "ticker": "QCOM",
+      "company": "QUALCOMM INC/DE",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "QCT semiconductor business is a primary reportable business.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2025-11-05",
+        "cik": 804328,
+        "url": "https://www.sec.gov/Archives/edgar/data/804328/000080432825000085/qcom-20250928.htm",
+        "excerpt": "ducts and services and have three reportable segments. We conduct business primarily through our QCT (Qualcomm CDMA Technologies) semiconductor business and our QTL (Qualcomm Technology Licensing) licensing business. QCT develops and supplies integrated circuit platforms and system software with advanced connectivity and high-performance, low-power computing technologies for use in mobile devices; automotive systems for connectivity, digital cockpit and ADAS/AD; and IoT including consumer electronic devices, industrial devices and edge networki"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "semiconductors",
+      "ticker": "LRCX",
+      "company": "LAM RESEARCH CORP",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Wafer-fabrication equipment and services for semiconductor production.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-08-07",
+        "cik": 707549,
+        "url": "https://www.sec.gov/Archives/edgar/data/707549/000070754926000037/lrcx-20260628.htm",
+        "excerpt": "countries. All other marks mentioned herein are the property of their respective holders. We are a global supplier of innovative wafer fabrication equipment and services to the semiconductor industry. We have built a strong global presence with core competencies in areas such as nanoscale manufacturing enablement, chemistry, plasma and fluidics, advanced systems engineering, and a broad range of operational disciplines. Our products and services are designed to help our customers build smaller and better performing devices that are used in a v"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "cybersecurity",
+      "ticker": "CRWD",
+      "company": "CrowdStrike Holdings, Inc.",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Cloud-delivered cybersecurity platform.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-03-05",
+        "cik": 1535527,
+        "url": "https://www.sec.gov/Archives/edgar/data/1535527/000153552726000010/crwd-20260131.htm",
+        "excerpt": "ITEM 1. BUSINESS Overview Founded in 2011, CrowdStrike reinvented cybersecurity for the cloud and artificial intelligence (“AI”) era and transformed the way cybersecurity is delivered and experienced by customers. When we started CrowdStrike, cyberattackers had an asymmetric advantage over legacy cybersecurity products that could not keep pace with rapid changes in adversary tactics, a dynamic that has intensified as adversaries increasingly leverage automation, identity abuse, and"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "cybersecurity",
+      "ticker": "FTNT",
+      "company": "Fortinet, Inc.",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Cybersecurity products and network-security platforms.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-02-25",
+        "cik": 1262039,
+        "url": "https://www.sec.gov/Archives/edgar/data/1262039/000126203926000007/ftnt-20251231.htm",
+        "excerpt": "ITEM 1. Business Overview Fortinet is a leader in cybersecurity, driving the convergence of networking and security. Our mission is to secure people, devices and data everywhere. Our integrated platform, the Fortinet Security Fabric, spans secure networking, unified Secure Access Service Edge (“SASE”) and artificial intelligence (“AI”)-driven security operations (“SecOps”). As of December 31, 2025, our end-customers were located in over 100 countries and included en"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "cybersecurity",
+      "ticker": "PANW",
+      "company": "Palo Alto Networks Inc",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Cybersecurity platforms and services for networks, clouds, endpoints and identity.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-09-10",
+        "cik": 1327567,
+        "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756726000023/panw-20260731.htm",
+        "excerpt": "Item 1. Business General Palo Alto Networks, Inc. is a global artificial intelligence (“AI”) cybersecurity provider and our vision is a world where each day is safer and more secure than the one before. We were incorporated in 2005 and are headquartered in Santa Clara, California. Our mission is to be the cybersecurity partner of choice, protecting our digital way of life. Our platforms and services help secure enterprise users, networks, clouds, endpoints, AI apps and agents, and identities by delivering co"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "cybersecurity",
+      "ticker": "OKTA",
+      "company": "Okta, Inc.",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Identity and access platforms positioned as a core security layer.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-03-05",
+        "cik": 1660134,
+        "url": "https://www.sec.gov/Archives/edgar/data/1660134/000166013426000020/okta-20260131.htm",
+        "excerpt": "Our Okta Platform and Auth0 Platform enable our customers to securely connect the right people to the right technologies and services at the right time. Identity is becoming the most critical layer of an organization’s security."
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "cybersecurity",
+      "ticker": "ZS",
+      "company": "Zscaler, Inc.",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Cybersecurity platform and protection services.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-09-03",
+        "cik": 1713683,
+        "url": "https://www.sec.gov/Archives/edgar/data/1713683/000171368326000157/zs-20260731.htm",
+        "excerpt": "Item 1. Business Overview We are the cybersecurity platform for the AI era. We empower our customers with the cybersecurity solutions necessary to protect their enterprises, drive growth and outpace competitors where success depends on securely adopting the technologies required to operate and compete effectively in an AI world. We were founded in 2007, based on a vision that, with the broad adoption of SaaS applications, the internet would become the n"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "cybersecurity",
+      "ticker": "RBRK",
+      "company": "Rubrik, Inc.",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Data security and cyber-resilience products.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-03-19",
+        "cik": 1943896,
+        "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000013/rbrk-20260131.htm",
+        "excerpt": "dscape that is now amplified at an AI-scale. We believe that cyber resilience will result in AI resilience and that the future of cybersecurity is data security—if your data is secure, your business is resilient. We built the Rubrik Security Cloud (“RSC”) suite with Zero Trust design principles to secure data across enterprise, cloud, SaaS, unstructured data, and identity providers. RSC delivers a cloud native SaaS platform that detects, analyzes, and remediates data security risks and unauthorized user activities. Our platform is architected t"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "cybersecurity",
+      "ticker": "TENB",
+      "company": "Tenable Holdings, Inc.",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Cybersecurity products to identify and address security gaps.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-02-27",
+        "cik": 1660280,
+        "url": "https://www.sec.gov/Archives/edgar/data/1660280/000166028026000005/tenb-20251231.htm",
+        "excerpt": "urity visibility, insight and action across this attack surface, equipping modern organizations to quickly identify and close the cybersecurity gaps that erode business value, reputation and trust. Business dynamics continue to shift under pressure of geopolitical tensions, talent shortages, the push for greater automation, unrelenting compliance and regulatory pressures, along with the drive to out-innovate and out-pace competitors. AI is now a constant undercurrent and is recognized as both a business enabler and a cybersecurity risk. For mos"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "cybersecurity",
+      "ticker": "S",
+      "company": "SentinelOne, Inc.",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Endpoint cybersecurity platform.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-03-19",
+        "cik": 1583708,
+        "url": "https://www.sec.gov/Archives/edgar/data/1583708/000158370826000020/s-20260131.htm",
+        "excerpt": "ITEM 1. BUSINESS Overview Cybersecurity is indispensable to our digital way of life, with millions of cyberattacks resulting in trillions of dollars in damages. We are in the midst of a generational shift in cybersecurity, ushered in by the ongoing digital transformation of the enterprise and the rise of AI. Attacks can inflict damages that span operational disruption, leadership change, loss of customer trust, and intellectual property theft"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "cybersecurity",
+      "ticker": "QLYS",
+      "company": "QUALYS, INC.",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Cloud-based security, compliance and vulnerability products.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-02-20",
+        "cik": 1107843,
+        "url": "https://www.sec.gov/Archives/edgar/data/1107843/000110784326000008/qlys-20251231.htm",
+        "excerpt": "Our cloud platform consists of a suite of IT security, compliance, web application security, asset management and cloud security solutions, which we refer to as the Qualys Cloud Apps."
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "cybersecurity",
+      "ticker": "VRNS",
+      "company": "VARONIS SYSTEMS INC",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Data Security Platform for enterprise data and identity environments.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-02-04",
+        "cik": 1361113,
+        "url": "https://www.sec.gov/Archives/edgar/data/1361113/000162828026005450/vrns-20251231.htm",
+        "excerpt": "s, cloud infrastructure environments, identity repositories, and key SaaS and AI applications. In 2022, we introduced the Varonis Data Security Platform as a SaaS offering to simplify deployment, accelerate time-to-value, and enable continuous cloud-delivered automation for protecting data. Varonis software helps organizations of all sizes and industries protect sensitive data stored in the cloud and on-premises, including: files, emails and databases, confidential personal data, financial records, source code, strategic and product plans, and"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "clean_energy",
+      "ticker": "FSLR",
+      "company": "FIRST SOLAR, INC.",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Photovoltaic solar technology and manufacturing.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-02-24",
+        "cik": 1274494,
+        "url": "https://www.sec.gov/Archives/edgar/data/1274494/000127449426000021/fslr-20251231.htm",
+        "excerpt": "Item 1. Business Company Overview We are America’s leading PV solar technology and manufacturing company. The only U.S.-headquartered company among the world’s largest solar manufacturers, First Solar is focused on competitively and reliably enabling power generation needs with our advanced, uniquely American thin film PV technology. Developed at R&D labs in California and Ohio, our technology provides a competitive, high-performance, and responsibly produced alternative to con"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "clean_energy",
+      "ticker": "NXT",
+      "company": "Nextpower Inc.",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Solar and energy technology for utility-scale power.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-05-19",
+        "cik": 1852131,
+        "url": "https://www.sec.gov/Archives/edgar/data/1852131/000185213126000017/nxt-20260331.htm",
+        "excerpt": "ering the world’s most intelligent, reliable, and productive clean-power technology. Overview We are a leading global provider of solar and energy technology solutions for utility-scale power plants. Founded in 2013 by our Chief Executive Officer, Dan Shugar, we pioneered and remain the global market leader in solar tracking systems. We now deliver an integrated suite of structural, electrical, and digital solutions across the full lifecycle of solar power plants, from design and construction through operations and maintenance. Our integrated s"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "clean_energy",
+      "ticker": "ENPH",
+      "company": "Enphase Energy, Inc.",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Products that manage solar generation and storage.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-02-17",
+        "cik": 1463101,
+        "url": "https://www.sec.gov/Archives/edgar/data/1463101/000146310126000013/enph-20251231.htm",
+        "excerpt": "y We are a global energy technology company originally founded in March 2006. We deliver smart, easy-to-use solutions that manage solar generation, storage and communication on one platform. Our intelligent microinverters work with virtually every solar panel made, and when paired with our smart technology, result in one of the industry’s best-performing clean energy systems. For the first time in the evolution of our centuries-old grid, people can get paid for the clean energy they produce and share with their communities, helping to build a n"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "clean_energy",
+      "ticker": "ORA",
+      "company": "ORMAT TECHNOLOGIES, INC.",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Geothermal power generation and related clean-energy systems.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-02-26",
+        "cik": 1296445,
+        "url": "https://www.sec.gov/Archives/edgar/data/1296445/000129644526000006/ora-20251231.htm",
+        "excerpt": "ITEM 1. BUSINESS Overview We are a leading vertically integrated company primarily engaged in the geothermal power business. We leverage our core capabilities, proprietary technologies, and global presence to expand our activities in conventional geothermal development, recovered energy generation and emerging geothermal technologies, including piloting of new EGS technologies. In addition, we are expanding into different complementary energy solutions, including stand alone utility scale energy storage services"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "aerospace_defense",
+      "ticker": "LMT",
+      "company": "LOCKHEED MARTIN CORP",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Aerospace and defense technology across aircraft, missiles, mission systems and space.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-01-29",
+        "cik": 936468,
+        "url": "https://www.sec.gov/Archives/edgar/data/936468/000162828026004195/lmt-20251231.htm",
+        "excerpt": "ITEM 1. Business General We are a global aerospace and defense technology company that builds and sustains the solutions America and its allies need to deter conflict and advance national security and scientific exploration objectives. Our four business areas – Aeronautics, Missiles and Fire Control, Rotary and Mission Systems, and Space – work as one company offering integrated solutions, at scale, across all warfighting domains. Our defense, space, intell"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "aerospace_defense",
+      "ticker": "NOC",
+      "company": "NORTHROP GRUMMAN CORP /DE/",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Aerospace and defense technology and systems.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-01-27",
+        "cik": 1133421,
+        "url": "https://www.sec.gov/Archives/edgar/data/1133421/000113342126000003/noc-20251231.htm",
+        "excerpt": "Northrop Grumman Corporation (herein referred to as “Northrop Grumman,” the “company,” “we,” “us,” or “our”) is a leading global aerospace and defense technology company. We deliver a broad range of products, services and solutions to U.S. and international customers, and principally to the U.S. Department of War (“DoW”) and intelligence community. Our broad portfolio is aligned to support national security priorities and our solutions equip our customers with capabilities they need to connect, protect and advance humanity. The company is a le"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "aerospace_defense",
+      "ticker": "TDG",
+      "company": "TransDigm Group INC",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Commercial aerospace component businesses.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2025-11-12",
+        "cik": 1260221,
+        "url": "https://www.sec.gov/Archives/edgar/data/1260221/000126022125000081/tdg-20250930.htm",
+        "excerpt": "d to do so. Selective Acquisition Strategy. We maintain a selective acquisition strategy, concentrating on proprietary commercial aerospace component businesses with significant aftermarket content where we see a clear path to value creation through the application of our three core value drivers. The integration of acquisitions into our existing businesses combined with implementing our proven operating strategy has historically resulted in improvements in the financial performance of the acquired businesses. Since the inception of our company"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "aerospace_defense",
+      "ticker": "LHX",
+      "company": "L3HARRIS TECHNOLOGIES, INC. /DE/",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Defense systems, national-security space and mission technology.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-02-12",
+        "cik": 202058,
+        "url": "https://www.sec.gov/Archives/edgar/data/202058/000020205826000015/hrs-20260102.htm",
+        "excerpt": "L3Harris Technologies is the Trusted Disruptor in the defense industry. It delivers end-to-end technology solutions connecting space, air, land, sea and cyber domains for national security."
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "aerospace_defense",
+      "ticker": "GD",
+      "company": "GENERAL DYNAMICS CORP",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Aerospace and defense platforms.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-01-30",
+        "cik": 40533,
+        "url": "https://www.sec.gov/Archives/edgar/data/40533/000004053326000006/gd-20251231.htm",
+        "excerpt": "ITEM 1. BUSINESS (Dollars in millions, unless otherwise noted) BUSINESS OVERVIEW General Dynamics is a global aerospace and defense company that specializes in high-end design, engineering and manufacturing to deliver state-of-the-art solutions to our customers. We offer a broad portfolio of products and services in business aviation; ship construction and repair; land combat vehicles, weapon systems and munitions; and technology products and services. Our leadership positions in attractive business aviation and defense mark"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "aerospace_defense",
+      "ticker": "HII",
+      "company": "HUNTINGTON INGALLS INDUSTRIES, INC.",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Naval shipbuilding, fleet sustainment and defense systems.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-02-05",
+        "cik": 1501585,
+        "url": "https://www.sec.gov/Archives/edgar/data/1501585/000150158526000006/hii-20251231.htm",
+        "excerpt": "harm’s way. We maintain and modernize the vast majority of the U.S. Navy’s fleet, with a holistic approach to life cycle maritime defense systems, from small watercraft to submarines, surface combatants, and aircraft carriers. We support the DoE’s national security mission through the management and operation of its sites, as well as the safe cleanup of legacy waste across the country . Unmanned Systems Creates advanced unmanned systems for defense, marine research, and commercial applications. Serving customers in more than 30 countries, we pr"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "aerospace_defense",
+      "ticker": "RTX",
+      "company": "RTX Corp",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Aerospace and defense systems for commercial, military and government customers.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-02-06",
+        "cik": 101829,
+        "url": "https://www.sec.gov/Archives/edgar/data/101829/000010182926000006/rtx-20251231.htm",
+        "excerpt": "ITEM 1. BUSINESS General RTX Corporation is an aerospace and defense company that provides advanced systems and services for commercial, military, and government customers worldwide. The terms “we,” “us,” “our,” the “Company”, and “RTX” mean RTX Corporation and its subsidiaries, unless the context indicates another meaning. We serve commercial and government customers in both the original equipment and aftermarket parts and services segments of the aerospace indu"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "aerospace_defense",
+      "ticker": "TXT",
+      "company": "TEXTRON INC",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Aerospace products and defense systems.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-02-11",
+        "cik": 217346,
+        "url": "https://www.sec.gov/Archives/edgar/data/217346/000021734626000006/txt-20260103.htm",
+        "excerpt": "e under the U.S. Government-sponsored foreign military sales program, for the design, development, manufacture or modification of aerospace and defense products as well as related services. We generally use the cost-to-cost method to measure progress for these contracts because it best depicts the transfer of control to the customer that occurs as we incur costs on our contracts. Under this measure, the extent of progress towards completion is measured based on the ratio of costs incurred to date to the estimated costs at completion of the perf"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "aerospace_defense",
+      "ticker": "WWD",
+      "company": "Woodward, Inc.",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Control solutions for aerospace and industrial markets.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2025-11-25",
+        "cik": 108312,
+        "url": "https://www.sec.gov/Archives/edgar/data/108312/000119312525296204/wwd-20250930.htm",
+        "excerpt": "We are an independent designer, manufacturer, and services provider of control solutions for the aerospace and industrial markets."
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "aerospace_defense",
+      "ticker": "HEI",
+      "company": "HEICO CORP",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Aircraft and jet-engine replacement parts; Flight Support is 70% of FY2025 sales.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2025-12-22",
+        "cik": 46619,
+        "url": "https://www.sec.gov/Archives/edgar/data/46619/000004661925000082/hei-20251031.htm",
+        "excerpt": "The Flight Support Group accounted for 70% of HEICO net sales in fiscal 2025 and uses proprietary technology to design and manufacture jet engine and aircraft component replacement parts."
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "cloud_computing",
+      "ticker": "ORCL",
+      "company": "ORACLE CORP",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Cloud applications, infrastructure and database services.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-06-22",
+        "cik": 1341439,
+        "url": "https://www.sec.gov/Archives/edgar/data/1341439/000119312526277521/orcl-20260531.htm",
+        "excerpt": "• Cloud revenues, which are earned by providing customers access to Oracle Cloud applications and infrastructure technologies via cloud-based deployment models that Oracle develops, provides unspecified updates and enhancements for, deploys, hosts, manages and supports and that customers access by entering into a subscription agreement with us for a stated period. Oracle Cloud Applications and Oracle Cloud Infrastructure (collectively Oracle Cloud) arrangements generally: have durations of one to five years; are renewed at the customer’s option"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "cloud_computing",
+      "ticker": "NTNX",
+      "company": "Nutanix, Inc.",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Nutanix Cloud Platform for hybrid and public-cloud operations.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-09-18",
+        "cik": 1618732,
+        "url": "https://www.sec.gov/Archives/edgar/data/1618732/000119312526394793/ntnx-20260731.htm",
+        "excerpt": "native and AI, optimizes how they run their organizations today, and accelerates innovation, efficiency, and growth. The Nutanix Cloud Platform is designed to enable organizations to build hybrid cloud infrastructure. It provides a consistent cloud operating model with a single platform for running and managing applications, agentic AI workloads, and data in core data centers, at the edge, and in public clouds. We aim to provide customers with flexibility and choice across server platforms, storage options, virtualized and cloud-native environ"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "cloud_computing",
+      "ticker": "DOCN",
+      "company": "DigitalOcean Holdings, Inc.",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Cloud platform for developers and growing technology companies.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-02-24",
+        "cik": 1582961,
+        "url": "https://www.sec.gov/Archives/edgar/data/1582961/000158296126000019/docn-20251231.htm",
+        "excerpt": "s to build, run, and scale intelligent applications with speed, simplicity and predictable economics through an agentic inference cloud platform that reduces operational complexity and accelerates time to product. DigitalOcean is an agentic inference cloud platform that helps AI and Digital Native Enterprises build, run, and scale intelligent applications with speed, simplicity, and predictable economics. The platform combines production-ready GPU infrastructure, a full-stack cloud, model-first inference workflows, and an agentic experience lay"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "cloud_computing",
+      "ticker": "MDB",
+      "company": "MongoDB, Inc.",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "MongoDB Atlas managed multi-cloud database service.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-03-11",
+        "cik": 1441816,
+        "url": "https://www.sec.gov/Archives/edgar/data/1441816/000162828026016799/mdb-20260131.htm",
+        "excerpt": "Atlas is MongoDB’s managed multi-cloud database-as-a-service offering, including an integrated set of database and related services."
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "cloud_computing",
+      "ticker": "NET",
+      "company": "Cloudflare, Inc.",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Connectivity Cloud services delivered over a global network.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-02-26",
+        "cik": 1477333,
+        "url": "https://www.sec.gov/Archives/edgar/data/1477333/000147733326000016/cloud-20251231.htm",
+        "excerpt": "Cloudflare is a leader in the Connectivity Cloud category. It delivers services that secure and improve business-critical applications through a global network."
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "cloud_computing",
+      "ticker": "DDOG",
+      "company": "Datadog, Inc.",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "SaaS observability and security for cloud applications.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-02-18",
+        "cik": 1561550,
+        "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm",
+        "excerpt": "Datadog is the AI-powered observability and security platform for cloud applications. Its SaaS platform integrates infrastructure monitoring, application performance monitoring, log management and cloud security."
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "cloud_computing",
+      "ticker": "NOW",
+      "company": "ServiceNow, Inc.",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Cloud-based workflow platform and services.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-01-29",
+        "cik": 1373715,
+        "url": "https://www.sec.gov/Archives/edgar/data/1373715/000137371526000007/now-20251231.htm",
+        "excerpt": "sting systems, cloud environments or collaboration tools. At the core of these solutions is the ServiceNow AI Platform, a robust, cloud-based platform that facilitates comprehensive delivery of seamless workflows and drives digital transformation across all departments and personas within an organization. With the emergence of artificial intelligence, organizations are under pressure from their stakeholders to accelerate growth and achieve unprecedented productivity improvements. To meet these demands, they are prioritizing the digitalization a"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "cloud_computing",
+      "ticker": "SNOW",
+      "company": "Snowflake Inc.",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Cloud data and AI platform.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-03-20",
+        "cik": 1640147,
+        "url": "https://www.sec.gov/Archives/edgar/data/1640147/000164014726000008/snow-20260131.htm",
+        "excerpt": "ITEM 1. BUSINESS We believe that a cloud computing platform that puts data and artificial intelligence (AI) at its core will offer great benefits to organizations by allowing them to realize the value of the data that powers their businesses. By offering rich primitives for data and applications, we believe that we can create a data connected world where organizations have seamless access to explore, share, and unlock the value of data. Our vision is"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "cloud_computing",
+      "ticker": "TEAM",
+      "company": "Atlassian Corp",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Atlassian Cloud Platform and cloud-delivered work applications.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-08-14",
+        "cik": 1650372,
+        "url": "https://www.sec.gov/Archives/edgar/data/1650372/000165037226000036/team-20260630.htm",
+        "excerpt": "chestrate work effectively across both human and AI teammates. These apps, agents, and Collections are all built on the Atlassian Cloud Platform and data model: a common technology foundation that seamlessly connects teams, information, context, and workflows throughout an organization. Since Atlassian was founded in Sydney, Australia in 2002, we’ve advanced our mission with a deep investment in product development to build innovative, high-value, and versatile apps that users love. Our software has been recognized as a leader in multiple marke"
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "cloud_computing",
+      "ticker": "CRM",
+      "company": "Salesforce, Inc.",
+      "category": "Core business",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Cloud application and platform services delivered as SaaS.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-03-02",
+        "cik": 1108524,
+        "url": "https://www.sec.gov/Archives/edgar/data/1108524/000110852426000060/crm-20260131.htm",
+        "excerpt": "Salesforce primarily delivers its solutions as highly scalable cloud computing application and platform services on a multi-tenant technology architecture."
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "cloud_computing",
+      "ticker": "AMZN",
+      "company": "AMAZON COM INC",
+      "category": "Unresolved",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Amazon reports Amazon Web Services as a separate operating segment. The AWS segment is included in the fund holdings, but cloud exposure has not been quantified and screened against the specification threshold in this run.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-02-06",
+        "cik": 1018724,
+        "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+        "excerpt": "Amazon reports Amazon Web Services as a separate operating segment. The AWS segment is included in the fund holdings, but cloud exposure has not been quantified and screened against the specification threshold in this run."
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    },
+    {
+      "theme_id": "cloud_computing",
+      "ticker": "GOOGL",
+      "company": "Alphabet Inc.",
+      "category": "Unresolved",
+      "reviewed_date": "2026-10-22",
+      "reviewer": "Codex",
+      "review_note": "Google Cloud is a reported segment generating revenue from infrastructure, platform, applications and other cloud services. Its revenue share has not been screened against the specification threshold in this run.",
+      "evidence": {
+        "form": "10-K",
+        "filed_date": "2026-02-05",
+        "cik": 1652044,
+        "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000018/goog-20251231.htm",
+        "excerpt": "Google Cloud is a reported segment generating revenue from infrastructure, platform, applications and other cloud services. Its revenue share has not been screened against the specification threshold in this run."
+      },
+      "security_type": "common_share",
+      "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
+    }
+  ]
+}

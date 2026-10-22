@@ -1,0 +1,24 @@
+{
+  "comparisons": [
+    {
+      "id": "clean_energy_us_alternative",
+      "theme_id": "clean_energy",
+      "ticker": "QCLN",
+      "provider": "First Trust",
+      "method": "first_trust_html",
+      "holdings_url": "https://www.ftportfolios.com/Retail/Etf/EtfHoldings.aspx?Ticker=QCLN",
+      "fund_url": "https://www.ftportfolios.com/Retail/Etf/EtfSummary.aspx?Ticker=QCLN",
+      "comparison_note": "North America clean-energy and clean-technology exposure; includes broader activities such as EVs and enabling electronics. ICLN is retained because the registry scope is narrower renewable generation and equipment, despite ICLN's global holdings and U.S.-listed-subset limitation."
+    },
+    {
+      "id": "aerospace_defense_cap_weighted_alternative",
+      "theme_id": "aerospace_defense",
+      "ticker": "ITA",
+      "provider": "iShares",
+      "method": "ishares_csv",
+      "holdings_url": "https://www.ishares.com/us/products/239502/ishares-us-aerospace-defense-etf/latest-holdings.csv",
+      "fund_url": "https://www.ishares.com/us/products/239502/ishares-us-aerospace-defense-etf",
+      "comparison_note": "U.S. aerospace and defense exposure with a more concentrated cap-weighted profile. XAR is retained for broader constituent representation; this is a mandate and concentration decision, not a return score."
+    }
+  ]
+}
