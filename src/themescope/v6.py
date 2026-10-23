@@ -17,6 +17,9 @@ def _source_status(raw: dict[str, Any], snapshot: dict[str, Any]) -> dict[str, A
     chart_errors = errors.get("charts", {})
     holdings_errors = errors.get("holdings", {})
     v5_errors = raw.get("v5", {}).get("chart_errors", {})
+    iwm_errors = raw.get("v5", {}).get("iwm_breadth_errors", {})
+    iwm_diagnostics = raw.get("v5", {}).get("iwm_breadth_diagnostics", {})
+    iwm_shortfalls = iwm_diagnostics.get("history_shortfalls", {})
     charts = raw.get("charts", {})
     holdings = raw.get("holdings", {})
     context_holdings = raw.get("context_holdings", {})
@@ -87,12 +90,13 @@ def _source_status(raw: dict[str, Any], snapshot: dict[str, Any]) -> dict[str, A
         "bid_ask_spread": {"provider": None, "status": "unavailable", "retrieved_at": None, "effective_date": None, "unavailable_reason": "No reproducible historical ETF bid/ask source is configured."},
         "breadth_histories": {
             "provider": "Yahoo Finance chart API",
-            "status": "unavailable" if not indexes and not context_holdings else "partial" if v5_errors else "available",
+            "status": "unavailable" if not indexes and not context_holdings else "partial" if v5_errors or iwm_errors or iwm_shortfalls else "available",
             "retrieved_at": raw.get("retrieved_at"),
             "effective_date": snapshot.get("session_date"),
-            "unavailable_reason": ("Index/holdings constituent universes were not retrieved" if not indexes and not context_holdings else f"{len(v5_errors)} constituent price histories unavailable" if v5_errors else None),
-            "errors": v5_errors,
+            "unavailable_reason": ("Index/holdings constituent universes were not retrieved" if not indexes and not context_holdings else f"{len(v5_errors)} constituent histories; {len(iwm_errors)} IWM retrieval failures; {len(iwm_shortfalls)} IWM histories below warmup" if v5_errors or iwm_errors or iwm_shortfalls else None),
+            "errors": {**v5_errors, **{"IWM:" + key: value for key, value in iwm_errors.items()}},
             "mapped_universes": {key: len(value.get("companies", [])) for key, value in mapped.items()},
+            "iwm_diagnostics": iwm_diagnostics,
         },
     }
 
@@ -209,6 +213,12 @@ def _field_snapshot(row: dict[str, Any], session: str | None) -> dict[str, Any]:
         "theme_score": row.get("theme_score"),
         "breadth21": row.get("etf_breadth21_pct"),
         "breadth50": row.get("etf_breadth50_pct"),
+        "price_vs_ema21_pct": row.get("price_vs_ema21_pct"),
+        "price_vs_ema50_pct": row.get("price_vs_ema50_pct"),
+        "breadth21_t_minus_5": row.get("breadth21_t_minus_5"),
+        "breadth50_t_minus_5": row.get("breadth50_t_minus_5"),
+        "breadth21_change_5_pp": row.get("breadth21_change_5_pp"),
+        "breadth50_change_5_pp": row.get("breadth50_change_5_pp"),
     }
     statuses = row.get("field_status", {})
     for name, value in values.items():
@@ -451,5 +461,5 @@ def apply_v6(snapshot: dict[str, Any], raw: dict[str, Any], registry: dict[str, 
     snapshot["resolved_market_session"] = snapshot.get("session_date")
     snapshot.setdefault("collection_started_at", snapshot.get("generated_at"))
     snapshot.setdefault("collection_completed_at", snapshot.get("generated_at"))
-    snapshot["schema_version"] = "6.1"
+    snapshot["schema_version"] = "6.2"
     return snapshot

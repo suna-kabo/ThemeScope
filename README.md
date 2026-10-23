@@ -27,7 +27,9 @@ Optionally resolve a historical common session:
 python3 scripts/generate_dashboard.py --as-of 2026-10-22 --output-dir dist
 ```
 
-Wait for `SUCCESS: data date ...` and for the command prompt to return. The run collects configured ETF candidate charts, official holdings, mapped index constituents, constituent price histories, quote summaries, and requested SEC annual-filing checks. It is deliberately paced to reduce provider rate limits, so a complete refresh may take several minutes. A Yahoo HTTP 429 opens a run-local circuit. A failed refresh writes `dist/refresh_status.json` and `dist/failed_refresh.md` separately and preserves the prior successful dashboard and exports. Opening the HTML never retries collection.
+Wait for `SUCCESS: data date ...` and for the command prompt to return. The run collects configured ETF candidate charts, official holdings, mapped index constituents, one-year price histories for normalized IWM holdings, quote summaries, and requested SEC annual-filing checks. IWM uses many individual price requests, so a complete refresh can take substantially longer than the other collections. Its pacing interval can be adjusted with `THEMESCOPE_IWM_CHART_INTERVAL`; keep it conservative to avoid provider rate limits. A Yahoo HTTP 429 opens a run-local circuit. A failed refresh writes `dist/refresh_status.json` and `dist/failed_refresh.md` separately and preserves the prior successful dashboard and exports. Opening the HTML never retries collection.
+
+The normalized IWM price payload is stored in `dist/iwm_breadth_prices.csv.gz`, separate from `raw_inputs.json` to keep the JSON below GitHub's per-file size limit. The generator restores it when importing a run ZIP. `dist/Inter-LICENSE.txt` contains the bundled Inter font license.
 
 The generator publishes only after validating dated SPY/QQQ prices and the eligible output. IWM and VIX have independent status; missing IWM breadth or VIX does not hide otherwise valid market facts. It stages files beside the target directory and rolls back a partial file replacement. It uses real retrieved values only; unavailable data remains blank or is listed with a reason.
 
@@ -51,12 +53,12 @@ The S&P 500 constituent source is a current Wikipedia table observed at retrieva
 
 ## Metrics and interface
 
-- **Market:** SPY, QQQ, and IWM each have independent price cards with close, 5/21/63-session adjusted returns, and EMA21/EMA50 comparisons. IWM holdings breadth is a practical Russell 2000 proxy using official iShares IWM holdings; it is not official Russell 2000 breadth. VIX is shown as separate volatility context with no constituent breadth or score dependency.
-- **Sectors & Themes:** one eligible primary ETF row per registry exposure. ETF excess returns are percentage-point differences against SPY. Current is the 21-session excess-return percentile; Medium is the 63-session excess-return percentile. Percentile ranks require the configured minimum of ten eligible peers. Theme Score is 60% Current + 40% Medium. Breadth and curated stocks are independent evidence and do not affect scores or states. Missing inputs are not imputed or reweighted.
+- **Market:** SPY, QQQ, and IWM have separate price, breadth, and trend sections. Cards show price-to-EMA distance and five-session breadth change when both observations pass the same completeness rule. IWM holdings breadth is a practical Russell 2000 proxy using official iShares IWM holdings; it is not official Russell 2000 breadth. VIX is separate volatility context with dynamic 1D/5D/21D direction and a trailing 252-session percentile.
+- **Sectors & Themes:** one eligible primary ETF row per registry exposure. Each row shows absolute 1M/3M ETF returns beside excess returns against SPY, breadth and its five-session change, and a recomputed rank from five sessions earlier. Current is the 21-session excess-return percentile; Medium is the 63-session excess-return percentile. Percentile ranks require the configured minimum of ten eligible peers. Theme Score remains 60% Current + 40% Medium. Breadth and curated stocks are independent evidence and do not affect scores or states. Missing inputs are not imputed or reweighted.
 - **States:** Leading, Improving, Fading, and Lagging describe whether Current and Medium are above or below 50 in the cross-sectional eligible ETF universe. Improving/Fading do not establish a time-series reversal.
 - **Watchlist:** only individually sourced Core/Related memberships that pass the configured stock filters can be selected. Sorting and filtering do not refill the selected queue. ETF-only rows remain usable in the rankings without a fabricated stock list.
 
-The three navigation pages are **Market**, **Sectors & Themes**, and **Watchlist**. Exports include the full ranking, a registry audit, visible-row CSV downloads, the 15- and 20-row stock lists, exchange-qualified TradingView text files, source matrix, raw inputs, snapshot, run report, and a complete run ZIP. A CSV blank means unavailable; `excess*_pp` is in percentage points.
+The three navigation pages are **Market**, **Sectors & Themes**, and **Watchlist**. The self-contained HTML embeds the Inter variable font under its OFL license and makes no external font requests. Exports include the full ranking, a registry audit, visible-row CSV downloads, the 15- and 20-row stock lists, exchange-qualified TradingView text files, IWM history sidecar, source matrix, raw inputs, snapshot, run report, and a complete run ZIP. A CSV blank means unavailable; `excess*_pp` and breadth changes are in percentage points.
 
 ## Project files
 
@@ -66,7 +68,7 @@ The three navigation pages are **Market**, **Sectors & Themes**, and **Watchlist
 - `src/themescope/sources.py`: public source adapters.
 - `src/themescope/collect.py`: on-demand retrieval and stock curation.
 - `src/themescope/metrics.py`: dated return, EMA, liquidity, breadth, and queue calculations.
-- `src/themescope/v5.py`: index/holdings breadth and price-relative-strength calculations.
+- `src/themescope/v5.py`: index/holdings breadth, historical breadth/rank calculations, IWM normalization, and price-relative-strength calculations.
 - `src/themescope/v6.py`: candidate audit, eligibility, source diagnostics, and snapshot contract.
 - `scripts/generate_dashboard.py`: validation, staged publication, exports, and rollback.
 - `static/`: data-neutral offline dashboard template, CSS, and JavaScript.

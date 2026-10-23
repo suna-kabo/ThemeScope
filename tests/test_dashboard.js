@@ -142,3 +142,17 @@ assert.match(
   ]),
   /membership_tag/,
 );
+const configuredBands = [
+  { class: "score-q1", min: 0, max: 25 },
+  { class: "score-q2", min: 25, max: 50 },
+  { class: "score-q3", min: 50, max: 75 },
+  { class: "score-q4", min: 75, max: 100 },
+];
+assert.equal(ui.scoreBandClass(24.999, configuredBands), "score-q1");
+assert.equal(ui.scoreBandClass(25, configuredBands), "score-q2");
+assert.equal(ui.scoreBandClass(49.999, configuredBands), "score-q2");
+assert.equal(ui.scoreBandClass(50, configuredBands), "score-q3");
+assert.equal(ui.scoreBandClass(74.999, configuredBands), "score-q3");
+assert.equal(ui.scoreBandClass(75, configuredBands), "score-q4");
+assert.equal(ui.scoreBandClass(100, configuredBands), "score-q4");
+assert.equal(ui.scoreBandClass(null, configuredBands), "score-na");

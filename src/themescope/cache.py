@@ -50,7 +50,7 @@ def manifest_for_inputs(raw: dict[str, Any], default_retrieved_at: str) -> list[
         for key, value in sorted((raw.get(group) or {}).items()):
             add(group, str(key), value, provider)
     v5 = raw.get("v5") or {}
-    for group, provider in (("charts", "Yahoo Finance chart API"), ("index_universes", "Index constituent provider"), ("security_mapping", "SEC issuer/listing map")):
+    for group, provider in (("charts", "Yahoo Finance chart API"), ("iwm_breadth_charts", "Yahoo Finance chart API; iShares IWM holdings"), ("index_universes", "Index constituent provider"), ("security_mapping", "SEC issuer/listing map")):
         if group == "security_mapping":
             value = v5.get(group)
             if isinstance(value, dict):

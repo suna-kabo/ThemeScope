@@ -35,6 +35,8 @@ def enrich(snapshot, raw):
             'daily_change': current / previous - 1 if current and previous else None,
             'ema21_distance': current / trend['ema21'] - 1 if current and trend.get('ema21') else None,
             'ema50_distance': current / trend['ema50'] - 1 if current and trend.get('ema50') else None,
+            'price_vs_ema21_pct': 100 * (current / trend['ema21'] - 1) if current and trend.get('ema21') else None,
+            'price_vs_ema50_pct': 100 * (current / trend['ema50'] - 1) if current and trend.get('ema50') else None,
             'ema21': trend.get('ema21'), 'ema50': trend.get('ema50'),
             'above_ema21': current > trend['ema21'] if current is not None and trend.get('ema21') is not None else None,
             'above_ema50': current > trend['ema50'] if current is not None and trend.get('ema50') is not None else None,
@@ -60,21 +62,47 @@ def enrich(snapshot, raw):
         current_date = dates[-1] if dates else None
         current = rows.get(current_date, {}).get('close') if current_date else None
         previous = rows.get(dates[-2], {}).get('close') if len(dates) > 1 else None
+        changes = {
+            'vix_direction_1d': 'up' if isinstance(current, (int, float)) and isinstance(previous, (int, float)) and current > previous else 'down' if isinstance(current, (int, float)) and isinstance(previous, (int, float)) and current < previous else 'flat' if isinstance(current, (int, float)) and isinstance(previous, (int, float)) else 'unavailable',
+            'vix_direction_5d': 'up' if len(dates) >= 6 and rows[dates[-6]].get('close') not in (None, 0) and current > rows[dates[-6]]['close'] else 'down' if len(dates) >= 6 and rows[dates[-6]].get('close') not in (None, 0) and current < rows[dates[-6]]['close'] else 'flat' if len(dates) >= 6 and rows[dates[-6]].get('close') not in (None, 0) and current == rows[dates[-6]]['close'] else 'unavailable',
+            'vix_direction_21d': 'up' if len(dates) >= 22 and rows[dates[-22]].get('close') not in (None, 0) and current > rows[dates[-22]]['close'] else 'down' if len(dates) >= 22 and rows[dates[-22]].get('close') not in (None, 0) and current < rows[dates[-22]]['close'] else 'flat' if len(dates) >= 22 and rows[dates[-22]].get('close') not in (None, 0) and current == rows[dates[-22]]['close'] else 'unavailable',
+        }
+        directions = [changes[f'vix_direction_{window}'] for window in ('1d', '5d', '21d')]
+        direction_summary = 'Volatility increased across all displayed periods.' if all(value == 'up' for value in directions) else 'Volatility decreased across all displayed periods.' if all(value == 'down' for value in directions) else 'Volatility direction is mixed across the displayed periods.'
+        percentile_rows = [rows[d]['close'] for d in dates[-252:] if isinstance(rows[d].get('close'), (int, float))] if current is not None and len(dates) >= 252 else []
+        percentile = None
+        if percentile_rows:
+            less = sum(value < current for value in percentile_rows)
+            ties = sum(value == current for value in percentile_rows)
+            percentile = 100 * (less + ties / 2) / len(percentile_rows)
         item.update({
             'instrument_type': 'volatility_index',
             'level': current,
             'daily_change': current / previous - 1 if current is not None and previous not in (None, 0) else None,
             'return5': current / rows[dates[-6]]['close'] - 1 if current is not None and len(dates) >= 6 and rows[dates[-6]].get('close') not in (None, 0) else None,
             'return21': current / rows[dates[-22]]['close'] - 1 if current is not None and len(dates) >= 22 and rows[dates[-22]].get('close') not in (None, 0) else None,
-            'trailing_1y_percentile': (100 * sum(rows[d]['close'] <= current for d in dates[-252:]) / len(dates[-252:])) if current is not None and len(dates) >= 252 else None,
-            'trailing_1y_observations': min(len(dates), 252),
+            'trailing_1y_percentile': percentile,
+            'trailing_1y_observations': len(percentile_rows),
+            **changes,
+            'vix_direction_summary': direction_summary,
+            'history': [{'date': d, 'close': rows[d].get('close')} for d in dates[-63:]],
             'observation_date': current_date,
             'source_url': (chart or {}).get('url'),
             'retrieved_at': (chart or {}).get('retrieved_at'),
             'retrieved_at_hkt_display': _hkt_display((chart or {}).get('retrieved_at')),
-            'source_status': 'available' if current is not None else 'unavailable',
-            'source_reason': None if current is not None else raw.get('errors', {}).get('charts', {}).get(ticker, 'No VIX close observation available'),
+            'source_status': 'unavailable' if current is None else 'available' if percentile is not None and all(value != 'unavailable' for value in directions) else 'partial',
+            'source_reason': None if current is not None and percentile is not None and all(value != 'unavailable' for value in directions) else raw.get('errors', {}).get('charts', {}).get(ticker) or ('No VIX close observation available' if current is None else 'Some VIX context periods are unavailable'),
         })
+    spy_chart = raw.get('charts', {}).get('SPY')
+    spy_rows = observation_map(spy_chart) if spy_chart else {}
+    for theme in snapshot.get('themes', []):
+        theme_chart = raw.get('charts', {}).get(theme.get('anchor'))
+        theme_rows = observation_map(theme_chart) if theme_chart else {}
+        aligned = [d for d in calendar if d <= session and isinstance(theme_rows.get(d, {}).get('adj_close'), (int, float)) and isinstance(spy_rows.get(d, {}).get('adj_close'), (int, float)) and spy_rows[d]['adj_close'] != 0] if session else []
+        theme['relative_strength_series'] = [
+            {'date': d, 'ratio': theme_rows[d]['adj_close'] / spy_rows[d]['adj_close']}
+            for d in aligned[-63:]
+        ]
     return snapshot
 
 

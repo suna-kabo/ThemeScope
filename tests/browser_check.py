@@ -3,6 +3,7 @@ import json
 import re
 import sys
 import functools
+import platform
 import threading
 import zipfile
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
@@ -27,10 +28,17 @@ with sync_playwright() as p:
     assert 'Loading' not in page.inner_text('body')
     assert page.locator('#cards .market-card').count()==3
     assert page.locator('#volatility-card .market-card').count()==1
-    assert 'IWM' in page.inner_text('#cards') and 'IWM holdings breadth' in page.inner_text('#cards')
+    assert 'IWM' in page.inner_text('#cards') and 'IWM HOLDINGS BREADTH' in page.inner_text('#cards')
+    assert 'Constituents above EMA21' in page.inner_text('#cards')
+    assert 'Price vs EMA21' in page.inner_text('#cards')
+    assert page.locator('#cards .ema-pill').count()==0
+    assert page.locator('#cards .condition-box').count()==6
     assert 'VIX' in page.inner_text('#volatility-card')
+    assert 'Source status: available' not in page.inner_text('#volatility-card')
     assert 'HKT' in page.inner_text('#generated-hkt')
-    assert 'eligible ETF anchors' in page.inner_text('#status')
+    assert page.locator('#status').inner_text() == '' or 'breadth unavailable' in page.locator('#status').inner_text()
+    assert page.evaluate('document.fonts.check(\'15px "Inter Variable"\')')
+    assert 'font-src data:' in page.content()
     assert page.locator('.state-tag').count() >= 0
     assert page.locator('html').get_attribute('data-mode')=='dark'
     assert page.locator('.side-nav [data-page]').count()==3
@@ -43,7 +51,7 @@ with sync_playwright() as p:
     assert info.count()==1
     info.focus()
     assert page.locator('#'+info.get_attribute('aria-describedby')).count()==1
-    assert page.locator('#'+info.get_attribute('aria-describedby')).inner_text()
+    assert page.locator('#'+info.get_attribute('aria-describedby')).text_content()
     info.click()
     assert info.get_attribute('aria-expanded')=='true'
     rows=page.locator('#theme-body tr[data-theme]')
@@ -51,6 +59,10 @@ with sync_playwright() as p:
         page.select_option('#theme-sort','theme_score')
         page.click('#theme-direction')
         assert rows.count() >= 1
+        assert page.locator('#theme-head').inner_text().find('1M Return') >= 0
+        assert page.locator('#theme-head').inner_text().find('Rank Δ 5D') >= 0
+        assert page.locator('#theme-body .score-chip').count() > 0
+        assert not page.locator('#watchlist-navigation #back-to-themes').count()
         with page.expect_download() as download:
             page.click('#theme-visible-csv')
         assert Path(download.value.path()).stat().st_size > 0
@@ -68,6 +80,7 @@ with sync_playwright() as p:
         assert page.locator('#watchlist').is_visible()
         assert page.locator('#watchlist-theme-selector optgroup[label="Sectors"]').count()==1
         assert page.locator('#watchlist-theme-selector optgroup[label="Themes"]').count()==1
+        assert page.locator('#active-summary .rs-spark-row').count()==1
         current=page.locator('#active-name').inner_text()
         options=page.locator('#watchlist-theme-selector option:not([disabled])')
         if options.count()>1:
@@ -95,7 +108,7 @@ with sync_playwright() as p:
         page.click('a[href="run_bundle.zip"]')
     with zipfile.ZipFile(download.value.path()) as bundle:
         names=set(bundle.namelist())
-        assert {'dashboard.html','themes.csv','registry_audit.csv','latest_snapshot.json','raw_inputs.json'} <= names
+        assert {'dashboard.html','themes.csv','registry_audit.csv','latest_snapshot.json','raw_inputs.json','iwm_breadth_prices.csv.gz','Inter-LICENSE.txt'} <= names
         assert 'sectors.csv' not in names and 'industries.csv' not in names
 
     page.click('#mode');assert page.locator('html').get_attribute('data-mode')=='light'
@@ -112,7 +125,16 @@ with sync_playwright() as p:
     external=[u for u in requests if u.startswith(('http:','https:','ws:','wss:')) and not u.startswith(f'http://127.0.0.1:{server.server_port}/')]
     assert not external, external
     assert not errors, errors
-    result={'file_scheme_note':'Managed Chromium policy blocks file://; exact exported bytes served over loopback for verification', 'method':'Chromium DevTools Protocol Network.requestWillBeSent (Network panel backend)','open_and_reload_external_requests':external,'requests':requests,'javascript_errors':errors,'interaction_checks':'passed'}
+    request_summary=[]
+    for request_url in requests:
+        if request_url.startswith('data:font/woff2;base64,'):
+            summary='data:font/woff2 (embedded)'
+        elif request_url.startswith(f'http://127.0.0.1:{server.server_port}/'):
+            summary=Path(request_url.split('?',1)[0]).name + ' (local loopback)'
+        else:
+            summary=request_url
+        request_summary.append(summary)
+    result={'file_scheme_note':'Managed Chromium policy blocks file://; exact exported bytes served over loopback for verification', 'method':'Chromium DevTools Protocol Network.requestWillBeSent (Network panel backend)','runtime_environment':platform.platform(),'browser':'Chromium '+browser.version,'windows_chrome_verified':False,'embedded_font_loaded':True,'open_and_reload_external_requests':external,'requests':request_summary,'javascript_errors':errors,'interaction_checks':'passed'}
     Path('/tmp/themescope-browser-verification.json').write_text(json.dumps(result,indent=2))
     print(json.dumps(result,indent=2))
     browser.close()

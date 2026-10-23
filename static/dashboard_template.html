@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; font-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; font-src data:; base-uri 'none'; form-action 'none'">
   <title>ThemeScope — daily snapshot</title>
   <style>{{STYLE}}</style>
 </head>
@@ -12,9 +12,9 @@
     <a class="brand" href="#market"><span class="brand-mark">T</span><span>ThemeScope<small>Market research</small></span></a>
     <div class="sidebar-session"><span>MARKET SESSION</span><b id="sidebar-date">—</b></div>
     <nav class="side-nav" aria-label="Dashboard pages">
-      <a href="#market" data-page="market" class="active"><span class="nav-icon" aria-hidden="true">◉</span>Market</a>
-      <a href="#sectors-themes" data-page="sectors-themes"><span class="nav-icon" aria-hidden="true">◫</span>Sectors &amp; Themes</a>
-      <a href="#watchlist" data-page="watchlist"><span class="nav-icon" aria-hidden="true">≡</span>Watchlist</a>
+      <a href="#market" data-page="market" class="active"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 18 18"><path d="M2.5 9h3l2-4 3.1 8 1.8-4h3.1"/></svg></span>Market</a>
+      <a href="#sectors-themes" data-page="sectors-themes"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 18 18"><path d="M3 3.5h12v11H3zM3 7.5h12M7 7.5v7"/></svg></span>Sectors &amp; Themes</a>
+      <a href="#watchlist" data-page="watchlist"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 18 18"><path d="M3.5 4.5h11M3.5 9h11M3.5 13.5h11"/></svg></span>Watchlist</a>
     </nav>
     <div class="sidebar-bottom">
       <span class="offline-label"><i></i>Offline snapshot</span>
@@ -23,9 +23,9 @@
   </aside>
   <div class="app-shell">
     <header class="topbar">
-      <button id="app-back" type="button" aria-label="Go back within ThemeScope" disabled>← Back</button>
-      <p id="status" role="status">Dashboard unavailable. JavaScript must be enabled to read this snapshot.</p>
-      <div class="timestamp-label"><span>Market session <b id="date">—</b></span><span>Dashboard generated <b id="generated-hkt">—</b></span></div>
+      <button id="app-back" type="button" aria-label="Go back within ThemeScope" disabled><svg class="control-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5M5 8h8"/></svg>Back</button>
+      <p id="status" role="status"></p>
+      <div class="timestamp-label"><span>Data through <b id="date">—</b></span><span>Generated <b id="generated-hkt">—</b></span></div>
     </header>
     <main>
       <section id="market" class="page" aria-labelledby="market-title">
@@ -35,7 +35,7 @@
       </section>
 
       <section id="sectors-themes" class="page" hidden aria-labelledby="themes-title">
-        <div class="page-heading"><div><span class="eyebrow">ELIGIBLE EQUITY EXPOSURES</span><h1 id="themes-title">Sectors &amp; Themes</h1><p>Sortable ETF comparisons. Rank is global within the eligible registry; filters do not rerank the remaining rows.</p></div><a class="download-link" href="themes.csv" download>Full ranking CSV ↓</a></div>
+        <div class="page-heading"><div><span class="eyebrow">ELIGIBLE EQUITY EXPOSURES</span><h1 id="themes-title">Sectors &amp; Themes</h1><p>Sortable ETF comparisons. Rank is global within the eligible registry; filters do not rerank the remaining rows.</p></div><a class="download-link" href="themes.csv" download>Full ranking CSV</a></div>
         <details class="help-card"><summary>Score and state definitions</summary><p id="score-method-description">Score weights and inputs come from this snapshot’s configured methodology.</p><p><b>Improving</b> means the current score is in the stronger half while the medium score is in the weaker half. <b>Fading</b> means the reverse. These cross-sectional labels do not establish a time-series reversal or rotation.</p></details>
         <div id="theme-controls" class="controls"></div>
         <p id="theme-count" class="caption"></p>
@@ -45,19 +45,18 @@
 
       <section id="watchlist" class="page" hidden aria-labelledby="active-name">
         <div id="watchlist-navigation" class="controls watchlist-navigation">
-          <button id="back-to-themes" type="button">Back to Sectors &amp; Themes</button>
           <label>Search themes <input id="watchlist-theme-search" type="search" placeholder="Find sector or theme"></label>
           <label>Sector / Theme <select id="watchlist-theme-selector" aria-label="Select a sector or theme"></select></label>
-          <button id="previous-theme" type="button" aria-label="Previous eligible sector or theme">← Previous</button>
-          <button id="next-theme" type="button" aria-label="Next eligible sector or theme">Next →</button>
+          <button id="previous-theme" type="button" aria-label="Previous eligible sector or theme"><svg class="control-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="m10 3-5 5 5 5"/></svg>Previous</button>
+          <button id="next-theme" type="button" aria-label="Next eligible sector or theme">Next<svg class="control-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg></button>
         </div>
         <div class="page-heading"><div><span class="eyebrow">SELECTED COMPANIES</span><h1 id="active-name">Watchlist</h1><p id="active-summary" class="watchlist-summary"></p></div></div>
         <p id="watchlist-message" class="watchlist-message" hidden></p>
-        <div id="stock-controls" class="controls"></div><p id="stock-basis" class="caption"></p><p id="coverage" class="caption"></p>
+        <div id="stock-controls" class="controls"></div><p id="coverage" class="caption"></p>
         <div class="table-wrap" id="stock-table-wrap"><table><thead id="stock-head"></thead><tbody id="stock-body"></tbody></table></div>
         <div class="exports" id="stock-exports"><button id="csv">Download visible CSV</button><button id="tv">Download TradingView list</button><a href="stock_diagnostics.csv" download>Stock eligibility audit</a><a href="run_bundle.zip" download>Download complete run ZIP</a><span id="export-status" role="status"></span></div>
       </section>
-      <footer>Offline snapshot · Opening or reloading this file makes no market-data requests. To refresh, run <code>python scripts/generate_dashboard.py</code>. <a href="latest_run.md" download>Run report</a> · <a href="latest_snapshot.json" download>Snapshot JSON</a><br><span id="generated"></span></footer>
+      <footer><a href="latest_run.md" download>Run report</a> · <a href="latest_snapshot.json" download>Snapshot JSON</a></footer>
     </main>
   </div>
   <script id="snapshot-data" type="application/json">{{SNAPSHOT_JSON}}</script>

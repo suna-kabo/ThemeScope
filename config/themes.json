@@ -1,5 +1,5 @@
 {
-  "registry_version": "6.1",
+  "registry_version": "6.2",
   "reviewer": "Codex implementation review",
   "decision_date": "2026-10-22",
   "effective_date": "2026-10-22",
@@ -9,7 +9,9 @@
     "QQQ",
     "IWM"
   ],
-  "volatility_symbols": ["^VIX"],
+  "volatility_symbols": [
+    "^VIX"
+  ],
   "settings": {
     "return_sessions": [
       5,
@@ -1236,7 +1238,7 @@
       "scope": "Working scope for Mortgage REITs: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
     }
   ],
-  "methodology_version": "6.1",
+  "methodology_version": "6.2",
   "score_methodology": {
     "current_strength_weights": {
       "excess21_percentile": 1.0
@@ -1249,7 +1251,31 @@
       "medium_strength": 0.4
     },
     "state_threshold": 50,
-    "score_method": "price_relative_strength_v6_1",
-    "purpose": "60% 21-session excess-return percentile plus 40% 63-session excess-return percentile; consistent relative-strength ranking for manual review, not a prediction or entry signal."
+    "score_method": "price_relative_strength_v6_2",
+    "purpose": "60% 21-session excess-return percentile plus 40% 63-session excess-return percentile; fixed browsing convention for manual review, not a prediction or entry signal."
+  },
+  "ui": {
+    "score_bands": [
+      {
+        "class": "score-q1",
+        "min": 0,
+        "max": 25
+      },
+      {
+        "class": "score-q2",
+        "min": 25,
+        "max": 50
+      },
+      {
+        "class": "score-q3",
+        "min": 50,
+        "max": 75
+      },
+      {
+        "class": "score-q4",
+        "min": 75,
+        "max": 100
+      }
+    ]
   }
 }

@@ -87,7 +87,7 @@ class V6RegistryTests(unittest.TestCase):
         snapshot = {"session_date": session, "run_date": session, "generated_at": "2026-10-23T16:00:00+00:00", "themes": [theme], "context": [], "settings": self.registry["settings"]}
         raw = {"charts": {}, "holdings": {}, "quotes": {}, "errors": {"charts": {}, "holdings": {}, "quotes": {}}, "v5": {}}
         result = apply_v6(snapshot, raw, {"registry_version": "6.1", "methodology_version": "6.1", "themes": [record]})
-        self.assertEqual(result["schema_version"], "6.1")
+        self.assertEqual(result["schema_version"], "6.2")
         self.assertEqual(result["theme_registry_version"], "6.1")
         self.assertEqual(result["resolved_market_session"], session)
         self.assertEqual(result["themes"], [])

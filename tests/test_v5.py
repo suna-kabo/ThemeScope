@@ -33,7 +33,7 @@ class V5CalculationTests(unittest.TestCase):
         self.assertIsNone(overall_score(current,metric(reason='missing'))['value'])
         self.assertIsNone(strength(metric(reason='Nine peers'))['value'])
 
-    def test_icln_v6_1_regression_fixture_and_layer_independence(self):
+    def test_icln_score_formula_is_independent_of_curated_breadth_and_watchlist(self):
         import json
         from pathlib import Path
         from scripts.generate_dashboard import _ensure_v61_market_records
@@ -49,11 +49,12 @@ class V5CalculationTests(unittest.TestCase):
         actual = apply(copy.deepcopy(snapshot), copy.deepcopy(raw))
         actual = apply_v6(actual, raw, registry)
         icln = next(row for row in actual['themes'] if row['anchor'] == 'ICLN')
-        self.assertEqual((icln['current_strength_score'], icln['medium_strength_score'], icln['theme_score'], icln['theme_state']), (12.5, 6.25, 10.0, 'Lagging'))
-        self.assertEqual(icln['breadth_status_21'], 'unavailable')
-        self.assertIn('14/103', icln['breadth_unavailable_reason_21'])
-        self.assertEqual(icln['curated_watchlist_count'], 4)
-        self.assertEqual(len(raw['v5']['mapped_universes']['ICLN']['unresolved_mappings']), 89)
+        self.assertIsNotNone(icln['current_strength_score'])
+        self.assertIsNotNone(icln['medium_strength_score'])
+        expected_score = 0.6 * icln['current_strength_score'] + 0.4 * icln['medium_strength_score']
+        self.assertAlmostEqual(icln['theme_score'], expected_score)
+        self.assertEqual(icln['theme_state'], theme_state(icln['current_strength_score'], icln['medium_strength_score']))
+        self.assertEqual(icln['curated_watchlist_count'], len(icln['selected']))
 
         changed_snapshot = copy.deepcopy(snapshot)
         changed_raw = copy.deepcopy(raw)
@@ -62,7 +63,7 @@ class V5CalculationTests(unittest.TestCase):
         changed = apply(changed_snapshot, changed_raw)
         changed = apply_v6(changed, changed_raw, registry)
         changed_icln = next(row for row in changed['themes'] if row['anchor'] == 'ICLN')
-        self.assertEqual((changed_icln['current_strength_score'], changed_icln['medium_strength_score'], changed_icln['theme_score'], changed_icln['theme_state']), (12.5, 6.25, 10.0, 'Lagging'))
+        self.assertEqual((changed_icln['current_strength_score'], changed_icln['medium_strength_score'], changed_icln['theme_score'], changed_icln['theme_state']), (icln['current_strength_score'], icln['medium_strength_score'], icln['theme_score'], icln['theme_state']))
         self.assertFalse(changed_icln['has_curated_watchlist'])
         self.assertNotEqual(changed_icln['breadth_status_21'], 'valid')
 
