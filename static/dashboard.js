@@ -396,7 +396,9 @@
         const count = m && finite(m.valid_count) && finite(m.eligible_count) ? m.valid_count.toLocaleString("en-US") + "/" + m.eligible_count.toLocaleString("en-US") + " mapped" : "Counts unavailable";
         const reason = m?.reason || "Price history unavailable";
         const shortReason = /coverage/i.test(reason) ? "Insufficient price history" : reason.replace(/\b\d+(?:\.\d+)?%/g, "").replace(/\s{2,}/g, " ").trim();
-        return '<div class="indicator-box"><div class="indicator-label">' + title + '</div><div class="breadth-unavailable"><b>Breadth unavailable</b><small>' + esc(count) + '</small><small class="breadth-reason">' + esc(shortReason) + '</small>' + changeLine + '</div></div>';
+        const changeReason = row.field_status?.["breadth" + period + "_change_5_pp"]?.reason || "Both observations must pass the breadth validity rule";
+        const diagnostic = "Breadth unavailable · " + count + " · " + reason + " · 5-session change unavailable: " + changeReason;
+        return '<div class="indicator-box"><div class="indicator-label">' + title + '</div><div class="breadth-unavailable" title="' + esc(diagnostic) + '"><b>Breadth unavailable</b><small>' + esc(count) + '</small><small class="breadth-reason">' + esc(shortReason) + '</small><small class="breadth-change">5-session change unavailable</small></div></div>';
       }
       return '<div class="indicator-box"><div class="indicator-label">' + title + '</div><div class="breadth-row"><b class="breadth-value">' + m.value.toFixed(1) + '%</b><span class="breadth-count">' + m.above_count.toLocaleString("en-US") + '/' + m.valid_count.toLocaleString("en-US") + '</span></div><div class="meter"><i style="width:' + Math.max(0, Math.min(100, m.value)) + '%"></i></div>' + changeLine + '</div>';
     }
@@ -761,9 +763,10 @@
         columns
           .map(
             (c) => {
+              var fullLabel = c[4] || c[0];
               var label = c[1]
-                ? '<button data-sort="' + c[1] + '" title="Sort values; unavailable values stay last">' + c[0] + (state[p + "Key"] === c[1] ? arrowIcon(state[p + "Dir"]) : "") + '</button>'
-                : '<span>' + c[0] + '</span>';
+                ? '<button data-sort="' + c[1] + '" title="Sort by ' + esc(fullLabel) + '; unavailable values stay last" aria-label="Sort by ' + esc(fullLabel) + '">' + c[0] + (state[p + "Key"] === c[1] ? arrowIcon(state[p + "Dir"]) : "") + '</button>'
+                : '<span title="' + esc(fullLabel) + '">' + c[0] + '</span>';
               return '<th><div class="th-content">' + label + (c[3] ? infoControl(c[3]) : '') + '</div></th>';
             },
           )
@@ -804,8 +807,12 @@
     function themeBreadthCell(row, period) {
       const metric = row.holdings_breadth?.[String(period)];
       const value = row["etf_breadth" + period + "_pct"];
-      if (!metric || !finite(value) || metric.status !== "valid")
-        return '<span class="breadth-unavailable-cell" title="' + esc(metric?.reason || row["breadth_unavailable_reason_" + period] || "Holdings breadth is unavailable") + '">Breadth unavailable <small>(' + esc(metric && finite(metric.valid_count) && finite(metric.eligible_count) ? metric.valid_count + '/' + metric.eligible_count + ' holdings' : 'counts unavailable') + ')</small></span>';
+      if (!metric || !finite(value) || metric.status !== "valid") {
+        const count = metric && finite(metric.valid_count) && finite(metric.eligible_count) ? metric.valid_count + '/' + metric.eligible_count + ' holdings' : 'counts unavailable';
+        const reason = metric?.reason || row["breadth_unavailable_reason_" + period] || "Holdings breadth is unavailable";
+        const label = "Breadth unavailable · " + count + " · " + reason;
+        return '<span class="breadth-unavailable-cell" title="' + esc(label) + '" aria-label="' + esc(label) + '">N/A</span>';
+      }
       return '<span title="Holdings as of ' + esc(metric.as_of || "unknown") + '">' + value.toFixed(1) + '% <small>(' + metric.above_count + '/' + metric.valid_count + ')</small></span>';
     }
     function themeBreadthChangeCell(row, period) {
@@ -844,10 +851,10 @@
       const breadthUnavailable = visibleThemes.filter((row) => row.breadth_status_21 !== "valid" || row.breadth_status_50 !== "valid").length;
       $("theme-count").textContent = visibleThemes.length + " of " + all.length + " exposures" + (breadthUnavailable ? " · " + breadthUnavailable + " with breadth unavailable" : "");
       head("theme", [
-        ["Rank", "rank_current"], ["Type"], ["Sector / Theme", "name"], ["ETF"], ["State", "theme_state", null, "state"],
-        ["Theme Score", "theme_score", null, "theme_score"], ["Current", "current_strength_score", null, "current_strength_score"], ["Medium", "medium_strength_score", null, "medium_strength_score"],
-        ["1M Return", "return21"], ["1M vs SPY", "excess21", null, "excess21"], ["3M Return", "return63"], ["3M vs SPY", "excess63", null, "excess63"],
-        ["EMA21 Breadth", "etf_breadth21_pct", null, "etf_breadth21_pct"], ["EMA21 Δ 5D"], ["EMA50 Breadth", "etf_breadth50_pct", null, "etf_breadth50_pct"], ["EMA50 Δ 5D"], ["Rank 5D ago"], ["Rank Δ 5D"], ["Details"],
+        ["#", "rank_current", null, null, "Current rank"], ["Type", null, null, null, "Exposure type"], ["Name", "name", null, null, "Sector or theme name"], ["ETF", null, null, null, "Anchor ETF"], ["State", "theme_state", null, "state"],
+        ["Score", "theme_score", null, "theme_score", "Theme Score"], ["Now", "current_strength_score", null, "current_strength_score", "Current strength"], ["Med", "medium_strength_score", null, "medium_strength_score", "Medium strength"],
+        ["1M", "return21", null, null, "21-session return"], ["1M−SPY", "excess21", null, "excess21", "21-session excess return vs SPY"], ["3M", "return63", null, null, "63-session return"], ["3M−SPY", "excess63", null, "excess63", "63-session excess return vs SPY"],
+        ["EMA21", "etf_breadth21_pct", null, "etf_breadth21_pct", "Holdings above EMA21"], ["Δ5D", null, null, null, "EMA21 breadth change over five sessions"], ["EMA50", "etf_breadth50_pct", null, "etf_breadth50_pct", "Holdings above EMA50"], ["Δ5D", null, null, null, "EMA50 breadth change over five sessions"], ["Rk−5D", null, null, null, "Rank five sessions ago"], ["Δ", null, null, null, "Rank change over five sessions"], ["Facts", null, null, null, "Facts and status"],
       ]);
       $("theme-body").innerHTML = visibleThemes.map(function (row) {
         const type = row.level === "Sector" ? "Sector" : "Theme";
@@ -921,13 +928,13 @@
         const capacity = Number(data.settings?.watchlist_capacity || 20);
         $("coverage").textContent = base.length + " of " + capacity + " stocks";
       }
-      head("stock", [["Rank"],["Ticker / company"],["Price","price_close"],["5-session %","return5"],["21-session %","return21"],["63-session %","return63"],["21-session vs ETF (pp)","excess21"],["63-session vs ETF (pp)","excess63"],["EMA21"],["EMA50"],["Core / Related"],["ADV$30","adv30_usd"],["Chart"]]);
+      head("stock", [["#", null, null, null, "Visible rank"],["Ticker / company", null, null, null, "Ticker and company name"],["Price","price_close",null,null,"Latest close"],["5D %","return5",null,null,"Five-session return"],["1M %","return21",null,null,"21-session return"],["3M %","return63",null,null,"63-session return"],["1M−ETF","excess21",null,null,"21-session excess return vs anchor ETF, percentage points"],["3M−ETF","excess63",null,null,"63-session excess return vs anchor ETF, percentage points"],["EMA21",null,null,null,"Close relative to EMA21"],["EMA50",null,null,null,"Close relative to EMA50"],["Core / Related",null,null,null,"Membership relationship"],["ADV$30","adv30_usd",null,null,"30-session average daily dollar volume"],["Chart",null,null,null,"Open verified ticker chart"]]);
       $("stock-body").innerHTML = visible.map(function (row) {
         const exchange = String(row.exchange || "").toUpperCase();
         const prefix = exchange.startsWith("NASDAQ") ? "NASDAQ" : exchange.startsWith("NYSE") ? "NYSE" : null;
         const url = prefix ? "https://www.tradingview.com/chart/?symbol=" + encodeURIComponent(prefix + ":" + row.ticker) : null;
         const rationale = row.membership_rationale || row.evidence_note || "Business relevance rationale recorded in the membership source.";
-        return '<tr><td>' + (row.display_rank || "—") + '</td><td><b>' + esc(row.ticker) + '</b><span class="company">' + esc(row.company) + '</span><details><summary>Rationale</summary><div class="stock-details">' + esc(rationale) + '<br>' + esc(row.membership_source || row.evidence?.url || "") + '</div></details></td>' +
+        return '<tr><td>' + (row.display_rank || "—") + '</td><td><b>' + esc(row.ticker) + '</b><span class="company" title="' + esc(row.company) + '">' + esc(row.company) + '</span><details><summary aria-label="Business rationale">Info</summary><div class="stock-details">' + esc(rationale) + '<br>' + esc(row.membership_source || row.evidence?.url || "") + '</div></details></td>' +
           '<td>' + money(row.price_close) + '</td>' + ["return5","return21","return63","excess21","excess63"].map((key) => '<td>' + pct(valueAt(row,key), key.startsWith("excess")) + '</td>').join("") +
           '<td>' + ema(row,21) + '</td><td>' + ema(row,50) + '</td><td>' + esc(row.membership_tag || "—") + '</td><td>' + money(row.adv30_usd,true) + '</td><td>' + (url ? '<a target="_blank" rel="noopener noreferrer" href="' + esc(url) + '">Open</a>' : missing) + '</td></tr>';
       }).join("") || (hasCuratedList ? '<tr><td colspan="13">No stocks match these filters.</td></tr>' : "");
