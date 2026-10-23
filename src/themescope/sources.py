@@ -27,6 +27,21 @@ class RateLimited(RuntimeError):
 
 
 _YAHOO_BLOCKED_HOSTS: set[str] = set()
+_YAHOO_CHART_HOSTS: tuple[str, ...] = (
+    "query1.finance.yahoo.com",
+    "query2.finance.yahoo.com",
+)
+
+
+def configure_sources(source_config: dict[str, Any]) -> None:
+    """Load configured provider priority without changing adapter semantics."""
+    global _YAHOO_CHART_HOSTS
+    configured = source_config.get("prices", {}).get("hosts", _YAHOO_CHART_HOSTS)
+    hosts = tuple(str(host).strip() for host in configured if str(host).strip())
+    if not hosts or any("/" in host or ":" in host for host in hosts):
+        raise ValueError("config/sources.json prices.hosts must contain host names")
+    _YAHOO_CHART_HOSTS = hosts
+    _YAHOO_BLOCKED_HOSTS.clear()
 
 
 def _request(url: str, accept: str = "*/*", user_agent: str | None = None) -> bytes:
@@ -150,9 +165,11 @@ def _vaneck_holdings(theme: dict[str, Any]) -> dict[str, Any]:
     if any(item.get('Ticker') != theme['anchor'] for item in data['Holdings']):
         raise RuntimeError('VanEck dataset fund identity mismatch')
     rows = []
+    excluded_rows = []
     for item in data.get("Holdings", []):
         ticker = str(item.get("Label") or item.get("HoldingTicker") or "").strip()
         if not ticker or str(item.get("AssetClass", "")).lower() not in ("stock", "equity"):
+            excluded_rows.append({'ticker': ticker, 'company': item.get('HoldingName'), 'security_type': item.get('AssetClass'), 'reason': 'Non-equity or unresolved source row'})
             continue
         rows.append(
             {
@@ -164,7 +181,7 @@ def _vaneck_holdings(theme: dict[str, Any]) -> dict[str, Any]:
             }
         )
     as_of = str(data.get("AsOfDate") or "")[:10] or None
-    return {"as_of": as_of, "url": url, "rows": rows, "discovery_error": discovery_error}
+    return {"as_of": as_of, "url": url, "rows": rows, "discovery_error": discovery_error, "excluded_rows": excluded_rows}
 
 
 def _first_trust_holdings(theme: dict[str, Any]) -> dict[str, Any]:
@@ -220,7 +237,7 @@ def _ishares_holdings(theme: dict[str, Any]) -> dict[str, Any]:
         if len(row) < len(header):
             continue
         ticker = row[index["ticker"]].strip()
-        if not ticker or ticker == "-":
+        if not ticker:
             continue
         type_column = index.get("type", index.get("asset class"))
         results.append(
@@ -309,11 +326,14 @@ def _spdr_holdings(theme: dict[str, Any]) -> dict[str, Any]:
     if header_index is None:
         raise RuntimeError("SPDR workbook did not contain the expected holdings columns")
     results = []
+    excluded_rows = []
     for row in table[header_index + 1 :]:
         if len(row) < 5:
             continue
         ticker = str(row[1] or "").strip()
         if not ticker:
+            if _number(row[4]) is not None:
+                excluded_rows.append({'company': str(row[0]), 'reason': 'Source row has no equity ticker'})
             continue
         results.append(
             {
@@ -323,7 +343,7 @@ def _spdr_holdings(theme: dict[str, Any]) -> dict[str, Any]:
                 "weight_pct": _number(row[4]),
             }
         )
-    return {"as_of": as_of, "url": theme["holdings_source"]["url"], "rows": results}
+    return {"as_of": as_of, "url": theme["holdings_source"]["url"], "rows": results, "excluded_rows": excluded_rows}
 
 
 HOLDINGS_PARSERS = {
@@ -348,7 +368,7 @@ def fetch_yahoo_chart(symbol: str, years: int = 2) -> dict[str, Any]:
     start = int((now - timedelta(days=365 * years + 2)).timestamp())
     end = int(now.timestamp()) + 86400
     failures = []
-    for host in ('query1.finance.yahoo.com', 'query2.finance.yahoo.com'):
+    for host in _YAHOO_CHART_HOSTS:
         if host in _YAHOO_BLOCKED_HOSTS:
             failures.append(f'{host}: circuit open after HTTP 429 in this run')
             continue

@@ -1,4 +1,4 @@
-# Workflow and interface verification — 2026-10-22
+# Archived v4 workflow and interface verification — 2026-10-22
 
 ## Actual retrieved run
 

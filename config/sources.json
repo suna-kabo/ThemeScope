@@ -1,0 +1,50 @@
+{
+  "version": "1.0",
+  "prices": {
+    "provider": "Yahoo Finance chart API",
+    "hosts": [
+      "query1.finance.yahoo.com",
+      "query2.finance.yahoo.com"
+    ],
+    "interval_seconds": 1.5,
+    "history_years": 2,
+    "price_field": "close",
+    "return_field": "adj_close",
+    "fallback_policy": "Try hosts in listed order; open a run-local circuit after HTTP 429; do not substitute raw close for adjusted close."
+  },
+  "index_constituents": {
+    "SPY": {
+      "provider": "Wikipedia S&P 500 constituent table",
+      "url": "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+    },
+    "QQQ": {
+      "provider": "Nasdaq Nasdaq-100 list",
+      "url": "https://api.nasdaq.com/api/quote/list-type/nasdaq100"
+    },
+    "IWM": {
+      "provider": "iShares Russell 2000 ETF official holdings",
+      "method": "ishares_csv",
+      "url": "https://www.ishares.com/us/products/239710/ishares-russell-2000-etf/latest-holdings.csv",
+      "limitations": "ETF holdings breadth is a practical Russell 2000 proxy, not official Russell 2000 constituent breadth."
+    }
+  },
+  "volatility": {
+    "provider": "Yahoo Finance chart API",
+    "symbols": ["^VIX"],
+    "description": "VIX is displayed as volatility context only; no constituent breadth or score dependency."
+  },
+  "security_mapping": {
+    "provider": "SEC company ticker and exchange file",
+    "url": "https://www.sec.gov/files/company_tickers_exchange.json"
+  },
+  "stock_market_metadata": {
+    "provider": "Nasdaq quote summary",
+    "url_template": "https://api.nasdaq.com/api/quote/{symbol}/summary?assetclass=stocks",
+    "limitations": "The retrieved market-cap field has no separate observation timestamp."
+  },
+  "etf_metadata": {
+    "aum": null,
+    "bid_ask_spread": null,
+    "limitations": "No reproducible daily AUM and bid/ask history adapter is configured; both remain unavailable and are not inferred."
+  }
+}

@@ -90,3 +90,69 @@ assert.deepEqual(
   [1, 1, 3, null],
 );
 assert.equal(ui.filterRows(ranked, { query: "D" })[0].display_rank, 3);
+const scores = [
+  { id: "z", theme_score: null },
+  { id: "b", theme_score: 60 },
+  { id: "a", theme_score: 60 },
+  { id: "c", theme_score: 10 },
+];
+assert.deepEqual(
+  ui.sortRows(scores, "theme_score", "desc").map((r) => r.id),
+  ["a", "b", "c", "z"],
+);
+assert.deepEqual(
+  ui.sortRows(scores, "theme_score", "asc").map((r) => r.id),
+  ["c", "a", "b", "z"],
+);
+assert.deepEqual(
+  ui.sortRows([{ name: "Zebra" }, { name: "Apple" }], "name", "asc").map(
+    (r) => r.name,
+  ),
+  ["Apple", "Zebra"],
+);
+assert.equal(
+  ui.ranked(scores, "theme_score", "desc").at(-1).display_rank,
+  null,
+);
+const pool = Array.from({ length: 25 }, (_, i) => ({
+  ticker: "S" + i,
+  selection_slot: i + 1,
+  adv30_usd: 25 - i,
+}));
+const compact = ui.limitSelection(pool, 15),
+  expanded = ui.limitSelection(pool, 20);
+assert.equal(compact.length, 15);
+assert.equal(expanded.length, 20);
+assert.deepEqual(compact, expanded.slice(0, 15));
+assert.deepEqual(
+  ui
+    .sortRows(compact, "adv30_usd", "asc")
+    .map((r) => r.ticker)
+    .sort(),
+  compact.map((r) => r.ticker).sort(),
+);
+assert.match(
+  ui.rowsToCsv([
+    {
+      ticker: "X",
+      membership_tag: "Related",
+      is_anchor_holding: false,
+      etf_weight_pct: null,
+    },
+  ]),
+  /membership_tag/,
+);
+const configuredBands = [
+  { class: "score-q1", min: 0, max: 25 },
+  { class: "score-q2", min: 25, max: 50 },
+  { class: "score-q3", min: 50, max: 75 },
+  { class: "score-q4", min: 75, max: 100 },
+];
+assert.equal(ui.scoreBandClass(24.999, configuredBands), "score-q1");
+assert.equal(ui.scoreBandClass(25, configuredBands), "score-q2");
+assert.equal(ui.scoreBandClass(49.999, configuredBands), "score-q2");
+assert.equal(ui.scoreBandClass(50, configuredBands), "score-q3");
+assert.equal(ui.scoreBandClass(74.999, configuredBands), "score-q3");
+assert.equal(ui.scoreBandClass(75, configuredBands), "score-q4");
+assert.equal(ui.scoreBandClass(100, configuredBands), "score-q4");
+assert.equal(ui.scoreBandClass(null, configuredBands), "score-na");

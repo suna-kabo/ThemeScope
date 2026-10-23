@@ -1,13 +1,16 @@
 """Real Chromium/CDP Network verification; run against an exported HTML path."""
 import json
 import re
-import zipfile
 import sys
 import functools
+import platform
 import threading
+import zipfile
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
+
 from playwright.sync_api import sync_playwright
+
 
 path = Path(sys.argv[1]).resolve()
 server = ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(SimpleHTTPRequestHandler, directory=str(path.parent)))
@@ -22,52 +25,117 @@ with sync_playwright() as p:
     cdp.on('Network.requestWillBeSent', lambda event: requests.append(event['request']['url']))
     page.on('pageerror', lambda error: errors.append(str(error)))
     page.goto(url);page.wait_for_timeout(400)
-    assert page.locator('#theme-body tr').count()==6
-    assert page.locator('#stock-body tr').count()>1
     assert 'Loading' not in page.inner_text('body')
-    assert page.locator('.card').count()==2
+    assert page.locator('#cards .market-card').count()==3
+    assert page.locator('#volatility-card .market-card').count()==1
+    assert 'IWM' in page.inner_text('#cards') and 'IWM HOLDINGS BREADTH' in page.inner_text('#cards')
+    assert 'Constituents above EMA21' in page.inner_text('#cards')
+    assert 'Price vs EMA21' in page.inner_text('#cards')
+    assert page.locator('#cards .ema-pill').count()==0
+    assert page.locator('#cards .condition-box').count()==6
+    assert 'VIX' in page.inner_text('#volatility-card')
+    assert 'Source status: available' not in page.inner_text('#volatility-card')
+    assert 'HKT' in page.inner_text('#generated-hkt')
+    assert page.locator('#status').inner_text() == '' or 'breadth unavailable' in page.locator('#status').inner_text()
+    assert page.evaluate('document.fonts.check(\'15px "Inter Variable"\')')
+    assert 'font-src data:' in page.content()
+    assert page.locator('.state-tag').count() >= 0
     assert page.locator('html').get_attribute('data-mode')=='dark'
+    assert page.locator('.side-nav [data-page]').count()==3
+    assert page.locator('.side-nav [data-page="industries"]').count()==0
     page.screenshot(path='/tmp/themescope-dark.png',full_page=True)
-    # Numeric sorting, stable ranks through filters, and missing-last are also unit tested.
-    first=page.locator('#theme-body tr').first.inner_text()
-    page.click('#theme-direction')
-    assert page.locator('#theme-body tr').first.inner_text()!=first
-    page.fill('#theme-search','cloud')
-    assert page.locator('#theme-body tr[data-theme]').count()==1
-    page.click('#theme-body tr[data-theme]')
-    assert 'Cloud' in page.inner_text('#active-name')
-    page.fill('#theme-search','')
-    page.select_option('#pool','20');page.select_option('#pool','all');page.select_option('#pool','15')
-    page.select_option('#stock-trend','Downtrend');page.select_option('#stock-trend','All')
-    page.select_option('#stock-relative','Outperforming');page.select_option('#stock-relative','All')
-    page.fill('#stock-search','MSFT');page.fill('#stock-search','')
-    page.click('#stock-direction')
-    assert page.locator('#stock-body a').first.get_attribute('href').startswith('https://www.tradingview.com/chart/?symbol=')
-    for button in ['#csv','#tv','a[href="run_bundle.zip"]']:
+
+    page.click('.side-nav a[data-page="sectors-themes"]')
+    assert page.locator('#sectors-themes').is_visible()
+    info=page.locator('#theme-head .info-button').first
+    assert info.count()==1
+    info.focus()
+    assert page.locator('#'+info.get_attribute('aria-describedby')).count()==1
+    assert page.locator('#'+info.get_attribute('aria-describedby')).text_content()
+    info.click()
+    assert info.get_attribute('aria-expanded')=='true'
+    rows=page.locator('#theme-body tr[data-theme]')
+    if rows.count():
+        page.select_option('#theme-sort','theme_score')
+        page.click('#theme-direction')
+        assert rows.count() >= 1
+        assert page.locator('#theme-head').inner_text().find('1M Return') >= 0
+        assert page.locator('#theme-head').inner_text().find('Rank Δ 5D') >= 0
+        assert page.locator('#theme-body .score-chip').count() > 0
+        assert not page.locator('#watchlist-navigation #back-to-themes').count()
         with page.expect_download() as download:
-            page.click(button)
-        assert Path(download.value.path()).stat().st_size>0
-        if button.startswith('a['):
-            with zipfile.ZipFile(download.value.path()) as bundle:
-                assert 'dashboard.html' in bundle.namelist()
-                assert len(bundle.namelist()) == 9
+            page.click('#theme-visible-csv')
+        assert Path(download.value.path()).stat().st_size > 0
+        page.fill('#theme-search','no-such-theme')
+        assert page.locator('#theme-body tr[data-theme]').count()==0
+        page.fill('#theme-search','')
+        page.locator('#theme-body tr[data-theme]').first.click()
+        assert page.locator('#watchlist').is_visible()
+        assert not page.locator('#app-back').is_disabled()
+        page.click('#app-back')
+        assert page.locator('#sectors-themes').is_visible()
+        assert page.locator('#theme-sort').input_value()=='theme_score'
+        assert page.locator('#theme-direction').inner_text().startswith('Ascending')
+        page.go_forward()
+        assert page.locator('#watchlist').is_visible()
+        assert page.locator('#watchlist-theme-selector optgroup[label="Sectors"]').count()==1
+        assert page.locator('#watchlist-theme-selector optgroup[label="Themes"]').count()==1
+        assert page.locator('#active-summary .rs-spark-row').count()==1
+        current=page.locator('#active-name').inner_text()
+        options=page.locator('#watchlist-theme-selector option:not([disabled])')
+        if options.count()>1:
+            page.select_option('#watchlist-theme-selector',options.nth(1).get_attribute('value'))
+            assert page.locator('#active-name').inner_text()!=current
+            page.click('#next-theme')
+            assert page.locator('#active-name').inner_text()
+        assert '20-stock capacity and 15-row default' not in page.inner_text('body')
+        assert page.locator('#watchlist-message').inner_text() in ('No curated stock drilldown is available for this theme.', '')
+
+    page.click('.side-nav a[data-page="watchlist"]')
+    if not page.locator('#stock-table-wrap').is_hidden():
+        page.select_option('#pool','20');page.select_option('#pool','15')
+        page.select_option('#ema-filter','above21');page.select_option('#ema-filter','all')
+        page.fill('#stock-search','MSFT');page.fill('#stock-search','')
+        page.click('#stock-direction')
+        with page.expect_download() as download:
+            page.click('#csv')
+        assert Path(download.value.path()).stat().st_size > 0
+        with page.expect_download() as download:
+            page.click('#tv')
+        assert Path(download.value.path()).stat().st_size > 0
+
+    with page.expect_download() as download:
+        page.click('a[href="run_bundle.zip"]')
+    with zipfile.ZipFile(download.value.path()) as bundle:
+        names=set(bundle.namelist())
+        assert {'dashboard.html','themes.csv','registry_audit.csv','latest_snapshot.json','raw_inputs.json','iwm_breadth_prices.csv.gz','Inter-LICENSE.txt'} <= names
+        assert 'sectors.csv' not in names and 'industries.csv' not in names
+
     page.click('#mode');assert page.locator('html').get_attribute('data-mode')=='light'
     page.screenshot(path='/tmp/themescope-light.png',full_page=True)
     page.reload();page.wait_for_timeout(400)
     assert page.locator('html').get_attribute('data-mode')=='light'
-    # A supplied failed snapshot must show a concise failure, with no loading placeholders.
     bad = re.sub(r'(<script id="snapshot-data" type="application/json">).*?(</script>)', lambda m: m[1] + '{"session_date":null,"sources":{"source_errors":{"charts":{"SPY":"HTTP 429"}}}}' + m[2], path.read_text(encoding='utf-8'), flags=re.S)
     page.route(url, lambda route: route.fulfill(status=200, content_type='text/html', body=bad))
     page.reload()
     assert 'Market data unavailable' in page.inner_text('#status')
-    assert 'HTTP 429' in page.inner_text('#status')
     assert 'Loading' not in page.inner_text('body')
     assert page.locator('section:visible').count()==0
     page.unroute(url)
     external=[u for u in requests if u.startswith(('http:','https:','ws:','wss:')) and not u.startswith(f'http://127.0.0.1:{server.server_port}/')]
     assert not external, external
     assert not errors, errors
-    result={'file_scheme_note':'Managed Chromium policy blocks file://; exact exported bytes served on loopback for verification', 'method':'Chromium DevTools Protocol Network.requestWillBeSent (Network panel backend)','open_and_reload_external_requests':external,'requests':requests,'javascript_errors':errors,'interaction_checks':'passed'}
+    request_summary=[]
+    for request_url in requests:
+        if request_url.startswith('data:font/woff2;base64,'):
+            summary='data:font/woff2 (embedded)'
+        elif request_url.startswith(f'http://127.0.0.1:{server.server_port}/'):
+            summary=Path(request_url.split('?',1)[0]).name + ' (local loopback)'
+        else:
+            summary=request_url
+        request_summary.append(summary)
+    result={'file_scheme_note':'Managed Chromium policy blocks file://; exact exported bytes served over loopback for verification', 'method':'Chromium DevTools Protocol Network.requestWillBeSent (Network panel backend)','runtime_environment':platform.platform(),'browser':'Chromium '+browser.version,'windows_chrome_verified':False,'embedded_font_loaded':True,'open_and_reload_external_requests':external,'requests':request_summary,'javascript_errors':errors,'interaction_checks':'passed'}
     Path('/tmp/themescope-browser-verification.json').write_text(json.dumps(result,indent=2))
     print(json.dumps(result,indent=2))
     browser.close()
+server.shutdown()

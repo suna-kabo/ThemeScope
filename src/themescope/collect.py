@@ -6,6 +6,7 @@ import json
 import math
 import statistics
 import time
+import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -25,7 +26,7 @@ from .metrics import (
     split_adjusted_observations,
     trend_metric,
 )
-from .sources import fetch_holdings, fetch_nasdaq_summary, fetch_sec_latest_annual, fetch_yahoo_chart
+from .sources import configure_sources, fetch_holdings, fetch_nasdaq_summary, fetch_sec_latest_annual, fetch_yahoo_chart
 
 
 WINDOWS = (5, 21, 63, 126)
@@ -39,8 +40,9 @@ def _numeric(value: Any) -> float | None:
         return None
 
 
-def _metric_values(metrics: dict[str, Any]) -> dict[str, float | None]:
-    return {str(window): metrics[str(window)].get("value") for window in WINDOWS}
+def _metric_values(metrics: dict[str, Any], settings: dict[str, Any] | None = None) -> dict[str, float | None]:
+    windows = tuple((settings or {}).get("return_sessions", WINDOWS))
+    return {str(window): metrics[str(window)].get("value") for window in windows}
 
 
 def _fetch_many(
@@ -48,6 +50,7 @@ def _fetch_many(
     fetcher: Any,
     workers: int = 4,
     request_interval_seconds: float = 0.0,
+    progress_label: str | None = None,
 ) -> tuple[dict[str, Any], dict[str, str]]:
     results: dict[str, Any] = {}
     errors: dict[str, str] = {}
@@ -60,19 +63,25 @@ def _fetch_many(
                 results[symbol] = fetcher(symbol)
             except Exception as exc:  # retain per-symbol failures as explicit unavailable data
                 errors[symbol] = f"{type(exc).__name__}: {exc}"
+            attempted = index + 1
+            if progress_label and (attempted % 25 == 0 or attempted == len(ordered_symbols)):
+                print(f"{progress_label}: {attempted}/{len(ordered_symbols)} attempted, {len(results)} retrieved, {len(errors)} unavailable.", flush=True)
         return results, errors
     with ThreadPoolExecutor(max_workers=workers) as pool:
         jobs = {pool.submit(fetcher, symbol): symbol for symbol in ordered_symbols}
-        for future in as_completed(jobs):
+        for index, future in enumerate(as_completed(jobs), 1):
             symbol = jobs[future]
             try:
                 results[symbol] = future.result()
             except Exception as exc:  # retain per-symbol failures as explicit unavailable data
                 errors[symbol] = f"{type(exc).__name__}: {exc}"
+            if progress_label and (index % 50 == 0 or index == len(ordered_symbols)):
+                print(f"{progress_label}: {index}/{len(ordered_symbols)} attempted, {len(results)} retrieved, {len(errors)} unavailable.", flush=True)
     return results, errors
 
 
-def _returns(chart: dict[str, Any] | None, calendar: list[str], session: str | None) -> dict[str, dict[str, Any]]:
+def _returns(chart: dict[str, Any] | None, calendar: list[str], session: str | None, settings: dict[str, Any] | None = None) -> dict[str, dict[str, Any]]:
+    windows = tuple((settings or {}).get("return_sessions", WINDOWS))
     if chart is None or session is None:
         return {
             str(n): {
@@ -83,9 +92,9 @@ def _returns(chart: dict[str, Any] | None, calendar: list[str], session: str | N
                 "session_date": session,
                 "input_version": "yahoo-chart-adjusted-close-v1",
             }
-            for n in WINDOWS
+            for n in windows
         }
-    return {str(n): return_metric(chart, calendar, session, n) for n in WINDOWS}
+    return {str(n): return_metric(chart, calendar, session, n) for n in windows}
 
 
 def _number_from_quote(value: Any) -> float | None:
@@ -195,7 +204,7 @@ def _stock_row(
     if chart is None:
         price_map: dict[str, dict[str, Any]] = {}
         raw_map: dict[str, dict[str, Any]] = {}
-        returns = _returns(None, calendar, session)
+        returns = _returns(None, calendar, session, settings)
         adv = {"value": None, "status": "unavailable", "reason": error or "Price source unavailable", "observation_count": 0, "session_date": session}
         trend = {"state": "Unavailable", "status": "unavailable", "reason": error or "Price source unavailable", "ema21": None, "ema50": None, "price_close": None}
         instrument = None
@@ -204,8 +213,8 @@ def _stock_row(
         price_map = observation_map(chart)
         raw_rows = split_adjusted_observations(chart)
         raw_map = {row["date"]: row for row in raw_rows}
-        returns = _returns(chart, calendar, session)
-        adv = adv30_metric(chart, calendar, session)
+        returns = _returns(chart, calendar, session, settings)
+        adv = adv30_metric(chart, calendar, session, int(settings.get("adv30_sessions", 30)))
         trend = trend_metric(chart, calendar, session, settings)
         instrument = chart.get("meta", {}).get("instrumentType")
         price_currency = chart.get("meta", {}).get("currency")
@@ -224,11 +233,13 @@ def _stock_row(
         reasons.append("Price source did not identify an equity instrument")
     if price_currency != "USD":
         reasons.append("Price currency is not confirmed as USD")
-    if member.get("security_type") not in ("common_share", "sponsored_ADS"):
+    if member.get("security_type") not in ("common_share", "sponsored_ADS", "listed_REIT_common_share"):
         reasons.append("Security type is outside the eligible stock set")
     evidence_check = member.get("_evidence_freshness", {})
-    if evidence_check.get("status") != "current":
-        reasons.append(evidence_check.get("reason") or "Latest annual-filing freshness check unavailable")
+    if member.get('membership_tag') not in ('Core', 'Related') or not member.get('membership_source') or not member.get('membership_rationale'):
+        reasons.append('Supported Core/Related membership decision is missing')
+    if member.get('requires_filing_review', False) and evidence_check.get('status') != 'current':
+        reasons.append(evidence_check.get('reason') or 'Ambiguous membership needs current filing review')
     if cap is None:
         reasons.append("Market capitalization is unavailable")
     elif cap < float(settings["market_cap_floor_usd"]):
@@ -244,13 +255,18 @@ def _stock_row(
     if "biotechnolog" in quote_industry.lower() or "biotech" in quote_industry.lower():
         reasons.append("Industry is classified as biotechnology and is excluded by default")
     eligible = not reasons
-    anchor_returns = _returns(anchor_chart, calendar, session)
-    stock_excess = {str(n): excess_metric(returns[str(n)], anchor_returns[str(n)]) for n in WINDOWS}
+    anchor_returns = _returns(anchor_chart, calendar, session, settings)
+    windows = tuple(settings.get("return_sessions", WINDOWS))
+    stock_excess = {str(n): excess_metric(returns[str(n)], anchor_returns[str(n)]) for n in windows}
     ex21 = stock_excess["21"].get("value") if stock_excess["21"].get("status") == "valid" else None
     ex63 = stock_excess["63"].get("value") if stock_excess["63"].get("status") == "valid" else None
     company_id = str(member.get("evidence", {}).get("cik") or ticker)
     return {
         "ticker": ticker,
+        "membership_tag": member.get('membership_tag'),
+        "membership_source": member.get('membership_source'),
+        "membership_rationale": member.get('membership_rationale'),
+        "is_anchor_holding": holding.get('_is_anchor_holding', True),
         "company": holding.get("company") or member.get("company") or ticker,
         "company_id": company_id,
         "security_type": member.get("security_type"),
@@ -297,18 +313,21 @@ def _stock_row(
 
 
 def _anchor_summary(theme: dict[str, Any], chart: dict[str, Any] | None, spy_chart: dict[str, Any] | None, calendar: list[str], session: str | None, settings: dict[str, Any], error: str | None) -> dict[str, Any]:
-    returns = _returns(chart, calendar, session)
+    returns = _returns(chart, calendar, session, settings)
     trend = trend_metric(chart, calendar, session, settings) if chart else {"state": "Unavailable", "status": "unavailable", "reason": error or "Price source unavailable"}
-    adv = adv30_metric(chart, calendar, session) if chart else {"value": None, "status": "unavailable", "reason": error or "Price source unavailable", "observation_count": 0}
-    excess = {str(n): excess_metric(returns[str(n)], _returns(spy_chart, calendar, session)[str(n)]) for n in WINDOWS}
+    adv = adv30_metric(chart, calendar, session, int(settings.get("adv30_sessions", 30))) if chart else {"value": None, "status": "unavailable", "reason": error or "Price source unavailable", "observation_count": 0}
+    windows = tuple(settings.get("return_sessions", WINDOWS))
+    spy_returns = _returns(spy_chart, calendar, session, settings)
+    excess = {str(n): excess_metric(returns[str(n)], spy_returns[str(n)]) for n in windows}
     ex21 = excess["21"].get("value") if excess["21"].get("status") == "valid" else None
     ex63 = excess["63"].get("value") if excess["63"].get("status") == "valid" else None
     observations = observation_map(chart) if chart else {}
-    last_64 = calendar[max(0, len(calendar) - 64) :]
-    consecutive64 = len(last_64) == 64 and all(observations.get(d, {}).get("close") is not None for d in last_64)
+    minimum_history = int(settings.get("anchor_minimum_history_sessions", 64))
+    last_sessions = calendar[max(0, len(calendar) - minimum_history) :]
+    consecutive_history = len(last_sessions) == minimum_history and all(observations.get(d, {}).get("close") is not None for d in last_sessions)
     meta = chart.get("meta", {}) if chart else {}
     instrument_ok = meta.get("instrumentType") == "ETF" and meta.get("currency") == "USD"
-    history_ok = consecutive64 and len(calendar) >= 64
+    history_ok = consecutive_history and len(calendar) >= minimum_history
     volume_ok = adv.get("value") is not None and adv["value"] >= float(settings["anchor_adv30_floor_usd"])
     return {
         "ticker": theme["anchor"],
@@ -324,11 +343,11 @@ def _anchor_summary(theme: dict[str, Any], chart: dict[str, Any] | None, spy_cha
         "adv30_usd": adv.get("value"),
         "adv30_metric": adv,
         "history_observations": len([d for d in calendar if observations.get(d, {}).get("close") is not None]),
-        "consecutive_64_sessions": consecutive64,
+        "consecutive_minimum_history_sessions": consecutive_history,
         "instrument_currency_valid": instrument_ok,
         "anchor_criteria": {
-            "history_64_sessions": history_ok,
-            "adv30_at_least_1m": volume_ok,
+            "minimum_history_sessions": history_ok,
+            "adv30_at_least_configured_floor": volume_ok,
             "usd_unleveraged_equity_etf_mandate": instrument_ok and bool(theme.get("unleveraged_equity_etf_review")),
         },
         "anchor_screen_valid": history_ok and volume_ok and instrument_ok and bool(theme.get("unleveraged_equity_etf_review")),
@@ -341,12 +360,18 @@ def _anchor_summary(theme: dict[str, Any], chart: dict[str, Any] | None, spy_cha
     }
 
 
-def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
+def build_snapshot(root: Path, requested_asof: str | None = None) -> tuple[dict[str, Any], dict[str, Any]]:
+    collection_started = datetime.now(timezone.utc)
     theme_cfg = json.loads((root / "config/themes.json").read_text(encoding="utf-8"))
     evidence_cfg = json.loads((root / "config/evidence_reviews.json").read_text(encoding="utf-8"))
     comparison_cfg = json.loads((root / "config/anchor_comparisons.json").read_text(encoding="utf-8"))
+    source_cfg = json.loads((root / "config/sources.json").read_text(encoding="utf-8"))
+    configure_sources(source_cfg)
     settings = theme_cfg["settings"]
-    themes = theme_cfg["themes"]
+    registry = theme_cfg["themes"]
+    # An approved ETF anchor is a collection target even when its issuer holdings
+    # adapter is missing. Holdings affect breadth only, never ETF eligibility.
+    themes = [t for t in registry if t.get("anchor")]
     evidence_by_theme: dict[str, dict[str, dict[str, Any]]] = {}
     for member in evidence_cfg["members"]:
         evidence_by_theme.setdefault(member["theme_id"], {})[member["ticker"]] = member
@@ -354,10 +379,20 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
     holdings: dict[str, Any] = {}
     holdings_errors: dict[str, str] = {}
     for theme in themes:
+        if not theme.get("holdings_source"):
+            continue
         try:
             holdings[theme["anchor"]] = fetch_holdings(theme)
         except Exception as exc:
             holdings_errors[theme["anchor"]] = f"{type(exc).__name__}: {exc}"
+    context_holdings: dict[str, Any] = {}
+    for symbol, source in source_cfg.get("index_constituents", {}).items():
+        if symbol != "IWM" or not source.get("method"):
+            continue
+        try:
+            context_holdings[symbol] = fetch_holdings({"anchor": symbol, "holdings_source": source})
+        except Exception as exc:
+            holdings_errors[symbol] = f"{type(exc).__name__}: {exc}"
     comparisons: dict[str, Any] = {}
     for item in comparison_cfg["comparisons"]:
         pseudo = {
@@ -369,7 +404,12 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
         except Exception as exc:
             holdings_errors[item["ticker"]] = f"{type(exc).__name__}: {exc}"
 
-    chart_symbols = set(theme_cfg.get("context_symbols", ["SPY", "QQQ"]))
+    chart_symbols = set(theme_cfg.get("context_symbols", ["SPY", "QQQ", "IWM"]))
+    chart_symbols.update(theme_cfg.get("volatility_symbols", ["^VIX"]))
+    # Collect price, instrument and liquidity evidence for every configured
+    # candidate. Holdings remain a separate requirement; a price chart alone
+    # never makes a candidate eligible.
+    chart_symbols.update(ticker for row in registry for ticker in row.get("candidate_anchors", []))
     for theme in themes:
         chart_symbols.add(theme["anchor"])
         if theme.get("parent_sector"):
@@ -377,14 +417,19 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
         chart_symbols.update(
             ticker
             for ticker, member in evidence_by_theme.get(theme["id"], {}).items()
-            if member.get("category") == "Core business"
+            if member.get("membership_tag") in ("Core", "Related")
         )
     chart_symbols.update(item["ticker"] for item in comparison_cfg["comparisons"])
     # Yahoo throttles bursts of chart requests. Keep these sequential with a
     # short pause so a normal on-demand run is less likely to receive HTTP 429.
-    print(f"Collecting {len(chart_symbols)} price histories sequentially (1.5s pacing).", flush=True)
+    interval = max(0.0, float(os.environ.get("THEMESCOPE_CHART_INTERVAL", source_cfg.get("prices", {}).get("interval_seconds", 1.5))))
+    print(f"Collecting {len(chart_symbols)} price histories sequentially ({interval:g}s pacing).", flush=True)
     charts, chart_errors = _fetch_many(
-        chart_symbols, fetch_yahoo_chart, workers=1, request_interval_seconds=1.5
+        chart_symbols,
+        lambda symbol: fetch_yahoo_chart(symbol, years=int(source_cfg.get("prices", {}).get("history_years", 2))),
+        workers=1,
+        request_interval_seconds=interval,
+        progress_label="Candidate and reviewed-member price histories",
     )
 
     print(f"Price histories: {len(charts)} retrieved, {len(chart_errors)} unavailable. Checking quote and filing sources.", flush=True)
@@ -392,27 +437,45 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
         ticker
         for entries in evidence_by_theme.values()
         for ticker, member in entries.items()
-        if member.get("category") == "Core business"
+        if member.get("membership_tag") in ("Core", "Related")
     }
     # Industry-only review of XBI: non-stock identifiers remain unmapped, never guessed.
     industry_symbols = {row['ticker'] for row in holdings.get('XBI', {}).get('rows', []) if row.get('ticker', '').isalpha()}
-    quotes, quote_errors = _fetch_many(member_symbols | industry_symbols, fetch_nasdaq_summary, workers=2)
+    sector_anchors = {theme['anchor'] for theme in registry if theme.get('level') == 'Sector' and theme.get('holdings_source')}
+    sector_symbols = {
+        str(row.get('ticker') or '').strip()
+        for anchor in sector_anchors
+        for row in holdings.get(anchor, {}).get('rows', [])
+        if str(row.get('ticker') or '').strip()
+    }
+    sector_symbols.update(ticker.replace('.', '-') for ticker in list(sector_symbols) if '.' in ticker)
+    quote_symbols = member_symbols | industry_symbols | sector_symbols
+    print(f"Checking Nasdaq quote summaries for {len(quote_symbols)} curated and sector constituent symbols.", flush=True)
+    quotes, quote_errors = _fetch_many(
+        quote_symbols,
+        fetch_nasdaq_summary,
+        workers=2,
+        progress_label="Stock market-cap and listing metadata",
+    )
 
     ciks = {
         str(member.get("evidence", {}).get("cik"))
         for entries in evidence_by_theme.values()
         for member in entries.values()
-        if member.get("category") == "Core business" and member.get("evidence", {}).get("cik")
+        if member.get("membership_tag") in ("Core", "Related") and member.get("evidence", {}).get("cik") and member.get("requires_filing_review", False)
     }
     sec_latest, sec_errors = _fetch_many(ciks, fetch_sec_latest_annual, workers=4)
     sec_freshness: dict[str, dict[str, Any]] = {}
     for entries in evidence_by_theme.values():
         for ticker, member in entries.items():
+            if not member.get('requires_filing_review', False):
+                sec_freshness[f"{member['theme_id']}:{ticker}"] = {'status': 'not_required', 'reason': 'v5 supported classification; mandatory filing freshness review not requested', 'checked_at': None}
+                continue
             evidence = member.get("evidence", {})
             cik = str(evidence.get("cik") or "")
             checked = sec_latest.get(cik)
             if checked is None:
-                if member.get("category") != "Core business":
+                if member.get("membership_tag") not in ("Core", "Related"):
                     sec_freshness[f"{member['theme_id']}:{ticker}"] = {
                         "status": "not_checked",
                         "reason": "Evidence remains unresolved; annual-filing freshness was not checked for stock eligibility.",
@@ -453,11 +516,15 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
     )
     calendar_source_chart = charts.get(calendar_source_symbol) if calendar_source_symbol else None
     run_session = completed_session(calendar_source_chart, now) if calendar_source_chart else None
+    if requested_asof and run_session:
+        eligible_sessions = [d for d in session_dates(calendar_source_chart) if d <= requested_asof and d <= run_session]
+        run_session = max(eligible_sessions) if eligible_sessions else None
     calendar = [d for d in session_dates(calendar_source_chart) if run_session and d <= run_session] if calendar_source_chart else []
     run_date = now.astimezone(NY).date().isoformat()
-    spy_returns = _returns(spy_chart, calendar, run_session)
+    spy_returns = _returns(spy_chart, calendar, run_session, settings)
     raw_inputs = {
         "retrieved_at": now.isoformat(timespec="seconds"),
+        "requested_asof": requested_asof,
         "session_calendar": calendar,
         "calendar_source_symbol": calendar_source_symbol,
         "charts": charts,
@@ -465,13 +532,14 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
         "holdings": holdings,
         "comparison_holdings": comparisons,
         "sec_annual_checks": sec_latest,
+        "source_configuration": source_cfg,
         "errors": {"charts": chart_errors, "quotes": quote_errors, "holdings": holdings_errors, "sec": sec_errors},
     }
 
     context = []
     for symbol in theme_cfg.get("context_symbols", ["SPY", "QQQ"]):
         chart = charts.get(symbol)
-        returns = _returns(chart, calendar, run_session)
+        returns = _returns(chart, calendar, run_session, settings)
         trend = trend_metric(chart, calendar, run_session, settings) if chart else {"state": "Unavailable", "status": "unavailable", "reason": chart_errors.get(symbol, "Price source unavailable")}
         context.append({
             "ticker": symbol,
@@ -488,7 +556,8 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
     for theme in themes:
         anchor = theme["anchor"]
         anchor_chart = charts.get(anchor)
-        source_holdings = holdings.get(anchor, {"as_of": None, "url": theme["holdings_source"]["url"], "rows": []})
+        configured_holdings_source = theme.get("holdings_source", {})
+        source_holdings = holdings.get(anchor, {"as_of": None, "url": configured_holdings_source.get("url"), "rows": []})
         holdings_rows = source_holdings.get("rows", [])
         holdings_lookup = _holdings_map(source_holdings)
         holdings_as_of = source_holdings.get("as_of")
@@ -503,7 +572,11 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
         member_rows: list[dict[str, Any]] = []
         pending: list[dict[str, Any]] = []
         excluded: list[dict[str, Any]] = []
-        for ticker, held in holdings_lookup.items():
+        discovery = {ticker: {**held, '_is_anchor_holding': True} for ticker, held in holdings_lookup.items()}
+        for ticker, member in member_records.items():
+            if member.get('membership_tag') in ('Core', 'Related') and ticker not in discovery:
+                discovery[ticker] = {'ticker': ticker, 'company': member.get('company'), 'weight_pct': None, '_is_anchor_holding': False}
+        for ticker, held in discovery.items():
             member = member_records.get(ticker)
             industry_quote = quotes.get(ticker) if theme['id'] == 'biotechnology' else None
             if industry_quote and 'biotech' in str(industry_quote.get('industry', '')).lower():
@@ -512,7 +585,7 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
             if member is None:
                 pending.append({**held, "status": "Pending evidence review", "reason": "Non-stock or unmapped holding identifier; no ticker mapping invented." if not ticker.isalpha() and theme["id"] == "biotechnology" else "Current official holding has no completed issuer business-evidence review."})
                 continue
-            if member.get("category") != "Core business":
+            if member.get("membership_tag") not in ("Core", "Related"):
                 pending.append({
                     **held,
                     "status": "Unresolved",
@@ -532,11 +605,6 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
             if row["eligibility"] != "eligible_provisional":
                 excluded.append({"ticker": ticker, "company": row["company"], "reasons": row["eligibility_reasons"], "weight_pct": row["etf_weight_pct"], "evidence": row.get("evidence"), "evidence_freshness": row.get("evidence_freshness")})
 
-        # Evidence records whose ticker is no longer present in the official snapshot are not current members.
-        for ticker, member in member_records.items():
-            if ticker not in holdings_lookup:
-                excluded.append({"ticker": ticker, "company": member.get("company", ticker), "reasons": ["Official holdings retrieval unavailable; membership cannot be determined" if anchor in holdings_errors else "Not present in the retrieved current official holdings snapshot"], "weight_pct": None, "evidence": member.get("evidence")})
-
         eligible = [row for row in member_rows if row["eligibility"] == "eligible_provisional"]
         # Deduplicate company identifiers. Keep the security with highest ADV$30 and aggregate fund weights.
         by_company: dict[str, list[dict[str, Any]]] = {}
@@ -547,12 +615,12 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
             company_rows.sort(key=lambda row: (-(row.get("adv30_usd") or 0.0), row["ticker"]))
             chosen = dict(company_rows[0])
             chosen["share_classes"] = [row["ticker"] for row in company_rows]
-            chosen["etf_weight_pct"] = sum(row.get("etf_weight_pct") or 0.0 for row in company_rows)
+            chosen["etf_weight_pct"] = sum(row["etf_weight_pct"] for row in company_rows if row.get("etf_weight_pct") is not None) if any(row.get("etf_weight_pct") is not None for row in company_rows) else None
             eligible_companies.append(chosen)
         for row in eligible_companies:
             row["anchor"] = anchor
             row["theme_id"] = theme["id"]
-        selected = select_candidates(eligible_companies, int(settings["max_candidates"]))
+        selected = select_candidates(eligible_companies, int(settings["watchlist_capacity"]))
         breadth = _breadth(eligible_companies, bool(review_theme_cfg.get(theme["id"], {}).get("review_complete", False)), holdings_fresh, settings)
         weight = lambda rows: sum(row.get("etf_weight_pct") or 0.0 for row in rows)
         weight_by_issuer: dict[str, float] = {}
@@ -569,12 +637,12 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
         parent_ticker = theme.get("parent_sector")
         if parent_ticker:
             parent_chart = charts.get(parent_ticker)
-            parent_returns = _returns(parent_chart, calendar, run_session)
+            parent_returns = _returns(parent_chart, calendar, run_session, settings)
             parent_trend = trend_metric(parent_chart, calendar, run_session, settings) if parent_chart else {"state": "Unavailable", "status": "unavailable", "reason": chart_errors.get(parent_ticker, "Price source unavailable")}
             parent_summary = {
                 "ticker": parent_ticker,
                 "returns": parent_returns,
-                "excess_returns": {str(n): excess_metric(parent_returns[str(n)], theme_returns[str(n)]) for n in WINDOWS},
+                "excess_returns": {str(n): excess_metric(parent_returns[str(n)], theme_returns[str(n)]) for n in settings.get("return_sessions", WINDOWS)},
                 "trend": parent_trend.get("state", "Unavailable"),
                 "trend_status": parent_trend.get("status", "unavailable"),
                 "trend_reason": parent_trend.get("reason"),
@@ -594,7 +662,7 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
             "parent_sector": theme.get("parent_sector"),
             "representation_limit": theme.get("representation_limit"),
             "representation_status": representation_status,
-            "holdings_source": {"provider": theme["holdings_source"]["provider"], "url": source_holdings.get("url"), "as_of": holdings_as_of, "publication_date": None, "retrieved_at": source_holdings.get("retrieved_at")},
+            "holdings_source": {"provider": configured_holdings_source.get("provider"), "url": source_holdings.get("url"), "as_of": holdings_as_of, "publication_date": None, "retrieved_at": source_holdings.get("retrieved_at")},
             "holdings_age_days": holdings_age,
             "holdings_fresh": holdings_fresh,
             "holdings_status": "current" if holdings_fresh else ("stale" if holdings_as_of else "unavailable"),
@@ -608,11 +676,12 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
             "excluded_count": len(excluded),
             "review_complete": bool(review_theme_cfg.get(theme["id"], {}).get("review_complete", False)),
             "review_reason": review_theme_cfg.get(theme["id"], {}).get("reason"),
-            "evidence_freshness_check_count": sum(1 for ticker, member in member_records.items() if member.get("category") == "Core business" and f"{theme['id']}:{ticker}" in sec_freshness),
-            "stale_evidence_count": sum(1 for ticker, member in member_records.items() if member.get("category") == "Core business" and sec_freshness.get(f"{theme['id']}:{ticker}", {}).get("status") == "stale"),
-            "unavailable_evidence_freshness_count": sum(1 for ticker, member in member_records.items() if member.get("category") == "Core business" and sec_freshness.get(f"{theme['id']}:{ticker}", {}).get("status") == "unavailable"),
+            "evidence_freshness_check_count": sum(1 for ticker, member in member_records.items() if member.get("membership_tag") in ("Core", "Related") and f"{theme['id']}:{ticker}" in sec_freshness),
+            "stale_evidence_count": sum(1 for ticker, member in member_records.items() if member.get("membership_tag") in ("Core", "Related") and sec_freshness.get(f"{theme['id']}:{ticker}", {}).get("status") == "stale"),
+            "unavailable_evidence_freshness_count": sum(1 for ticker, member in member_records.items() if member.get("membership_tag") in ("Core", "Related") and sec_freshness.get(f"{theme['id']}:{ticker}", {}).get("status") == "unavailable"),
             "unresolved_evidence_count": sum(1 for row in pending if row.get("status") == "Unresolved"),
             "pending_evidence_count": sum(1 for row in pending if row.get("status") == "Pending evidence review"),
+            "level": theme.get("level", "Theme"),
             "anchor_screen": anchor_summary,
             "parent_comparison": parent_summary,
             "returns": theme_returns,
@@ -624,7 +693,7 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
             "breadth": breadth,
             "eligible_weight_pct": weight(eligible_companies),
             "selected_weight_pct": weight(selected),
-            "visible15_weight_pct": weight(selected[: int(settings["compact_candidates"])]),
+            "visible_default_weight_pct": weight(selected[: int(settings["watchlist_default_limit"])]),
             "largest_holding_weight_pct": top_weights[0] if top_weights else None,
             "top5_holding_weight_pct": sum(top_weights[:5]) if top_weights else None,
             "concentration_note": "Duplicate ticker lines are aggregated; reviewed share classes are combined by SEC CIK. Unreviewed share-class aliases remain separate because company mapping is incomplete.",
@@ -642,9 +711,9 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
         symbol = item["ticker"]
         chart = charts.get(symbol)
         comp_hold = comparisons.get(symbol, {"as_of": None, "rows": []})
-        ret = _returns(chart, calendar, run_session)
-        exc = {str(n): excess_metric(ret[str(n)], spy_returns[str(n)]) for n in WINDOWS}
-        adv = adv30_metric(chart, calendar, run_session) if chart else {"value": None, "status": "unavailable", "reason": chart_errors.get(symbol, "Price source unavailable")}
+        ret = _returns(chart, calendar, run_session, settings)
+        exc = {str(n): excess_metric(ret[str(n)], spy_returns[str(n)]) for n in settings.get("return_sessions", WINDOWS)}
+        adv = adv30_metric(chart, calendar, run_session, int(settings.get("adv30_sessions", 30))) if chart else {"value": None, "status": "unavailable", "reason": chart_errors.get(symbol, "Price source unavailable")}
         weights = sorted([_numeric(row.get("weight_pct")) for row in comp_hold.get("rows", []) if _numeric(row.get("weight_pct")) is not None], reverse=True)
         comparison_results.append({
             **item,
@@ -662,19 +731,33 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
         theme["anchor_comparisons"] = [row for row in comparison_results if row["theme_id"] == theme["id"]]
 
     snapshot = {
-        "schema_version": "1.0",
+        "schema_version": "6.1",
         "run_id": now.strftime("themescope-%Y%m%dT%H%M%SZ"),
         "generated_at": now.isoformat(timespec="seconds"),
         "run_date": run_date,
         "session_date": run_session,
+        "requested_asof": requested_asof,
+        "resolved_market_session": run_session,
+        "collection_started_at": collection_started.isoformat(timespec="seconds"),
+        "collection_completed_at": None,
         "timezone": "America/New_York",
         "registry_version": theme_cfg["registry_version"],
         "evidence_review_date": evidence_cfg["review_date"],
         "settings": settings,
+        "score_methodology": theme_cfg.get("score_methodology", {}),
         "benchmark": "SPY",
         "session_calendar_source": calendar_source_symbol,
         "benchmark_status": "valid" if spy_chart else "unavailable",
         "context": context,
+        "volatility_context": [{
+            "ticker": symbol,
+            "name": "CBOE Volatility Index" if symbol == "^VIX" else symbol,
+            "instrument_type": "volatility_index",
+            "source_url": charts.get(symbol, {}).get("url"),
+            "retrieved_at": charts.get(symbol, {}).get("retrieved_at"),
+            "source_status": "available" if symbol in charts else "unavailable",
+            "source_reason": chart_errors.get(symbol),
+        } for symbol in theme_cfg.get("volatility_symbols", ["^VIX"])],
         "themes": theme_results,
         "comparisons": comparison_results,
         "sources": {
@@ -698,5 +781,13 @@ def build_snapshot(root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
     raw_inputs["run_session"] = run_session
     raw_inputs["evidence_freshness"] = sec_freshness
     raw_inputs["retrieval_error_count"] = len(chart_errors) + len(quote_errors) + len(holdings_errors) + len(sec_errors)
+    from .v5 import collect_inputs
+    raw_inputs['context_holdings'] = context_holdings
+    raw_inputs['v5'] = collect_inputs(holdings, charts, context_holdings=context_holdings, interval=interval)
+    snapshot['collection_completed_at'] = datetime.now(timezone.utc).isoformat(timespec='seconds')
+    snapshot['generated_at'] = snapshot['collection_completed_at']
+    snapshot['methodology_version'] = theme_cfg.get('methodology_version', theme_cfg['registry_version'])
+    from .cache import manifest_for_inputs
+    raw_inputs['cache_manifest'] = manifest_for_inputs(raw_inputs, snapshot['collection_completed_at'])
     return snapshot, raw_inputs
 

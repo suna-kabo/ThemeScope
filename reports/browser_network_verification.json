@@ -1,11 +1,18 @@
 {
-  "file_scheme_note": "Managed Chromium policy blocks file://; exact exported bytes served on loopback for verification",
+  "file_scheme_note": "Managed Chromium policy blocks file://; exact exported bytes served over loopback for verification",
   "method": "Chromium DevTools Protocol Network.requestWillBeSent (Network panel backend)",
+  "runtime_environment": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "browser": "Chromium 154.0.8037.57",
+  "windows_chrome_verified": false,
+  "embedded_font_loaded": true,
   "open_and_reload_external_requests": [],
   "requests": [
-    "http://127.0.0.1:44429/dashboard.html",
-    "http://127.0.0.1:44429/dashboard.html",
-    "http://127.0.0.1:44429/dashboard.html"
+    "dashboard.html (local loopback)",
+    "data:font/woff2 (embedded)",
+    "dashboard.html (local loopback)",
+    "data:font/woff2 (embedded)",
+    "dashboard.html (local loopback)",
+    "data:font/woff2 (embedded)"
   ],
   "javascript_errors": [],
   "interaction_checks": "passed"

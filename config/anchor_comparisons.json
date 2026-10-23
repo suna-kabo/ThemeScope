@@ -2,7 +2,7 @@
   "comparisons": [
     {
       "id": "clean_energy_us_alternative",
-      "theme_id": "clean_energy",
+      "theme_id": "theme-clean-energy",
       "ticker": "QCLN",
       "provider": "First Trust",
       "method": "first_trust_html",
@@ -12,7 +12,7 @@
     },
     {
       "id": "aerospace_defense_cap_weighted_alternative",
-      "theme_id": "aerospace_defense",
+      "theme_id": "theme-aerospace-defense",
       "ticker": "ITA",
       "provider": "iShares",
       "method": "ishares_csv",
