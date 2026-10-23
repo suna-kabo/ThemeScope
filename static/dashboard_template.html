@@ -12,11 +12,9 @@
     <a class="brand" href="#market"><span class="brand-mark">T</span><span>ThemeScope<small>Market research</small></span></a>
     <div class="sidebar-session"><span>DATA SESSION</span><b id="sidebar-date">—</b></div>
     <nav class="side-nav" aria-label="Dashboard pages">
-      <a href="#market" data-page="market" class="active"><span class="nav-icon">◉</span>Market</a>
-      <a href="#sectors" data-page="sectors"><span class="nav-icon">◫</span>Sectors</a>
-      <a href="#industries" data-page="industries"><span class="nav-icon">▦</span>Industries</a>
-      <a href="#themes" data-page="themes"><span class="nav-icon">✳</span>Themes</a>
-      <a href="#watchlist" data-page="watchlist"><span class="nav-icon">≡</span>Watchlist</a>
+      <a href="#market" data-page="market" class="active"><span class="nav-icon" aria-hidden="true">◉</span>Market</a>
+      <a href="#sectors-themes" data-page="sectors-themes"><span class="nav-icon" aria-hidden="true">◫</span>Sectors &amp; Themes</a>
+      <a href="#watchlist" data-page="watchlist"><span class="nav-icon" aria-hidden="true">≡</span>Watchlist</a>
     </nav>
     <div class="sidebar-bottom">
       <span class="offline-label"><i></i>Offline snapshot</span>
@@ -30,44 +28,27 @@
     </header>
     <main>
       <section id="market" class="page" aria-labelledby="market-title">
-        <div class="page-heading"><div><span class="eyebrow">MARKET PULSE</span><h1 id="market-title">Market</h1><p>Price trend and constituent participation for SPY and QQQ.</p></div></div>
+        <div class="page-heading"><div><span class="eyebrow">MARKET</span><h1 id="market-title">Market</h1><p>SPY and QQQ price facts with index constituent participation.</p></div></div>
         <div id="cards" class="market-cards"></div>
-        <details class="help-card"><summary>How to read EMA, breadth and coverage</summary><div class="help-grid"><p><b>EMA21 / EMA50</b><br>21- and 50-session exponential moving averages. “Above” means the latest close is higher than that average; the distance is shown as a percentage.</p><p><b>Breadth</b><br>The share of constituents with usable prices that close above their own EMA. Example: 355 / 499 = 71.1% above EMA21.</p><p><b>Price coverage</b><br>How much of the eligible index has usable price history: 499 / 500 = 99.8%. Coverage is data completeness; breadth is participation among the names with data.</p></div></details>
       </section>
 
-      <section id="sectors" class="page" hidden aria-labelledby="sectors-title">
-        <div class="page-heading"><div><span class="eyebrow">GICS SECTORS</span><h1 id="sectors-title">Sectors</h1><p>All 11 standard U.S. equity sectors, each represented by its Select Sector SPDR ETF.</p></div><a class="download-link" href="sectors.csv" download>Download sector data ↓</a></div>
-        <div id="sector-summary" class="summary-cards"></div>
-        <div class="definition-strip"><b>Above EMA21 / EMA50</b> is the percentage of that ETF’s verified equity holdings above the corresponding moving average. <b>Coverage</b> is the percentage of eligible holdings with valid prices. Both values use holdings as of the date shown in each row.</div>
-        <div class="table-wrap category-table-wrap"><table><thead id="sector-head"></thead><tbody id="sector-body"></tbody></table></div>
-        <p id="sector-note" class="page-note"></p>
-      </section>
-
-      <section id="industries" class="page" hidden aria-labelledby="industries-title">
-        <div class="page-heading"><div><span class="eyebrow">GICS SUB-INDUSTRIES</span><h1 id="industries-title">Industries</h1><p>Every sub-industry in the retrieved S&amp;P 500 classification, grouped from actual constituent price histories.</p></div><a class="download-link" href="industries.csv" download>Download industry data ↓</a></div>
-        <div id="industry-summary" class="summary-cards"></div>
-        <div class="controls"><label>Search industry <input id="industry-search" placeholder="Type an industry name"></label><span id="industry-count" class="caption"></span></div>
-        <article class="panel scatter-panel"><div class="panel-heading"><div><h2>Industry return map</h2><p>Each dot is one GICS sub-industry represented in the S&amp;P 500.</p></div><span class="axis-note">X · median 1M return &nbsp; / &nbsp; Y · median 3M return</span></div><div id="industry-scatter" class="scatter-scroll"></div><p class="chart-note"><span class="legend-key"><i class="quadrant-strong"></i>Both positive</span><span class="legend-key"><i class="quadrant-weak"></i>Both negative</span><span class="legend-key"><i class="quadrant-mixed"></i>Mixed signs</span> · Hover or focus a point for its sample. Returns are descriptions, not entries or a validated model.</p></article>
-        <div class="definition-strip"><b>Median return</b> is the middle constituent return for the category, with each company counted once. <b>Above EMA21 / EMA50</b> is the percentage of constituents with valid price data whose close is above that EMA. <b>Coverage</b> is the fraction of all category constituents with valid prices. Categories use current S&amp;P 500 membership; they do not represent every listed company in the industry.</div>
-        <div class="table-wrap category-table-wrap"><table><thead id="industry-head"></thead><tbody id="industry-body"></tbody></table></div>
-        <p id="industry-note" class="page-note"></p>
-      </section>
-
-      <section id="themes" class="page" hidden aria-labelledby="themes-title">
-        <div class="page-heading"><div><span class="eyebrow">CURATED ETF EXPOSURES</span><h1 id="themes-title">Themes</h1><p>Industry and thematic ETFs selected by mandate, with ETF holdings breadth and relative returns.</p></div></div>
-        <details class="help-card"><summary>Score method and data terms</summary><p>CurrentStrength = 70% 1M excess-return percentile + 30% holdings breadth above EMA21. MediumStrength = 70% 3M excess-return percentile + 30% holdings breadth above EMA50. ThemeScore = 60% CurrentStrength + 40% MediumStrength. At least ten valid ETF peers and valid breadth are required; missing inputs are not filled in. Scores are fixed browsing conventions, not a validated trading model.</p><a href="themes.csv" download>Theme CSV</a> · <a href="market.csv" download>Market CSV</a></details>
-        <div id="theme-controls" class="controls"></div><p id="theme-count" class="caption"></p><p id="theme-basis" class="caption"></p>
+      <section id="sectors-themes" class="page" hidden aria-labelledby="themes-title">
+        <div class="page-heading"><div><span class="eyebrow">ELIGIBLE EQUITY EXPOSURES</span><h1 id="themes-title">Sectors &amp; Themes</h1><p>Sortable ETF comparisons. Rank is global within the eligible registry; filters do not rerank the remaining rows.</p></div><a class="download-link" href="themes.csv" download>Full ranking CSV ↓</a></div>
+        <details class="help-card"><summary>Score and state definitions</summary><p id="score-method-description">Score weights and inputs come from this snapshot’s configured methodology.</p><p><b>Improving</b> means the current score is in the stronger half while the medium score is in the weaker half. <b>Fading</b> means the reverse. These cross-sectional labels do not establish a time-series reversal or rotation.</p></details>
+        <div id="theme-controls" class="controls"></div>
+        <p id="theme-count" class="caption"></p>
         <div class="table-wrap theme-table-wrap"><table><thead id="theme-head"></thead><tbody id="theme-body"></tbody></table></div>
-        <details class="panel scatter-panel"><summary>Relative-return map · 1M versus 3M</summary><p class="chart-note">X: 1M excess return versus SPY · Y: 3M excess return versus SPY. Positive and negative describe returns over each window.</p><div id="scatter"></div></details>
+        <div class="exports"><button id="theme-visible-csv">Download visible table CSV</button><a href="registry_audit.csv" download>Registry audit CSV</a><span id="theme-export-status" role="status"></span></div>
       </section>
 
       <section id="watchlist" class="page" hidden aria-labelledby="active-name">
         <div class="page-heading"><div><span class="eyebrow">SELECTED COMPANIES</span><h1 id="active-name">Watchlist</h1><p id="active-summary" class="watchlist-summary"></p></div></div>
+        <p id="watchlist-message" class="watchlist-message" hidden></p>
         <div id="stock-controls" class="controls"></div><p id="stock-basis" class="caption"></p><p id="coverage" class="warning"></p>
-        <div class="table-wrap"><table><thead id="stock-head"></thead><tbody id="stock-body"></tbody></table></div>
-        <div class="exports"><button id="csv">Download visible CSV</button><button id="tv">Download TradingView list</button><a href="run_bundle.zip" download>Download complete run ZIP</a><span id="export-status" role="status"></span></div>
+        <div class="table-wrap" id="stock-table-wrap"><table><thead id="stock-head"></thead><tbody id="stock-body"></tbody></table></div>
+        <div class="exports" id="stock-exports"><button id="csv">Download visible CSV</button><button id="tv">Download TradingView list</button><a href="stock_diagnostics.csv" download>Stock eligibility audit</a><a href="run_bundle.zip" download>Download complete run ZIP</a><span id="export-status" role="status"></span></div>
       </section>
-      <footer>Offline snapshot · Reloading does not retrieve data. To refresh, run <code>python scripts/generate_dashboard.py</code>. <a href="latest_run.md" download>Run report</a> · <a href="latest_snapshot.json" download>Snapshot JSON</a><br><span id="generated"></span></footer>
+      <footer>Offline snapshot · Opening or reloading this file makes no market-data requests. To refresh, run <code>python scripts/generate_dashboard.py</code>. <a href="latest_run.md" download>Run report</a> · <a href="latest_snapshot.json" download>Snapshot JSON</a><br><span id="generated"></span></footer>
     </main>
   </div>
   <script id="snapshot-data" type="application/json">{{SNAPSHOT_JSON}}</script>

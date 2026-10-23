@@ -149,19 +149,20 @@ def split_adjusted_observations(chart: dict[str, Any]) -> list[dict[str, Any]]:
     return output
 
 
-def adv30_metric(chart: dict[str, Any], market_calendar: list[str], run_session: str) -> dict[str, Any]:
+def adv30_metric(chart: dict[str, Any], market_calendar: list[str], run_session: str, sessions: int = 30) -> dict[str, Any]:
     if run_session not in market_calendar:
         return _metric(None, "unavailable", "Run session is not in benchmark calendar", None, run_session)
     index = market_calendar.index(run_session)
-    expected = market_calendar[max(0, index - 29) : index + 1]
-    if len(expected) < 30:
-        return _metric(None, "unavailable", "Fewer than 30 completed benchmark sessions", len(expected), run_session)
+    sessions = max(1, int(sessions))
+    expected = market_calendar[max(0, index - (sessions - 1)) : index + 1]
+    if len(expected) < sessions:
+        return _metric(None, "unavailable", f"Fewer than {sessions} completed benchmark sessions", len(expected), run_session)
     rows = observation_map({**chart, "observations": split_adjusted_observations(chart)})
     values = [rows.get(d, {}).get("dollar_volume_proxy") for d in expected]
     valid = [value for value in values if value is not None and value >= 0]
-    if len(valid) != 30:
-        return _metric(None, "unavailable", f"Requires all 30 raw close-volume pairs; {len(valid)}/30 valid", len(valid), run_session)
-    return _metric(sum(valid) / 30.0, "valid", "Mean of raw contemporaneous close multiplied by raw share volume over 30 sessions", 30, run_session)
+    if len(valid) != sessions:
+        return _metric(None, "unavailable", f"Requires all {sessions} raw close-volume pairs; {len(valid)}/{sessions} valid", len(valid), run_session)
+    return _metric(sum(valid) / sessions, "valid", f"Mean of raw contemporaneous close multiplied by raw share volume over {sessions} sessions", sessions, run_session)
 
 
 def _ema(values: list[float], period: int) -> list[float | None]:
@@ -188,66 +189,72 @@ def trend_metric(
     prices = [price_rows.get(d, {}).get("close") for d in market_calendar[: end + 1]]
     last_gap = max((i for i, value in enumerate(prices) if value is None), default=-1)
     segment = prices[last_gap + 1 :]
-    required = int(settings["ema50_warmup_sessions"])
-    warm21 = int(settings["ema21_warmup_sessions"])
-    warm_slope = int(settings["ema21_slope_warmup_sessions"])
-    if len(segment) < warm21:
+    periods = tuple(int(value) for value in settings.get("ema_periods", (21, 50)))
+    if len(periods) != 2:
+        raise ValueError("ema_periods must contain the short and medium EMA windows")
+    short_period, long_period = periods
+    warmups = settings.get("ema_warmup_sessions", {})
+    warm_short = int(warmups.get(str(short_period), settings.get(f"ema{short_period}_warmup_sessions", short_period * 4)))
+    warm_long = int(warmups.get(str(long_period), settings.get(f"ema{long_period}_warmup_sessions", long_period * 4)))
+    slope_sessions = int(settings.get("ema_slope_sessions", 5))
+    warm_slope = warm_short + slope_sessions
+    if len(segment) < warm_short:
         return {
             "state": "Unavailable",
             "status": "unavailable",
-            "reason": f"Requires {warm21} consecutive closes for EMA21; {len(segment)} available after the latest gap",
-            "ema21": None,
-            "ema50": None,
-            "ema21_slope_5": None,
+            "reason": f"Requires {warm_short} consecutive closes for EMA{short_period}; {len(segment)} available after the latest gap",
+            f"ema{short_period}": None,
+            f"ema{long_period}": None,
+            f"ema{short_period}_slope_{slope_sessions}": None,
             "observations": len(segment),
             "session_date": run_session,
             "input_version": "yahoo-chart-close-ema-v1",
         }
     values = [float(value) for value in segment]
-    e21 = _ema(values, 21)
-    e50 = _ema(values, 50)
+    eshort = _ema(values, short_period)
+    elong = _ema(values, long_period)
     i = len(values) - 1
     if len(values) < warm_slope:
         return {
             "state": "Unavailable",
             "status": "unavailable",
-            "reason": f"EMA21 is available; requires {warm_slope} consecutive closes for its five-session slope",
-            "ema21": e21[i],
-            "ema50": None,
-            "ema21_slope_5": None,
+            "reason": f"EMA{short_period} is available; requires {warm_slope} consecutive closes for its {slope_sessions}-session slope",
+            f"ema{short_period}": eshort[i],
+            f"ema{long_period}": None,
+            f"ema{short_period}_slope_{slope_sessions}": None,
             "price_close": values[-1],
             "observations": len(values),
             "session_date": run_session,
             "input_version": "yahoo-chart-close-ema-v1",
         }
-    slope = float(e21[i] - e21[i - 5])
-    if len(values) < required or e50[i] is None:
+    slope = float(eshort[i] - eshort[i - slope_sessions])
+    if len(values) < warm_long or elong[i] is None:
         return {
             "state": "Unavailable",
             "status": "unavailable",
-            "reason": f"EMA21 is available; requires {required} consecutive closes for EMA50 trend classification",
-            "ema21": e21[i],
-            "ema50": None,
-            "ema21_slope_5": slope,
+            "reason": f"EMA{short_period} is available; requires {warm_long} consecutive closes for EMA{long_period} trend classification",
+            f"ema{short_period}": eshort[i],
+            f"ema{long_period}": None,
+            f"ema{short_period}_slope_{slope_sessions}": slope,
             "price_close": values[-1],
             "observations": len(values),
             "session_date": run_session,
             "input_version": "yahoo-chart-close-ema-v1",
         }
     current = values[-1]
-    if current > e21[i] and e21[i] > e50[i] and slope > 0:
+    if current > eshort[i] and eshort[i] > elong[i] and slope > 0:
         state = "Uptrend"
-    elif current < e21[i] and e21[i] < e50[i] and slope < 0:
+    elif current < eshort[i] and eshort[i] < elong[i] and slope < 0:
         state = "Downtrend"
     else:
         state = "Mixed"
     return {
         "state": state,
         "status": "valid",
-        "reason": "Consecutive closes; EMA21 and EMA50 use recursive smoothing seeded by a simple average",
-        "ema21": float(e21[i]),
-        "ema50": float(e50[i]),
-        "ema21_slope_5": slope,
+        "reason": f"Consecutive closes; EMA{short_period} and EMA{long_period} use recursive smoothing seeded by a simple average",
+        f"ema{short_period}": float(eshort[i]),
+        f"ema{long_period}": float(elong[i]),
+        f"ema{short_period}_slope_{slope_sessions}": slope,
         "price_close": current,
         "observations": len(values),
         "session_date": run_session,

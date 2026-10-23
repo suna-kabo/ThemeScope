@@ -27,6 +27,21 @@ class RateLimited(RuntimeError):
 
 
 _YAHOO_BLOCKED_HOSTS: set[str] = set()
+_YAHOO_CHART_HOSTS: tuple[str, ...] = (
+    "query1.finance.yahoo.com",
+    "query2.finance.yahoo.com",
+)
+
+
+def configure_sources(source_config: dict[str, Any]) -> None:
+    """Load configured provider priority without changing adapter semantics."""
+    global _YAHOO_CHART_HOSTS
+    configured = source_config.get("prices", {}).get("hosts", _YAHOO_CHART_HOSTS)
+    hosts = tuple(str(host).strip() for host in configured if str(host).strip())
+    if not hosts or any("/" in host or ":" in host for host in hosts):
+        raise ValueError("config/sources.json prices.hosts must contain host names")
+    _YAHOO_CHART_HOSTS = hosts
+    _YAHOO_BLOCKED_HOSTS.clear()
 
 
 def _request(url: str, accept: str = "*/*", user_agent: str | None = None) -> bytes:
@@ -353,7 +368,7 @@ def fetch_yahoo_chart(symbol: str, years: int = 2) -> dict[str, Any]:
     start = int((now - timedelta(days=365 * years + 2)).timestamp())
     end = int(now.timestamp()) + 86400
     failures = []
-    for host in ('query1.finance.yahoo.com', 'query2.finance.yahoo.com'):
+    for host in _YAHOO_CHART_HOSTS:
         if host in _YAHOO_BLOCKED_HOSTS:
             failures.append(f'{host}: circuit open after HTTP 429 in this run')
             continue

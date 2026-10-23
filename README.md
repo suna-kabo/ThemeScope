@@ -1,109 +1,87 @@
-# ThemeScope v5
+# ThemeScope
 
-An on-demand, end-of-day dashboard with separate **Market, Sectors, Industries, Themes, and Watchlist** pages. It organizes ETFs and stocks for manual chart review. It does not generate entries, stops, position sizes or trades. The 15/20 pool and score weights are explicit conventions, not validated trading models.
+ThemeScope is an on-demand, end-of-day US equity sector and theme dashboard. It reports SPY and QQQ facts, compares eligible ETF anchors, and provides an optional evidence-reviewed stock watchlist. It does not produce trade signals, entries, stops, position sizes, allocations, or orders. Scores and the 15/20-stock display limit are fixed browsing conventions, not a validated trading model.
 
-## Open the delivered dashboard
+## Open a generated dashboard
 
-Download/extract the project and open **`dist/dashboard.html`**. This is a dated real-data demonstration; opening or reloading it never collects data. Use **Download complete run ZIP** for its inputs and exports. The date displayed is the date of the data, not the time you opened the file.
+Open `dist/dashboard.html` in a browser. The file embeds the snapshot and all page assets; opening or reloading it does not request market data. Its displayed date is the date of the observations. Use **Download complete run ZIP** for the matching inputs, diagnostics, and exports.
 
-## Generate on your own device
+## Generate a fresh run
 
-Python 3.10+ and internet access are required. Windows:
+Requires Python 3.10+ and internet access. On Windows:
 
 ```bat
 py -3 -m pip install tzdata
-py -3 scripts/generate_dashboard.py
+py -3 scripts/generate_dashboard.py --output-dir dist
 ```
 
-macOS/Linux:
+On macOS or Linux:
 
 ```sh
-python3 scripts/generate_dashboard.py
+python3 scripts/generate_dashboard.py --output-dir dist
 ```
 
-Wait for **`SUCCESS: data date ...`** and the terminal prompt to return, then open **`output/dashboard.html`**. A full v5 run collects hundreds of constituent histories and can take 20–40 minutes at default sequential 1.5-second pacing, plus network delays. Progress is printed every 50 additional histories. A rate-limited Yahoo host is disabled for the rest of that process; both hosts being rate-limited stops the breadth refresh.
+Optionally resolve a historical common session:
 
-All ordinary run outputs remain local in Git-ignored `output/`. The program does not commit or push files. Choose a different local directory with `--output-dir`. There is no database, account, backend service or scheduler.
+```sh
+python3 scripts/generate_dashboard.py --as-of 2026-10-22 --output-dir dist
+```
 
-If access fails, explicitly render a previously saved real-data run:
+Wait for `SUCCESS: data date ...` and for the command prompt to return. The run collects configured ETF candidate charts, official holdings, mapped index constituents, constituent price histories, quote summaries, and requested SEC annual-filing checks. It is deliberately paced to reduce provider rate limits, so a complete refresh may take several minutes. A Yahoo HTTP 429 opens a run-local circuit. A failed refresh writes `dist/refresh_status.json` and `dist/failed_refresh.md` separately and preserves the prior successful dashboard and exports. Opening the HTML never retries collection.
+
+The generator publishes only after validating the dated SPY/QQQ data and eligible output. It stages files beside the target directory and rolls back a partial file replacement. It uses real retrieved values only; unavailable data remains blank or is listed with a reason.
+
+## Import an existing real-data run
+
+An existing run directory or `run_bundle.zip` can be rendered without network access:
 
 ```bat
-py -3 scripts/generate_dashboard.py --import-run dist/run_bundle.zip
+py -3 scripts/generate_dashboard.py --import-run dist/run_bundle.zip --output-dir output
 ```
 
-A directory containing `latest_snapshot.json` and `raw_inputs.json` also works. Imports make no network requests, preserve the original data date/collection time and show an import timestamp. A v4 input lacking constituent histories will correctly show unavailable v5 breadth; importing does not create missing observations.
+The imported data date and original generation time are retained. A v4/v5 run without v6 source diagnostics, official holdings freshness, or mapped breadth histories will show those values as unavailable. Import does not recreate missing source observations.
 
-## What changed in v5
+## What is configured and what remains incomplete
 
-- Separate S&P 500 and Nasdaq-100 constituent breadth and short/medium market conditions.
-- Anchor ETF holdings breadth independent of curated watchlist membership or filing reviews.
-- All 11 standard GICS sector ETF anchors, using each Select Sector SPDR fund's official dated holdings.
-- Every GICS sub-industry label represented in the retrieved S&P 500 constituent classification, with actual constituent median returns and EMA participation. This describes the S&P 500 slice, not every listed company.
-- Six existing curated industry/theme ETF exposures remain on the Themes page. The theme taxonomy is open-ended; no private 400-theme taxonomy was present in the project files.
-- Sector ETF rankings, a searchable industry table and return scatter chart, plus separate page navigation in a left sidebar.
-- CurrentStrength = 70% 1M excess-return percentile + 30% EMA21 breadth.
-- MediumStrength = 70% 3M excess-return percentile + 30% EMA50 breadth.
-- ThemeScore = 60% CurrentStrength + 40% MediumStrength.
-- Supported `Core`/`Related` non-anchor stocks can enter curated watchlists; their ETF weight is missing, not zero. Obvious cases do not require an annual filing check. Ambiguous records can require one via `requires_filing_review`.
-- Original liquidity filters, stock-versus-ETF excess returns and Liquid/Liquid/Strong/Weak selection remain. Individual biotechnology exclusion remains; XBI remains a valid ETF.
+The registry has 65 sector/theme records from the v6 seed list, including all 11 US equity sectors and the listed theme alternatives. Every configured candidate ticker is queried for price, instrument, and ADV evidence on an explicit refresh. Only candidates with a configured, dated holdings adapter can currently qualify for the primary ranking. This repository currently has official holdings adapters for 17 primary anchors: the 11 Select Sector SPDR funds plus SMH, SKYY, CIBR, XBI, XAR, and ICLN. Other candidate tickers are audited, but their holdings source and parser are not configured, so they cannot be selected as anchors. Alternative ETF prices alone do not establish eligibility.
 
-There are now 17 primary ETF anchors: 11 sector funds and six curated industry/theme exposures. Scores and percentiles still require at least ten valid peers; if valid inputs fall below that threshold, fields remain unavailable. Industry classifications use the separate S&P 500 constituent aggregation and do not receive an invented ETF score.
+ETF AUM and historical bid/ask spread sources are not configured. The run report records them as unavailable rather than estimating them. Theme stock watchlists use the existing reviewed membership set, not every ETF holding. Sector watchlists intersect the current S&P 500 sector classification with the sector ETF's official holdings, then apply the stock filters; this is a sourced S&P 500 subset, not every listed company in each sector. Nasdaq market-cap summaries do not expose a separate field observation time, so stock cap eligibility remains provisional. Business charters tagged `needs_review` are registry candidates, not confirmed claims that every company belongs to that theme.
 
-Breadth uses equal-company counts, not portfolio weights. Validity requires a universe no older than 35 days, eight valid companies and at least 80% price coverage. Missing prices are excluded from that metric's valid denominator but retained in its eligible coverage count. Cash, funds and other identified non-equities are excluded separately. Company share classes are deduplicated using verified issuer IDs; the alphabetically first mapped share class is used, never the best performer. Unverified foreign mappings remain missing rather than borrowing similarly named US tickers.
+The S&P 500 constituent source is a current Wikipedia table observed at retrieval, and the Nasdaq-100 list is retrieved from Nasdaq. These are not historical point-in-time universes. Yahoo Finance supplies adjusted closes and split-adjusted closes; those adjustment semantics are provider conventions. The cache manifest hashes normalized payloads retained in the run bundle; it is not a hash of the original HTTP wire bytes.
 
-## Sources and limits
+## Metrics and interface
 
-- **S&P 500:** current Wikipedia constituent table, with CIKs, retained rows and response hash. Its date means observed at retrieval, not an official constituent effective date.
-- **Nasdaq-100:** Nasdaq's dated `api/quote/list-type/nasdaq100` list.
-- **Issuer/listing map:** SEC `company_tickers_exchange.json`.
-- **ETF holdings:** official VanEck, First Trust, iShares and State Street sources. VanEck has a verified direct-dataset fallback.
-- **Prices:** Yahoo chart hosts query1/query2, with adjusted close for returns and split-adjusted close for EMAs. Exact common-session endpoints are used; unavailable data is never filled with zero.
-- **Market capitalization/industry/exchange:** Nasdaq summaries. The cap field has no separate observation timestamp, so stock eligibility remains provisional.
-- **Company-theme membership:** recorded reliable source and rationale in `config/evidence_reviews.json`. No automatic agent decision makes unsupported membership valid.
+- **Market:** SPY and QQQ are shown separately, with close, 5/21/63-session adjusted returns, values relative to EMA21/EMA50, and constituent counts above each EMA. Index breadth coverage stays in diagnostics rather than the normal display.
+- **Sectors & Themes:** one eligible primary ETF row per registry exposure. ETF excess returns are percentage-point differences against SPY. Percentile ranks require the configured minimum of ten eligible peers. The score is 70% 21-session excess-return percentile + 30% EMA21 holdings breadth for CurrentStrength; 70% 63-session excess-return percentile + 30% EMA50 breadth for MediumStrength; and 60%/40% CurrentStrength/MediumStrength for ThemeScore. Missing inputs are not imputed or reweighted.
+- **States:** Leading, Improving, Fading, and Lagging compare current and medium cross-sectional scores around 50. Improving/Fading do not establish a time-series reversal.
+- **Watchlist:** only individually sourced Core/Related memberships that pass the configured stock filters can be selected. Sorting and filtering do not refill the selected queue. ETF-only rows remain usable in the rankings without a fabricated stock list.
 
-The common US session is accepted after the v4 conservative closing cutoff. Foreign exchange/currency/share-class coverage is not assumed complete. Current universes are not historical point-in-time universes. No market score averages SPY/QQQ, and index breadth never enters ThemeScore. See `reports/v5_implementation_report.md` for the delivered run's exact availability and limitations.
+The three navigation pages are **Market**, **Sectors & Themes**, and **Watchlist**. Exports include the full ranking, a registry audit, visible-row CSV downloads, the 15- and 20-row stock lists, exchange-qualified TradingView text files, source matrix, raw inputs, snapshot, run report, and a complete run ZIP. A CSV blank means unavailable; `excess*_pp` is in percentage points.
 
-## Safe refresh and local exports
+## Project files
 
-Mandatory market/anchor return data, primary holdings collection and index-universe collection must succeed. Core prices/returns are validated against retrieved observations. Optional constituent histories, stock curation and score eligibility can remain unavailable with explicit reasons; they do not invalidate unrelated ETF returns. Rate-limit/constituent transport aborts and mandatory collection/validation failures return exit code 1, write `refresh_status.json` and `failed_refresh.md`, and preserve the last valid HTML, downloads and original date.
+- `config/themes.json`: theme registry, settings, candidate ETFs, and score configuration.
+- `config/sources.json`: provider priority/fallback order and documented source limitations.
+- `config/evidence_reviews.json`: reviewed company-theme membership rationale.
+- `src/themescope/sources.py`: public source adapters.
+- `src/themescope/collect.py`: on-demand retrieval and stock curation.
+- `src/themescope/metrics.py`: dated return, EMA, liquidity, breadth, and queue calculations.
+- `src/themescope/v5.py`: index/holdings breadth and score calculations.
+- `src/themescope/v6.py`: candidate audit, eligibility, source diagnostics, and snapshot contract.
+- `scripts/generate_dashboard.py`: validation, staged publication, exports, and rollback.
+- `static/`: data-neutral offline dashboard template, CSS, and JavaScript.
 
-Outputs are staged before publication; replacement errors roll back changed files. Invalid preexisting HTML is retained as `rejected_dashboard.html`, not advertised as successful. No empty first run is presented as completed. Imported v4 runs with valid ETF prices may be displayed as dated references with unavailable v5 fields.
-
-Run ZIP contents now include sectors.csv and industries.csv in addition to the dashboard, snapshot, raw inputs, market and theme exports, stock lists, TradingView lists, source matrix and run report:
-
-- `dashboard.html`, `latest_snapshot.json`, `raw_inputs.json`, `source_matrix.csv`, `latest_run.md`
-- `market.csv`, `themes.csv` including raw values, dates, field statuses/reasons
-- `watchlist_15.csv`, `watchlist_20.csv` with company-theme pairs and membership tags
-- `tradingview_15.txt`, `tradingview_20.txt` with deduplicated exchange-qualified symbols
-
-CSV return fields use decimal fractions; `excess*_pp` uses percentage points, while breadth `_pct` and scores use 0–100 values. Blank numeric cells mean unavailable.
-
-Browser CSV/TXT exports use the visible stock rows; the full run ZIP includes both configured pools and diagnostics. TradingView links only open after a user click. TradingView's external import dialog has not been automated here.
-
-## Project and validation
-
-- `src/themescope/sources.py`: public-source adapters
-- `src/themescope/collect.py`: retrieval and curated eligibility/selection
-- `src/themescope/metrics.py`: original return/EMA/selection calculations
-- `src/themescope/v5.py`: constituent collection, security mapping, independent breadth and approved scores
-- `src/themescope/presentation.py`: display fields and publication validation
-- `scripts/generate_dashboard.py`: staging, exports, imports, reports and rollback
-- `static/`: self-contained UI template/CSS/JS
-- `docs/ThemeScope_v5_Implementation_Change_Brief.md`: implemented product direction
+## Verification
 
 ```sh
-python3 -m unittest discover -s tests -v
+python -m unittest discover -s tests -v
 node tests/test_dashboard.js
 ```
 
-Optional browser checks require Playwright and Chromium:
+Optional Chromium checks require Playwright and Chromium:
 
 ```sh
-python3 tests/browser_check.py output/dashboard.html
+python tests/browser_check.py dist/dashboard.html
 ```
 
-They use Chromium DevTools Protocol Network events. Managed development Chromium blocks `file://`, so the exact exported bytes are served over loopback; the check requires zero automatic external requests. A regular local browser needs no server. The HTML embeds all assets and sets `connect-src 'none'`.
-
-## Distribution
-
-A source license and public repository visibility remain owner decisions. No license or visibility change was made by this implementation. Running the collector locally always keeps generated files on that user's device.
+The browser check uses Chromium DevTools Network events and verifies that opening and reloading the exported HTML makes no automatic external requests. The default security policy also blocks page-initiated network connections.

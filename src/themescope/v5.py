@@ -42,8 +42,22 @@ def fetch_universes():
     rows = [{'ticker': row['symbol'], 'company': row['companyName'], 'company_id': str(listings.get(row['symbol'], {}).get('cik') or row['symbol']), 'security_type': 'EQUITY'} for row in data['data']['rows']]
     if len(rows) != int(data['totalrecords']) or len(rows) < 90:
         raise ValueError('Nasdaq-100 constituent response incomplete')
-    qqq = {'as_of': datetime.strptime(data['date'], '%b %d, %Y').date().isoformat(), 'asof_basis': 'Nasdaq response date', 'url': url, 'retrieved_at': now, 'rows': rows}
+    qqq = {'as_of': _nasdaq_effective_date(data.get('date')), 'asof_basis': 'Nasdaq response date', 'url': url, 'retrieved_at': now, 'rows': rows}
     return {'SPY': spy, 'QQQ': qqq}, mapping
+
+
+def _nasdaq_effective_date(value):
+    """Parse Nasdaq dates with or without its intraday response-time suffix."""
+    match = re.search(r'([A-Za-z]{3,9}\s+\d{1,2},\s+\d{4})', str(value or ''))
+    if not match:
+        raise ValueError(f'Nasdaq-100 response date is missing or unrecognized: {value!r}')
+    date_text = match.group(1)
+    for form in ('%b %d, %Y', '%B %d, %Y'):
+        try:
+            return datetime.strptime(date_text, form).date().isoformat()
+        except ValueError:
+            pass
+    raise ValueError(f'Nasdaq-100 response date is missing or unrecognized: {value!r}')
 
 
 def map_universe(source, mapping, index=False):
@@ -113,7 +127,7 @@ def index_category_views(universe, charts, calendar, session, settings, source):
             prices = observation_map(chart)
             close = prices.get(session, {}).get('close') if session else None
             trend = trend_metric(chart, calendar, session, settings) if session else {}
-            for period in (21, 50):
+            for period in settings.get('ema_periods', (21, 50)):
                 ema_value = trend.get(f'ema{period}')
                 if isinstance(close, (int, float)) and math.isfinite(close) and isinstance(ema_value, (int, float)) and math.isfinite(ema_value):
                     data_members[period] += 1
@@ -131,7 +145,7 @@ def index_category_views(universe, charts, calendar, session, settings, source):
             'source': 'S&P 500 constituents classified by GICS Sector / GICS Sub-Industry',
             'session_date': session,
         }
-        for period in (21, 50):
+        for period in settings.get('ema_periods', (21, 50)):
             count = data_members[period]
             output[f'valid_ema{period}_count'] = count
             output[f'above_ema{period}_count'] = above[period]
@@ -187,12 +201,16 @@ def participation(universe, source, charts, calendar, session, settings, run_dat
         else:
             companies.append(company)
     n = len(companies)
+    max_age = int(settings.get('maximum_holdings_age_days', 35))
     try:
         age = (date.fromisoformat(run_date) - date.fromisoformat(source['as_of'])).days
-        fresh = 0 <= age <= 35
+        fresh = 0 <= age <= max_age
     except (ValueError, KeyError, TypeError):
         fresh = False
-    counts = {21: [0, 0], 50: [0, 0]}
+    periods = tuple(int(period) for period in settings.get('ema_periods', (21, 50)))
+    counts = {period: [0, 0] for period in periods}
+    minimum_sample = int(settings.get('minimum_breadth_sample', 8))
+    minimum_coverage = float(settings.get('minimum_breadth_coverage', .8))
     company_metrics = []
     for company in companies:
         values = {}
@@ -202,7 +220,7 @@ def participation(universe, source, charts, calendar, session, settings, run_dat
         if chart and chart.get('meta', {}).get('instrumentType') == 'EQUITY':
             trend = trend_metric(chart, calendar, session, settings)
             price = observation_map(chart).get(session, {}).get('close')
-            for period in (21, 50):
+            for period in periods:
                 ema = trend.get(f'ema{period}')
                 if isinstance(price, (int,float)) and isinstance(ema, (int,float)) and math.isfinite(price) and math.isfinite(ema):
                     counts[period][1] += 1
@@ -214,16 +232,16 @@ def participation(universe, source, charts, calendar, session, settings, run_dat
     for period, (above, valid) in counts.items():
         raw = 100 * above / valid if valid else None
         coverage = 100 * valid / n if n else None
-        reason = ('Holdings/constituent date unavailable, future, or older than 35 days' if not fresh else 'No eligible equity companies' if not n else f'Only {valid} valid companies; at least 8 required' if valid < 8 else f'Price coverage {valid}/{n} below 80%' if valid/n < .8 else None)
+        reason = (f'Holdings/constituent date unavailable, future, or older than {max_age} days' if not fresh else 'No eligible equity companies' if not n else f'Only {valid} valid companies; at least {minimum_sample} required' if valid < minimum_sample else f'Price coverage {valid}/{n} below {minimum_coverage:.0%}' if valid/n < minimum_coverage else None)
         output[str(period)] = metric(raw, reason, above_count=above, valid_count=valid, eligible_count=n, coverage_pct=coverage, session_date=session, as_of=source.get('as_of'), observation_count=valid)
     return output
 
 
-def percentiles(values, session):
+def percentiles(values, session, minimum_peers=10):
     valid = sorted((float(v), k) for k,v in values.items() if isinstance(v, (float, int)) and not isinstance(v, bool) and math.isfinite(v))
     n = len(valid)
-    out = {k: metric(reason=f'Requires 10 valid ETF peers; {n} available' if n < 10 else 'Excess return unavailable', peer_count=n, session_date=session) for k in values}
-    if n < 10:
+    out = {k: metric(reason=f'Requires {minimum_peers} valid ETF peers; {n} available' if n < minimum_peers else 'Excess return unavailable', peer_count=n, session_date=session) for k in values}
+    if n < minimum_peers:
         return out
     i = 0
     while i < n:
@@ -237,29 +255,29 @@ def percentiles(values, session):
     return out
 
 
-def strength(percentile, breadth):
+def strength(percentile, breadth, weights=(.7, .3)):
     if percentile.get('status') != 'valid' or breadth.get('status') != 'valid':
         return metric(reason='; '.join(str(m.get('reason')) for m in (percentile, breadth) if m.get('status') != 'valid'))
-    return metric(.7 * percentile['value'] + .3 * breadth['value'])
+    return metric(weights[0] * percentile['value'] + weights[1] * breadth['value'])
 
 
-def overall_score(current, medium):
+def overall_score(current, medium, weights=(.6, .4)):
     if current.get('status') != 'valid' or medium.get('status') != 'valid':
         return metric(reason='CurrentStrength and MediumStrength must both be valid')
-    return metric(.6 * current['value'] + .4 * medium['value'])
+    return metric(weights[0] * current['value'] + weights[1] * medium['value'])
 
 
-def theme_state(current, medium):
+def theme_state(current, medium, threshold=50):
     if current is None or medium is None:
-        return 'Unavailable'
-    return ('Leading' if medium >= 50 else 'Short-term strength only') if current >= 50 else ('Medium-term strength only' if medium >= 50 else 'Lagging')
+        return '—'
+    return ('Leading' if medium >= threshold else 'Improving') if current >= threshold else ('Fading' if medium >= threshold else 'Lagging')
 
 
-def market_condition(price, ema, breadth, period):
+def market_condition(price, ema, breadth, period, threshold=50):
     if price is None or ema is None or breadth.get('status') != 'valid':
         return metric(reason=breadth.get('reason') or 'Price or EMA unavailable')
     horizon = 'short-term' if period == 21 else 'medium-term'
-    strong, broad = price > ema, breadth['value'] >= 50
+    strong, broad = price > ema, breadth['value'] >= threshold
     text = f'Broad {horizon} strength' if strong and broad else f'Narrow {horizon} strength' if strong else f'Internal strength, index below EMA{period}' if broad else f'Broad {horizon} weakness'
     return metric(text)
 
@@ -270,7 +288,8 @@ def apply(snapshot, raw):
     snapshot['last_source_retrieved_at'] = max((c.get('retrieved_at', '') for c in all_charts.values()), default=None)
     mapped = inputs.get('mapped_universes', {})
     date_ = snapshot.get('session_date')
-    common = (all_charts, raw.get('session_calendar', []), date_, snapshot['settings'], snapshot['run_date'])
+    freshness_reference = date_ if snapshot.get('requested_asof') else snapshot['run_date']
+    common = (all_charts, raw.get('session_calendar', []), date_, snapshot['settings'], freshness_reference)
     for market in snapshot['context']:
         symbol = market['ticker']
         source = inputs.get('index_universes', {}).get(symbol, {})
@@ -285,12 +304,12 @@ def apply(snapshot, raw):
         market['ema50'] = trend.get('ema50')
         market['ema21_distance'] = (market.get('price_close') / market['ema21'] - 1) if market.get('price_close') is not None and market.get('ema21') else None
         market['ema50_distance'] = (market.get('price_close') / market['ema50'] - 1) if market.get('price_close') is not None and market.get('ema50') else None
-        for period in (21, 50):
+        for period in snapshot['settings'].get('ema_periods', (21, 50)):
             item = breadth[str(period)]
             market[f'index_valid_ema{period}_count'] = item['valid_count']
             market[f'index_breadth{period}_pct'] = item['value']
             market[f'index_coverage{period}_pct'] = item['coverage_pct']
-            condition = market_condition(market.get('price_close'), trend.get(f'ema{period}'), item, period)
+            condition = market_condition(market.get('price_close'), trend.get(f'ema{period}'), item, period, float(snapshot['settings'].get('market_breadth_threshold', 50)))
             market[f'market_condition{period}'] = condition['value'] or 'Unavailable'
             market[f'above_ema{period}'] = market['price_close'] > trend[f'ema{period}'] if market.get('price_close') is not None and trend.get(f'ema{period}') is not None else None
             market['field_status'][f'index_breadth{period}_pct'] = item
@@ -299,8 +318,33 @@ def apply(snapshot, raw):
         mapped.get('SPY', {}), all_charts, raw.get('session_calendar', []), date_,
         snapshot['settings'], inputs.get('index_universes', {}).get('SPY', {}),
     )
-    p21 = percentiles({t['id']: t['excess_returns']['21']['value'] if t.get('anchor_screen', {}).get('anchor_screen_valid', False) and t['excess_returns']['21'].get('status') == 'valid' else None for t in snapshot['themes']}, date_)
-    p63 = percentiles({t['id']: t['excess_returns']['63']['value'] if t.get('anchor_screen', {}).get('anchor_screen_valid', False) and t['excess_returns']['63'].get('status') == 'valid' else None for t in snapshot['themes']}, date_)
+    peer_minimum = int(snapshot['settings']['minimum_percentile_peers'])
+    def eligible_peer(theme):
+        if not theme.get('anchor_screen', {}).get('anchor_screen_valid', False):
+            return False
+        source = raw.get('holdings', {}).get(theme['anchor'], {})
+        if not source.get('rows') or not source.get('as_of'):
+            return False
+        try:
+            reference = snapshot.get('session_date')
+            age = (date.fromisoformat(reference) - date.fromisoformat(source['as_of'])).days
+        except (TypeError, ValueError):
+            return False
+        minimum_age = int(snapshot['settings'].get('maximum_holdings_age_days', 35))
+        # Peer ranks are across eligible primary ETFs with valid returns.
+        # Holdings breadth can independently fail its sample/coverage rules;
+        # that makes the composite score unavailable but does not remove the
+        # ETF from the return percentile's eligible peer universe.
+        return 0 <= age <= minimum_age
+    p21 = percentiles({t['id']: t['excess_returns']['21']['value'] if eligible_peer(t) and t['excess_returns']['21'].get('status') == 'valid' else None for t in snapshot['themes']}, date_, peer_minimum)
+    p63 = percentiles({t['id']: t['excess_returns']['63']['value'] if eligible_peer(t) and t['excess_returns']['63'].get('status') == 'valid' else None for t in snapshot['themes']}, date_, peer_minimum)
+    weights = snapshot.get('score_methodology', {})
+    current_weights = weights.get('current_strength_weights', {})
+    medium_weights = weights.get('medium_strength_weights', {})
+    final_weights = weights.get('theme_score_weights', {})
+    if not current_weights or not medium_weights or not final_weights or 'state_threshold' not in weights:
+        raise ValueError('Configured score_methodology is required to calculate v6 scores')
+    threshold = float(weights['state_threshold'])
     for theme in snapshot['themes']:
         source = raw.get('holdings', {}).get(theme['anchor'], {})
         breadth = participation(mapped.get(theme['anchor'], {}), source, *common)
@@ -308,7 +352,7 @@ def apply(snapshot, raw):
         theme['holdings_asof'] = source.get('as_of')
         theme['breadth_eligible_equity_count'] = breadth['eligible_count']
         theme['field_status'] = {}
-        for period in (21, 50):
+        for period in snapshot['settings'].get('ema_periods', (21, 50)):
             item = breadth[str(period)]
             theme[f'breadth_valid_ema{period}_count'] = item['valid_count']
             theme[f'etf_breadth{period}_pct'] = item['value']
@@ -316,14 +360,14 @@ def apply(snapshot, raw):
             theme['field_status'][f'etf_breadth{period}_pct'] = item
             distance = theme.get(f'ema{period}_distance')
             theme[f'above_ema{period}'] = distance > 0 if distance is not None else None
-        current = strength(p21[theme['id']], breadth['21'])
-        medium = strength(p63[theme['id']], breadth['50'])
-        score = overall_score(current, medium)
+        current = strength(p21[theme['id']], breadth['21'], (float(current_weights['excess21_percentile']), float(current_weights['breadth21'])))
+        medium = strength(p63[theme['id']], breadth['50'], (float(medium_weights['excess63_percentile']), float(medium_weights['breadth50'])))
+        score = overall_score(current, medium, (float(final_weights['current_strength']), float(final_weights['medium_strength'])))
         for field,item in [('percentile_excess21',p21[theme['id']]),('percentile_excess63',p63[theme['id']]),('current_strength_score',current),('medium_strength_score',medium),('theme_score',score)]:
             item['session_date'] = date_
             theme[field] = item['value'] if item['status'] == 'valid' else None
             theme['field_status'][field] = item
-        theme['theme_state'] = theme_state(current['value'], medium['value'])
+        theme['theme_state'] = theme_state(current['value'], medium['value'], threshold)
         theme['ranking_universe_date'] = date_
         theme['ranking_peer_count21'] = p21[theme['id']]['peer_count']
         theme['ranking_peer_count63'] = p63[theme['id']]['peer_count']
@@ -347,6 +391,14 @@ def apply(snapshot, raw):
         'Curated company-theme classifications use recorded Core/Related rationale and source; non-anchor members are allowed. Holdings are not a membership gate.',
         'Scores are fixed ranking conventions, not validated entry signals, predictions or portfolio allocations.'
     ]
-    snapshot['schema_version'] = '5.0' 
-    snapshot['score_methodology'] = {'current_weights': [0.7,0.3], 'medium_weights': [0.7,0.3], 'overall_weights': [0.6,0.4], 'minimum_peers':10, 'purpose':'Fixed ranking conventions, not optimized or validated predictive signals'}
+    snapshot['schema_version'] = '6.0'
+    snapshot['methodology_version'] = snapshot.get('methodology_version', '6.0')
+    snapshot['score_methodology'] = {
+        'current_strength_weights': current_weights,
+        'medium_strength_weights': medium_weights,
+        'theme_score_weights': final_weights,
+        'minimum_peers': peer_minimum,
+        'state_threshold': threshold,
+        'purpose': 'Fixed ranking conventions for manual review, not validated or predictive signals',
+    }
     return snapshot

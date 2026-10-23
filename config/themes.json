@@ -1,5 +1,5 @@
 {
-  "registry_version": "5.1",
+  "registry_version": "6.0",
   "reviewer": "Codex implementation review",
   "decision_date": "2026-10-22",
   "effective_date": "2026-10-22",
@@ -15,29 +15,36 @@
       63,
       126
     ],
-    "market_cap_floor_usd": 2000000000,
-    "raw_close_floor_usd": 15,
-    "adv30_floor_usd": 20000000,
-    "anchor_adv30_floor_usd": 1000000,
-    "max_candidates": 20,
-    "compact_candidates": 15,
     "ema_periods": [
       21,
       50
     ],
+    "ema_warmup_sessions": {
+      "21": 84,
+      "50": 200
+    },
     "ema_slope_sessions": 5,
-    "ema21_warmup_sessions": 84,
-    "ema21_slope_warmup_sessions": 89,
-    "ema50_warmup_sessions": 200,
+    "adv30_sessions": 30,
+    "anchor_minimum_history_sessions": 64,
+    "anchor_preferred_history_sessions": 126,
+    "anchor_adv30_floor_usd": 10000000,
+    "anchor_minimum_aum_usd": 100000000,
+    "anchor_maximum_spread_pct": 0.25,
+    "market_cap_floor_usd": 2000000000,
+    "raw_close_floor_usd": 15,
+    "adv30_floor_usd": 20000000,
     "minimum_breadth_sample": 8,
     "minimum_breadth_coverage": 0.8,
     "maximum_holdings_age_days": 35,
     "minimum_percentile_peers": 10,
+    "market_breadth_threshold": 50,
+    "watchlist_capacity": 20,
+    "watchlist_default_limit": 15,
     "business_revenue_materiality_percent": 20
   },
   "themes": [
     {
-      "id": "sector_communication_services",
+      "id": "sector-communication-services",
       "name": "Communication Services",
       "scope": "U.S. listed companies classified in the Communication Services sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
       "included": [
@@ -58,10 +65,16 @@
       "representation_limit": "The Select Sector SPDR fund holdings define the ETF breadth sample. Industry classification views separately cover categories represented in the dated S&P 500 constituent table.",
       "unleveraged_equity_etf_review": true,
       "anchor_instrument_review": "Select Sector SPDR U.S. equity sector ETF; long-only unleveraged mandate reviewed from the issuer’s fund family description.",
-      "level": "Sector"
+      "level": "Sector",
+      "candidate_anchors": [
+        "XLC"
+      ],
+      "preferred_candidate": "XLC",
+      "charter": "U.S. listed companies classified in the Communication Services sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
+      "charter_status": "reviewed"
     },
     {
-      "id": "sector_consumer_discretionary",
+      "id": "sector-consumer-discretionary",
       "name": "Consumer Discretionary",
       "scope": "U.S. listed companies classified in the Consumer Discretionary sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
       "included": [
@@ -82,10 +95,16 @@
       "representation_limit": "The Select Sector SPDR fund holdings define the ETF breadth sample. Industry classification views separately cover categories represented in the dated S&P 500 constituent table.",
       "unleveraged_equity_etf_review": true,
       "anchor_instrument_review": "Select Sector SPDR U.S. equity sector ETF; long-only unleveraged mandate reviewed from the issuer’s fund family description.",
-      "level": "Sector"
+      "level": "Sector",
+      "candidate_anchors": [
+        "XLY"
+      ],
+      "preferred_candidate": "XLY",
+      "charter": "U.S. listed companies classified in the Consumer Discretionary sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
+      "charter_status": "reviewed"
     },
     {
-      "id": "sector_consumer_staples",
+      "id": "sector-consumer-staples",
       "name": "Consumer Staples",
       "scope": "U.S. listed companies classified in the Consumer Staples sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
       "included": [
@@ -106,10 +125,16 @@
       "representation_limit": "The Select Sector SPDR fund holdings define the ETF breadth sample. Industry classification views separately cover categories represented in the dated S&P 500 constituent table.",
       "unleveraged_equity_etf_review": true,
       "anchor_instrument_review": "Select Sector SPDR U.S. equity sector ETF; long-only unleveraged mandate reviewed from the issuer’s fund family description.",
-      "level": "Sector"
+      "level": "Sector",
+      "candidate_anchors": [
+        "XLP"
+      ],
+      "preferred_candidate": "XLP",
+      "charter": "U.S. listed companies classified in the Consumer Staples sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
+      "charter_status": "reviewed"
     },
     {
-      "id": "sector_energy",
+      "id": "sector-energy",
       "name": "Energy",
       "scope": "U.S. listed companies classified in the Energy sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
       "included": [
@@ -130,10 +155,16 @@
       "representation_limit": "The Select Sector SPDR fund holdings define the ETF breadth sample. Industry classification views separately cover categories represented in the dated S&P 500 constituent table.",
       "unleveraged_equity_etf_review": true,
       "anchor_instrument_review": "Select Sector SPDR U.S. equity sector ETF; long-only unleveraged mandate reviewed from the issuer’s fund family description.",
-      "level": "Sector"
+      "level": "Sector",
+      "candidate_anchors": [
+        "XLE"
+      ],
+      "preferred_candidate": "XLE",
+      "charter": "U.S. listed companies classified in the Energy sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
+      "charter_status": "reviewed"
     },
     {
-      "id": "sector_financials",
+      "id": "sector-financials",
       "name": "Financials",
       "scope": "U.S. listed companies classified in the Financials sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
       "included": [
@@ -154,10 +185,16 @@
       "representation_limit": "The Select Sector SPDR fund holdings define the ETF breadth sample. Industry classification views separately cover categories represented in the dated S&P 500 constituent table.",
       "unleveraged_equity_etf_review": true,
       "anchor_instrument_review": "Select Sector SPDR U.S. equity sector ETF; long-only unleveraged mandate reviewed from the issuer’s fund family description.",
-      "level": "Sector"
+      "level": "Sector",
+      "candidate_anchors": [
+        "XLF"
+      ],
+      "preferred_candidate": "XLF",
+      "charter": "U.S. listed companies classified in the Financials sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
+      "charter_status": "reviewed"
     },
     {
-      "id": "sector_health_care",
+      "id": "sector-health-care",
       "name": "Health Care",
       "scope": "U.S. listed companies classified in the Health Care sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
       "included": [
@@ -178,10 +215,16 @@
       "representation_limit": "The Select Sector SPDR fund holdings define the ETF breadth sample. Industry classification views separately cover categories represented in the dated S&P 500 constituent table.",
       "unleveraged_equity_etf_review": true,
       "anchor_instrument_review": "Select Sector SPDR U.S. equity sector ETF; long-only unleveraged mandate reviewed from the issuer’s fund family description.",
-      "level": "Sector"
+      "level": "Sector",
+      "candidate_anchors": [
+        "XLV"
+      ],
+      "preferred_candidate": "XLV",
+      "charter": "U.S. listed companies classified in the Health Care sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
+      "charter_status": "reviewed"
     },
     {
-      "id": "sector_industrials",
+      "id": "sector-industrials",
       "name": "Industrials",
       "scope": "U.S. listed companies classified in the Industrials sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
       "included": [
@@ -202,10 +245,16 @@
       "representation_limit": "The Select Sector SPDR fund holdings define the ETF breadth sample. Industry classification views separately cover categories represented in the dated S&P 500 constituent table.",
       "unleveraged_equity_etf_review": true,
       "anchor_instrument_review": "Select Sector SPDR U.S. equity sector ETF; long-only unleveraged mandate reviewed from the issuer’s fund family description.",
-      "level": "Sector"
+      "level": "Sector",
+      "candidate_anchors": [
+        "XLI"
+      ],
+      "preferred_candidate": "XLI",
+      "charter": "U.S. listed companies classified in the Industrials sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
+      "charter_status": "reviewed"
     },
     {
-      "id": "sector_information_technology",
+      "id": "sector-information-technology",
       "name": "Information Technology",
       "scope": "U.S. listed companies classified in the Information Technology sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
       "included": [
@@ -226,10 +275,16 @@
       "representation_limit": "The Select Sector SPDR fund holdings define the ETF breadth sample. Industry classification views separately cover categories represented in the dated S&P 500 constituent table.",
       "unleveraged_equity_etf_review": true,
       "anchor_instrument_review": "Select Sector SPDR U.S. equity sector ETF; long-only unleveraged mandate reviewed from the issuer’s fund family description.",
-      "level": "Sector"
+      "level": "Sector",
+      "candidate_anchors": [
+        "XLK"
+      ],
+      "preferred_candidate": "XLK",
+      "charter": "U.S. listed companies classified in the Information Technology sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
+      "charter_status": "reviewed"
     },
     {
-      "id": "sector_materials",
+      "id": "sector-materials",
       "name": "Materials",
       "scope": "U.S. listed companies classified in the Materials sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
       "included": [
@@ -250,10 +305,16 @@
       "representation_limit": "The Select Sector SPDR fund holdings define the ETF breadth sample. Industry classification views separately cover categories represented in the dated S&P 500 constituent table.",
       "unleveraged_equity_etf_review": true,
       "anchor_instrument_review": "Select Sector SPDR U.S. equity sector ETF; long-only unleveraged mandate reviewed from the issuer’s fund family description.",
-      "level": "Sector"
+      "level": "Sector",
+      "candidate_anchors": [
+        "XLB"
+      ],
+      "preferred_candidate": "XLB",
+      "charter": "U.S. listed companies classified in the Materials sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
+      "charter_status": "reviewed"
     },
     {
-      "id": "sector_real_estate",
+      "id": "sector-real-estate",
       "name": "Real Estate",
       "scope": "U.S. listed companies classified in the Real Estate sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
       "included": [
@@ -274,10 +335,16 @@
       "representation_limit": "The Select Sector SPDR fund holdings define the ETF breadth sample. Industry classification views separately cover categories represented in the dated S&P 500 constituent table.",
       "unleveraged_equity_etf_review": true,
       "anchor_instrument_review": "Select Sector SPDR U.S. equity sector ETF; long-only unleveraged mandate reviewed from the issuer’s fund family description.",
-      "level": "Sector"
+      "level": "Sector",
+      "candidate_anchors": [
+        "XLRE"
+      ],
+      "preferred_candidate": "XLRE",
+      "charter": "U.S. listed companies classified in the Real Estate sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
+      "charter_status": "reviewed"
     },
     {
-      "id": "sector_utilities",
+      "id": "sector-utilities",
       "name": "Utilities",
       "scope": "U.S. listed companies classified in the Utilities sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
       "included": [
@@ -298,10 +365,16 @@
       "representation_limit": "The Select Sector SPDR fund holdings define the ETF breadth sample. Industry classification views separately cover categories represented in the dated S&P 500 constituent table.",
       "unleveraged_equity_etf_review": true,
       "anchor_instrument_review": "Select Sector SPDR U.S. equity sector ETF; long-only unleveraged mandate reviewed from the issuer’s fund family description.",
-      "level": "Sector"
+      "level": "Sector",
+      "candidate_anchors": [
+        "XLU"
+      ],
+      "preferred_candidate": "XLU",
+      "charter": "U.S. listed companies classified in the Utilities sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
+      "charter_status": "reviewed"
     },
     {
-      "id": "semiconductors",
+      "id": "theme-semiconductors",
       "name": "Semiconductors",
       "scope": "Semiconductor design, foundry manufacturing, memory, and fabrication equipment.",
       "included": [
@@ -325,86 +398,32 @@
       "representation_limit": "SMH may hold non-US issuers and ADRs. The stock subset is limited to verified NYSE/Nasdaq listings; any ADR mapping is labeled.",
       "unleveraged_equity_etf_review": true,
       "anchor_instrument_review": "Plain-vanilla long-only USD equity ETF; official fund mandate checked for inverse or leveraged objective.",
-      "level": "Industry"
+      "level": "Theme",
+      "candidate_anchors": [
+        "SMH",
+        "SOXX",
+        "XSD"
+      ],
+      "preferred_candidate": "SMH",
+      "charter": "Semiconductor design, foundry manufacturing, memory, and fabrication equipment.",
+      "charter_status": "reviewed"
     },
     {
-      "id": "cybersecurity",
-      "name": "Cybersecurity",
-      "scope": "Companies whose established products directly protect networks, endpoints, identities, applications, or enterprise data.",
-      "included": [
-        "Dedicated security products and platforms",
-        "Established reportable cybersecurity businesses"
+      "id": "theme-software",
+      "name": "Software",
+      "level": "Theme",
+      "candidate_anchors": [
+        "IGV",
+        "XSW"
       ],
-      "excluded": [
-        "Generic technology adoption, customer association, pilots, and incidental security features"
-      ],
-      "anchor": "CIBR",
-      "parent_sector": null,
-      "anchor_rationale": "First Trust's Nasdaq CTA Cybersecurity ETF has an explicit cybersecurity mandate, current holdings, and published index materials. Cybersecurity spans several industries, so no single parent-sector ETF is assigned.",
-      "anchor_url": "https://www.ftportfolios.com/Retail/Etf/EtfSummary.aspx?Ticker=CIBR",
-      "holdings_source": {
-        "provider": "First Trust",
-        "method": "first_trust_html",
-        "url": "https://www.ftportfolios.com/Retail/Etf/EtfHoldings.aspx?Ticker=CIBR"
-      },
-      "representation_limit": "The fund includes non-US securities and companies with adjacent technology businesses. Each issuer still needs independent business evidence.",
-      "unleveraged_equity_etf_review": true,
-      "anchor_instrument_review": "Plain-vanilla long-only USD equity ETF; official fund mandate checked for inverse or leveraged objective.",
-      "level": "Theme"
+      "preferred_candidate": "IGV",
+      "charter": "Working scope for Software: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Software: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
     },
     {
-      "id": "clean_energy",
-      "name": "Clean Energy",
-      "scope": "Renewable electricity generation and established equipment or services directly used to generate or manage renewable power.",
-      "included": [
-        "Solar, wind, and geothermal generation",
-        "Established renewable generation equipment and power-control systems"
-      ],
-      "excluded": [
-        "General utilities without material renewable exposure",
-        "EVs, batteries, and broad electrification without a directly matching established activity"
-      ],
-      "anchor": "ICLN",
-      "parent_sector": null,
-      "anchor_rationale": "The iShares Global Clean Energy ETF tracks a global clean-energy mandate and its dated holdings are downloadable. QCLN is a U.S.-tilted alternative with broader clean-technology exposure; ICLN better fits this narrower renewable-generation scope. The comparison is about mandate fit, not recent return.",
-      "anchor_url": "https://www.ishares.com/us/products/239738/ishares-global-clean-energy-etf",
-      "holdings_source": {
-        "provider": "iShares",
-        "method": "ishares_csv",
-        "url": "https://www.ishares.com/us/products/239738/ishares-global-clean-energy-etf/latest-holdings.csv"
-      },
-      "representation_limit": "ICLN is global. The formal stock universe contains only verified eligible U.S.-listed securities, so it is a U.S.-listed subset of the fund.",
-      "unleveraged_equity_etf_review": true,
-      "anchor_instrument_review": "Plain-vanilla long-only USD equity ETF; official fund mandate checked for inverse or leveraged objective.",
-      "level": "Theme"
-    },
-    {
-      "id": "aerospace_defense",
-      "name": "Aerospace & Defense",
-      "scope": "U.S.-listed companies with established aerospace manufacturing, defense systems, or mission-critical components as a core business.",
-      "included": [
-        "Defense contractors and systems",
-        "Commercial and military aerospace equipment and components"
-      ],
-      "excluded": [
-        "General industrial companies without a material aerospace or defense business"
-      ],
-      "anchor": "XAR",
-      "parent_sector": "XLI",
-      "anchor_rationale": "XAR follows the S&P Aerospace & Defense Select Industry Index and uses a more even holding-weight profile than ITA. In the retrieved 2026-10-21 snapshots, XAR's top five weights sum to about 16%, while ITA's top five sum to about 55%; XAR is selected for broader constituent representation. Both are accessible and have sufficient history.",
-      "anchor_url": "https://www.ssga.com/us/en/intermediary/etfs/spdr-sp-aerospace-defense-etf-xar",
-      "holdings_source": {
-        "provider": "State Street SPDR",
-        "method": "spdr_xlsx",
-        "url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xar.xlsx"
-      },
-      "representation_limit": "XAR holdings can include component suppliers and non-defense aerospace businesses; each company is reviewed against the stated scope.",
-      "unleveraged_equity_etf_review": true,
-      "anchor_instrument_review": "Plain-vanilla long-only USD equity ETF; official fund mandate checked for inverse or leveraged objective.",
-      "level": "Industry"
-    },
-    {
-      "id": "cloud_computing",
+      "id": "theme-cloud-computing",
       "name": "Cloud Computing",
       "scope": "Public cloud infrastructure, cloud platforms, and established software services primarily delivered through cloud deployment.",
       "included": [
@@ -427,10 +446,190 @@
       "representation_limit": "The index's cloud categories are broader than this watchlist's business-evidence rule. Unreviewed holdings are shown separately and excluded from formal selection.",
       "unleveraged_equity_etf_review": true,
       "anchor_instrument_review": "Plain-vanilla long-only USD equity ETF; official fund mandate checked for inverse or leveraged objective.",
-      "level": "Theme"
+      "level": "Theme",
+      "candidate_anchors": [
+        "SKYY",
+        "CLOU",
+        "WCLD"
+      ],
+      "preferred_candidate": "SKYY",
+      "charter": "Public cloud infrastructure, cloud platforms, and established software services primarily delivered through cloud deployment.",
+      "charter_status": "reviewed"
     },
     {
-      "id": "biotechnology",
+      "id": "theme-cybersecurity",
+      "name": "Cybersecurity",
+      "scope": "Companies whose established products directly protect networks, endpoints, identities, applications, or enterprise data.",
+      "included": [
+        "Dedicated security products and platforms",
+        "Established reportable cybersecurity businesses"
+      ],
+      "excluded": [
+        "Generic technology adoption, customer association, pilots, and incidental security features"
+      ],
+      "anchor": "CIBR",
+      "parent_sector": null,
+      "anchor_rationale": "First Trust's Nasdaq CTA Cybersecurity ETF has an explicit cybersecurity mandate, current holdings, and published index materials. Cybersecurity spans several industries, so no single parent-sector ETF is assigned.",
+      "anchor_url": "https://www.ftportfolios.com/Retail/Etf/EtfSummary.aspx?Ticker=CIBR",
+      "holdings_source": {
+        "provider": "First Trust",
+        "method": "first_trust_html",
+        "url": "https://www.ftportfolios.com/Retail/Etf/EtfHoldings.aspx?Ticker=CIBR"
+      },
+      "representation_limit": "The fund includes non-US securities and companies with adjacent technology businesses. Each issuer still needs independent business evidence.",
+      "unleveraged_equity_etf_review": true,
+      "anchor_instrument_review": "Plain-vanilla long-only USD equity ETF; official fund mandate checked for inverse or leveraged objective.",
+      "level": "Theme",
+      "candidate_anchors": [
+        "CIBR",
+        "HACK",
+        "BUG"
+      ],
+      "preferred_candidate": "CIBR",
+      "charter": "Companies whose established products directly protect networks, endpoints, identities, applications, or enterprise data.",
+      "charter_status": "reviewed"
+    },
+    {
+      "id": "theme-internet",
+      "name": "Internet",
+      "level": "Theme",
+      "candidate_anchors": [
+        "FDN"
+      ],
+      "preferred_candidate": "FDN",
+      "charter": "Working scope for Internet: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Internet: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-artificial-intelligence",
+      "name": "Artificial Intelligence & Big Data",
+      "level": "Theme",
+      "candidate_anchors": [
+        "AIQ",
+        "THNQ"
+      ],
+      "preferred_candidate": "AIQ",
+      "charter": "Working scope for Artificial Intelligence & Big Data: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Artificial Intelligence & Big Data: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-robotics-automation",
+      "name": "Robotics & Automation",
+      "level": "Theme",
+      "candidate_anchors": [
+        "BOTZ",
+        "ROBO"
+      ],
+      "preferred_candidate": "BOTZ",
+      "charter": "Working scope for Robotics & Automation: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Robotics & Automation: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-quantum-computing",
+      "name": "Quantum Computing",
+      "level": "Theme",
+      "candidate_anchors": [
+        "QTUM"
+      ],
+      "preferred_candidate": "QTUM",
+      "charter": "Working scope for Quantum Computing: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Quantum Computing: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-fintech",
+      "name": "Fintech",
+      "level": "Theme",
+      "candidate_anchors": [
+        "FINX",
+        "ARKF"
+      ],
+      "preferred_candidate": "FINX",
+      "charter": "Working scope for Fintech: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Fintech: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-blockchain",
+      "name": "Blockchain & Digital-Asset Companies",
+      "level": "Theme",
+      "candidate_anchors": [
+        "BLOK",
+        "BKCH"
+      ],
+      "preferred_candidate": "BLOK",
+      "charter": "Working scope for Blockchain & Digital-Asset Companies: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Blockchain & Digital-Asset Companies: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-data-centers",
+      "name": "Data Centers & Digital Infrastructure",
+      "level": "Theme",
+      "candidate_anchors": [
+        "SRVR",
+        "VPN"
+      ],
+      "preferred_candidate": "SRVR",
+      "charter": "Working scope for Data Centers & Digital Infrastructure: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Data Centers & Digital Infrastructure: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-autonomous-electric-vehicles",
+      "name": "Autonomous & Electric Vehicles",
+      "level": "Theme",
+      "candidate_anchors": [
+        "DRIV",
+        "KARS",
+        "IDRV"
+      ],
+      "preferred_candidate": "DRIV",
+      "charter": "Working scope for Autonomous & Electric Vehicles: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Autonomous & Electric Vehicles: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-video-games",
+      "name": "Video Games & Esports",
+      "level": "Theme",
+      "candidate_anchors": [
+        "GAMR",
+        "HERO"
+      ],
+      "preferred_candidate": "GAMR",
+      "charter": "Working scope for Video Games & Esports: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Video Games & Esports: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-ecommerce",
+      "name": "E-Commerce",
+      "level": "Theme",
+      "candidate_anchors": [
+        "IBUY",
+        "ONLN"
+      ],
+      "preferred_candidate": "IBUY",
+      "charter": "Working scope for E-Commerce: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for E-Commerce: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-biotechnology",
       "name": "Biotechnology",
       "scope": "Biotechnology industry ETF performance context.",
       "included": [
@@ -451,7 +650,605 @@
       "representation_limit": "Stock selection is intentionally withheld until issuer-level industry screening is complete; the biotechnology exclusion applies to stocks, not the ETF's own returns.",
       "unleveraged_equity_etf_review": true,
       "anchor_instrument_review": "Plain-vanilla long-only USD equity ETF; official fund mandate checked for inverse or leveraged objective.",
-      "level": "Industry"
+      "level": "Theme",
+      "candidate_anchors": [
+        "XBI",
+        "IBB"
+      ],
+      "preferred_candidate": "XBI",
+      "charter": "Biotechnology industry ETF performance context.",
+      "charter_status": "reviewed"
+    },
+    {
+      "id": "theme-pharmaceuticals",
+      "name": "Pharmaceuticals",
+      "level": "Theme",
+      "candidate_anchors": [
+        "XPH",
+        "PJP"
+      ],
+      "preferred_candidate": "XPH",
+      "charter": "Working scope for Pharmaceuticals: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Pharmaceuticals: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-medical-devices",
+      "name": "Medical Devices",
+      "level": "Theme",
+      "candidate_anchors": [
+        "IHI",
+        "XHE"
+      ],
+      "preferred_candidate": "IHI",
+      "charter": "Working scope for Medical Devices: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Medical Devices: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-healthcare-providers",
+      "name": "Healthcare Providers",
+      "level": "Theme",
+      "candidate_anchors": [
+        "IHF",
+        "XHS"
+      ],
+      "preferred_candidate": "IHF",
+      "charter": "Working scope for Healthcare Providers: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Healthcare Providers: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-genomics",
+      "name": "Genomics",
+      "level": "Theme",
+      "candidate_anchors": [
+        "ARKG",
+        "GNOM"
+      ],
+      "preferred_candidate": "ARKG",
+      "charter": "Working scope for Genomics: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Genomics: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-cannabis",
+      "name": "Cannabis",
+      "level": "Theme",
+      "candidate_anchors": [
+        "MSOS",
+        "MJ"
+      ],
+      "preferred_candidate": "MSOS",
+      "charter": "Working scope for Cannabis: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Cannabis: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-aerospace-defense",
+      "name": "Aerospace & Defense",
+      "scope": "U.S.-listed companies with established aerospace manufacturing, defense systems, or mission-critical components as a core business.",
+      "included": [
+        "Defense contractors and systems",
+        "Commercial and military aerospace equipment and components"
+      ],
+      "excluded": [
+        "General industrial companies without a material aerospace or defense business"
+      ],
+      "anchor": "XAR",
+      "parent_sector": "XLI",
+      "anchor_rationale": "XAR follows the S&P Aerospace & Defense Select Industry Index and uses a more even holding-weight profile than ITA. In the retrieved 2026-10-21 snapshots, XAR's top five weights sum to about 16%, while ITA's top five sum to about 55%; XAR is selected for broader constituent representation. Both are accessible and have sufficient history.",
+      "anchor_url": "https://www.ssga.com/us/en/intermediary/etfs/spdr-sp-aerospace-defense-etf-xar",
+      "holdings_source": {
+        "provider": "State Street SPDR",
+        "method": "spdr_xlsx",
+        "url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xar.xlsx"
+      },
+      "representation_limit": "XAR holdings can include component suppliers and non-defense aerospace businesses; each company is reviewed against the stated scope.",
+      "unleveraged_equity_etf_review": true,
+      "anchor_instrument_review": "Plain-vanilla long-only USD equity ETF; official fund mandate checked for inverse or leveraged objective.",
+      "level": "Theme",
+      "candidate_anchors": [
+        "ITA",
+        "XAR",
+        "PPA"
+      ],
+      "preferred_candidate": "ITA",
+      "charter": "U.S.-listed companies with established aerospace manufacturing, defense systems, or mission-critical components as a core business.",
+      "charter_status": "reviewed"
+    },
+    {
+      "id": "theme-space",
+      "name": "Space Economy",
+      "level": "Theme",
+      "candidate_anchors": [
+        "UFO",
+        "ARKX"
+      ],
+      "preferred_candidate": "UFO",
+      "charter": "Working scope for Space Economy: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Space Economy: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-us-infrastructure",
+      "name": "US Infrastructure",
+      "level": "Theme",
+      "candidate_anchors": [
+        "PAVE",
+        "IFRA"
+      ],
+      "preferred_candidate": "PAVE",
+      "charter": "Working scope for US Infrastructure: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for US Infrastructure: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-transportation",
+      "name": "Transportation",
+      "level": "Theme",
+      "candidate_anchors": [
+        "IYT",
+        "XTN"
+      ],
+      "preferred_candidate": "IYT",
+      "charter": "Working scope for Transportation: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Transportation: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-airlines",
+      "name": "Airlines",
+      "level": "Theme",
+      "candidate_anchors": [
+        "JETS"
+      ],
+      "preferred_candidate": "JETS",
+      "charter": "Working scope for Airlines: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Airlines: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-shipping",
+      "name": "Shipping",
+      "level": "Theme",
+      "candidate_anchors": [
+        "BOAT"
+      ],
+      "preferred_candidate": "BOAT",
+      "charter": "Working scope for Shipping: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Shipping: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-water",
+      "name": "Water",
+      "level": "Theme",
+      "candidate_anchors": [
+        "PHO",
+        "FIW"
+      ],
+      "preferred_candidate": "PHO",
+      "charter": "Working scope for Water: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Water: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-agribusiness",
+      "name": "Agribusiness",
+      "level": "Theme",
+      "candidate_anchors": [
+        "MOO",
+        "VEGI"
+      ],
+      "preferred_candidate": "MOO",
+      "charter": "Working scope for Agribusiness: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Agribusiness: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-oil-gas-exploration",
+      "name": "Oil & Gas Exploration & Production",
+      "level": "Theme",
+      "candidate_anchors": [
+        "XOP",
+        "IEO"
+      ],
+      "preferred_candidate": "XOP",
+      "charter": "Working scope for Oil & Gas Exploration & Production: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Oil & Gas Exploration & Production: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-oil-services",
+      "name": "Oil Services",
+      "level": "Theme",
+      "candidate_anchors": [
+        "OIH",
+        "IEZ"
+      ],
+      "preferred_candidate": "OIH",
+      "charter": "Working scope for Oil Services: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Oil Services: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-midstream",
+      "name": "Midstream & MLP Infrastructure",
+      "level": "Theme",
+      "candidate_anchors": [
+        "AMLP",
+        "MLPX"
+      ],
+      "preferred_candidate": "AMLP",
+      "charter": "Working scope for Midstream & MLP Infrastructure: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Midstream & MLP Infrastructure: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-natural-gas-equities",
+      "name": "Natural Gas Companies",
+      "level": "Theme",
+      "candidate_anchors": [
+        "FCG"
+      ],
+      "preferred_candidate": "FCG",
+      "charter": "Working scope for Natural Gas Companies: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Natural Gas Companies: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-clean-energy",
+      "name": "Clean Energy",
+      "scope": "Renewable electricity generation and established equipment or services directly used to generate or manage renewable power.",
+      "included": [
+        "Solar, wind, and geothermal generation",
+        "Established renewable generation equipment and power-control systems"
+      ],
+      "excluded": [
+        "General utilities without material renewable exposure",
+        "EVs, batteries, and broad electrification without a directly matching established activity"
+      ],
+      "anchor": "ICLN",
+      "parent_sector": null,
+      "anchor_rationale": "The iShares Global Clean Energy ETF tracks a global clean-energy mandate and its dated holdings are downloadable. QCLN is a U.S.-tilted alternative with broader clean-technology exposure; ICLN better fits this narrower renewable-generation scope. The comparison is about mandate fit, not recent return.",
+      "anchor_url": "https://www.ishares.com/us/products/239738/ishares-global-clean-energy-etf",
+      "holdings_source": {
+        "provider": "iShares",
+        "method": "ishares_csv",
+        "url": "https://www.ishares.com/us/products/239738/ishares-global-clean-energy-etf/latest-holdings.csv"
+      },
+      "representation_limit": "ICLN is global. The formal stock universe contains only verified eligible U.S.-listed securities, so it is a U.S.-listed subset of the fund.",
+      "unleveraged_equity_etf_review": true,
+      "anchor_instrument_review": "Plain-vanilla long-only USD equity ETF; official fund mandate checked for inverse or leveraged objective.",
+      "level": "Theme",
+      "candidate_anchors": [
+        "ICLN",
+        "PBW",
+        "QCLN"
+      ],
+      "preferred_candidate": "ICLN",
+      "charter": "Renewable electricity generation and established equipment or services directly used to generate or manage renewable power.",
+      "charter_status": "reviewed"
+    },
+    {
+      "id": "theme-solar",
+      "name": "Solar",
+      "level": "Theme",
+      "candidate_anchors": [
+        "TAN"
+      ],
+      "preferred_candidate": "TAN",
+      "charter": "Working scope for Solar: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Solar: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-wind",
+      "name": "Wind Energy",
+      "level": "Theme",
+      "candidate_anchors": [
+        "FAN"
+      ],
+      "preferred_candidate": "FAN",
+      "charter": "Working scope for Wind Energy: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Wind Energy: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-uranium-miners",
+      "name": "Uranium Miners",
+      "level": "Theme",
+      "candidate_anchors": [
+        "URA",
+        "URNM"
+      ],
+      "preferred_candidate": "URA",
+      "charter": "Working scope for Uranium Miners: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Uranium Miners: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-nuclear-energy",
+      "name": "Nuclear Energy",
+      "level": "Theme",
+      "candidate_anchors": [
+        "NLR",
+        "NUKZ"
+      ],
+      "preferred_candidate": "NLR",
+      "charter": "Working scope for Nuclear Energy: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Nuclear Energy: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-lithium-batteries",
+      "name": "Lithium & Battery Technology",
+      "level": "Theme",
+      "candidate_anchors": [
+        "LIT",
+        "BATT"
+      ],
+      "preferred_candidate": "LIT",
+      "charter": "Working scope for Lithium & Battery Technology: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Lithium & Battery Technology: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-copper-miners",
+      "name": "Copper Miners",
+      "level": "Theme",
+      "candidate_anchors": [
+        "COPX"
+      ],
+      "preferred_candidate": "COPX",
+      "charter": "Working scope for Copper Miners: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Copper Miners: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-rare-earths",
+      "name": "Rare Earth & Strategic Materials",
+      "level": "Theme",
+      "candidate_anchors": [
+        "REMX",
+        "EART"
+      ],
+      "preferred_candidate": "REMX",
+      "charter": "Working scope for Rare Earth & Strategic Materials: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Rare Earth & Strategic Materials: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-gold-miners",
+      "name": "Gold Miners",
+      "level": "Theme",
+      "candidate_anchors": [
+        "GDX",
+        "RING"
+      ],
+      "preferred_candidate": "GDX",
+      "charter": "Working scope for Gold Miners: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Gold Miners: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-silver-miners",
+      "name": "Silver Miners",
+      "level": "Theme",
+      "candidate_anchors": [
+        "SIL",
+        "SLVP"
+      ],
+      "preferred_candidate": "SIL",
+      "charter": "Working scope for Silver Miners: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Silver Miners: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-steel",
+      "name": "Steel Producers",
+      "level": "Theme",
+      "candidate_anchors": [
+        "SLX"
+      ],
+      "preferred_candidate": "SLX",
+      "charter": "Working scope for Steel Producers: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Steel Producers: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-metals-mining",
+      "name": "Diversified Metals & Mining",
+      "level": "Theme",
+      "candidate_anchors": [
+        "PICK",
+        "XME"
+      ],
+      "preferred_candidate": "PICK",
+      "charter": "Working scope for Diversified Metals & Mining: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Diversified Metals & Mining: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-timber-forestry",
+      "name": "Timber & Forestry",
+      "level": "Theme",
+      "candidate_anchors": [
+        "WOOD",
+        "CUT"
+      ],
+      "preferred_candidate": "WOOD",
+      "charter": "Working scope for Timber & Forestry: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Timber & Forestry: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-regional-banks",
+      "name": "Regional Banks",
+      "level": "Theme",
+      "candidate_anchors": [
+        "KRE",
+        "IAT"
+      ],
+      "preferred_candidate": "KRE",
+      "charter": "Working scope for Regional Banks: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Regional Banks: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-insurance",
+      "name": "Insurance",
+      "level": "Theme",
+      "candidate_anchors": [
+        "KIE",
+        "IAK"
+      ],
+      "preferred_candidate": "KIE",
+      "charter": "Working scope for Insurance: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Insurance: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-capital-markets",
+      "name": "Broker-Dealers & Capital Markets",
+      "level": "Theme",
+      "candidate_anchors": [
+        "IAI"
+      ],
+      "preferred_candidate": "IAI",
+      "charter": "Working scope for Broker-Dealers & Capital Markets: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Broker-Dealers & Capital Markets: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-homebuilders",
+      "name": "Homebuilders",
+      "level": "Theme",
+      "candidate_anchors": [
+        "ITB",
+        "XHB"
+      ],
+      "preferred_candidate": "ITB",
+      "charter": "Working scope for Homebuilders: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Homebuilders: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-retail",
+      "name": "Retail",
+      "level": "Theme",
+      "candidate_anchors": [
+        "XRT",
+        "RTH"
+      ],
+      "preferred_candidate": "XRT",
+      "charter": "Working scope for Retail: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Retail: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-leisure-entertainment",
+      "name": "Leisure & Entertainment",
+      "level": "Theme",
+      "candidate_anchors": [
+        "PEJ"
+      ],
+      "preferred_candidate": "PEJ",
+      "charter": "Working scope for Leisure & Entertainment: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Leisure & Entertainment: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-food-beverage",
+      "name": "Food & Beverage",
+      "level": "Theme",
+      "candidate_anchors": [
+        "PBJ"
+      ],
+      "preferred_candidate": "PBJ",
+      "charter": "Working scope for Food & Beverage: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Food & Beverage: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-residential-real-estate",
+      "name": "Residential Real Estate",
+      "level": "Theme",
+      "candidate_anchors": [
+        "REZ"
+      ],
+      "preferred_candidate": "REZ",
+      "charter": "Working scope for Residential Real Estate: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Residential Real Estate: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+    },
+    {
+      "id": "theme-mortgage-reits",
+      "name": "Mortgage REITs",
+      "level": "Theme",
+      "candidate_anchors": [
+        "REM",
+        "MORT"
+      ],
+      "preferred_candidate": "REM",
+      "charter": "Working scope for Mortgage REITs: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "charter_status": "needs_review",
+      "anchor_rationale": null,
+      "scope": "Working scope for Mortgage REITs: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
     }
-  ]
+  ],
+  "methodology_version": "6.0",
+  "score_methodology": {
+    "current_strength_weights": {
+      "excess21_percentile": 0.7,
+      "breadth21": 0.3
+    },
+    "medium_strength_weights": {
+      "excess63_percentile": 0.7,
+      "breadth50": 0.3
+    },
+    "theme_score_weights": {
+      "current_strength": 0.6,
+      "medium_strength": 0.4
+    },
+    "state_threshold": 50,
+    "purpose": "Fixed browsing convention for manual prioritization; not predictive or trading advice."
+  }
 }

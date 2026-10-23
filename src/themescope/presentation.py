@@ -32,27 +32,25 @@ def enrich(snapshot, raw):
 
 
 def validate(snapshot, raw):
-    """Publication gate: complete retrieval, aligned core metrics and a useful pool."""
+    """Publication gate for required market facts and internally consistent values."""
     problems = []
     session = snapshot.get('session_date')
     if not session:
         problems.append('No completed market session was retrieved')
-    mandatory = {'SPY', 'QQQ'} | {t.get('anchor') for t in snapshot.get('themes', [])}
     failures = raw.get('errors', {}).get('charts', {})
-    if mandatory.intersection(failures) or mandatory.intersection(raw.get('errors', {}).get('holdings', {})):
-        problems.append('Mandatory market/anchor retrieval failed; see source_errors in refresh_status.json')
+    if {'SPY', 'QQQ'}.intersection(failures):
+        problems.append('Required SPY/QQQ price retrieval failed; see source_errors in refresh_status.json')
     def valid_number(x):
         return isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x)
     rows = snapshot.get('context', []) + snapshot.get('themes', [])
     if not {'SPY', 'QQQ'}.issubset({r.get('ticker') for r in snapshot.get('context', [])}):
         problems.append('SPY and QQQ are required')
-    if not snapshot.get('themes'):
-        problems.append('No themes available')
     for row in rows:
         name = row.get('ticker') or row.get('anchor')
         if not valid_number(row.get('price_close')) or row['price_close'] <= 0:
             problems.append(f'{name}: closing price unavailable')
-        for window in ('5', '21', '63'):
+        required_windows = ('5', '21', '63') if row in snapshot.get('context', []) else ()
+        for window in required_windows:
             metric = row.get('returns', {}).get(window, {})
             if metric.get('status') != 'valid' or not valid_number(metric.get('value')) or metric.get('session_date') != session:
                 problems.append(f'{name}: {window}-session return unavailable or misaligned')
@@ -78,12 +76,11 @@ def validate(snapshot, raw):
             benchmark = spy.get('returns', {}).get(window, {}).get('value')
             absolute = theme.get('returns', {}).get(window, {}).get('value')
             relative = theme.get('excess_returns', {}).get(window, {}).get('value')
-            if not all(valid_number(v) for v in (benchmark, absolute, relative)) or not math.isclose(relative, absolute - benchmark, abs_tol=1e-10):
+            if all(valid_number(v) for v in (benchmark, absolute, relative)) and not math.isclose(relative, absolute - benchmark, abs_tol=1e-10):
                 problems.append(f"{theme.get('anchor')}: excess return unavailable or inconsistent")
     for theme in snapshot.get('themes', []):
-        for stock in theme.get('selected', []):
-            if stock.get('session_date') != session:
-                problems.append(f"{stock.get('ticker')}: selected stock date is misaligned")
+        if theme.get('session_date') not in (None, session):
+            problems.append(f"{theme.get('anchor')}: anchor metric date is misaligned")
 
     if problems:
         raise ValueError('; '.join(problems))

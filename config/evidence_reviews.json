@@ -4,34 +4,34 @@
   "decision_log": "Provisional issuer evidence review based on the latest annual SEC filing retrieved for each listed issuer. Only current anchor holdings with an evidence record and passing security/data filters enter the reviewed subset. Other current holdings remain pending. More recent material disclosures were not exhaustively screened; all theme reviews therefore remain incomplete and no full-universe breadth label is available.",
   "complete_review_required_for_formal_breadth": true,
   "themes": {
-    "semiconductors": {
+    "theme-semiconductors": {
       "review_complete": false,
       "reason": "Only the listed direct semiconductor and equipment businesses were screened; remaining ETF holdings and non-U.S. security mappings are pending."
     },
-    "cybersecurity": {
+    "theme-cybersecurity": {
       "review_complete": false,
       "reason": "Only the listed direct security businesses were screened; remaining holdings, adjacent providers, and foreign securities are pending."
     },
-    "clean_energy": {
+    "theme-clean-energy": {
       "review_complete": false,
       "reason": "Only four U.S.-listed renewable generation and equipment businesses were screened; non-U.S. holdings and remaining candidates are pending."
     },
-    "aerospace_defense": {
+    "theme-aerospace-defense": {
       "review_complete": false,
       "reason": "Only the listed aerospace and defense businesses were screened; remaining holdings and component-supplier boundaries are pending."
     },
-    "cloud_computing": {
+    "theme-cloud-computing": {
       "review_complete": false,
       "reason": "Only direct cloud platform and SaaS businesses were screened; other holdings and some broad multi-segment issuers remain unresolved."
     },
-    "biotechnology": {
+    "theme-biotechnology": {
       "review_complete": false,
       "reason": "Industry screening runs on mapped XBI tickers. Biotechnology classifications are excluded by the default rule; other industries and unmapped identifiers still require business-evidence review."
     }
   },
   "members": [
     {
-      "theme_id": "semiconductors",
+      "theme_id": "theme-semiconductors",
       "ticker": "NVDA",
       "company": "NVIDIA CORP",
       "category": "Core business",
@@ -53,7 +53,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "semiconductors",
+      "theme_id": "theme-semiconductors",
       "ticker": "TSM",
       "company": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
       "category": "Core business",
@@ -75,7 +75,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "semiconductors",
+      "theme_id": "theme-semiconductors",
       "ticker": "AMD",
       "company": "ADVANCED MICRO DEVICES INC",
       "category": "Core business",
@@ -97,7 +97,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "semiconductors",
+      "theme_id": "theme-semiconductors",
       "ticker": "AVGO",
       "company": "Broadcom Inc.",
       "category": "Core business",
@@ -119,7 +119,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "semiconductors",
+      "theme_id": "theme-semiconductors",
       "ticker": "TXN",
       "company": "TEXAS INSTRUMENTS INC",
       "category": "Core business",
@@ -141,7 +141,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "semiconductors",
+      "theme_id": "theme-semiconductors",
       "ticker": "MU",
       "company": "MICRON TECHNOLOGY INC",
       "category": "Core business",
@@ -163,7 +163,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "semiconductors",
+      "theme_id": "theme-semiconductors",
       "ticker": "ADI",
       "company": "ANALOG DEVICES INC",
       "category": "Core business",
@@ -185,7 +185,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "semiconductors",
+      "theme_id": "theme-semiconductors",
       "ticker": "MRVL",
       "company": "Marvell Technology, Inc.",
       "category": "Core business",
@@ -207,7 +207,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "semiconductors",
+      "theme_id": "theme-semiconductors",
       "ticker": "KLAC",
       "company": "KLA CORP",
       "category": "Core business",
@@ -229,7 +229,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "semiconductors",
+      "theme_id": "theme-semiconductors",
       "ticker": "INTC",
       "company": "INTEL CORP",
       "category": "Core business",
@@ -251,7 +251,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "semiconductors",
+      "theme_id": "theme-semiconductors",
       "ticker": "AMAT",
       "company": "APPLIED MATERIALS INC /DE",
       "category": "Core business",
@@ -273,7 +273,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "semiconductors",
+      "theme_id": "theme-semiconductors",
       "ticker": "QCOM",
       "company": "QUALCOMM INC/DE",
       "category": "Core business",
@@ -295,7 +295,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "semiconductors",
+      "theme_id": "theme-semiconductors",
       "ticker": "LRCX",
       "company": "LAM RESEARCH CORP",
       "category": "Core business",
@@ -317,7 +317,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "cybersecurity",
+      "theme_id": "theme-cybersecurity",
       "ticker": "CRWD",
       "company": "CrowdStrike Holdings, Inc.",
       "category": "Core business",
@@ -339,7 +339,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "cybersecurity",
+      "theme_id": "theme-cybersecurity",
       "ticker": "FTNT",
       "company": "Fortinet, Inc.",
       "category": "Core business",
@@ -361,7 +361,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "cybersecurity",
+      "theme_id": "theme-cybersecurity",
       "ticker": "PANW",
       "company": "Palo Alto Networks Inc",
       "category": "Core business",
@@ -383,7 +383,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "cybersecurity",
+      "theme_id": "theme-cybersecurity",
       "ticker": "OKTA",
       "company": "Okta, Inc.",
       "category": "Core business",
@@ -405,7 +405,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "cybersecurity",
+      "theme_id": "theme-cybersecurity",
       "ticker": "ZS",
       "company": "Zscaler, Inc.",
       "category": "Core business",
@@ -427,7 +427,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "cybersecurity",
+      "theme_id": "theme-cybersecurity",
       "ticker": "RBRK",
       "company": "Rubrik, Inc.",
       "category": "Core business",
@@ -449,7 +449,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "cybersecurity",
+      "theme_id": "theme-cybersecurity",
       "ticker": "TENB",
       "company": "Tenable Holdings, Inc.",
       "category": "Core business",
@@ -471,7 +471,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "cybersecurity",
+      "theme_id": "theme-cybersecurity",
       "ticker": "S",
       "company": "SentinelOne, Inc.",
       "category": "Core business",
@@ -493,7 +493,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "cybersecurity",
+      "theme_id": "theme-cybersecurity",
       "ticker": "QLYS",
       "company": "QUALYS, INC.",
       "category": "Core business",
@@ -515,7 +515,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "cybersecurity",
+      "theme_id": "theme-cybersecurity",
       "ticker": "VRNS",
       "company": "VARONIS SYSTEMS INC",
       "category": "Core business",
@@ -537,7 +537,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "clean_energy",
+      "theme_id": "theme-clean-energy",
       "ticker": "FSLR",
       "company": "FIRST SOLAR, INC.",
       "category": "Core business",
@@ -559,7 +559,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "clean_energy",
+      "theme_id": "theme-clean-energy",
       "ticker": "NXT",
       "company": "Nextpower Inc.",
       "category": "Core business",
@@ -581,7 +581,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "clean_energy",
+      "theme_id": "theme-clean-energy",
       "ticker": "ENPH",
       "company": "Enphase Energy, Inc.",
       "category": "Core business",
@@ -603,7 +603,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "clean_energy",
+      "theme_id": "theme-clean-energy",
       "ticker": "ORA",
       "company": "ORMAT TECHNOLOGIES, INC.",
       "category": "Core business",
@@ -625,7 +625,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "aerospace_defense",
+      "theme_id": "theme-aerospace-defense",
       "ticker": "LMT",
       "company": "LOCKHEED MARTIN CORP",
       "category": "Core business",
@@ -647,7 +647,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "aerospace_defense",
+      "theme_id": "theme-aerospace-defense",
       "ticker": "NOC",
       "company": "NORTHROP GRUMMAN CORP /DE/",
       "category": "Core business",
@@ -669,7 +669,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "aerospace_defense",
+      "theme_id": "theme-aerospace-defense",
       "ticker": "TDG",
       "company": "TransDigm Group INC",
       "category": "Core business",
@@ -691,7 +691,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "aerospace_defense",
+      "theme_id": "theme-aerospace-defense",
       "ticker": "LHX",
       "company": "L3HARRIS TECHNOLOGIES, INC. /DE/",
       "category": "Core business",
@@ -713,7 +713,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "aerospace_defense",
+      "theme_id": "theme-aerospace-defense",
       "ticker": "GD",
       "company": "GENERAL DYNAMICS CORP",
       "category": "Core business",
@@ -735,7 +735,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "aerospace_defense",
+      "theme_id": "theme-aerospace-defense",
       "ticker": "HII",
       "company": "HUNTINGTON INGALLS INDUSTRIES, INC.",
       "category": "Core business",
@@ -757,7 +757,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "aerospace_defense",
+      "theme_id": "theme-aerospace-defense",
       "ticker": "RTX",
       "company": "RTX Corp",
       "category": "Core business",
@@ -779,7 +779,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "aerospace_defense",
+      "theme_id": "theme-aerospace-defense",
       "ticker": "TXT",
       "company": "TEXTRON INC",
       "category": "Core business",
@@ -801,7 +801,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "aerospace_defense",
+      "theme_id": "theme-aerospace-defense",
       "ticker": "WWD",
       "company": "Woodward, Inc.",
       "category": "Core business",
@@ -823,7 +823,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "aerospace_defense",
+      "theme_id": "theme-aerospace-defense",
       "ticker": "HEI",
       "company": "HEICO CORP",
       "category": "Core business",
@@ -845,7 +845,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "cloud_computing",
+      "theme_id": "theme-cloud-computing",
       "ticker": "ORCL",
       "company": "ORACLE CORP",
       "category": "Core business",
@@ -867,7 +867,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "cloud_computing",
+      "theme_id": "theme-cloud-computing",
       "ticker": "NTNX",
       "company": "Nutanix, Inc.",
       "category": "Core business",
@@ -889,7 +889,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "cloud_computing",
+      "theme_id": "theme-cloud-computing",
       "ticker": "DOCN",
       "company": "DigitalOcean Holdings, Inc.",
       "category": "Core business",
@@ -911,7 +911,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "cloud_computing",
+      "theme_id": "theme-cloud-computing",
       "ticker": "MDB",
       "company": "MongoDB, Inc.",
       "category": "Core business",
@@ -933,7 +933,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "cloud_computing",
+      "theme_id": "theme-cloud-computing",
       "ticker": "NET",
       "company": "Cloudflare, Inc.",
       "category": "Core business",
@@ -955,7 +955,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "cloud_computing",
+      "theme_id": "theme-cloud-computing",
       "ticker": "DDOG",
       "company": "Datadog, Inc.",
       "category": "Core business",
@@ -977,7 +977,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "cloud_computing",
+      "theme_id": "theme-cloud-computing",
       "ticker": "NOW",
       "company": "ServiceNow, Inc.",
       "category": "Core business",
@@ -999,7 +999,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "cloud_computing",
+      "theme_id": "theme-cloud-computing",
       "ticker": "SNOW",
       "company": "Snowflake Inc.",
       "category": "Core business",
@@ -1021,7 +1021,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "cloud_computing",
+      "theme_id": "theme-cloud-computing",
       "ticker": "TEAM",
       "company": "Atlassian Corp",
       "category": "Core business",
@@ -1043,7 +1043,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "cloud_computing",
+      "theme_id": "theme-cloud-computing",
       "ticker": "CRM",
       "company": "Salesforce, Inc.",
       "category": "Core business",
@@ -1065,7 +1065,7 @@
       "requires_filing_review": false
     },
     {
-      "theme_id": "cloud_computing",
+      "theme_id": "theme-cloud-computing",
       "ticker": "AMZN",
       "company": "AMAZON COM INC",
       "category": "Unresolved",
@@ -1083,7 +1083,7 @@
       "security_mapping_note": "Ticker is the U.S.-listed common share shown in the dated official ETF holdings snapshot."
     },
     {
-      "theme_id": "cloud_computing",
+      "theme_id": "theme-cloud-computing",
       "ticker": "GOOGL",
       "company": "Alphabet Inc.",
       "category": "Unresolved",

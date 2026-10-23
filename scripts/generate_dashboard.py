@@ -22,6 +22,7 @@ sys.path.insert(0, str(ROOT))
 from src.themescope.collect import build_snapshot  # noqa: E402
 from src.themescope.presentation import enrich, validate
 from src.themescope.v5 import apply as apply_v5
+from src.themescope.v6 import apply_v6
 
 
 def _write_json(path: Path, data: Any) -> None:
@@ -60,7 +61,18 @@ def _source_row(
 def make_source_matrix(snapshot: dict[str, Any], raw: dict[str, Any], root: Path) -> list[dict[str, str | None]]:
     rows = []
     def add(field, scope, provider, method, source, limitations):
-        rows.append(dict(field=field, scope=scope, provider=provider, method=method, as_of=source.get('as_of'), retrieved_at=source.get('retrieved_at'), url=source.get('url'), limitations=limitations))
+        observations = source.get('observations') or []
+        effective = source.get('as_of') or source.get('effective_date') or source.get('session_date') or (observations[-1].get('date') if observations else None)
+        rows.append(dict(field=field, scope=scope, provider=provider, method=method, as_of=effective, retrieved_at=source.get('retrieved_at'), url=source.get('url'), payload_kind=None, payload_sha256=None, limitations=limitations))
+    source_config = raw.get('source_configuration', {})
+    price_config = source_config.get('prices', {})
+    rows.append(dict(
+        field='Source priority and fallback configuration', scope='All retrieved price histories',
+        provider=price_config.get('provider', 'Yahoo Finance chart API'),
+        method=' → '.join(price_config.get('hosts', [])), as_of=None, retrieved_at=None, url=None,
+        payload_kind=None, payload_sha256=None,
+        limitations=price_config.get('fallback_policy', 'Source configuration unavailable.'),
+    ))
     add('Adjusted returns and split-adjusted closes/EMA; split events for ADV', 'SPY, QQQ, ETF anchors and accepted stocks', 'Yahoo Finance', 'Daily chart endpoint; sequential 1.5s default pacing, query2 fallback; stop host after HTTP 429', raw.get('charts', {}).get('SPY', {}), 'Undocumented provider convention. Only completed common US sessions. No silent adjustment substitution.')
     add('Breadth price histories', 'Mapped index and anchor constituents', 'Yahoo Finance', 'Same chart schema and EMA warmups as core; count companies once', next(iter(raw.get('v5', {}).get('charts', {}).values()), {}), 'Unmapped foreign listings remain missing in coverage; no guessed listing substitutions.')
     for symbol, source in raw.get('v5', {}).get('index_universes', {}).items():
@@ -73,6 +85,14 @@ def make_source_matrix(snapshot: dict[str, Any], raw: dict[str, Any], root: Path
         for member in theme.get('reviewed_universe', theme.get('selected', [])):
             source = {'url': member.get('membership_source') or member.get('evidence', {}).get('url'), 'as_of': member.get('reviewed_date')}
             add('Membership rationale', theme['id']+':'+member['ticker'], 'Recorded issuer/evidence source', member.get('membership_tag') or member.get('evidence_category'), source, member.get('membership_rationale') or member.get('evidence_note', ''))
+    for item in raw.get('cache_manifest', []):
+        rows.append(dict(
+            field='Normalized source payload hash', scope=f"{item.get('dataset')}:{item.get('key')}",
+            provider=item.get('source'), method='SHA-256', as_of=item.get('effective_asof'),
+            retrieved_at=item.get('retrieved_at'), url=item.get('url'),
+            payload_kind=item.get('payload_kind'), payload_sha256=item.get('sha256'),
+            limitations='Hash is over the normalized retained source payload, not original HTTP wire bytes.',
+        ))
     return rows
 
 
@@ -154,14 +174,77 @@ def _tradingview_text(rows: list[dict[str, Any]]) -> tuple[str, dict[str, int]]:
     return ("\n".join(symbols) + ("\n" if symbols else ""), {"unique": len(symbols), "omitted": omitted, "duplicates": duplicates})
 
 
+def _stock_diagnostics(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
+    output = []
+    for exposure in snapshot.get('themes', []):
+        rows = exposure.get('stock_audit')
+        if rows is None:
+            rows = list(exposure.get('reviewed_universe', []))
+        for row in rows:
+            output.append({
+                'theme_id': exposure.get('id'), 'theme': exposure.get('name'), 'type': exposure.get('level'),
+                'anchor': exposure.get('anchor'), 'ticker': row.get('ticker'), 'company': row.get('company'),
+                'eligibility': row.get('eligibility'), 'eligibility_reasons': '; '.join(row.get('eligibility_reasons', [])),
+                'membership_tag': row.get('membership_tag'), 'membership_source': row.get('membership_source'),
+                'membership_rationale': row.get('membership_rationale'), 'security_type': row.get('security_type'),
+                'exchange': row.get('exchange'), 'market_cap_usd': row.get('market_cap_usd'),
+                'market_cap_status': row.get('market_cap_status'), 'market_cap_retrieved_at': row.get('market_cap_retrieved_at'),
+                'raw_close': row.get('raw_close'), 'adv30_usd': row.get('adv30_usd'),
+                'return5': _number(row.get('returns', {}).get('5')), 'return21': _number(row.get('returns', {}).get('21')),
+                'return63': _number(row.get('returns', {}).get('63')),
+                'excess21_pp': (100 * value if (value := _number(row.get('excess_returns', {}).get('21'))) is not None else None),
+                'excess63_pp': (100 * value if (value := _number(row.get('excess_returns', {}).get('63'))) is not None else None),
+                'selection_slot': row.get('selection_slot'), 'selection_queue': row.get('selection_queue'),
+                'selection_queue_rank': row.get('selection_queue_rank'), 'selection_reason': row.get('selection_reason'),
+                'chart_source': row.get('chart_source'), 'quote_source': row.get('quote_source'),
+                'session_date': row.get('session_date') or snapshot.get('session_date'),
+            })
+        if exposure.get('stock_audit') is None:
+            for row in exposure.get('exclusions', []):
+                output.append({
+                    'theme_id': exposure.get('id'), 'theme': exposure.get('name'), 'type': exposure.get('level'),
+                    'anchor': exposure.get('anchor'), 'ticker': row.get('ticker'), 'company': row.get('company'),
+                    'eligibility': 'excluded_or_unavailable',
+                    'eligibility_reasons': '; '.join(row.get('reasons', row.get('eligibility_reasons', []))),
+                    'membership_tag': row.get('membership_tag'),
+                    'membership_source': row.get('membership_source') or row.get('source_url') or (row.get('evidence') or {}).get('url'),
+                    'membership_rationale': row.get('membership_rationale') or row.get('evidence_note'),
+                    'market_cap_usd': row.get('market_cap_usd'), 'adv30_usd': row.get('adv30_usd'),
+                    'session_date': snapshot.get('session_date'),
+                })
+            for row in exposure.get('pending_holdings', []):
+                output.append({
+                    'theme_id': exposure.get('id'), 'theme': exposure.get('name'), 'type': exposure.get('level'),
+                    'anchor': exposure.get('anchor'), 'ticker': row.get('ticker'), 'company': row.get('company'),
+                    'eligibility': row.get('status', 'pending_review'), 'eligibility_reasons': row.get('reason'),
+                    'membership_source': (row.get('evidence') or {}).get('url'),
+                    'session_date': snapshot.get('session_date'),
+                })
+        if exposure.get('level') == 'Sector':
+            for row in exposure.get('sector_member_exclusions', []):
+                output.append({
+                    'theme_id': exposure.get('id'), 'theme': exposure.get('name'), 'type': 'Sector',
+                    'anchor': exposure.get('anchor'), 'ticker': row.get('ticker'), 'company': row.get('company'),
+                    'eligibility': 'excluded_or_unmapped', 'eligibility_reasons': row.get('reason'),
+                    'membership_source': exposure.get('sector_membership_basis', {}).get('method'),
+                    'session_date': snapshot.get('session_date'),
+                })
+    return output
+
+
 def _run_report(snapshot: dict[str, Any], raw: dict[str, Any], matrix: list[dict[str, Any]], tv15: dict[str, int], tv20: dict[str, int]) -> str:
-    lines = ['# ThemeScope v5 run report', '', f"Data session: {snapshot['session_date']}", f"Collected: {snapshot['generated_at']}", '', '## Market/index participation']
+    lines = ['# ThemeScope v6 run report', '', f"Requested as-of: {snapshot.get('requested_asof') or 'latest verified completed common session'}", f"Resolved market session: {snapshot['session_date']}", f"Collection: {snapshot.get('collection_started_at')} to {snapshot.get('collection_completed_at')}", '', '## Market/index facts']
     for row in snapshot['context']:
-        lines.append(f"- {row['ticker']}: {row.get('market_condition21', 'Unavailable')} / {row.get('market_condition50', 'Unavailable')}")
+        lines.append(f"- {row['ticker']}: close {row.get('price_close')}; session {row.get('session_date') or snapshot.get('session_date')}.")
+        for window in ('5', '21', '63'):
+            metric = row.get('returns', {}).get(window, {})
+            lines.append(f"  - Return{window}: {metric.get('value')}; {metric.get('status')}; {metric.get('reason') or 'valid'}.")
         for period in (21,50):
             m = row.get('index_breadth', {}).get(str(period), {})
-            lines.append(f"  - EMA{period}: {m.get('above_count')}/{m.get('valid_count')}, eligible {m.get('eligible_count')}, coverage {m.get('coverage_pct')}%, as of {m.get('as_of')}; {m.get('status')}: {m.get('reason') or 'valid'}")
-    lines += ['', '## Primary ETF registry']
+            relation = 'above' if row.get(f'above_ema{period}') is True else 'at/below' if row.get(f'above_ema{period}') is False else 'unavailable'
+            ema_value = row.get("ema" + str(period))
+            lines.append(f"  - Close {relation} EMA{period} ({ema_value}); breadth {m.get('above_count')}/{m.get('valid_count')} valid, {m.get('eligible_count')} eligible, {m.get('coverage_pct')}% coverage, holdings/list as of {m.get('as_of')}; {m.get('status')}: {m.get('reason') or 'valid'}")
+    lines += ['', '## Eligible primary ETF ranking']
     for row in snapshot['themes']:
         lines.append(f"- {row['name']} ({row['anchor']}), {row.get('level')}: score {row.get('theme_score')}; {row.get('theme_state')}; {len(row['selected'])} selected stocks.")
         for field in ('percentile_excess21','percentile_excess63','etf_breadth21_pct','etf_breadth50_pct','current_strength_score','medium_strength_score','theme_score'):
@@ -169,14 +252,32 @@ def _run_report(snapshot: dict[str, Any], raw: dict[str, Any], matrix: list[dict
             lines.append(f"  - {field}: {row.get(field)}; {item.get('status')}; {item.get('reason') or 'valid'}")
         universe = raw.get('v5', {}).get('mapped_universes', {}).get(row['anchor'], {})
         lines.append(f"  - {len(universe.get('excluded_rows', []))} excluded source rows; {len(universe.get('unresolved_mappings', []))} unresolved equity mappings remain in coverage denominator.")
-    catalog = snapshot.get('classification_catalog', {})
-    catalog_source = catalog.get('source', {})
-    lines += ['', '## S&P 500 sector / industry catalog', f"- Source observed {catalog_source.get('as_of', 'unavailable')}: {len(catalog.get('sectors', []))} sectors and {len(catalog.get('industries', []))} represented GICS sub-industries.", '- Returns are medians of constituent returns; EMA breadth is equal-company participation among constituents with valid price data. These are descriptive values, not composite scores.', '', '## Methodology and limits', '- Scores require 10 valid primary ETF peers; missing inputs are never imputed or reweighted.', '- 70/30 relative-percentile/breadth horizon scores; 60/40 current/medium final score. Fixed conventions, not optimized or validated trading signals.', '- ETF and index breadth use complete sourced equity universes independently of curated watchlists; price coverage thresholds are 8 valid companies, 80%, 35-day freshness.', '- Nasdaq cap field timestamp is unavailable. Supported membership rationale is required; filings are mandatory only for records marked requires_filing_review.', '- Current constituents are observed snapshots, not point-in-time historical membership. Wikipedia S&P 500 as-of is the retrieval observation date, not an official rebalance date.', '- Unverified foreign listing mappings remain missing; no substitution with a US ticker sharing the same letters.', '- Optional constituent/stock metrics can be unavailable without invalidating core ETF returns. Mandatory core return/holdings or index-universe collection failures reject refresh publication.', '', '## Source errors', '```json', json.dumps({'core': raw.get('errors', {}), 'constituent_histories':raw.get('v5', {}).get('chart_errors', {})}, indent=2), '```', '', '## Local files', 'dashboard.html, market.csv, sectors.csv, industries.csv, themes.csv, latest_snapshot.json, raw_inputs.json, source_matrix.csv, watchlist_15.csv, watchlist_20.csv, tradingview_15.txt, tradingview_20.txt, run_bundle.zip.', 'Opening HTML never retrieves data. Explicitly run python scripts/generate_dashboard.py. Failed refreshes preserve existing valid exports and write refresh_status.json/failed_refresh.md separately.']
+    diagnostics = snapshot.get('registry_diagnostics', [])
+    active = sum(row.get('status') == 'selected_anchor' for row in diagnostics)
+    lines += ['', '## Registry audit', f"- Registry records: {len(diagnostics)}; runtime eligible anchors: {active}; inactive or unresolved this run: {len(diagnostics)-active}."]
+    for row in diagnostics:
+        lines.append(f"- {row.get('name')} ({row.get('id')}): {row.get('status')}; selected {row.get('selected_anchor') or 'none'}.")
+        for candidate in row.get('candidates', []):
+            reasons = '; '.join(candidate.get('reasons', [])) or 'passed configured runtime checks'
+            lines.append(f"  - {candidate.get('ticker')}: {candidate.get('status')}; {reasons}")
+    settings = snapshot.get('settings', {})
+    scores = snapshot.get('score_methodology', {})
+    lines += ['', '## Methodology and limits',
+        f"- ETF candidates require at least {settings.get('anchor_minimum_history_sessions')} valid price sessions and ${settings.get('anchor_adv30_floor_usd', 0):,.0f} 30-session average dollar volume; AUM/spread are reported unavailable when a reproducible source is not configured.",
+        f"- Holdings breadth requires a dated official equity holdings source. Score breadth rules: {settings.get('minimum_breadth_sample')} valid companies, {settings.get('minimum_breadth_coverage', 0)*100:g}% price coverage, and holdings no older than {settings.get('maximum_holdings_age_days')} days.",
+        f"- Score weights are configured as {json.dumps(scores, sort_keys=True)}. Scores are fixed browsing conventions, not predictive or trading signals.",
+        '- Missing score inputs are not imputed or reweighted. ETF and index breadth use complete sourced equity universes independently of curated stock watchlists.',
+        '- Index and ETF memberships are current source snapshots, not historical point-in-time universes. Yahoo adjusted-close semantics are vendor conventions.',
+        '- Nasdaq market-cap fields have no separate observation timestamps, so stock eligibility remains provisional. Sector stock watchlists use current S&P 500 classifications intersected with official sector ETF holdings and the configured price, cap and liquidity filters.',
+        '- Unconfigured registry candidates remain in the audit with exact source/configuration blockers; they do not appear as scored ranking rows.',
+        '', '## Source errors', '```json', json.dumps({'core': raw.get('errors', {}), 'constituent_histories':raw.get('v5', {}).get('chart_errors', {})}, indent=2), '```',
+        '', '## Sector stock-list scope', 'Sector stock candidates are the current S&P 500 sector classification intersected with official selected-sector ETF holdings, then filtered by the configured listed-equity, price, market-cap and ADV rules. This is not every listed company in each sector. Per-company evidence and exclusions are in stock_diagnostics.csv.',
+        '', '## Local files', 'dashboard.html, market.csv, themes.csv, registry_audit.csv, stock_diagnostics.csv, latest_snapshot.json, raw_inputs.json, source_matrix.csv, watchlist_15.csv, watchlist_20.csv, tradingview_15.txt, tradingview_20.txt, run_bundle.zip.', 'Opening HTML never retrieves data. Explicitly run python scripts/generate_dashboard.py. Failed refreshes preserve existing valid exports and write refresh_status.json/failed_refresh.md separately.']
     return '\n'.join(lines)+'\n'
 
 
 RUN_OUTPUT_FILES = (
-    "market.csv", "sectors.csv", "industries.csv", "themes.csv",
+    "market.csv", "themes.csv", "registry_audit.csv", "stock_diagnostics.csv",
     "dashboard.html",
     "latest_snapshot.json",
     "raw_inputs.json",
@@ -208,10 +309,14 @@ def _generate(snapshot, raw, output_dir):
     _write_json(output_dir / "raw_inputs.json", raw)
     _write_csv(output_dir / "source_matrix.csv", matrix, list(matrix[0].keys()) if matrix else [])
 
-    for filename, records in [('market.csv', snapshot.get('context', [])), ('themes.csv', snapshot.get('themes', []))]:
+    theme_records = sorted(snapshot.get('themes', []), key=lambda row: row.get('global_rank', 10**9))
+    for filename, records in [('market.csv', snapshot.get('context', [])), ('themes.csv', theme_records)]:
         flat = []
         for record in records:
             row = {k:v for k,v in record.items() if v is None or isinstance(v, (str,int,float,bool))}
+            if filename == 'themes.csv':
+                row['global_rank'] = record.get('global_rank')
+                row['type'] = 'Sector' if record.get('level') == 'Sector' else 'Theme'
             row['session_date'] = snapshot['session_date']
             row['generated_at'] = snapshot['generated_at']
             for key, item in record.get('field_status', {}).items():
@@ -224,12 +329,32 @@ def _generate(snapshot, raw, output_dir):
             flat.append(row)
         columns = list(dict.fromkeys(k for row in flat for k in row))
         _write_csv(output_dir / filename, flat, columns)
-    catalog = snapshot.get('classification_catalog', {})
-    catalog_source = catalog.get('source', {})
-    category_columns = ['level','sector','name','company_count','session_date','membership_asof','membership_source','median_return21_pct','return21_valid_count','return21_coverage_pct','median_return63_pct','return63_valid_count','return63_coverage_pct','above_ema21_count','valid_ema21_count','breadth21_pct','coverage21_pct','above_ema50_count','valid_ema50_count','breadth50_pct','coverage50_pct']
-    for filename, key in [('sectors.csv', 'sectors'), ('industries.csv', 'industries')]:
-        rows = [{**record, 'membership_asof': catalog_source.get('as_of'), 'membership_source': catalog_source.get('url'), 'session_date': snapshot.get('session_date'), 'generated_at': snapshot.get('generated_at')} for record in catalog.get(key, [])]
-        _write_csv(output_dir / filename, rows, category_columns)
+    registry_rows = []
+    for exposure in snapshot.get('registry_diagnostics', []):
+        for candidate in exposure.get('candidates', []):
+            registry_rows.append({
+                'id': exposure.get('id'), 'name': exposure.get('name'), 'type': exposure.get('type'),
+                'charter_status': exposure.get('charter_status'), 'charter': exposure.get('charter'),
+                'status': exposure.get('status'), 'selected_anchor': exposure.get('selected_anchor'),
+                'selected_anchor_reason': exposure.get('selected_anchor_reason'), 'candidate_ticker': candidate.get('ticker'),
+                'candidate_priority': candidate.get('candidate_priority'), 'candidate_status': candidate.get('status'),
+                'candidate_reasons': '; '.join(candidate.get('reasons', [])), 'fund_name': candidate.get('fund_name'),
+                'exchange': candidate.get('exchange'), 'listing_status': candidate.get('listing_status'),
+                'instrument_type': candidate.get('instrument_type'), 'currency': candidate.get('currency'),
+                'history_status': candidate.get('history_status'), 'valid_history_sessions': candidate.get('valid_history_sessions'),
+                'price_effective_date': candidate.get('price_effective_date'), 'price_retrieved_at': candidate.get('price_retrieved_at'),
+                'price_source_url': candidate.get('price_source_url'),
+                'adv30_usd': candidate.get('adv30_usd'), 'minimum_adv30_usd': candidate.get('minimum_adv30_usd'),
+                'holdings_effective_date': candidate.get('holdings_effective_date'), 'holdings_retrieved_at': candidate.get('holdings_retrieved_at'),
+                'source_holdings_rows': candidate.get('source_holdings_rows'), 'mapped_equity_holdings': candidate.get('mapped_equity_holdings'),
+                'unresolved_equity_mappings': candidate.get('unresolved_equity_mappings'), 'aum_usd': candidate.get('aum_usd'),
+                'aum_status': candidate.get('aum_status'), 'median_spread_pct': candidate.get('median_spread_pct'),
+                'spread_status': candidate.get('spread_status'), 'inactive_reason': exposure.get('inactive_reason'),
+            })
+    _write_csv(output_dir / 'registry_audit.csv', registry_rows, list(registry_rows[0]) if registry_rows else ['id','name','type','status'])
+    stock_rows = _stock_diagnostics(snapshot)
+    stock_columns = list(stock_rows[0]) if stock_rows else ['theme_id','theme','type','anchor','ticker','company','eligibility','eligibility_reasons','session_date']
+    _write_csv(output_dir / 'stock_diagnostics.csv', stock_rows, stock_columns)
     rows15 = _all_selected(snapshot, 15)
     rows20 = _all_selected(snapshot, 20)
     _write_csv(output_dir / "watchlist_15.csv", rows15, EXPORT_COLUMNS)
@@ -258,7 +383,13 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Explicitly refresh the offline ThemeScope dashboard.")
     parser.add_argument('--output-dir', default='output')
     parser.add_argument('--import-run', type=Path, help='Import a dated real run directory or run_bundle.zip; no network requests')
+    parser.add_argument('--as-of', help='Resolve the latest verified completed common US session on or before YYYY-MM-DD')
     args = parser.parse_args(argv)
+    if args.as_of:
+        try:
+            datetime.strptime(args.as_of, '%Y-%m-%d')
+        except ValueError:
+            parser.error('--as-of must use YYYY-MM-DD')
     output = Path(args.output_dir).expanduser()
     if not output.is_absolute():
         output = ROOT / output
@@ -283,17 +414,28 @@ def main(argv: list[str] | None = None) -> int:
                 raw = json.loads((args.import_run / 'raw_inputs.json').read_text(encoding='utf-8'))
             if not snapshot.get('generated_at') or not snapshot.get('session_date'):
                 raise ValueError('Imported run must retain its original generation time and session date')
+            if args.as_of and args.as_of != snapshot.get('session_date'):
+                raise ValueError('This imported bundle contains one resolved date only; use a fresh collection to resolve --as-of.')
             snapshot['imported_at'] = attempted
         else:
             print('Collecting official holdings, paced prices, quotes and filing checks. Please wait.', flush=True)
-            snapshot, raw = build_snapshot(ROOT)
+            snapshot, raw = build_snapshot(ROOT, args.as_of)
+        if args.as_of:
+            snapshot['requested_asof'] = args.as_of
         registry = json.loads((ROOT / 'config/themes.json').read_text(encoding='utf-8'))
+        snapshot.setdefault('score_methodology', registry.get('score_methodology', {}))
         for theme in snapshot.get('themes', []):
             configured = next((t for t in registry['themes'] if t['id'] == theme['id'] and t['anchor'] == theme['anchor']), {})
             theme.setdefault('level', configured.get('level', 'Theme'))
         enrich(snapshot, raw)
-        if snapshot.get("context") and snapshot.get("session_date"):
+        if snapshot.get("context") and snapshot.get("session_date") and all(
+            symbol in raw.get("charts", {}) for symbol in ("SPY", "QQQ")
+        ):
             apply_v5(snapshot, raw)
+        apply_v6(snapshot, raw, registry)
+        if not raw.get('cache_manifest'):
+            from src.themescope.cache import manifest_for_inputs
+            raw['cache_manifest'] = manifest_for_inputs(raw, snapshot.get('collection_completed_at') or attempted)
         validate(snapshot, raw)
         with tempfile.TemporaryDirectory(prefix='.themescope-stage-', dir=output.parent) as tmp:
             stage = Path(tmp) / 'run'
@@ -307,6 +449,7 @@ def main(argv: list[str] | None = None) -> int:
             backup.mkdir()
             changed = []
             files = sorted(stage.iterdir(), key=lambda p: p.name == 'dashboard.html')
+            retired_files = ('sectors.csv', 'industries.csv')
             try:
                 for source in files:
                     target = output / source.name
@@ -314,6 +457,11 @@ def main(argv: list[str] | None = None) -> int:
                         shutil.copy2(target, backup / source.name)
                     os.replace(source, target)
                     changed.append(source.name)
+                for name in retired_files:
+                    target = output / name
+                    if target.exists():
+                        os.replace(target, backup / name)
+                        changed.append(name)
             except BaseException:
                 for name in reversed(changed):
                     old = backup / name
@@ -323,7 +471,8 @@ def main(argv: list[str] | None = None) -> int:
                         (output / name).unlink(missing_ok=True)
                 raise
             (output / 'failed_refresh.md').unlink(missing_ok=True)
-        print(f"SUCCESS: data date {snapshot['session_date']}; {len(snapshot['themes'])} themes; {sum(len(t['selected']) for t in snapshot['themes'])} provisional stock selections.")
+            (output / 'rejected_dashboard.html').unlink(missing_ok=True)
+        print(f"SUCCESS: data date {snapshot['session_date']}; {len(snapshot['themes'])} eligible ETF anchors across {len(snapshot.get('registry_diagnostics', []))} registry records; {sum(len(t['selected']) for t in snapshot['themes'])} stock selections.")
         print(f"Open {output / 'dashboard.html'}\nDownload bundle: {output / 'run_bundle.zip'}")
         return 0
     except Exception as exc:

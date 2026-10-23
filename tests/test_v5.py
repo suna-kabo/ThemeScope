@@ -2,10 +2,16 @@
 import copy
 import unittest
 from unittest.mock import patch
-from src.themescope.v5 import metric, percentiles, strength, overall_score, theme_state, market_condition, participation, map_universe, index_category_views, apply
+from src.themescope.v5 import metric, percentiles, strength, overall_score, theme_state, market_condition, participation, map_universe, index_category_views, apply, _nasdaq_effective_date
 
 
 class V5CalculationTests(unittest.TestCase):
+    def test_nasdaq_index_date_accepts_timestamp_suffix(self):
+        self.assertEqual(_nasdaq_effective_date('Oct 23, 2026 12:04 PM'), '2026-10-23')
+        self.assertEqual(_nasdaq_effective_date('October 23, 2026'), '2026-10-23')
+        with self.assertRaisesRegex(ValueError, 'unrecognized'):
+            _nasdaq_effective_date('no date')
+
     def test_percentile_endpoints_ties_and_minimum(self):
         values = {str(i):i for i in range(10)}
         p=percentiles(values,'2026-10-22')
@@ -29,7 +35,7 @@ class V5CalculationTests(unittest.TestCase):
         self.assertIsNone(strength(metric(reason='Nine peers'),metric(60))['value'])
 
     def test_four_states_unrounded_thresholds(self):
-        for c,m,want in [(50,50,'Leading'),(50,49.9999,'Short-term strength only'),(49.9999,50,'Medium-term strength only'),(0,0,'Lagging'),(None,50,'Unavailable'),(50,None,'Unavailable')]:
+        for c,m,want in [(50,50,'Leading'),(50,49.9999,'Improving'),(49.9999,50,'Fading'),(0,0,'Lagging'),(None,50,'—'),(50,None,'—')]:
             self.assertEqual(theme_state(c,m),want)
 
     def test_market_conditions_both_indices_both_periods(self):
@@ -101,6 +107,7 @@ class V5CalculationTests(unittest.TestCase):
         from src.themescope.presentation import enrich
         import json
         snapshot=json.loads((ROOT/'data/latest_snapshot.json').read_text())
+        snapshot['score_methodology']=json.loads((ROOT/'config/themes.json').read_text())['score_methodology']
         raw=json.loads((ROOT/'data/raw_inputs.json').read_text())
         enrich(snapshot,raw)
         original=snapshot['themes'][0]
@@ -156,6 +163,7 @@ class V5CalculationTests(unittest.TestCase):
         from src.themescope.presentation import enrich,validate
         import json
         snapshot=json.loads((ROOT/'data/latest_snapshot.json').read_text())
+        snapshot['score_methodology']=json.loads((ROOT/'config/themes.json').read_text())['score_methodology']
         raw=json.loads((ROOT/'data/raw_inputs.json').read_text())
         enrich(snapshot,raw)
         for t in snapshot['themes']:

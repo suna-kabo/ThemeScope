@@ -65,11 +65,16 @@ class RefreshTests(unittest.TestCase):
                 self.assertEqual(main(['--output-dir', str(out)]), 1)
             self.assertFalse((out / 'dashboard.html').exists())
 
-    def test_mandatory_holdings_failure_rejects_refresh(self):
+    def test_failed_current_holdings_request_cannot_reuse_retained_payload(self):
         raw = copy.deepcopy(self.raw)
         raw['errors']['holdings']['SMH'] = 'HTTP 503'
-        with self.assertRaisesRegex(ValueError, 'Mandatory'):
-            validate(enrich(copy.deepcopy(self.snapshot), raw), raw)
+        from src.themescope.v6 import _candidate_status
+        registry = json.loads((ROOT / 'config/themes.json').read_text(encoding='utf-8'))
+        record = next(row for row in registry['themes'] if row.get('anchor') == 'SMH')
+        audit = _candidate_status(record, 'SMH', raw, self.snapshot, registry['settings'])
+        self.assertEqual(audit['status'], 'ineligible')
+        self.assertTrue(any('Official holdings refresh failed: HTTP 503' in reason for reason in audit['reasons']))
+        self.assertIsNone(audit['holdings_effective_date'])
 
     def test_run_zip_import_and_export_values_match_snapshot(self):
         import csv
