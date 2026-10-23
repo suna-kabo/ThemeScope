@@ -25,14 +25,46 @@ class V5CalculationTests(unittest.TestCase):
         self.assertTrue(all(m['status']=='unavailable' for m in percentiles({str(i):i for i in range(9)},'date').values()))
 
     def test_scores_and_missing_no_reweighting(self):
-        current=strength(metric(80),metric(60))
-        medium=strength(metric(40),metric(70))
-        self.assertEqual(current['value'],74)
-        self.assertEqual(medium['value'],49)
+        current=strength(metric(80))
+        medium=strength(metric(40))
+        self.assertEqual(current['value'],80)
+        self.assertEqual(medium['value'],40)
         self.assertEqual(overall_score(current,medium)['value'],64)
         self.assertIsNone(overall_score(current,metric(reason='missing'))['value'])
-        self.assertIsNone(strength(metric(80),metric(60,'Insufficient coverage'))['value'])
-        self.assertIsNone(strength(metric(reason='Nine peers'),metric(60))['value'])
+        self.assertIsNone(strength(metric(reason='Nine peers'))['value'])
+
+    def test_icln_v6_1_regression_fixture_and_layer_independence(self):
+        import json
+        from pathlib import Path
+        from scripts.generate_dashboard import _ensure_v61_market_records
+        from src.themescope.presentation import enrich
+        from src.themescope.v6 import apply_v6
+        root = Path(__file__).resolve().parents[1]
+        snapshot = json.loads((root / 'dist/latest_snapshot.json').read_text(encoding='utf-8'))
+        raw = json.loads((root / 'dist/raw_inputs.json').read_text(encoding='utf-8'))
+        registry = json.loads((root / 'config/themes.json').read_text(encoding='utf-8'))
+        _ensure_v61_market_records(snapshot, raw, registry)
+        snapshot['score_methodology'] = registry['score_methodology']
+        enrich(snapshot, raw)
+        actual = apply(copy.deepcopy(snapshot), copy.deepcopy(raw))
+        actual = apply_v6(actual, raw, registry)
+        icln = next(row for row in actual['themes'] if row['anchor'] == 'ICLN')
+        self.assertEqual((icln['current_strength_score'], icln['medium_strength_score'], icln['theme_score'], icln['theme_state']), (12.5, 6.25, 10.0, 'Lagging'))
+        self.assertEqual(icln['breadth_status_21'], 'unavailable')
+        self.assertIn('14/103', icln['breadth_unavailable_reason_21'])
+        self.assertEqual(icln['curated_watchlist_count'], 4)
+        self.assertEqual(len(raw['v5']['mapped_universes']['ICLN']['unresolved_mappings']), 89)
+
+        changed_snapshot = copy.deepcopy(snapshot)
+        changed_raw = copy.deepcopy(raw)
+        next(row for row in changed_snapshot['themes'] if row['anchor'] == 'ICLN')['selected'] = []
+        changed_raw['v5']['mapped_universes']['ICLN'] = {'companies': [], 'excluded_rows': [], 'unresolved_mappings': []}
+        changed = apply(changed_snapshot, changed_raw)
+        changed = apply_v6(changed, changed_raw, registry)
+        changed_icln = next(row for row in changed['themes'] if row['anchor'] == 'ICLN')
+        self.assertEqual((changed_icln['current_strength_score'], changed_icln['medium_strength_score'], changed_icln['theme_score'], changed_icln['theme_state']), (12.5, 6.25, 10.0, 'Lagging'))
+        self.assertFalse(changed_icln['has_curated_watchlist'])
+        self.assertNotEqual(changed_icln['breadth_status_21'], 'valid')
 
     def test_four_states_unrounded_thresholds(self):
         for c,m,want in [(50,50,'Leading'),(50,49.9999,'Improving'),(49.9999,50,'Fading'),(0,0,'Lagging'),(None,50,'—'),(50,None,'—')]:
@@ -126,7 +158,7 @@ class V5CalculationTests(unittest.TestCase):
                 t['index_breadth21_pct']=0;t['top5_holding_weight_pct']=100;t['vix']=99;t['sentiment']=0
             b=apply(changed,raw)
         target=a['themes'][8]
-        self.assertEqual((target['current_strength_score'],target['medium_strength_score'],target['theme_score']),(74,49,64))
+        self.assertEqual((target['current_strength_score'],target['medium_strength_score'],target['theme_score']),(80,40,64))
         self.assertEqual([t['theme_score'] for t in a['themes']],[t['theme_score'] for t in b['themes']])
 
     def test_transport_failure_aborts_but_missing_symbol_is_reported(self):
@@ -135,8 +167,8 @@ class V5CalculationTests(unittest.TestCase):
         mapping={'listings':{'AAA':{'ticker':'AAA','cik':1}}}
         with patch('src.themescope.v5.fetch_universes',return_value=(universes,mapping)):
             with patch('src.themescope.v5.fetch_yahoo_chart',side_effect=RuntimeError('HTTP Error 503: unavailable')):
-                with self.assertRaisesRegex(RuntimeError,'transport failure'):
-                    collect_inputs({}, {}, interval=0)
+                result=collect_inputs({}, {}, interval=0)
+                self.assertIn('AAA',result['chart_errors'])
             with patch('src.themescope.v5.fetch_yahoo_chart',side_effect=RuntimeError('HTTP Error 404: no symbol data')):
                 result=collect_inputs({}, {}, interval=0)
                 self.assertIn('AAA',result['chart_errors'])
@@ -165,6 +197,7 @@ class V5CalculationTests(unittest.TestCase):
         snapshot=json.loads((ROOT/'data/latest_snapshot.json').read_text())
         snapshot['score_methodology']=json.loads((ROOT/'config/themes.json').read_text())['score_methodology']
         raw=json.loads((ROOT/'data/raw_inputs.json').read_text())
+        snapshot['context'].append({'ticker':'IWM','returns':{},'price_close':None})
         enrich(snapshot,raw)
         for t in snapshot['themes']:
             t['selected']=[]

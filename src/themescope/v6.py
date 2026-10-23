@@ -19,6 +19,7 @@ def _source_status(raw: dict[str, Any], snapshot: dict[str, Any]) -> dict[str, A
     v5_errors = raw.get("v5", {}).get("chart_errors", {})
     charts = raw.get("charts", {})
     holdings = raw.get("holdings", {})
+    context_holdings = raw.get("context_holdings", {})
     quotes = raw.get("quotes", {})
     v5 = raw.get("v5", {})
     indexes = v5.get("index_universes", {})
@@ -38,23 +39,31 @@ def _source_status(raw: dict[str, Any], snapshot: dict[str, Any]) -> dict[str, A
         },
         "holdings": {
             "provider": "Official ETF issuers",
-            "status": "unavailable" if not holdings else "partial" if holdings_errors or configured_holdings_candidates < len(registry_candidates) else "available",
-            "retrieved_at": max((r.get("retrieved_at", "") for r in holdings.values()), default=None),
+            "status": "unavailable" if not holdings and not context_holdings else "partial" if holdings_errors or configured_holdings_candidates < len(registry_candidates) else "available",
+            "retrieved_at": max((r.get("retrieved_at", "") for r in [*holdings.values(), *context_holdings.values()]), default=None),
             "effective_date": None,
-            "unavailable_reason": ("No official holdings files retrieved" if not holdings else f"Official holdings configured for {configured_holdings_candidates} of {len(registry_candidates)} ETF candidates; {len(holdings_errors)} retrieval errors" if holdings_errors or configured_holdings_candidates < len(registry_candidates) else None),
+            "unavailable_reason": ("No official holdings files retrieved" if not holdings and not context_holdings else f"Official holdings configured for {configured_holdings_candidates} of {len(registry_candidates)} ETF candidates; {len(holdings_errors)} retrieval errors" if holdings_errors or configured_holdings_candidates < len(registry_candidates) else None),
             "errors": holdings_errors,
             "configured_candidate_count": configured_holdings_candidates,
             "registry_candidate_count": len(registry_candidates),
-            "datasets": {symbol: {"status": "available", "url": item.get("url"), "retrieved_at": item.get("retrieved_at"), "effective_date": item.get("as_of"), "unavailable_reason": None} for symbol, item in holdings.items()},
+            "datasets": {symbol: {"status": "available", "url": item.get("url"), "retrieved_at": item.get("retrieved_at"), "effective_date": item.get("as_of"), "unavailable_reason": None} for symbol, item in {**holdings, **context_holdings}.items()},
         },
         "index_constituents": {
-            "provider": "S&P 500 classification table and Nasdaq-100 constituent list",
-            "status": "available" if indexes else "unavailable",
-            "retrieved_at": max((r.get("retrieved_at", "") for r in indexes.values()), default=None),
+            "provider": "S&P 500 classification table, Nasdaq-100 constituent list, and iShares IWM holdings",
+            "status": "available" if indexes or context_holdings else "unavailable",
+            "retrieved_at": max((r.get("retrieved_at", "") for r in [*indexes.values(), *context_holdings.values()]), default=None),
             "effective_date": None,
-            "unavailable_reason": None if indexes else "Index constituent sources unavailable",
+            "unavailable_reason": None if indexes or context_holdings else "Index constituent sources unavailable",
             "errors": {},
-            "datasets": {symbol: {"status": "available", "url": item.get("url"), "retrieved_at": item.get("retrieved_at"), "effective_date": item.get("as_of"), "unavailable_reason": None} for symbol, item in indexes.items()},
+            "datasets": {symbol: {"status": "available", "url": item.get("url"), "retrieved_at": item.get("retrieved_at"), "effective_date": item.get("as_of"), "unavailable_reason": None} for symbol, item in {**indexes, **context_holdings}.items()},
+        },
+        "volatility": {
+            "provider": "Yahoo Finance chart API",
+            "status": "available" if raw.get("charts", {}).get("^VIX") else "unavailable",
+            "retrieved_at": raw.get("charts", {}).get("^VIX", {}).get("retrieved_at"),
+            "effective_date": snapshot.get("session_date"),
+            "unavailable_reason": raw.get("errors", {}).get("charts", {}).get("^VIX") if not raw.get("charts", {}).get("^VIX") else None,
+            "url": raw.get("charts", {}).get("^VIX", {}).get("url"),
         },
         "market_cap": {
             "provider": "Nasdaq quote summary",
@@ -78,10 +87,10 @@ def _source_status(raw: dict[str, Any], snapshot: dict[str, Any]) -> dict[str, A
         "bid_ask_spread": {"provider": None, "status": "unavailable", "retrieved_at": None, "effective_date": None, "unavailable_reason": "No reproducible historical ETF bid/ask source is configured."},
         "breadth_histories": {
             "provider": "Yahoo Finance chart API",
-            "status": "unavailable" if not indexes else "partial" if v5_errors else "available",
+            "status": "unavailable" if not indexes and not context_holdings else "partial" if v5_errors else "available",
             "retrieved_at": raw.get("retrieved_at"),
             "effective_date": snapshot.get("session_date"),
-            "unavailable_reason": ("Index constituent universes were not retrieved" if not indexes else f"{len(v5_errors)} constituent price histories unavailable" if v5_errors else None),
+            "unavailable_reason": ("Index/holdings constituent universes were not retrieved" if not indexes and not context_holdings else f"{len(v5_errors)} constituent price histories unavailable" if v5_errors else None),
             "errors": v5_errors,
             "mapped_universes": {key: len(value.get("companies", [])) for key, value in mapped.items()},
         },
@@ -93,6 +102,7 @@ def _candidate_status(
     snapshot: dict[str, Any], settings: dict[str, Any],
 ) -> dict[str, Any]:
     reasons: list[str] = []
+    breadth_reasons: list[str] = []
     session = snapshot.get("session_date")
     chart = raw.get("charts", {}).get(ticker)
     if not chart:
@@ -121,24 +131,24 @@ def _candidate_status(
     holdings = raw.get("holdings", {}).get(ticker) if holdings_configured else None
     source_date = (holdings or {}).get("as_of")
     if not holdings_configured:
-        reasons.append("Candidate-specific official holdings source and parser are not configured")
+        breadth_reasons.append("Candidate-specific official holdings source and parser are not configured")
     elif ticker in raw.get("errors", {}).get("holdings", {}):
-        reasons.append("Official holdings refresh failed: " + str(raw["errors"]["holdings"][ticker]))
+        breadth_reasons.append("Official holdings refresh failed: " + str(raw["errors"]["holdings"][ticker]))
         # A retained source object must never mask a current-run retrieval error.
         holdings = None
         source_date = None
     if not holdings or not holdings.get("rows"):
-        reasons.append("Official holdings file unavailable or empty")
+        breadth_reasons.append("Official holdings file unavailable or empty")
     ref_date = session or snapshot.get("requested_asof") or snapshot.get("run_date")
     age = None
     try:
         age = (date.fromisoformat(ref_date) - date.fromisoformat(source_date)).days
     except (TypeError, ValueError):
-        reasons.append("Holdings effective date unavailable or invalid")
+        breadth_reasons.append("Holdings effective date unavailable or invalid")
     if age is not None and age < 0:
-        reasons.append(f"Holdings effective date {source_date} is after the requested session/reference date {ref_date}")
+        breadth_reasons.append(f"Holdings effective date {source_date} is after the requested session/reference date {ref_date}")
     elif age is not None and age > int(settings.get("maximum_holdings_age_days", 35)):
-        reasons.append(f"Holdings are {age} days old; maximum allowed age is {settings.get('maximum_holdings_age_days', 35)} days")
+        breadth_reasons.append(f"Holdings are {age} days old; maximum allowed age is {settings.get('maximum_holdings_age_days', 35)} days")
 
     mapped = raw.get("v5", {}).get("mapped_universes", {}).get(ticker, {}) if holdings_configured else {}
     breadth_count = len(mapped.get("companies", []))
@@ -154,6 +164,8 @@ def _candidate_status(
         "candidate_priority": priority + 1,
         "status": "eligible" if not reasons else "ineligible",
         "reasons": reasons,
+        "breadth_status": "unavailable" if breadth_reasons else "available_pending_completeness_checks",
+        "breadth_reasons": breadth_reasons,
         "adv30_usd": adv_value,
         "adv30_status": adv.get("status", "unavailable"),
         "minimum_adv30_usd": adv_floor,
@@ -163,7 +175,7 @@ def _candidate_status(
         "currency": meta.get("currency"),
         "fund_name": meta.get("longName") or meta.get("shortName"),
         "exchange": meta.get("fullExchangeName") or meta.get("exchangeName"),
-        "listing_status": "not independently verified; Yahoo chart response observed" if chart else "unavailable",
+        "listing_status": "Active price history observed; listing status is not independently certified" if chart and valid_history >= history_min else "unavailable",
         "history_status": "passes minimum" if valid_history >= history_min else "below minimum or unavailable",
         "holdings_effective_date": source_date,
         "holdings_retrieved_at": (holdings or {}).get("retrieved_at"),
@@ -413,14 +425,31 @@ def apply_v6(snapshot: dict[str, Any], raw: dict[str, Any], registry: dict[str, 
         row["rank_method"] = "ThemeScore descending; unavailable scores last; stable ID tie-break"
     snapshot["registry_diagnostics"] = diagnostics
     snapshot["source_status"] = _source_status(raw, snapshot)
+    diagnostic_by_id = {row.get("id"): row for row in diagnostics}
     for row in snapshot.get("context", []):
         row["fields"] = _field_snapshot(row, snapshot.get("session_date"))
     for row in snapshot.get("themes", []):
+        row["score_method"] = row.get("score_method", "price_relative_strength_v6_1")
+        row["score_peer_count_21"] = row.get("score_peer_count_21", row.get("ranking_peer_count21"))
+        row["score_peer_count_63"] = row.get("score_peer_count_63", row.get("ranking_peer_count63"))
+        row["score_unavailable_reason"] = row.get("score_unavailable_reason") or row.get("field_status", {}).get("theme_score", {}).get("reason")
+        row["breadth_status_21"] = row.get("breadth_status_21", row.get("field_status", {}).get("etf_breadth21_pct", {}).get("status", "unavailable"))
+        row["breadth_status_50"] = row.get("breadth_status_50", row.get("field_status", {}).get("etf_breadth50_pct", {}).get("status", "unavailable"))
+        row["breadth_unavailable_reason_21"] = row.get("breadth_unavailable_reason_21", row.get("field_status", {}).get("etf_breadth21_pct", {}).get("reason"))
+        row["breadth_unavailable_reason_50"] = row.get("breadth_unavailable_reason_50", row.get("field_status", {}).get("etf_breadth50_pct", {}).get("reason"))
+        row["has_curated_watchlist"] = bool(row.get("selected"))
+        row["curated_watchlist_count"] = len(row.get("selected", []))
+        audit = diagnostic_by_id.get(row.get("id"), {})
+        anchor_candidate = next((candidate for candidate in audit.get("candidates", []) if candidate.get("ticker") == row.get("anchor")), {})
+        row["anchor_eligibility_status"] = anchor_candidate.get("status", "eligible")
+        row["anchor_eligibility_reasons"] = anchor_candidate.get("reasons", [])
+        row["breadth_source_status"] = anchor_candidate.get("breadth_status", "unavailable")
+        row["breadth_source_reasons"] = anchor_candidate.get("breadth_reasons", [])
         row["fields"] = _field_snapshot(row, snapshot.get("session_date"))
     snapshot["methodology_version"] = registry.get("methodology_version", registry.get("registry_version"))
     snapshot["theme_registry_version"] = registry.get("registry_version")
     snapshot["resolved_market_session"] = snapshot.get("session_date")
     snapshot.setdefault("collection_started_at", snapshot.get("generated_at"))
     snapshot.setdefault("collection_completed_at", snapshot.get("generated_at"))
-    snapshot["schema_version"] = "6.0"
+    snapshot["schema_version"] = "6.1"
     return snapshot

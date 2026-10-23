@@ -369,10 +369,9 @@ def build_snapshot(root: Path, requested_asof: str | None = None) -> tuple[dict[
     configure_sources(source_cfg)
     settings = theme_cfg["settings"]
     registry = theme_cfg["themes"]
-    # A registry candidate becomes a collection target only after a reproducible
-    # issuer holdings adapter is configured. Unconfigured records stay in the
-    # dated registry audit, with an explicit source blocker.
-    themes = [t for t in registry if t.get("anchor") and t.get("holdings_source")]
+    # An approved ETF anchor is a collection target even when its issuer holdings
+    # adapter is missing. Holdings affect breadth only, never ETF eligibility.
+    themes = [t for t in registry if t.get("anchor")]
     evidence_by_theme: dict[str, dict[str, dict[str, Any]]] = {}
     for member in evidence_cfg["members"]:
         evidence_by_theme.setdefault(member["theme_id"], {})[member["ticker"]] = member
@@ -380,10 +379,20 @@ def build_snapshot(root: Path, requested_asof: str | None = None) -> tuple[dict[
     holdings: dict[str, Any] = {}
     holdings_errors: dict[str, str] = {}
     for theme in themes:
+        if not theme.get("holdings_source"):
+            continue
         try:
             holdings[theme["anchor"]] = fetch_holdings(theme)
         except Exception as exc:
             holdings_errors[theme["anchor"]] = f"{type(exc).__name__}: {exc}"
+    context_holdings: dict[str, Any] = {}
+    for symbol, source in source_cfg.get("index_constituents", {}).items():
+        if symbol != "IWM" or not source.get("method"):
+            continue
+        try:
+            context_holdings[symbol] = fetch_holdings({"anchor": symbol, "holdings_source": source})
+        except Exception as exc:
+            holdings_errors[symbol] = f"{type(exc).__name__}: {exc}"
     comparisons: dict[str, Any] = {}
     for item in comparison_cfg["comparisons"]:
         pseudo = {
@@ -395,7 +404,8 @@ def build_snapshot(root: Path, requested_asof: str | None = None) -> tuple[dict[
         except Exception as exc:
             holdings_errors[item["ticker"]] = f"{type(exc).__name__}: {exc}"
 
-    chart_symbols = set(theme_cfg.get("context_symbols", ["SPY", "QQQ"]))
+    chart_symbols = set(theme_cfg.get("context_symbols", ["SPY", "QQQ", "IWM"]))
+    chart_symbols.update(theme_cfg.get("volatility_symbols", ["^VIX"]))
     # Collect price, instrument and liquidity evidence for every configured
     # candidate. Holdings remain a separate requirement; a price chart alone
     # never makes a candidate eligible.
@@ -546,7 +556,8 @@ def build_snapshot(root: Path, requested_asof: str | None = None) -> tuple[dict[
     for theme in themes:
         anchor = theme["anchor"]
         anchor_chart = charts.get(anchor)
-        source_holdings = holdings.get(anchor, {"as_of": None, "url": theme["holdings_source"]["url"], "rows": []})
+        configured_holdings_source = theme.get("holdings_source", {})
+        source_holdings = holdings.get(anchor, {"as_of": None, "url": configured_holdings_source.get("url"), "rows": []})
         holdings_rows = source_holdings.get("rows", [])
         holdings_lookup = _holdings_map(source_holdings)
         holdings_as_of = source_holdings.get("as_of")
@@ -651,7 +662,7 @@ def build_snapshot(root: Path, requested_asof: str | None = None) -> tuple[dict[
             "parent_sector": theme.get("parent_sector"),
             "representation_limit": theme.get("representation_limit"),
             "representation_status": representation_status,
-            "holdings_source": {"provider": theme["holdings_source"]["provider"], "url": source_holdings.get("url"), "as_of": holdings_as_of, "publication_date": None, "retrieved_at": source_holdings.get("retrieved_at")},
+            "holdings_source": {"provider": configured_holdings_source.get("provider"), "url": source_holdings.get("url"), "as_of": holdings_as_of, "publication_date": None, "retrieved_at": source_holdings.get("retrieved_at")},
             "holdings_age_days": holdings_age,
             "holdings_fresh": holdings_fresh,
             "holdings_status": "current" if holdings_fresh else ("stale" if holdings_as_of else "unavailable"),
@@ -720,7 +731,7 @@ def build_snapshot(root: Path, requested_asof: str | None = None) -> tuple[dict[
         theme["anchor_comparisons"] = [row for row in comparison_results if row["theme_id"] == theme["id"]]
 
     snapshot = {
-        "schema_version": "6.0",
+        "schema_version": "6.1",
         "run_id": now.strftime("themescope-%Y%m%dT%H%M%SZ"),
         "generated_at": now.isoformat(timespec="seconds"),
         "run_date": run_date,
@@ -738,6 +749,15 @@ def build_snapshot(root: Path, requested_asof: str | None = None) -> tuple[dict[
         "session_calendar_source": calendar_source_symbol,
         "benchmark_status": "valid" if spy_chart else "unavailable",
         "context": context,
+        "volatility_context": [{
+            "ticker": symbol,
+            "name": "CBOE Volatility Index" if symbol == "^VIX" else symbol,
+            "instrument_type": "volatility_index",
+            "source_url": charts.get(symbol, {}).get("url"),
+            "retrieved_at": charts.get(symbol, {}).get("retrieved_at"),
+            "source_status": "available" if symbol in charts else "unavailable",
+            "source_reason": chart_errors.get(symbol),
+        } for symbol in theme_cfg.get("volatility_symbols", ["^VIX"])],
         "themes": theme_results,
         "comparisons": comparison_results,
         "sources": {
@@ -762,7 +782,8 @@ def build_snapshot(root: Path, requested_asof: str | None = None) -> tuple[dict[
     raw_inputs["evidence_freshness"] = sec_freshness
     raw_inputs["retrieval_error_count"] = len(chart_errors) + len(quote_errors) + len(holdings_errors) + len(sec_errors)
     from .v5 import collect_inputs
-    raw_inputs['v5'] = collect_inputs(holdings, charts, interval=interval)
+    raw_inputs['context_holdings'] = context_holdings
+    raw_inputs['v5'] = collect_inputs(holdings, charts, context_holdings=context_holdings, interval=interval)
     snapshot['collection_completed_at'] = datetime.now(timezone.utc).isoformat(timespec='seconds')
     snapshot['generated_at'] = snapshot['collection_completed_at']
     snapshot['methodology_version'] = theme_cfg.get('methodology_version', theme_cfg['registry_version'])

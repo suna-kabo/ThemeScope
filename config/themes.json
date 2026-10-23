@@ -1,13 +1,15 @@
 {
-  "registry_version": "6.0",
+  "registry_version": "6.1",
   "reviewer": "Codex implementation review",
   "decision_date": "2026-10-22",
   "effective_date": "2026-10-22",
   "market_benchmark": "SPY",
   "context_symbols": [
     "SPY",
-    "QQQ"
+    "QQQ",
+    "IWM"
   ],
+  "volatility_symbols": ["^VIX"],
   "settings": {
     "return_sessions": [
       5,
@@ -1234,21 +1236,20 @@
       "scope": "Working scope for Mortgage REITs: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
     }
   ],
-  "methodology_version": "6.0",
+  "methodology_version": "6.1",
   "score_methodology": {
     "current_strength_weights": {
-      "excess21_percentile": 0.7,
-      "breadth21": 0.3
+      "excess21_percentile": 1.0
     },
     "medium_strength_weights": {
-      "excess63_percentile": 0.7,
-      "breadth50": 0.3
+      "excess63_percentile": 1.0
     },
     "theme_score_weights": {
       "current_strength": 0.6,
       "medium_strength": 0.4
     },
     "state_threshold": 50,
-    "purpose": "Fixed browsing convention for manual prioritization; not predictive or trading advice."
+    "score_method": "price_relative_strength_v6_1",
+    "purpose": "60% 21-session excess-return percentile plus 40% 63-session excess-return percentile; consistent relative-strength ranking for manual review, not a prediction or entry signal."
   }
 }

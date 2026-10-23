@@ -106,8 +106,8 @@
     return typeof value === "number" && Number.isFinite(value);
   }
 
-  function themeRowsToCsv(rows, session) {
-    var columns = ["rank", "type", "name", "anchor_etf", "state", "theme_score", "current_strength", "medium_strength", "return21", "excess21_pp", "return63", "excess63_pp", "holdings_breadth21_pct", "breadth21_above", "breadth21_valid", "holdings_breadth50_pct", "breadth50_above", "breadth50_valid", "holdings_asof", "score_status", "score_reason", "session_date"];
+  function themeRowsToCsv(rows, session, generatedAt) {
+    var columns = ["rank", "type", "name", "anchor_etf", "state", "theme_score", "current_strength", "medium_strength", "return21", "excess21_pp", "return63", "excess63_pp", "holdings_breadth21_pct", "breadth21_above", "breadth21_valid", "holdings_breadth50_pct", "breadth50_above", "breadth50_valid", "holdings_asof", "score_status", "score_reason", "session_date", "generated_at"];
     var lines = [columns.map(csvEscape).join(",")];
     rows.forEach(function (row) {
       var b21 = row.holdings_breadth && row.holdings_breadth["21"] || {};
@@ -119,7 +119,7 @@
         valueAt(row, "return63"), finiteNumber(valueAt(row, "excess63")) ? valueAt(row, "excess63") * 100 : null,
         row.etf_breadth21_pct, b21.above_count, b21.valid_count, row.etf_breadth50_pct,
         b50.above_count, b50.valid_count, row.holdings_asof,
-        row.field_status?.theme_score?.status, row.field_status?.theme_score?.reason, session];
+        row.field_status?.theme_score?.status, row.field_status?.theme_score?.reason, session, generatedAt];
       lines.push(values.map(csvEscape).join(","));
     });
     return lines.join("\r\n");
@@ -130,6 +130,7 @@
       "theme",
       "theme_id",
       "session_date",
+      "generated_at",
       "visible_rank",
       "price_close",
       "return5",
@@ -162,6 +163,7 @@
       var values = {
         theme: row.theme_name,
         session_date: row.session_date,
+        generated_at: row.generated_at,
         visible_rank: row.display_rank,
         price_close: row.price_close,
         return5: valueAt(row, "return5"),
@@ -276,6 +278,9 @@
     var finite = function (n) {
       return typeof n === "number" && Number.isFinite(n);
     };
+    data.context = Array.isArray(data.context) ? data.context : [];
+    data.themes = Array.isArray(data.themes) ? data.themes : [];
+    data.volatility_context = Array.isArray(data.volatility_context) ? data.volatility_context : [];
     var missing =
       '<span title="Input unavailable; see diagnostic export">—</span>';
     var scoreConfig = data.score_methodology || {};
@@ -286,10 +291,41 @@
       var value = part[key];
       return typeof value === "number" ? (value * 100).toFixed(0) + "%" : "unavailable";
     };
+    var currentWeight = weightText(finalWeights, "current_strength");
+    var mediumWeight = weightText(finalWeights, "medium_strength");
     $("score-method-description").textContent =
-      "CurrentStrength = " + weightText(currentWeights, "excess21_percentile") + " 21-session excess-return percentile + " + weightText(currentWeights, "breadth21") + " holdings breadth above EMA21. MediumStrength = " +
-      weightText(mediumWeights, "excess63_percentile") + " 63-session excess-return percentile + " + weightText(mediumWeights, "breadth50") + " holdings breadth above EMA50. ThemeScore = " +
-      weightText(finalWeights, "current_strength") + " CurrentStrength + " + weightText(finalWeights, "medium_strength") + " MediumStrength. These fixed weights support manual review; they are not a validated trading model.";
+      "Current is the 21-session excess-return percentile. Medium is the 63-session excess-return percentile. Theme Score = " +
+      currentWeight + " Current + " + mediumWeight + " Medium. ETF holdings breadth and curated stocks are independent evidence and do not affect score or state.";
+    var infoText = {
+      state: "Determined by whether Current and Medium are at least 50. Leading means both are in the stronger half; Improving means only Current is; Fading means only Medium is; Lagging means both are in the weaker half.",
+      theme_score: currentWeight + " Current plus " + mediumWeight + " Medium. It provides a consistent relative-performance ranking for manual review and is not a prediction or entry signal.",
+      current_strength_score: "The ETF's 21-session return minus SPY's 21-session return, converted to a percentile among all eligible sector/theme ETFs. A value of 50 is the middle of the current ranking universe.",
+      medium_strength_score: "The ETF's 63-session return minus SPY's 63-session return, converted to a percentile among all eligible sector/theme ETFs.",
+      excess21: "The ETF's 21-session percentage return minus SPY's 21-session percentage return, expressed in percentage points.",
+      excess63: "The ETF's 63-session percentage return minus SPY's 63-session percentage return, expressed in percentage points.",
+      etf_breadth21_pct: "The percentage of valid equity holdings in the anchor ETF trading above EMA21. This describes participation and does not determine the ETF's score or state.",
+      etf_breadth50_pct: "The percentage of valid equity holdings in the anchor ETF trading above EMA50. This describes participation and does not determine the ETF's score or state."
+    };
+    var infoCounter = 0;
+    function infoControl(key) {
+      var labels = {state:"State",theme_score:"Theme Score",current_strength_score:"Current",medium_strength_score:"Medium",excess21:"1M versus SPY",excess63:"3M versus SPY",etf_breadth21_pct:"Above EMA21",etf_breadth50_pct:"Above EMA50"};
+      var id = "themescope-tip-" + key + "-" + (++infoCounter);
+      return '<span class="info-control"><button class="info-button" type="button" aria-label="Explain ' + esc(labels[key] || key) + '" aria-describedby="' + id + '" aria-expanded="false">i</button><span class="info-tip" role="tooltip" id="' + id + '">' + esc(infoText[key] || "Methodology explanation unavailable.") + '</span></span>';
+    }
+    document.addEventListener("click", function (event) {
+      var button = event.target.closest(".info-button");
+      document.querySelectorAll(".info-control.open").forEach(function (control) {
+        if (!button || !control.contains(button)) {
+          control.classList.remove("open");
+          control.querySelector(".info-button")?.setAttribute("aria-expanded", "false");
+        }
+      });
+      if (button) {
+        var control = button.closest(".info-control");
+        var open = control.classList.toggle("open");
+        button.setAttribute("aria-expanded", String(open));
+      }
+    });
     function pct(n, pp, reason) {
       return finite(n)
         ? '<span class="' +
@@ -345,7 +381,7 @@
     function marketBreadth(row, period) {
       const m = row.index_breadth?.[String(period)];
       if (!m || !finite(m.value) || m.status !== "valid")
-        return '<span class="muted" title="' + esc(m?.reason || "Breadth is unavailable or fails its configured completeness rule") + '">Insufficient data</span>';
+        return '<div class="breadth-unavailable"><span class="muted">Insufficient data</span><small>' + (m && finite(m.valid_count) && finite(m.eligible_count) ? esc(m.valid_count + '/' + m.eligible_count + ' holdings · ' + (finite(m.coverage_pct) ? m.coverage_pct.toFixed(1) + '% coverage' : 'coverage unavailable')) : 'Counts unavailable') + '</small><small class="breadth-reason">' + esc(m?.reason || "Breadth is unavailable or fails its configured completeness rule") + '</small></div>';
       return (
         '<div class="breadth-row"><b class="breadth-value">' +
         m.value.toFixed(1) +
@@ -419,7 +455,7 @@
         '</div></div><div class="condition-row">' +
         conditionCard(row, 21) +
         conditionCard(row, 50) +
-        '</div><p class="coverage-line">Constituent list observed ' +
+        '</div><p class="coverage-line">' + (row.ticker === "IWM" ? "IWM holdings breadth, a practical Russell 2000 proxy (not official Russell 2000 breadth); holdings as of " : "Constituent list observed ") +
         esc(row.index_constituent_asof || "date unavailable") +
         "; membership is current, not point-in-time.</p>"
       );
@@ -504,8 +540,73 @@
       } catch (e) {}
     };
     var pageIds = ["market", "sectors-themes", "watchlist"];
-    function showPage(id, updateHash) {
+    var initialTheme = data.themes.find((t) => (t.selected || []).length) || data.themes[0];
+    var state = {
+      theme: initialTheme?.id, themeKey: "theme_score", themeDir: "desc",
+      stockKey: "excess21", stockDir: "desc", themeType: "All", themeState: "All",
+      page: location.hash.slice(1) || "market", themeNavigationOrder: null
+    };
+    if (history.state?.themescope && history.state.view) {
+      var firstView = history.state.view;
+      state.theme = firstView.selected_theme_id || state.theme;
+      state.themeSearch = firstView.theme_search || "";
+      state.themeType = firstView.theme_type_filter || "All";
+      state.themeState = firstView.theme_state_filter || "All";
+      state.themeKey = firstView.theme_sort_key || state.themeKey;
+      state.themeDir = firstView.theme_sort_direction || state.themeDir;
+      state.stockSearch = firstView.stock_search || "";
+      state.stockEmaFilter = firstView.stock_ema_filter || "all";
+      state.stockKey = firstView.stock_sort_key || state.stockKey;
+      state.stockDir = firstView.stock_sort_direction || state.stockDir;
+      state.stockRowLimit = firstView.stock_row_limit || "15";
+      state.themeSelectorSearch = firstView.theme_selector_search || "";
+      state.themeNavigationOrder = firstView.theme_navigation_order || null;
+      state.page = firstView.page || state.page;
+    }
+    function captureView() {
+      if ($("theme-search")) state.themeSearch = $("theme-search").value;
+      if ($("theme-type")) state.themeType = $("theme-type").value;
+      if ($("theme-state")) state.themeState = $("theme-state").value;
+      if ($("theme-sort")) state.themeKey = $("theme-sort").value;
+      if ($("stock-search")) state.stockSearch = $("stock-search").value;
+      if ($("ema-filter")) state.stockEmaFilter = $("ema-filter").value;
+      if ($("stock-sort")) state.stockKey = $("stock-sort").value;
+      if ($("pool")) state.stockRowLimit = $("pool").value;
+      if ($("watchlist-theme-search")) state.themeSelectorSearch = $("watchlist-theme-search").value;
+      state.scroll_position = window.scrollY || 0;
+      return {
+        page: state.page, selected_theme_id: state.theme,
+        theme_search: state.themeSearch || "", theme_type_filter: state.themeType,
+        theme_state_filter: state.themeState, theme_sort_key: state.themeKey,
+        theme_sort_direction: state.themeDir, stock_search: state.stockSearch || "",
+        stock_ema_filter: state.stockEmaFilter || "all", stock_sort_key: state.stockKey,
+        stock_sort_direction: state.stockDir, stock_row_limit: state.stockRowLimit || "15",
+        theme_selector_search: state.themeSelectorSearch || "",
+        theme_navigation_order: state.themeNavigationOrder,
+        scroll_position: state.scroll_position
+      };
+    }
+    function replaceHistoryState() {
+      var current = history.state;
+      if (current && current.themescope) {
+        try { history.replaceState({ themescope: true, index: current.index, view: captureView() }, "", "#" + state.page); } catch (e) {}
+      }
+    }
+    function updateBackControl() {
+      var current = history.state;
+      $("app-back").disabled = !(current && current.themescope && current.index > 0);
+    }
+    function showPage(id, navigation) {
+      navigation = navigation || {};
       if (!pageIds.includes(id)) id = "market";
+      if (navigation.push) {
+        var view = captureView();
+        view.page = id;
+        var previous = history.state;
+        var index = previous && previous.themescope ? previous.index + 1 : 1;
+        try { history.pushState({ themescope: true, index: index, view: view }, "", "#" + id); } catch (e) {}
+      }
+      state.page = id;
       document.querySelectorAll(".page").forEach(function (page) {
         page.hidden = page.id !== id;
       });
@@ -515,27 +616,42 @@
         if (active) link.setAttribute("aria-current", "page");
         else link.removeAttribute("aria-current");
       });
-      if (updateHash && location.hash !== "#" + id) {
-        try {
-          history.replaceState(null, "", "#" + id);
-        } catch (e) {}
-      }
-      window.scrollTo(0, 0);
+      updateBackControl();
+      if (navigation.scroll !== false) window.scrollTo(0, 0);
     }
     document.querySelectorAll(".side-nav [data-page]").forEach(function (link) {
       link.addEventListener("click", function (event) {
         event.preventDefault();
-        showPage(link.dataset.page, true);
+        if (link.dataset.page !== state.page) showPage(link.dataset.page, { push: true });
       });
     });
-    window.addEventListener("hashchange", function () {
-      showPage(location.hash.slice(1), false);
+    $("app-back").addEventListener("click", function () {
+      if (!this.disabled && history.state?.themescope && history.state.index > 0) history.back();
+    });
+    window.addEventListener("popstate", function (event) {
+      var view = event.state?.themescope ? event.state.view : null;
+      if (!view) { updateBackControl(); return; }
+      state.page = view.page || "market";
+      state.theme = view.selected_theme_id || state.theme;
+      state.themeSearch = view.theme_search || ""; state.themeType = view.theme_type_filter || "All";
+      state.themeState = view.theme_state_filter || "All"; state.themeKey = view.theme_sort_key || "theme_score";
+      state.themeDir = view.theme_sort_direction || "desc"; state.stockSearch = view.stock_search || "";
+      state.stockEmaFilter = view.stock_ema_filter || "all"; state.stockKey = view.stock_sort_key || "excess21";
+      state.stockDir = view.stock_sort_direction || "desc"; state.stockRowLimit = view.stock_row_limit || "15";
+      state.themeSelectorSearch = view.theme_selector_search || ""; state.themeNavigationOrder = view.theme_navigation_order || null;
+      state.scroll_position = view.scroll_position || 0;
+      var fields = {"theme-search":"themeSearch","theme-type":"themeType","theme-state":"themeState","theme-sort":"themeKey","stock-search":"stockSearch","ema-filter":"stockEmaFilter","stock-sort":"stockKey","pool":"stockRowLimit","watchlist-theme-search":"themeSelectorSearch"};
+      Object.keys(fields).forEach(function (id) { if ($(id) && state[fields[id]] !== undefined) $(id).value = state[fields[id]]; });
+      render();
+      showPage(state.page, { scroll: false });
+      window.scrollTo(0, state.scroll_position || 0);
     });
     $("date").textContent = data.session_date || "Unavailable";
     $("sidebar-date").textContent = data.session_date || "Unavailable";
+    $("generated-hkt").textContent = data.dashboard_generated_at_hkt_display || "Unavailable";
     $("generated").textContent =
-      "Snapshot created " +
-      (data.generated_at || "unknown") +
+      "Collection completed " +
+      (data.collection_completed_at || data.generated_at || "unknown") +
       (data.last_source_retrieved_at ? " · Last price retrieval " + data.last_source_retrieved_at : "") +
       (data.imported_at
         ? " · Imported " + data.imported_at + " (original data date retained)"
@@ -561,7 +677,7 @@
     const eligibleAnchors = (data.themes || []).length;
     const registryRecords = (data.registry_diagnostics || []).length;
     $("status").textContent =
-      "v6 · End-of-day snapshot · " + eligibleAnchors + " eligible ETF anchors from " +
+      "v6.1 · End-of-day snapshot · " + eligibleAnchors + " eligible ETF anchors from " +
       registryRecords + " registry records. Candidate source gaps are listed in the audit. " +
       (data.sources?.partial ? "Some source requests also failed. " : "") +
       "Opening this file makes no market-data requests.";
@@ -571,9 +687,7 @@
           '<article class="market-card"><div class="market-card-head"><div><div class="market-ticker">' +
           esc(r.ticker) +
           '</div><div class="market-title-sub">' +
-          (r.ticker === "SPY"
-            ? "S&P 500 · broad U.S. large-cap market"
-            : "Nasdaq-100 · growth-heavy market context") +
+          (r.ticker === "SPY" ? "S&P 500 · broad U.S. large-cap market" : r.ticker === "QQQ" ? "Nasdaq-100 · growth-heavy market context" : "Russell 2000 · IWM ETF holdings proxy") +
           '</div></div><div>' +
           spark(r.history).replace('class="spark"', 'class="market-chart"') +
           '</div></div><div class="market-price-row"><span class="price">' +
@@ -597,9 +711,15 @@
             .join("") +
           "</div></div>" +
           conditions(r) +
+          '<p class="market-observation">Price data session: ' + esc(r.price_session_date || data.session_date || "unavailable") + (r.price_retrieved_at_hkt_display ? ' · Retrieved ' + esc(r.price_retrieved_at_hkt_display) : '') + (r.price_reason ? ' · ' + esc(r.price_reason) : '') + '</p>' +
           "</article>",
       )
       .join("");
+    $("volatility-card").innerHTML = (data.volatility_context || []).map(function (item) {
+      return '<article class="market-card volatility-card"><div class="market-card-head"><div><div class="market-title-sub">' + esc(item.name || "Volatility Index") + '</div><div class="market-ticker">' + esc(item.ticker || "VIX") + '</div></div><span class="source-state ' + (item.source_status === "available" ? "source-ok" : "source-missing") + '">' + esc(item.source_status || "unavailable") + '</span></div>' +
+        '<div class="market-price-row"><span class="price">' + (finite(item.level) ? item.level.toFixed(2) : "Unavailable") + '</span><span>Daily ' + pct(item.daily_change, false, item.source_reason) + '</span><div class="market-returns"><span><small>5 sessions</small>' + pct(item.return5, false, item.source_reason) + '</span><span><small>21 sessions</small>' + pct(item.return21, false, item.source_reason) + '</span></div></div>' +
+        '<p class="coverage-line">Trailing 1-year percentile: ' + (finite(item.trailing_1y_percentile) ? item.trailing_1y_percentile.toFixed(1) + '% (' + item.trailing_1y_observations + ' observations)' : 'Unavailable (fewer than 252 observations)') + '</p><p class="market-observation">Observation date: ' + esc(item.observation_date || "unavailable") + ' · Retrieved ' + esc(item.retrieved_at_hkt_display || item.retrieved_at || "unavailable") + ' · Source status: ' + esc(item.source_status || "unavailable") + (item.source_reason ? ' · ' + esc(item.source_reason) : '') + '</p></article>';
+    }).join("") || '<article class="market-card volatility-card"><div class="market-ticker">VIX</div><p class="warning">Volatility observation unavailable in this snapshot.</p></article>';
     var metrics = {
       theme_score: "Theme Score",
       current_strength_score: "Current",
@@ -614,16 +734,6 @@
       price_close: "Price",
       adv30_usd: "ADV$30",
       name: "Name",
-    };
-    var initialTheme = data.themes.find((t) => (t.selected || []).length) || data.themes[0];
-    var state = {
-      theme: initialTheme?.id,
-      themeKey: "theme_score",
-      themeDir: "desc",
-      stockKey: "excess21",
-      stockDir: "desc",
-      themeType: "All",
-      themeState: "All",
     };
     function options(list) {
       return list.map((v) => '<option value="' + esc(v[0]) + '">' + esc(v[1]) + "</option>").join("");
@@ -641,18 +751,28 @@
       '<label>Sort by <select id="theme-sort">' + options(Object.entries(metrics).filter(([key]) => !["return5","return21","return63","price_close","adv30_usd","name"].includes(key))) + '</select></label>' +
       '<button id="theme-direction">Descending ↓</button>';
     $("stock-controls").innerHTML = stockControls();
+    $("theme-search").value = state.themeSearch || "";
+    $("theme-type").value = state.themeType;
+    $("theme-state").value = state.themeState;
     $("theme-sort").value = state.themeKey;
-    $("theme-sort").onchange = function () { state.themeKey = this.value; render(); };
-    $("theme-direction").onclick = function () { state.themeDir = state.themeDir === "desc" ? "asc" : "desc"; render(); };
-    $("theme-search").addEventListener("input", render);
-    $("theme-type").onchange = function () { state.themeType = this.value; render(); };
-    $("theme-state").onchange = function () { state.themeState = this.value; render(); };
+    $("stock-search").value = state.stockSearch || "";
     $("stock-sort").value = state.stockKey;
-    $("stock-sort").onchange = function () { state.stockKey = this.value; render(); };
-    $("stock-direction").onclick = function () { state.stockDir = state.stockDir === "desc" ? "asc" : "desc"; render(); };
-    $("stock-search").addEventListener("input", render);
-    $("ema-filter").onchange = render;
-    $("pool").onchange = render;
+    $("ema-filter").value = state.stockEmaFilter || "all";
+    $("pool").value = state.stockRowLimit || "15";
+    $("watchlist-theme-search").value = state.themeSelectorSearch || "";
+    function persistView() { replaceHistoryState(); }
+    $("theme-sort").onchange = function () { state.themeKey = this.value; render(); persistView(); };
+    $("theme-direction").onclick = function () { state.themeDir = state.themeDir === "desc" ? "asc" : "desc"; render(); persistView(); };
+    $("theme-search").addEventListener("input", function () { state.themeSearch = this.value; render(); persistView(); });
+    $("theme-type").onchange = function () { state.themeType = this.value; render(); persistView(); };
+    $("theme-state").onchange = function () { state.themeState = this.value; render(); persistView(); };
+    $("stock-sort").onchange = function () { state.stockKey = this.value; render(); persistView(); };
+    $("stock-direction").onclick = function () { state.stockDir = state.stockDir === "desc" ? "asc" : "desc"; render(); persistView(); };
+    $("stock-search").addEventListener("input", function () { state.stockSearch = this.value; render(); persistView(); });
+    $("ema-filter").onchange = function () { state.stockEmaFilter = this.value; render(); persistView(); };
+    $("pool").onchange = function () { state.stockRowLimit = this.value; render(); persistView(); };
+    $("watchlist-theme-search").addEventListener("input", function () { state.themeSelectorSearch = this.value; renderThemeSelector(); persistView(); });
+    $("back-to-themes").onclick = function () { showPage("sectors-themes", { push: true }); persistView(); };
     function filtered(rows, p) {
       if (p === "theme") {
         const query = $("theme-search").value.trim().toLowerCase();
@@ -672,36 +792,55 @@
         return filter.startsWith("above") ? row.price_close > row["ema" + period] : row.price_close <= row["ema" + period];
       });
     }
+    function renderThemeSelector() {
+      var query = ($("watchlist-theme-search").value || "").trim().toLowerCase();
+      var match = function (row) { return !query || [row.name, row.anchor, row.id].some(function (v) { return String(v || "").toLowerCase().includes(query); }) || row.id === state.theme; };
+      var sectorOptions = (data.themes || []).filter((row) => row.level === "Sector" && match(row)).map((row) => '<option value="' + esc(row.id) + '">' + esc(row.name) + ' · ' + esc(row.anchor) + '</option>').join("");
+      var themeOptions = (data.themes || []).filter((row) => row.level !== "Sector" && match(row)).map((row) => '<option value="' + esc(row.id) + '">' + esc(row.name) + ' · ' + esc(row.anchor) + '</option>').join("");
+      $("watchlist-theme-selector").innerHTML = '<optgroup label="Sectors">' + (sectorOptions || '<option disabled>No matching sectors</option>') + '</optgroup><optgroup label="Themes">' + (themeOptions || '<option disabled>No matching themes</option>') + '</optgroup>';
+      if ((data.themes || []).some((row) => row.id === state.theme)) $("watchlist-theme-selector").value = state.theme;
+    }
+    function themeNavigationOrder() {
+      var allIds = new Set((data.themes || []).map((row) => row.id));
+      var order = (state.themeNavigationOrder || []).filter((id) => allIds.has(id));
+      return order.length > 0 ? order : sortRows(data.themes || [], "theme_score", "desc").map((row) => row.id);
+    }
+    function switchTheme(id, order) {
+      if (!id || id === state.theme) return;
+      state.themeNavigationOrder = order || state.themeNavigationOrder;
+      state.theme = id;
+      showPage("watchlist", { push: true });
+      render();
+      replaceHistoryState();
+    }
+    $("watchlist-theme-selector").onchange = function () { switchTheme(this.value); };
+    $("previous-theme").onclick = function () {
+      var order = themeNavigationOrder(), index = order.indexOf(state.theme);
+      if (index < 0) index = 0;
+      if (order.length) switchTheme(order[(index - 1 + order.length) % order.length], order);
+    };
+    $("next-theme").onclick = function () {
+      var order = themeNavigationOrder(), index = order.indexOf(state.theme);
+      if (index < 0) index = -1;
+      if (order.length) switchTheme(order[(index + 1) % order.length], order);
+    };
 
     function head(p, columns) {
       $(p + "-head").innerHTML =
         "<tr>" +
         columns
           .map(
-            (c) =>
-              "<th>" +
-              (c[1]
-                ? '<button data-sort="' +
-                  c[1] +
-                  '" title="' +
-                  esc(
-                    c[2] || "Sort numeric values; missing values remain last",
-                  ) +
-                  '">' +
-                  c[0] +
-                  (state[p + "Key"] === c[1]
-                    ? state[p + "Dir"] === "desc"
-                      ? " ↓"
-                      : " ↑"
-                    : "") +
-                  "</button>"
-                : c[0]) +
-              "</th>",
+            (c) => {
+              var label = c[1]
+                ? '<button data-sort="' + c[1] + '" title="Sort values; unavailable values stay last">' + c[0] + (state[p + "Key"] === c[1] ? (state[p + "Dir"] === "desc" ? " ↓" : " ↑") : "") + '</button>'
+                : '<span>' + c[0] + '</span>';
+              return '<th><div class="th-content">' + label + (c[3] ? infoControl(c[3]) : '') + '</div></th>';
+            },
           )
           .join("") +
         "</tr>";
       $(p + "-head")
-        .querySelectorAll("button")
+        .querySelectorAll("button[data-sort]")
         .forEach(
           (b) =>
             (b.onclick = function () {
@@ -713,6 +852,7 @@
               state[p + "Key"] = key;
               if ($(p + "-sort")) $(p + "-sort").value = key;
               render();
+              persistView();
             }),
         );
     }
@@ -728,20 +868,22 @@
         ? "Current score is in the stronger half while medium score is in the weaker half. This does not prove a reversal or rotation."
         : value === "Fading"
           ? "Current score is in the weaker half while medium score is in the stronger half. This does not prove a reversal or rotation."
-          : "Cross-sectional state from CurrentStrength and MediumStrength.";
-      return '<span class="state-tag state-' + themeStateType(value) + '" title="' + esc(help) + '">' + esc(value || "—") + "</span>";
+        : "Cross-sectional state from Current and Medium relative-strength percentiles.";
+      return '<span class="state-tag state-' + themeStateType(value) + '" aria-label="' + esc(value || "State unavailable") + ': ' + esc(help) + '">' + esc(value || "—") + "</span>";
     }
     function themeBreadthCell(row, period) {
       const metric = row.holdings_breadth?.[String(period)];
       const value = row["etf_breadth" + period + "_pct"];
       if (!metric || !finite(value) || metric.status !== "valid")
-        return '<span title="' + esc(metric?.reason || "Holdings breadth is unavailable or fails its configured sample, freshness, or completeness rule") + '">—</span>';
+        return '<span title="' + esc(metric?.reason || row["breadth_unavailable_reason_" + period] || "Holdings breadth is unavailable or fails its configured sample, freshness, or completeness rule") + '">—</span>';
       return '<span title="Equal-company holdings participation; ' + esc(metric.above_count + '/' + metric.valid_count + ' valid; holdings as of ' + (metric.as_of || "unknown")) + '">' + value.toFixed(1) + '% <small>(' + metric.above_count + '/' + metric.valid_count + ')</small></span>';
     }
     function select(id) {
+      state.themeNavigationOrder = visibleThemes.map((row) => row.id);
       state.theme = id;
-      showPage("watchlist", true);
+      showPage("watchlist", { push: true });
       render();
+      replaceHistoryState();
     }
     var visible = [];
     var visibleThemes = [];
@@ -750,11 +892,12 @@
       $("theme-direction").textContent = state.themeDir === "desc" ? "Descending ↓" : "Ascending ↑";
       var all = sortRows(data.themes || [], state.themeKey, state.themeDir).map((row) => Object.assign({}, row, { display_rank: row.global_rank }));
       visibleThemes = filtered(all, "theme");
+      renderThemeSelector();
       $("theme-count").textContent = visibleThemes.length + " / " + all.length + " eligible sector/theme ETFs shown · " + data.session_date;
       head("theme", [
-        ["Rank"], ["Type"], ["Sector / Theme", "name"], ["ETF"], ["State"],
-        ["Theme Score", "theme_score"], ["Current", "current_strength_score"], ["Medium", "medium_strength_score"],
-        ["1M vs SPY", "excess21"], ["3M vs SPY", "excess63"], ["Above EMA21", "etf_breadth21_pct"], ["Above EMA50", "etf_breadth50_pct"], ["Details"],
+        ["Rank"], ["Type"], ["Sector / Theme", "name"], ["ETF"], ["State", "theme_state", null, "state"],
+        ["Theme Score", "theme_score", null, "theme_score"], ["Current", "current_strength_score", null, "current_strength_score"], ["Medium", "medium_strength_score", null, "medium_strength_score"],
+        ["1M vs SPY", "excess21", null, "excess21"], ["3M vs SPY", "excess63", null, "excess63"], ["Above EMA21", "etf_breadth21_pct", null, "etf_breadth21_pct"], ["Above EMA50", "etf_breadth50_pct", null, "etf_breadth50_pct"], ["Details"],
       ]);
       $("theme-body").innerHTML = visibleThemes.map(function (row) {
         const type = row.level === "Sector" ? "Sector" : "Theme";
@@ -783,7 +926,7 @@
         $("active-name").textContent = "Watchlist";
         $("active-summary").textContent = "No eligible ETF anchor is available in this snapshot.";
         $("watchlist-message").hidden = false;
-        $("watchlist-message").textContent = "No curated stock drilldown is available because no eligible anchor ETF passed this run’s checks.";
+        $("watchlist-message").textContent = "No eligible anchor ETF is available in this snapshot.";
         $("stock-controls").hidden = true;
         $("stock-exports").hidden = true;
         $("stock-basis").textContent = "";
@@ -800,12 +943,10 @@
       $("stock-table-wrap").hidden = false;
       $("watchlist-message").hidden = true;
       $("active-name").textContent = "Watchlist · " + selected.name + " / " + selected.anchor;
-      $("active-summary").innerHTML = "ETF 1M " + pct(valueAt(selected, "return21")) + " · 3M " + pct(valueAt(selected, "return63")) +
-        " · ThemeScore " + score(selected, "theme_score") + " · Current " + score(selected, "current_strength_score") + " · Medium " + score(selected, "medium_strength_score") +
-        " · " + stateBadge(selected.theme_state) + "<br>Anchor ETF holdings breadth: EMA21 " + breadth(selected, 21) + " · EMA50 " + breadth(selected, 50);
+      $("active-summary").innerHTML = '<span>State ' + infoControl("state") + ' ' + stateBadge(selected.theme_state) + '</span> · <span>Theme Score ' + infoControl("theme_score") + ' ' + score(selected, "theme_score") + '</span> · <span>Current ' + infoControl("current_strength_score") + ' ' + score(selected, "current_strength_score") + '</span> · <span>Medium ' + infoControl("medium_strength_score") + ' ' + score(selected, "medium_strength_score") + '</span><br>1M vs SPY ' + infoControl("excess21") + ' ' + pct(valueAt(selected, "excess21"), true) + ' · 3M vs SPY ' + infoControl("excess63") + ' ' + pct(valueAt(selected, "excess63"), true) + '<br>ETF holdings breadth: Above EMA21 ' + infoControl("etf_breadth21_pct") + ' ' + breadth(selected, 21) + ' · Above EMA50 ' + infoControl("etf_breadth50_pct") + ' ' + breadth(selected, 50);
       var pool = $("pool").value;
       var base = limitSelection(selected.selected || [], Number(pool));
-      base = base.map((row) => Object.assign({}, row, { theme_id: selected.id, theme_name: selected.name }));
+      base = base.map((row) => Object.assign({}, row, { theme_id: selected.id, theme_name: selected.name, generated_at: data.dashboard_generated_at || data.generated_at }));
       visible = filtered(sortRows(base, state.stockKey, state.stockDir).map((row) => Object.assign({}, row, { display_rank: row.selection_slot })), "stock");
       var hasCuratedList = base.length > 0;
       $("stock-controls").hidden = !hasCuratedList;
@@ -813,15 +954,15 @@
       $("stock-exports").hidden = !hasCuratedList;
       $("watchlist-message").hidden = hasCuratedList;
       if (!hasCuratedList) {
-        $("watchlist-message").textContent = "No curated stock drilldown for this theme. The ETF remains available in the Sectors & Themes comparison.";
+        $("watchlist-message").textContent = "No curated stock drilldown is available for this theme.";
         $("stock-basis").textContent = "";
         $("coverage").textContent = "";
         visible = [];
         $("csv").disabled = true;
         $("tv").disabled = true;
       } else {
-        $("stock-basis").textContent = visible.length + " / " + base.length + " shown · membership and selection are fixed for this snapshot; sorting does not refill the list.";
-        $("coverage").textContent = "Selected list is a browsing convention with a 20-stock capacity and 15-row default; it is not a validated trading model.";
+        $("stock-basis").textContent = "Membership and selection are fixed for this snapshot; sorting does not refill the list.";
+        $("coverage").textContent = visible.length + " of " + base.length + " stocks shown";
       }
       head("stock", [["Rank"],["Ticker / company"],["Price","price_close"],["5-session %","return5"],["21-session %","return21"],["63-session %","return63"],["21-session vs ETF (pp)","excess21"],["63-session vs ETF (pp)","excess63"],["EMA21"],["EMA50"],["Core / Related"],["ADV$30","adv30_usd"],["Chart"]]);
       $("stock-body").innerHTML = visible.map(function (row) {
@@ -843,7 +984,7 @@
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
     $("theme-visible-csv").onclick = function () {
-      download("themescope-visible-themes-" + data.session_date + ".csv", themeRowsToCsv(visibleThemes, data.session_date), "text/csv;charset=utf-8");
+      download("themescope-visible-themes-" + data.session_date + ".csv", themeRowsToCsv(visibleThemes, data.session_date, data.dashboard_generated_at || data.generated_at), "text/csv;charset=utf-8");
       $("theme-export-status").textContent = visibleThemes.length + " visible sector/theme rows exported.";
     };
     $("csv").onclick = () => {
@@ -865,6 +1006,18 @@
         " without verified exchange omitted.";
     };
     render();
+    showPage(state.page, { scroll: false });
+    if (!history.state?.themescope) {
+      try { history.replaceState({ themescope: true, index: 0, view: captureView() }, "", "#" + state.page); } catch (e) {}
+    } else {
+      replaceHistoryState();
+    }
+    updateBackControl();
+    var scrollSaveTimer;
+    window.addEventListener("scroll", function () {
+      clearTimeout(scrollSaveTimer);
+      scrollSaveTimer = setTimeout(replaceHistoryState, 120);
+    }, { passive: true });
   }
   return {
     init: init,

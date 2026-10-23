@@ -8,7 +8,7 @@ import statistics
 from .sources import _request, _TableParser, request_json, fetch_yahoo_chart, _YAHOO_BLOCKED_HOSTS
 from .metrics import observation_map, return_metric, trend_metric
 
-VERSION = 'themescope-v5.0'
+VERSION = 'themescope-v6.1'
 
 
 def metric(value=None, reason=None, **details):
@@ -166,8 +166,9 @@ def index_category_views(universe, charts, calendar, session, settings, source):
     return output
 
 
-def collect_inputs(holdings, existing_charts, interval=1.5):
+def collect_inputs(holdings, existing_charts, context_holdings=None, interval=1.5):
     universes, mapping = fetch_universes()
+    universes.update(context_holdings or {})
     mapped = {key: map_universe(value, mapping, index=True) for key, value in universes.items()}
     mapped.update({key: map_universe(value, mapping) for key, value in holdings.items()})
     symbols = sorted({symbol for universe in mapped.values() for row in universe['companies'] for symbol in row['symbols']} - set(existing_charts))
@@ -175,16 +176,15 @@ def collect_inputs(holdings, existing_charts, interval=1.5):
     charts, errors = {}, {}
     for i, symbol in enumerate(symbols):
         if len(_YAHOO_BLOCKED_HOSTS) == 2:
-            raise RuntimeError('Both Yahoo chart hosts rate-limited. Breadth refresh stopped; prior dashboard preserved.')
+            for pending in symbols[i:]:
+                errors[pending] = 'Not requested: both Yahoo chart hosts were rate-limited during this breadth refresh.'
+            break
         if i:
             time.sleep(interval)
         try:
             charts[symbol] = fetch_yahoo_chart(symbol)
         except Exception as exc:
-            message = str(exc)
-            if any(marker in message.lower() for marker in ('http error 403', 'http error 429', 'http 429', 'http error 500', 'http error 502', 'http error 503', 'http error 504', 'timed out', 'timeout', 'urlerror', 'circuit open')):
-                raise RuntimeError(f'Constituent history transport failure for {symbol}; refresh rejected: {message}') from exc
-            errors[symbol] = message
+            errors[symbol] = str(exc)
         if (i+1) % 50 == 0:
             print(f'v5 breadth histories: {i+1}/{len(symbols)} attempted, {len(errors)} unavailable.', flush=True)
     return {'index_universes': universes, 'security_mapping': mapping, 'mapped_universes': mapped, 'charts': charts, 'chart_errors': errors, 'holdings': holdings}
@@ -255,15 +255,16 @@ def percentiles(values, session, minimum_peers=10):
     return out
 
 
-def strength(percentile, breadth, weights=(.7, .3)):
-    if percentile.get('status') != 'valid' or breadth.get('status') != 'valid':
-        return metric(reason='; '.join(str(m.get('reason')) for m in (percentile, breadth) if m.get('status') != 'valid'))
-    return metric(weights[0] * percentile['value'] + weights[1] * breadth['value'])
+def strength(percentile):
+    """v6.1 Current/Medium are the ETF's price-relative percentile only."""
+    if percentile.get('status') != 'valid':
+        return metric(reason=percentile.get('reason') or 'ETF return percentile unavailable', peer_count=percentile.get('peer_count'))
+    return metric(float(percentile['value']), peer_count=percentile.get('peer_count'))
 
 
 def overall_score(current, medium, weights=(.6, .4)):
     if current.get('status') != 'valid' or medium.get('status') != 'valid':
-        return metric(reason='CurrentStrength and MediumStrength must both be valid')
+        return metric(reason='Current and Medium must both be valid')
     return metric(weights[0] * current['value'] + weights[1] * medium['value'])
 
 
@@ -299,7 +300,11 @@ def apply(snapshot, raw):
         market['index_source'] = {k:v for k,v in source.items() if k != 'rows'}
         market['index_eligible_count'] = breadth['eligible_count']
         market['field_status'] = {}
-        trend = trend_metric(raw['charts'][symbol], raw['session_calendar'], date_, snapshot['settings'])
+        market_chart = raw.get('charts', {}).get(symbol)
+        trend = trend_metric(market_chart, raw['session_calendar'], date_, snapshot['settings']) if market_chart else {
+            'state': 'Unavailable', 'status': 'unavailable', 'reason': raw.get('errors', {}).get('charts', {}).get(symbol, 'Price source unavailable'),
+            'ema21': None, 'ema50': None,
+        }
         market['ema21'] = trend.get('ema21')
         market['ema50'] = trend.get('ema50')
         market['ema21_distance'] = (market.get('price_close') / market['ema21'] - 1) if market.get('price_close') is not None and market.get('ema21') else None
@@ -320,30 +325,20 @@ def apply(snapshot, raw):
     )
     peer_minimum = int(snapshot['settings']['minimum_percentile_peers'])
     def eligible_peer(theme):
+        # The cross-sectional universe is the complete dated set of primary
+        # eligible sector/theme ETF anchors. Holdings and stock review are
+        # intentionally outside this eligibility and score dependency graph.
         if not theme.get('anchor_screen', {}).get('anchor_screen_valid', False):
             return False
-        source = raw.get('holdings', {}).get(theme['anchor'], {})
-        if not source.get('rows') or not source.get('as_of'):
-            return False
-        try:
-            reference = snapshot.get('session_date')
-            age = (date.fromisoformat(reference) - date.fromisoformat(source['as_of'])).days
-        except (TypeError, ValueError):
-            return False
-        minimum_age = int(snapshot['settings'].get('maximum_holdings_age_days', 35))
-        # Peer ranks are across eligible primary ETFs with valid returns.
-        # Holdings breadth can independently fail its sample/coverage rules;
-        # that makes the composite score unavailable but does not remove the
-        # ETF from the return percentile's eligible peer universe.
-        return 0 <= age <= minimum_age
+        return all(theme.get('returns', {}).get(window, {}).get('status') == 'valid' for window in ('21', '63'))
     p21 = percentiles({t['id']: t['excess_returns']['21']['value'] if eligible_peer(t) and t['excess_returns']['21'].get('status') == 'valid' else None for t in snapshot['themes']}, date_, peer_minimum)
     p63 = percentiles({t['id']: t['excess_returns']['63']['value'] if eligible_peer(t) and t['excess_returns']['63'].get('status') == 'valid' else None for t in snapshot['themes']}, date_, peer_minimum)
     weights = snapshot.get('score_methodology', {})
     current_weights = weights.get('current_strength_weights', {})
     medium_weights = weights.get('medium_strength_weights', {})
     final_weights = weights.get('theme_score_weights', {})
-    if not current_weights or not medium_weights or not final_weights or 'state_threshold' not in weights:
-        raise ValueError('Configured score_methodology is required to calculate v6 scores')
+    if current_weights != {'excess21_percentile': 1.0} or medium_weights != {'excess63_percentile': 1.0} or not final_weights or 'state_threshold' not in weights:
+        raise ValueError('Configured score_methodology is required to calculate v6.1 scores')
     threshold = float(weights['state_threshold'])
     for theme in snapshot['themes']:
         source = raw.get('holdings', {}).get(theme['anchor'], {})
@@ -360,14 +355,24 @@ def apply(snapshot, raw):
             theme['field_status'][f'etf_breadth{period}_pct'] = item
             distance = theme.get(f'ema{period}_distance')
             theme[f'above_ema{period}'] = distance > 0 if distance is not None else None
-        current = strength(p21[theme['id']], breadth['21'], (float(current_weights['excess21_percentile']), float(current_weights['breadth21'])))
-        medium = strength(p63[theme['id']], breadth['50'], (float(medium_weights['excess63_percentile']), float(medium_weights['breadth50'])))
+        current = strength(p21[theme['id']])
+        medium = strength(p63[theme['id']])
         score = overall_score(current, medium, (float(final_weights['current_strength']), float(final_weights['medium_strength'])))
         for field,item in [('percentile_excess21',p21[theme['id']]),('percentile_excess63',p63[theme['id']]),('current_strength_score',current),('medium_strength_score',medium),('theme_score',score)]:
             item['session_date'] = date_
             theme[field] = item['value'] if item['status'] == 'valid' else None
             theme['field_status'][field] = item
         theme['theme_state'] = theme_state(current['value'], medium['value'], threshold)
+        theme['score_method'] = weights.get('score_method', 'price_relative_strength_v6_1')
+        theme['score_peer_count_21'] = p21[theme['id']].get('peer_count')
+        theme['score_peer_count_63'] = p63[theme['id']].get('peer_count')
+        theme['score_unavailable_reason'] = score.get('reason')
+        theme['breadth_status_21'] = breadth['21']['status']
+        theme['breadth_status_50'] = breadth['50']['status']
+        theme['breadth_unavailable_reason_21'] = breadth['21'].get('reason')
+        theme['breadth_unavailable_reason_50'] = breadth['50'].get('reason')
+        theme['has_curated_watchlist'] = bool(theme.get('selected'))
+        theme['curated_watchlist_count'] = len(theme.get('selected', []))
         theme['ranking_universe_date'] = date_
         theme['ranking_peer_count21'] = p21[theme['id']]['peer_count']
         theme['ranking_peer_count63'] = p63[theme['id']]['peer_count']
@@ -382,23 +387,26 @@ def apply(snapshot, raw):
     snapshot['sources']['partial'] = snapshot['sources'].get('partial', False) or bool(inputs.get('chart_errors'))
     snapshot['sources']['evidence_freshness_provider'] = 'SEC annual submissions only for membership records explicitly requiring deeper filing review'
     snapshot['limitations'] = [
-        f"{len(snapshot['themes'])} dated primary ETF anchors are included across {sum(1 for t in snapshot['themes'] if t.get('level') == 'Sector')} standard sectors and curated industry/theme exposures. Percentiles require ten valid peers; values remain unavailable when peer or breadth inputs fail, without imputing or reweighting.",
+        f"{len(snapshot['themes'])} dated primary ETF anchors are included across {sum(1 for t in snapshot['themes'] if t.get('level') == 'Sector')} standard sectors and curated industry/theme exposures. Current and Medium are price-return percentiles among eligible anchors; breadth and curated stock lists are independent evidence layers.",
         'S&P 500 list is a reproducible current Wikipedia table, not an official point-in-time membership feed. Its as-of is the retrieval observation date.',
         'Sector and industry summaries are equal-company descriptions of currently listed S&P 500 constituents, not whole-market rankings or validated trading scores. Industry names are the source table’s GICS Sub-Industry labels.',
-        'Anchor breadth is equal-company participation of official equity holdings, not whole-industry breadth. Incomplete foreign listing mappings reduce price coverage.',
+        'ETF holdings breadth is equal-company participation of the official equity holdings universe, not whole-industry breadth. Incomplete foreign listing mappings reduce breadth coverage but do not affect ETF score or eligibility.',
+        'IWM holdings breadth uses the current official iShares IWM ETF holdings file as a practical Russell 2000 proxy; it is not official Russell 2000 constituent breadth.',
+        'VIX is a separate volatility context series with no constituent breadth or ETF score/state dependency.',
         'Yahoo adjusted close and split conventions are vendor definitions; there is no guaranteed availability or publication delay.',
         'Nasdaq does not supply a separate market-cap field timestamp; stock eligibility is provisional.',
         'Curated company-theme classifications use recorded Core/Related rationale and source; non-anchor members are allowed. Holdings are not a membership gate.',
         'Scores are fixed ranking conventions, not validated entry signals, predictions or portfolio allocations.'
     ]
-    snapshot['schema_version'] = '6.0'
-    snapshot['methodology_version'] = snapshot.get('methodology_version', '6.0')
+    snapshot['schema_version'] = '6.1'
+    snapshot['methodology_version'] = '6.1'
     snapshot['score_methodology'] = {
         'current_strength_weights': current_weights,
         'medium_strength_weights': medium_weights,
         'theme_score_weights': final_weights,
         'minimum_peers': peer_minimum,
         'state_threshold': threshold,
-        'purpose': 'Fixed ranking conventions for manual review, not validated or predictive signals',
+        'score_method': weights.get('score_method', 'price_relative_strength_v6_1'),
+        'purpose': 'Consistent relative-strength ranking for manual review; not a prediction or entry signal',
     }
     return snapshot

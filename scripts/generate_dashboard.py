@@ -12,6 +12,7 @@ import tempfile
 import shutil
 import os
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from pathlib import Path
 from typing import Any
 
@@ -23,11 +24,46 @@ from src.themescope.collect import build_snapshot  # noqa: E402
 from src.themescope.presentation import enrich, validate
 from src.themescope.v5 import apply as apply_v5
 from src.themescope.v6 import apply_v6
+from src.themescope.metrics import return_metric, trend_metric
 
 
 def _write_json(path: Path, data: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False, allow_nan=False) + "\n", encoding="utf-8")
+
+
+def _ensure_v61_market_records(snapshot: dict[str, Any], raw: dict[str, Any], registry: dict[str, Any]) -> None:
+    """Add explicit unavailable records when importing a pre-v6.1 real run."""
+    session = snapshot.get('session_date')
+    calendar = raw.get('session_calendar', [])
+    context = {row.get('ticker'): row for row in snapshot.setdefault('context', [])}
+    for symbol in registry.get('context_symbols', ['SPY', 'QQQ', 'IWM']):
+        if symbol in context:
+            continue
+        chart = raw.get('charts', {}).get(symbol)
+        returns = {str(window): return_metric(chart, calendar, session, window) if chart else {'value': None, 'status': 'unavailable', 'reason': 'Price history was not included in this imported run'} for window in (5, 21, 63)}
+        trend = trend_metric(chart, calendar, session, snapshot.get('settings', {})) if chart else {'state': 'Unavailable', 'status': 'unavailable', 'reason': 'Price history was not included in this imported run'}
+        context[symbol] = {'ticker': symbol, 'returns': returns, 'trend': trend.get('state'), 'trend_status': trend.get('status'), 'trend_reason': trend.get('reason'), 'source_url': chart.get('url') if chart else None}
+    snapshot['context'] = [context[symbol] for symbol in registry.get('context_symbols', ['SPY', 'QQQ', 'IWM'])]
+    if 'volatility_context' not in snapshot:
+        snapshot['volatility_context'] = [{
+            'ticker': symbol, 'name': 'CBOE Volatility Index' if symbol == '^VIX' else symbol,
+            'instrument_type': 'volatility_index',
+            'source_status': 'available' if symbol in raw.get('charts', {}) else 'unavailable',
+            'source_reason': raw.get('errors', {}).get('charts', {}).get(symbol) or ('not present in imported run' if symbol not in raw.get('charts', {}) else None),
+            'source_url': raw.get('charts', {}).get(symbol, {}).get('url'),
+            'retrieved_at': raw.get('charts', {}).get(symbol, {}).get('retrieved_at'),
+        } for symbol in registry.get('volatility_symbols', ['^VIX'])]
+    context_holdings = raw.get('context_holdings', {})
+    if context_holdings:
+        from src.themescope.v5 import map_universe
+        v5 = raw.setdefault('v5', {})
+        universes = v5.setdefault('index_universes', {})
+        mapped = v5.setdefault('mapped_universes', {})
+        security_mapping = v5.get('security_mapping', {})
+        for symbol, source in context_holdings.items():
+            universes[symbol] = source
+            mapped[symbol] = map_universe(source, security_mapping, index=True)
 
 
 def _source_row(
@@ -76,10 +112,19 @@ def make_source_matrix(snapshot: dict[str, Any], raw: dict[str, Any], root: Path
     add('Adjusted returns and split-adjusted closes/EMA; split events for ADV', 'SPY, QQQ, ETF anchors and accepted stocks', 'Yahoo Finance', 'Daily chart endpoint; sequential 1.5s default pacing, query2 fallback; stop host after HTTP 429', raw.get('charts', {}).get('SPY', {}), 'Undocumented provider convention. Only completed common US sessions. No silent adjustment substitution.')
     add('Breadth price histories', 'Mapped index and anchor constituents', 'Yahoo Finance', 'Same chart schema and EMA warmups as core; count companies once', next(iter(raw.get('v5', {}).get('charts', {}).values()), {}), 'Unmapped foreign listings remain missing in coverage; no guessed listing substitutions.')
     for symbol, source in raw.get('v5', {}).get('index_universes', {}).items():
-        add('Index constituent universe', symbol, 'Nasdaq' if symbol == 'QQQ' else 'Wikipedia current S&P 500 constituent table', 'Reproducible constituent list; source rows retained', source, source.get('asof_basis', ''))
+        if symbol == 'IWM':
+            # IWM is sourced from official iShares holdings and is deliberately
+            # reported separately below as a practical Russell 2000 proxy.
+            continue
+        provider = 'Nasdaq' if symbol == 'QQQ' else 'Wikipedia current S&P 500 constituent table'
+        add('Index constituent universe', symbol, provider, 'Reproducible constituent list; source rows retained', source, source.get('asof_basis', ''))
     add('Verified issuer/listing map', 'Company deduplication and ticker mapping', 'SEC', 'company_tickers_exchange.json; deterministic primary share class', raw.get('v5', {}).get('security_mapping', {}), 'SEC CIK identifies issuers. Unverified mappings are not invented; common company IDs are deduplicated.')
     for symbol, source in raw.get('holdings', {}).items():
         add('Official equity holdings', symbol, 'Fund issuer', 'Official JSON/HTML/CSV/XLSX adapter; actual as-of date retained', source, 'Breadth is equal-company participation, independent of watchlist curation. Excluded and unmapped rows recorded.')
+    for symbol, source in raw.get('context_holdings', {}).items():
+        add('Official equity holdings', symbol, 'iShares', 'Official ETF holdings CSV; practical Russell 2000 proxy', source, 'IWM holdings breadth is not official Russell 2000 constituent breadth; holdings as-of is separate from price session.')
+    for item in snapshot.get('volatility_context', []):
+        add('Volatility level and changes', item.get('ticker'), 'Yahoo Finance', 'Daily chart close observations; no breadth or score dependency', raw.get('charts', {}).get(item.get('ticker'), {}), 'VIX is independent volatility context.')
     add('Market capitalization and stock eligibility', 'Accepted watchlist candidates', 'Nasdaq', 'Quote summary endpoint', next(iter(raw.get('quotes', {}).values()), {}), 'No separate market-cap field timestamp; stock eligibility remains provisional.')
     for theme in snapshot.get('themes', []):
         for member in theme.get('reviewed_universe', theme.get('selected', [])):
@@ -102,7 +147,7 @@ EXPORT_COLUMNS = [
     "selection_reason", "ticker", "company", "exchange", "security_type", "evidence_category",
     "evidence_note", "evidence_url", "evidence_filed_date", "reviewed_date", "etf_weight_pct",
     "market_cap_usd", "market_cap_retrieved_at", "adv30_usd", "return21", "return63",
-    "excess21_pp", "excess63_pp", "relative_state", "price_trend", "session_date", "chart_url",
+    "excess21_pp", "excess63_pp", "relative_state", "price_trend", "session_date", "generated_at", "chart_url",
 ]
 
 
@@ -140,7 +185,7 @@ def _all_selected(snapshot: dict[str, Any], limit: int) -> list[dict[str, Any]]:
                 "excess21_pp": (value * 100 if (value := _number(stock.get("excess_returns", {}).get("21"))) is not None else None),
                 "excess63_pp": (value * 100 if (value := _number(stock.get("excess_returns", {}).get("63"))) is not None else None),
                 "relative_state": stock.get("relative_state"), "price_trend": stock.get("trend"),
-                "session_date": stock.get("session_date"), "chart_url": chart_url,
+                "session_date": stock.get("session_date"), "generated_at": snapshot.get('dashboard_generated_at') or snapshot.get('generated_at'), "chart_url": chart_url,
             })
     return rows
 
@@ -233,25 +278,47 @@ def _stock_diagnostics(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def _run_report(snapshot: dict[str, Any], raw: dict[str, Any], matrix: list[dict[str, Any]], tv15: dict[str, int], tv20: dict[str, int]) -> str:
-    lines = ['# ThemeScope v6 run report', '', f"Requested as-of: {snapshot.get('requested_asof') or 'latest verified completed common session'}", f"Resolved market session: {snapshot['session_date']}", f"Collection: {snapshot.get('collection_started_at')} to {snapshot.get('collection_completed_at')}", '', '## Market/index facts']
+    lines = ['# ThemeScope v6.1 run report', '', f"Market session: {snapshot['session_date']}", f"Dashboard generated: {snapshot.get('dashboard_generated_at')} ({snapshot.get('dashboard_generated_at_hkt_display')})", f"Latest source retrieval: {snapshot.get('last_source_retrieved_at') or snapshot.get('collection_completed_at')}", f"Base collection: {snapshot.get('collection_started_at')} to {snapshot.get('collection_completed_at')}", f"Requested as-of: {snapshot.get('requested_asof') or 'latest verified completed common session'}", '', '## Market/index facts']
+    restored = score_failures = breadth_failures = drilldown_unavailable = 0
     for row in snapshot['context']:
-        lines.append(f"- {row['ticker']}: close {row.get('price_close')}; session {row.get('session_date') or snapshot.get('session_date')}.")
+        description = {'SPY': 'S&P 500 ETF', 'QQQ': 'Nasdaq-100 ETF', 'IWM': 'Russell 2000 ETF proxy'}.get(row['ticker'], row['ticker'])
+        lines.append(f"- {row['ticker']} ({description}): close {row.get('price_close')}; session {row.get('price_session_date') or row.get('session_date') or snapshot.get('session_date')}; price status {row.get('price_status', 'available' if row.get('price_close') is not None else 'unavailable')}; {row.get('price_reason') or 'valid'}.")
         for window in ('5', '21', '63'):
             metric = row.get('returns', {}).get(window, {})
             lines.append(f"  - Return{window}: {metric.get('value')}; {metric.get('status')}; {metric.get('reason') or 'valid'}.")
         for period in (21,50):
             m = row.get('index_breadth', {}).get(str(period), {})
             relation = 'above' if row.get(f'above_ema{period}') is True else 'at/below' if row.get(f'above_ema{period}') is False else 'unavailable'
-            ema_value = row.get("ema" + str(period))
-            lines.append(f"  - Close {relation} EMA{period} ({ema_value}); breadth {m.get('above_count')}/{m.get('valid_count')} valid, {m.get('eligible_count')} eligible, {m.get('coverage_pct')}% coverage, holdings/list as of {m.get('as_of')}; {m.get('status')}: {m.get('reason') or 'valid'}")
-    lines += ['', '## Eligible primary ETF ranking']
+            breadth_label = 'IWM holdings breadth' if row['ticker'] == 'IWM' else 'constituent breadth'
+            lines.append(f"  - Close {relation} EMA{period} ({row.get('ema' + str(period))}); {breadth_label} {m.get('above_count')}/{m.get('valid_count')} valid, {m.get('eligible_count')} eligible, {m.get('coverage_pct')}% coverage, holdings/list as of {m.get('as_of')}; {m.get('status', 'unavailable')}: {m.get('reason') or 'valid'}")
+    lines += ['', '## Volatility context']
+    for item in snapshot.get('volatility_context', []):
+        lines.append(f"- {item.get('ticker')}: level {item.get('level')}; daily {item.get('daily_change')}; 5-session {item.get('return5')}; 21-session {item.get('return21')}; trailing 1-year percentile {item.get('trailing_1y_percentile')}; observation date {item.get('observation_date')}; retrieved {item.get('retrieved_at')}; {item.get('source_status')}: {item.get('source_reason') or item.get('source_url') or 'valid'}. No breadth fields or score dependency.")
+    weights = snapshot.get('score_methodology', {}).get('theme_score_weights', {})
+    current_weight = weights.get('current_strength', 0.6)
+    medium_weight = weights.get('medium_strength', 0.4)
+    minimum_peers = snapshot.get('score_methodology', {}).get('minimum_peers', 10)
+    lines += ['', '## Eligible primary ETF ranking', f"Current is the 21-session excess-return percentile; Medium is the 63-session excess-return percentile; Theme Score = {current_weight:.0%} Current + {medium_weight:.0%} Medium. Percentiles require at least {minimum_peers} valid peers. Breadth and curated stocks do not enter score or state."]
     for row in snapshot['themes']:
-        lines.append(f"- {row['name']} ({row['anchor']}), {row.get('level')}: score {row.get('theme_score')}; {row.get('theme_state')}; {len(row['selected'])} selected stocks.")
+        candidate = next((c for d in snapshot.get('registry_diagnostics', []) if d.get('id') == row.get('id') for c in d.get('candidates', []) if c.get('ticker') == row.get('anchor')), {})
+        restored += int(candidate.get('status') == 'eligible' and not candidate.get('holdings_source_configured'))
+        score_failures += int(row.get('theme_score') is None)
+        breadth_failures += int(row.get('breadth_status_21') != 'valid' or row.get('breadth_status_50') != 'valid')
+        drilldown_unavailable += int(not row.get('has_curated_watchlist', bool(row.get('selected'))))
+        drilldown = 'available (' + str(len(row.get('selected', []))) + ')' if row.get('selected') else 'unavailable'
+        lines.append(f"- {row['name']} ({row['anchor']}), {row.get('level')}: score {row.get('theme_score')}; state {row.get('theme_state')}; curated stock drilldown {drilldown}; anchor eligibility {candidate.get('status', 'eligible')}.")
         for field in ('percentile_excess21','percentile_excess63','etf_breadth21_pct','etf_breadth50_pct','current_strength_score','medium_strength_score','theme_score'):
             item = row.get('field_status', {}).get(field, {})
             lines.append(f"  - {field}: {row.get(field)}; {item.get('status')}; {item.get('reason') or 'valid'}")
+        lines.append(f"  - Score peers: 21-session {row.get('score_peer_count_21')}; 63-session {row.get('score_peer_count_63')}; method {row.get('score_method')}; unavailable reason {row.get('score_unavailable_reason') or 'none'}.")
+        lines.append(f"  - Breadth: EMA21 {row.get('breadth_status_21')}: {row.get('breadth_unavailable_reason_21') or 'valid'}; EMA50 {row.get('breadth_status_50')}: {row.get('breadth_unavailable_reason_50') or 'valid'}.")
         universe = raw.get('v5', {}).get('mapped_universes', {}).get(row['anchor'], {})
         lines.append(f"  - {len(universe.get('excluded_rows', []))} excluded source rows; {len(universe.get('unresolved_mappings', []))} unresolved equity mappings remain in coverage denominator.")
+    icln = next((row for row in snapshot.get('themes', []) if row.get('anchor') == 'ICLN'), None)
+    if icln:
+        universe = raw.get('v5', {}).get('mapped_universes', {}).get('ICLN', {})
+        lines += ['', '## ICLN score and breadth diagnostic', f"- Current {icln.get('current_strength_score')}; Medium {icln.get('medium_strength_score')}; Theme Score {icln.get('theme_score')}; state {icln.get('theme_state')}.", f"- EMA21 breadth: {icln.get('breadth_status_21')}; {icln.get('breadth_unavailable_reason_21') or 'valid'}.", f"- EMA50 breadth: {icln.get('breadth_status_50')}; {icln.get('breadth_unavailable_reason_50') or 'valid'}.", f"- Mapped holdings: {len(universe.get('companies', []))}; unresolved equity mappings: {len(universe.get('unresolved_mappings', []))}; official source rows: {universe.get('source_row_count')}."]
+    lines += ['', '## Layer totals', f"- Eligible ETF anchors with no configured holdings parser (restored by removing holdings-parser eligibility gate): {restored}.", f"- ETF score failures: {score_failures}; only ETF/SPY return data and peer availability affect these.", f"- ETF breadth failures: {breadth_failures}; they do not affect ETF eligibility or score.", f"- Curated stock drilldown unavailable: {drilldown_unavailable}; it does not affect ETF eligibility or score."]
     diagnostics = snapshot.get('registry_diagnostics', [])
     active = sum(row.get('status') == 'selected_anchor' for row in diagnostics)
     lines += ['', '## Registry audit', f"- Registry records: {len(diagnostics)}; runtime eligible anchors: {active}; inactive or unresolved this run: {len(diagnostics)-active}."]
@@ -260,19 +327,22 @@ def _run_report(snapshot: dict[str, Any], raw: dict[str, Any], matrix: list[dict
         for candidate in row.get('candidates', []):
             reasons = '; '.join(candidate.get('reasons', [])) or 'passed configured runtime checks'
             lines.append(f"  - {candidate.get('ticker')}: {candidate.get('status')}; {reasons}")
+            breadth_reasons = '; '.join(candidate.get('breadth_reasons', []))
+            if breadth_reasons:
+                lines.append(f"    - Breadth only: {breadth_reasons}")
     settings = snapshot.get('settings', {})
     scores = snapshot.get('score_methodology', {})
     lines += ['', '## Methodology and limits',
         f"- ETF candidates require at least {settings.get('anchor_minimum_history_sessions')} valid price sessions and ${settings.get('anchor_adv30_floor_usd', 0):,.0f} 30-session average dollar volume; AUM/spread are reported unavailable when a reproducible source is not configured.",
-        f"- Holdings breadth requires a dated official equity holdings source. Score breadth rules: {settings.get('minimum_breadth_sample')} valid companies, {settings.get('minimum_breadth_coverage', 0)*100:g}% price coverage, and holdings no older than {settings.get('maximum_holdings_age_days')} days.",
-        f"- Score weights are configured as {json.dumps(scores, sort_keys=True)}. Scores are fixed browsing conventions, not predictive or trading signals.",
+        f"- Holdings breadth requires a dated official equity holdings source, at least {settings.get('minimum_breadth_sample')} valid companies, {settings.get('minimum_breadth_coverage', 0)*100:g}% price coverage, and holdings no older than {settings.get('maximum_holdings_age_days')} days. These checks do not enter scoring.",
+        f"- Score weights are configured as {json.dumps(scores, sort_keys=True)}. This is a consistent relative-strength ranking for manual review, not a prediction or entry signal.",
         '- Missing score inputs are not imputed or reweighted. ETF and index breadth use complete sourced equity universes independently of curated stock watchlists.',
         '- Index and ETF memberships are current source snapshots, not historical point-in-time universes. Yahoo adjusted-close semantics are vendor conventions.',
         '- Nasdaq market-cap fields have no separate observation timestamps, so stock eligibility remains provisional. Sector stock watchlists use current S&P 500 classifications intersected with official sector ETF holdings and the configured price, cap and liquidity filters.',
-        '- Unconfigured registry candidates remain in the audit with exact source/configuration blockers; they do not appear as scored ranking rows.',
+        '- Ineligible anchors, unavailable ETF scores, unavailable breadth, and missing curated stock drilldowns are separate statuses. Missing breadth or stocks does not make an ETF ineligible.',
         '', '## Source errors', '```json', json.dumps({'core': raw.get('errors', {}), 'constituent_histories':raw.get('v5', {}).get('chart_errors', {})}, indent=2), '```',
         '', '## Sector stock-list scope', 'Sector stock candidates are the current S&P 500 sector classification intersected with official selected-sector ETF holdings, then filtered by the configured listed-equity, price, market-cap and ADV rules. This is not every listed company in each sector. Per-company evidence and exclusions are in stock_diagnostics.csv.',
-        '', '## Local files', 'dashboard.html, market.csv, themes.csv, registry_audit.csv, stock_diagnostics.csv, latest_snapshot.json, raw_inputs.json, source_matrix.csv, watchlist_15.csv, watchlist_20.csv, tradingview_15.txt, tradingview_20.txt, run_bundle.zip.', 'Opening HTML never retrieves data. Explicitly run python scripts/generate_dashboard.py. Failed refreshes preserve existing valid exports and write refresh_status.json/failed_refresh.md separately.']
+        '', '## Local files', 'dashboard.html, market.csv (SPY, QQQ, IWM, VIX with instrument-specific fields), themes.csv, registry_audit.csv, stock_diagnostics.csv, latest_snapshot.json, raw_inputs.json, source_matrix.csv, watchlist_15.csv, watchlist_20.csv, tradingview_15.txt, tradingview_20.txt, run_bundle.zip.', 'Opening HTML never retrieves data. Explicitly run python scripts/generate_dashboard.py. Failed refreshes preserve existing valid exports and write refresh_status.json/failed_refresh.md separately.']
     return '\n'.join(lines)+'\n'
 
 
@@ -310,7 +380,8 @@ def _generate(snapshot, raw, output_dir):
     _write_csv(output_dir / "source_matrix.csv", matrix, list(matrix[0].keys()) if matrix else [])
 
     theme_records = sorted(snapshot.get('themes', []), key=lambda row: row.get('global_rank', 10**9))
-    for filename, records in [('market.csv', snapshot.get('context', [])), ('themes.csv', theme_records)]:
+    market_records = list(snapshot.get('context', [])) + list(snapshot.get('volatility_context', []))
+    for filename, records in [('market.csv', market_records), ('themes.csv', theme_records)]:
         flat = []
         for record in records:
             row = {k:v for k,v in record.items() if v is None or isinstance(v, (str,int,float,bool))}
@@ -318,14 +389,19 @@ def _generate(snapshot, raw, output_dir):
                 row['global_rank'] = record.get('global_rank')
                 row['type'] = 'Sector' if record.get('level') == 'Sector' else 'Theme'
             row['session_date'] = snapshot['session_date']
-            row['generated_at'] = snapshot['generated_at']
+            row['generated_at'] = snapshot.get('dashboard_generated_at') or snapshot['generated_at']
+            if record.get('instrument_type') == 'volatility_index':
+                row['instrument_type'] = 'volatility_index'
+                row.pop('index_breadth', None)
+                row.pop('holdings_breadth', None)
             for key, item in record.get('field_status', {}).items():
                 for part in ('status','reason','observation_count','session_date','input_version','above_count','valid_count','eligible_count','coverage_pct','peer_count'):
                     row[key+'_'+part] = item.get(part)
-            for window in ('5','21','63'):
-                row['return'+window] = _number(record.get('returns', {}).get(window))
-                value = _number(record.get('excess_returns', {}).get(window))
-                row['excess'+window+'_pp'] = value*100 if value is not None else None
+            if record.get('instrument_type') != 'volatility_index':
+                for window in ('5','21','63'):
+                    row['return'+window] = _number(record.get('returns', {}).get(window))
+                    value = _number(record.get('excess_returns', {}).get(window))
+                    row['excess'+window+'_pp'] = value*100 if value is not None else None
             flat.append(row)
         columns = list(dict.fromkeys(k for row in flat for k in row))
         _write_csv(output_dir / filename, flat, columns)
@@ -342,6 +418,7 @@ def _generate(snapshot, raw, output_dir):
                 'exchange': candidate.get('exchange'), 'listing_status': candidate.get('listing_status'),
                 'instrument_type': candidate.get('instrument_type'), 'currency': candidate.get('currency'),
                 'history_status': candidate.get('history_status'), 'valid_history_sessions': candidate.get('valid_history_sessions'),
+                'breadth_status': candidate.get('breadth_status'), 'breadth_reasons': '; '.join(candidate.get('breadth_reasons', [])),
                 'price_effective_date': candidate.get('price_effective_date'), 'price_retrieved_at': candidate.get('price_retrieved_at'),
                 'price_source_url': candidate.get('price_source_url'),
                 'adv30_usd': candidate.get('adv30_usd'), 'minimum_adv30_usd': candidate.get('minimum_adv30_usd'),
@@ -423,7 +500,9 @@ def main(argv: list[str] | None = None) -> int:
         if args.as_of:
             snapshot['requested_asof'] = args.as_of
         registry = json.loads((ROOT / 'config/themes.json').read_text(encoding='utf-8'))
-        snapshot.setdefault('score_methodology', registry.get('score_methodology', {}))
+        _ensure_v61_market_records(snapshot, raw, registry)
+        snapshot['score_methodology'] = registry.get('score_methodology', {})
+        snapshot['methodology_version'] = registry.get('methodology_version', registry.get('registry_version'))
         for theme in snapshot.get('themes', []):
             configured = next((t for t in registry['themes'] if t['id'] == theme['id'] and t['anchor'] == theme['anchor']), {})
             theme.setdefault('level', configured.get('level', 'Theme'))
@@ -433,9 +512,14 @@ def main(argv: list[str] | None = None) -> int:
         ):
             apply_v5(snapshot, raw)
         apply_v6(snapshot, raw, registry)
-        if not raw.get('cache_manifest'):
-            from src.themescope.cache import manifest_for_inputs
-            raw['cache_manifest'] = manifest_for_inputs(raw, snapshot.get('collection_completed_at') or attempted)
+        from src.themescope.cache import manifest_for_inputs
+        raw['cache_manifest'] = manifest_for_inputs(raw, snapshot.get('collection_completed_at') or attempted)
+        generated_dt = datetime.now(timezone.utc)
+        generated_hkt = generated_dt.astimezone(ZoneInfo('Asia/Hong_Kong'))
+        snapshot['dashboard_generated_at'] = generated_dt.isoformat(timespec='seconds')
+        snapshot['dashboard_generated_at_hkt'] = generated_hkt.isoformat(timespec='seconds')
+        snapshot['dashboard_generated_at_hkt_display'] = generated_hkt.strftime('%d %b %Y, %I:%M %p HKT').lstrip('0')
+        snapshot['dashboard_display_timezone'] = 'Asia/Hong_Kong'
         validate(snapshot, raw)
         with tempfile.TemporaryDirectory(prefix='.themescope-stage-', dir=output.parent) as tmp:
             stage = Path(tmp) / 'run'

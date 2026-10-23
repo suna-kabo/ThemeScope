@@ -72,8 +72,8 @@ class RefreshTests(unittest.TestCase):
         registry = json.loads((ROOT / 'config/themes.json').read_text(encoding='utf-8'))
         record = next(row for row in registry['themes'] if row.get('anchor') == 'SMH')
         audit = _candidate_status(record, 'SMH', raw, self.snapshot, registry['settings'])
-        self.assertEqual(audit['status'], 'ineligible')
-        self.assertTrue(any('Official holdings refresh failed: HTTP 503' in reason for reason in audit['reasons']))
+        self.assertEqual(audit['status'], 'eligible')
+        self.assertTrue(any('Official holdings refresh failed: HTTP 503' in reason for reason in audit['breadth_reasons']))
         self.assertIsNone(audit['holdings_effective_date'])
 
     def test_run_zip_import_and_export_values_match_snapshot(self):

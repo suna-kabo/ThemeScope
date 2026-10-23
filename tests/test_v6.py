@@ -45,7 +45,7 @@ class V6RegistryTests(unittest.TestCase):
         self.assertTrue(all(row["id"].startswith("theme-") for row in rows if row.get("level") != "Sector"))
         self.assertEqual(sum(bool(row.get("holdings_source")) for row in rows), 17)
 
-    def test_candidate_requires_verified_usd_etf_mandate_liquidity_and_dated_holdings(self):
+    def test_candidate_requires_price_mandate_liquidity_but_not_holdings_breadth(self):
         dates = [(date(2026, 10, 22) - timedelta(days=i)).isoformat() for i in range(69, -1, -1)]
         session = dates[-1]
         record = {
@@ -66,15 +66,19 @@ class V6RegistryTests(unittest.TestCase):
         self.assertGreaterEqual(result["adv30_usd"], self.registry["settings"]["anchor_adv30_floor_usd"])
         self.assertIsNone(result["aum_usd"])
         self.assertIsNone(result["median_spread_pct"])
+        no_holdings_parser = {key: value for key, value in record.items() if key != "holdings_source"}
+        result_without_parser = _candidate_status(no_holdings_parser, "TST", {**raw, "holdings": {}}, snapshot, self.registry["settings"])
+        self.assertEqual(result_without_parser["status"], "eligible")
+        self.assertTrue(any("holdings source and parser are not configured" in reason for reason in result_without_parser["breadth_reasons"]))
 
-    def test_price_data_does_not_make_an_alternative_eligible_without_its_own_holdings_config(self):
+    def test_missing_holdings_parser_does_not_reject_a_reviewed_anchor(self):
         dates = [(date(2026, 10, 22) - timedelta(days=i)).isoformat() for i in range(69, -1, -1)]
-        record = {"id": "test-theme", "name": "Test Theme", "candidate_anchors": ["ALT"]}
+        record = {"id": "test-theme", "name": "Test Theme", "anchor": "ALT", "candidate_anchors": ["ALT"], "unleveraged_equity_etf_review": True}
         raw = {"charts": {"ALT": chart_fixture("ALT", dates)}, "session_calendar": dates, "holdings": {}}
         result = _candidate_status(record, "ALT", raw, {"session_date": dates[-1]}, self.registry["settings"])
-        self.assertEqual(result["status"], "ineligible")
-        self.assertTrue(any("official holdings source and parser are not configured" in reason for reason in result["reasons"]))
-        self.assertTrue(any("mandate has not been reviewed" in reason for reason in result["reasons"]))
+        self.assertEqual(result["status"], "eligible")
+        self.assertFalse(any("holdings" in reason.lower() for reason in result["reasons"]))
+        self.assertTrue(any("official holdings source and parser are not configured" in reason for reason in result["breadth_reasons"]))
 
     def test_v6_snapshot_records_unavailable_sources_and_candidate_reasons(self):
         session = "2026-10-22"
@@ -82,9 +86,9 @@ class V6RegistryTests(unittest.TestCase):
         theme = {"id": "theme-test", "name": "Test", "anchor": "TST", "selected": [], "returns": {}, "excess_returns": {}, "field_status": {}}
         snapshot = {"session_date": session, "run_date": session, "generated_at": "2026-10-23T16:00:00+00:00", "themes": [theme], "context": [], "settings": self.registry["settings"]}
         raw = {"charts": {}, "holdings": {}, "quotes": {}, "errors": {"charts": {}, "holdings": {}, "quotes": {}}, "v5": {}}
-        result = apply_v6(snapshot, raw, {"registry_version": "6.0", "themes": [record]})
-        self.assertEqual(result["schema_version"], "6.0")
-        self.assertEqual(result["theme_registry_version"], "6.0")
+        result = apply_v6(snapshot, raw, {"registry_version": "6.1", "methodology_version": "6.1", "themes": [record]})
+        self.assertEqual(result["schema_version"], "6.1")
+        self.assertEqual(result["theme_registry_version"], "6.1")
         self.assertEqual(result["resolved_market_session"], session)
         self.assertEqual(result["themes"], [])
         self.assertEqual(result["registry_diagnostics"][0]["status"], "inactive_this_run")

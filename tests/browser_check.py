@@ -25,7 +25,11 @@ with sync_playwright() as p:
     page.on('pageerror', lambda error: errors.append(str(error)))
     page.goto(url);page.wait_for_timeout(400)
     assert 'Loading' not in page.inner_text('body')
-    assert page.locator('.market-card').count()==2
+    assert page.locator('#cards .market-card').count()==3
+    assert page.locator('#volatility-card .market-card').count()==1
+    assert 'IWM' in page.inner_text('#cards') and 'IWM holdings breadth' in page.inner_text('#cards')
+    assert 'VIX' in page.inner_text('#volatility-card')
+    assert 'HKT' in page.inner_text('#generated-hkt')
     assert 'eligible ETF anchors' in page.inner_text('#status')
     assert page.locator('.state-tag').count() >= 0
     assert page.locator('html').get_attribute('data-mode')=='dark'
@@ -35,10 +39,16 @@ with sync_playwright() as p:
 
     page.click('.side-nav a[data-page="sectors-themes"]')
     assert page.locator('#sectors-themes').is_visible()
+    info=page.locator('#theme-head .info-button').first
+    assert info.count()==1
+    info.focus()
+    assert page.locator('#'+info.get_attribute('aria-describedby')).count()==1
+    assert page.locator('#'+info.get_attribute('aria-describedby')).inner_text()
+    info.click()
+    assert info.get_attribute('aria-expanded')=='true'
     rows=page.locator('#theme-body tr[data-theme]')
     if rows.count():
-        initial=rows.first.inner_text()
-        page.select_option('#theme-sort','excess21')
+        page.select_option('#theme-sort','theme_score')
         page.click('#theme-direction')
         assert rows.count() >= 1
         with page.expect_download() as download:
@@ -49,6 +59,24 @@ with sync_playwright() as p:
         page.fill('#theme-search','')
         page.locator('#theme-body tr[data-theme]').first.click()
         assert page.locator('#watchlist').is_visible()
+        assert not page.locator('#app-back').is_disabled()
+        page.click('#app-back')
+        assert page.locator('#sectors-themes').is_visible()
+        assert page.locator('#theme-sort').input_value()=='theme_score'
+        assert page.locator('#theme-direction').inner_text().startswith('Ascending')
+        page.go_forward()
+        assert page.locator('#watchlist').is_visible()
+        assert page.locator('#watchlist-theme-selector optgroup[label="Sectors"]').count()==1
+        assert page.locator('#watchlist-theme-selector optgroup[label="Themes"]').count()==1
+        current=page.locator('#active-name').inner_text()
+        options=page.locator('#watchlist-theme-selector option:not([disabled])')
+        if options.count()>1:
+            page.select_option('#watchlist-theme-selector',options.nth(1).get_attribute('value'))
+            assert page.locator('#active-name').inner_text()!=current
+            page.click('#next-theme')
+            assert page.locator('#active-name').inner_text()
+        assert '20-stock capacity and 15-row default' not in page.inner_text('body')
+        assert page.locator('#watchlist-message').inner_text() in ('No curated stock drilldown is available for this theme.', '')
 
     page.click('.side-nav a[data-page="watchlist"]')
     if not page.locator('#stock-table-wrap').is_hidden():
