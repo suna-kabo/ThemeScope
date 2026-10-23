@@ -1,62 +1,51 @@
-# ThemeScope v5 implementation report
+# ThemeScope implementation and category expansion report
 
-Data session: **2026-10-22**. The delivered export was regenerated offline from the complete freshly retrieved inputs, retaining their original data date and collection timestamps.
+Latest data session: **2026-10-22**. The current project includes the approved v5 calculations plus the follow-up sector/industry catalog and dashboard redesign requested on 2026-10-23.
 
-## Architecture and changes
-The existing project uses Python standard-library source adapters, a core collection/eligibility module, pure calculation functions, a static template/JavaScript UI, and a generator that stages and validates local exports. No database or backend was added.
+## Category coverage
 
-- Added `src/themescope/v5.py`: index universes, issuer mapping, independent holdings breadth, percentiles, scores and states.
-- Updated `src/themescope/collect.py`, `presentation.py`, and `sources.py`: non-anchor membership, Core/Related metadata, explicit optional filing review, excluded-row diagnostics, core validation and bulk constituent retrieval.
-- Updated `scripts/generate_dashboard.py`: v5 enrichment, market/theme CSVs, per-field statuses, ZIP imports, reporting and existing failure rollback.
-- Updated `static/dashboard.js`, `.css`, and `_template.html`: market participation/conditions, level filters, approved score columns, raw metric sorting, coverage warnings, stock EMA facts and 3M excess.
-- Updated `config/themes.json` and `config/evidence_reviews.json`; preserved six anchors and the selection queues. Existing supported principal-business classifications are Core; unsupported memberships were not manufactured.
-- Added v5 formula/membership tests and expanded browser/export/failure checks. README and the supplied brief in `docs/` document operation.
-- Current deliverables are in `dist/`, `exports/` and `reports/`. `data/` remains a labeled compact v4 regression fixture; v5 raw inputs are in the downloadable run ZIP.
+- **11 standard GICS sectors** are represented by the corresponding State Street Select Sector SPDR ETF and its official dated holdings file.
+- **126 GICS sub-industries** appear in the retrieved S&P 500 classification, covering **500 companies**. The industry page groups their actual constituent price histories by sub-industry and parent sector.
+- The six existing curated non-sector ETF exposures remain: Semiconductors, Aerospace & Defense, Biotechnology, Cybersecurity, Clean Energy, and Cloud Computing. The project did not contain the external proprietary 400-theme taxonomy mentioned in the conversation; those memberships were not invented.
+- Sector ETF metrics use ETF prices and official ETF holdings breadth. Industry metrics use S&P 500 constituent prices. They are separate views with separate source universes.
 
-## Actual sources
-- S&P 500: reproducible current Wikipedia constituent table with retained rows and SHA-256 response hash; CIKs verify company deduplication. Date is observation at retrieval, not an official effective date.
-- Nasdaq-100: official Nasdaq dated constituent list endpoint.
-- Security mapping: SEC company_tickers_exchange.json; no guessed foreign ticker substitutions.
-- ETF holdings: official VanEck, First Trust, iShares and State Street adapters. A separate same-date audit verified the equity rows and retained non-equity exclusions.
-- Price histories: Yahoo daily chart endpoint, identical adjustment convention across both hosts; 60 core plus 727 additional unique histories retrieved, zero reported request errors. This controlled live probe used 0.5-second breadth spacing with circuit breakers; the user default remains 1.5 seconds.
-- Market capitalization/industry/exchange: Nasdaq summaries; field timestamp for capitalization remains unavailable.
-- Membership sources: recorded issuer/filing evidence and inclusion rationale; annual filings are mandatory only for explicitly ambiguous records. No agent roles are exposed.
+The industry table shows each category's median 1M and 3M adjusted return, count and coverage, and the number and share of constituents above their own EMA21 and EMA50. These are descriptive S&P 500 subset measures, not whole-market breadth or a composite score. The scatter plot uses median 1M and 3M constituent returns; point colors distinguish positive, negative, and mixed return signs.
 
-## Market breadth
-| Context | Eligible companies | EMA21 above/valid | EMA50 above/valid | Conditions |
-|---|---:|---:|---:|---|
-| SPY | 500 | 355/499 | 320/497 | Internal strength, index below EMA21; Internal strength, index below EMA50 |
-| QQQ | 100 | 47/100 | 51/98 | Broad short-term weakness; Internal strength, index below EMA50 |
+## Visual and navigation changes
 
-## Registry results
-| Anchor | Level | EMA21 above/valid; eligible | EMA50 above/valid | Watchlist |
-|---|---|---|---|---:|
-| SMH | Industry | 0/23; 25 | 1/23 | 13 |
-| CIBR | Theme | 21/41; 45 | 30/41 | 10 |
-| ICLN | Theme | 2/14; 103 | 1/14 | 4 |
-| XAR | Industry | 14/50; 50 | 8/46 | 10 |
-| SKYY | Theme | 39/65; 65 | 45/65 | 10 |
-| XBI | Industry | 56/157; 157 | 38/153 | 0 |
+- Added separate Market, Sectors, Industries, Themes, and Watchlist pages in a left sidebar. Only the selected page is visible; mobile navigation switches to a horizontal menu.
+- Market cards separate EMA position, index breadth, valid-price coverage, and short/medium market condition. Breadth includes numerator and denominator; coverage states how many eligible constituents had usable prices. The state pill and card edge use distinct colors for broad strength, narrow strength, internal strength, weakness, and unavailable data.
+- Added a local system font stack that prefers Inter, Aptos, and Segoe UI without requesting a font from the network.
+- Standardized page spacing, table alignment, numeric columns, status badges, and responsive layouts. Sector and industry tables fit the tested 1440-pixel viewport without horizontal overflow.
+- Kept all browser code and snapshot data inside the exported HTML. Opening or reloading it does not request market data or fonts.
 
-All six ETF return series were successfully generated. Both index breadth measures and both breadth measures for SMH/CIBR/XAR/SKYY/XBI satisfy the freshness, eight-company and 80% rules.
+## Actual collection and results
 
-**ICLN breadth is unavailable for scoring:** 14/103 valid companies = 13.5922% price coverage. 89 equity rows have no verified foreign listing mapping in the current SEC-based adapter. Its observed fractions (2/14 above EMA21; 1/14 above EMA50) are displayed only with a warning. 34 cash/derivative/non-equity rows are excluded, not counted as missing equities.
+- Market data session: **2026-10-22**.
+- S&P 500 classification table observed on **2026-10-23**; Nasdaq-100 constituent response dated **2026-10-22**.
+- Sector ETF official holdings files were dated **2026-10-21**.
+- Retrieved **68 core price histories** and **727 additional unique constituent histories**, for **795 unique histories** total. The live run reported zero chart, quote, holdings, SEC, or constituent-history errors.
+- All 11 sector ETFs have valid holdings breadth. Across all 17 primary ETF anchors, **16 scores are available**. ICLN remains unavailable because only 14 of 103 eligible equity holdings have valid prices (**13.6% coverage**, below the 80% rule); its raw breadth fractions remain visible with a warning.
+- The existing five non-ETF-only curated watchlists contain **47 provisional selections**. The sector funds are ETF-only and do not create stock memberships.
+- The downloaded `dist/run_bundle.zip` contains the dashboard, raw inputs, snapshot, diagnostics, market/sector/industry/theme CSVs, watchlist CSVs, and TradingView text exports.
 
-**All six CurrentStrength, MediumStrength and ThemeScore values are unavailable:** six valid primary ETF peers are below the required ten. The exact percentile/tie/weight/state implementation is present and passes hand-calculated fixtures, including a full 11-peer fixture producing 74 Current, 49 Medium and 64 ThemeScore. No registry padding, missing-input imputation or reweighting was used.
+## Method and limitations
 
-XBI remains ETF-only but has valid holdings breadth across 157 eligible companies; curated biotechnology exclusions do not contaminate ETF breadth. Total stock selections are 47 across the five other themes. NET can enter under the supported Core classification because v5 no longer makes every obvious classification depend on an annual-filing freshness gate.
+- Sector ETF relative ranks and scores use the approved v5 formulas: 70/30 excess-return percentile/breadth by horizon, then 60/40 CurrentStrength/MediumStrength. At least ten valid primary ETF peers are required. No missing component is imputed or reweighted.
+- This expanded dated universe contains 17 primary anchors (11 sectors plus six curated exposures). The 15/20 selection convention remains a browsing convention, not a validated trading model.
+- The source's industry labels are GICS Sub-Industry values. S&P 500 membership came from the current Wikipedia constituent table, whose as-of date is when the page was observed; it is not an official historical membership-effective date.
+- Unverified foreign ETF holdings remain in the eligible price-coverage denominator. No ticker collision is guessed. ICLN's low coverage remains disclosed.
+- Industry categories with small constituent counts are still displayed, with their sample size and coverage; their breadth values are descriptive and are not scored.
+- Scores are fixed prioritization conventions, not demonstrated predictions, profitability, or entry instructions.
 
 ## Validation
-- 34 Python tests passed: original return/session/split/liquidity rules; percentile endpoints, exact ties and minimum peers; approved formulas and excluded inputs; exhaustive theme/market states; equality rules; zero denominators; 8/10 versus 8/11 coverage; missing-price handling; verified share-class deduplication; non-anchor Related membership with no ETF weight; source requirements; import/CSV consistency; ETF-only validity; transport-failure abort versus explicitly missing symbols.
-- Node checks passed: numeric sorting both directions, stable ID ties, missing scores last/no rank, fixed 15/20 nested pools, filters and export fields.
-- Real Chromium checks passed: score default, raw-excess sorting, level/EMA filters, theme selection, 15/20/all-accepted controls, CSV/TXT/complete ZIP downloads, dark/light persistence, failed-snapshot state and zero JavaScript errors.
-- Network instrumentation recorded zero automatic external requests on opening/reloading. Managed Chromium disallows file://, so exact exported bytes were served over loopback. This verifies the browser Network backend, not a manual graphical panel inspection.
-- Refresh-failure preservation was tested: prior files/date preserved byte-for-byte, publication failure rollback, unrelated files retained, missing mandatory holdings rejected, invalid prior HTML not treated as a success.
 
-## Remaining limits and decisions
-- To obtain live scores, the primary registry needs at least ten deliberately selected, suitable ETFs. Expanding the economic coverage is a separate registry decision; no extra ETFs were added merely to force scores to appear.
-- Improving ICLN participation requires verified foreign exchange/listing and company/share-class mappings. Unresolved equities remain in the coverage denominator; unknown company identities are not guessed.
-- Wikipedia membership has observation-time provenance, not a historical effective-date guarantee. SEC issuer IDs identify companies, and deterministic primary share classes represent participation; unresolved mappings are disclosed separately.
-- Scores are approved prioritization conventions, not demonstrated predictions, profitable strategies or entry instructions.
-- Source availability on the user’s Windows network is unverified. The bundled dated real-data import is available if live access fails.
-- No approval is needed to use the implemented features. No license, public visibility, extra indicators, execution rules or additional primary ETF exposures were introduced.
+- **36 Python tests passed**, including the sector registry, industry aggregation, v5 score/coverage rules, generation/import/export, and failure preservation.
+- **Node dashboard checks passed** for sort direction, stable ranks, missing-value placement, filtering, 15/20 pools, and browser export helpers.
+- Chromium checks passed for all five page routes, 11 sector rows, the 126-industry table and scatter, theme selection, watchlist controls, CSV/TXT/ZIP downloads, dark/light persistence, and the failed-snapshot state. There were zero JavaScript errors.
+- Chromium DevTools Network instrumentation recorded zero automatic external requests on open and reload. Managed Chromium blocks `file://`, so the exact exported HTML bytes were served over loopback; the check used the browser Network backend and does not claim a manual graphical Network panel inspection.
+- The browser screenshots were visually inspected at 1440 pixels. Category tables fit within the available content width, and page/table headings align with the shared content grid.
+
+## Regeneration
+
+Use Python 3.10+ and run `py -3 scripts/generate_dashboard.py` on Windows or `python3 scripts/generate_dashboard.py` on macOS/Linux. Generated files stay in the user's local `output/` folder. To render this dated retrieved run offline, run `py -3 scripts/generate_dashboard.py --import-run dist/run_bundle.zip`.

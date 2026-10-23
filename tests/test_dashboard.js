@@ -104,6 +104,12 @@ assert.deepEqual(
   ui.sortRows(scores, "theme_score", "asc").map((r) => r.id),
   ["c", "a", "b", "z"],
 );
+assert.deepEqual(
+  ui.sortRows([{ name: "Zebra" }, { name: "Apple" }], "name", "asc").map(
+    (r) => r.name,
+  ),
+  ["Apple", "Zebra"],
+);
 assert.equal(
   ui.ranked(scores, "theme_score", "desc").at(-1).display_rank,
   null,

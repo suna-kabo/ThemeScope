@@ -1,5 +1,5 @@
 {
-  "registry_version": "5.0",
+  "registry_version": "5.1",
   "reviewer": "Codex implementation review",
   "decision_date": "2026-10-22",
   "effective_date": "2026-10-22",
@@ -36,6 +36,270 @@
     "business_revenue_materiality_percent": 20
   },
   "themes": [
+    {
+      "id": "sector_communication_services",
+      "name": "Communication Services",
+      "scope": "U.S. listed companies classified in the Communication Services sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
+      "included": [
+        "Equity holdings of XLC"
+      ],
+      "excluded": [
+        "Companies outside the sector fund’s published holdings; ETF holdings participation is not an exhaustive measure of every company in this sector."
+      ],
+      "anchor": "XLC",
+      "parent_sector": null,
+      "anchor_rationale": "State Street’s Select Sector SPDR XLC is the plain long-only equity ETF for the Communication Services sector. Its official daily holdings file supplies the dated breadth universe. Selection follows stated mandate, not recent performance.",
+      "anchor_url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xlc.xlsx",
+      "holdings_source": {
+        "provider": "State Street SPDR",
+        "method": "spdr_xlsx",
+        "url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xlc.xlsx"
+      },
+      "representation_limit": "The Select Sector SPDR fund holdings define the ETF breadth sample. Industry classification views separately cover categories represented in the dated S&P 500 constituent table.",
+      "unleveraged_equity_etf_review": true,
+      "anchor_instrument_review": "Select Sector SPDR U.S. equity sector ETF; long-only unleveraged mandate reviewed from the issuer’s fund family description.",
+      "level": "Sector"
+    },
+    {
+      "id": "sector_consumer_discretionary",
+      "name": "Consumer Discretionary",
+      "scope": "U.S. listed companies classified in the Consumer Discretionary sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
+      "included": [
+        "Equity holdings of XLY"
+      ],
+      "excluded": [
+        "Companies outside the sector fund’s published holdings; ETF holdings participation is not an exhaustive measure of every company in this sector."
+      ],
+      "anchor": "XLY",
+      "parent_sector": null,
+      "anchor_rationale": "State Street’s Select Sector SPDR XLY is the plain long-only equity ETF for the Consumer Discretionary sector. Its official daily holdings file supplies the dated breadth universe. Selection follows stated mandate, not recent performance.",
+      "anchor_url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xly.xlsx",
+      "holdings_source": {
+        "provider": "State Street SPDR",
+        "method": "spdr_xlsx",
+        "url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xly.xlsx"
+      },
+      "representation_limit": "The Select Sector SPDR fund holdings define the ETF breadth sample. Industry classification views separately cover categories represented in the dated S&P 500 constituent table.",
+      "unleveraged_equity_etf_review": true,
+      "anchor_instrument_review": "Select Sector SPDR U.S. equity sector ETF; long-only unleveraged mandate reviewed from the issuer’s fund family description.",
+      "level": "Sector"
+    },
+    {
+      "id": "sector_consumer_staples",
+      "name": "Consumer Staples",
+      "scope": "U.S. listed companies classified in the Consumer Staples sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
+      "included": [
+        "Equity holdings of XLP"
+      ],
+      "excluded": [
+        "Companies outside the sector fund’s published holdings; ETF holdings participation is not an exhaustive measure of every company in this sector."
+      ],
+      "anchor": "XLP",
+      "parent_sector": null,
+      "anchor_rationale": "State Street’s Select Sector SPDR XLP is the plain long-only equity ETF for the Consumer Staples sector. Its official daily holdings file supplies the dated breadth universe. Selection follows stated mandate, not recent performance.",
+      "anchor_url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xlp.xlsx",
+      "holdings_source": {
+        "provider": "State Street SPDR",
+        "method": "spdr_xlsx",
+        "url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xlp.xlsx"
+      },
+      "representation_limit": "The Select Sector SPDR fund holdings define the ETF breadth sample. Industry classification views separately cover categories represented in the dated S&P 500 constituent table.",
+      "unleveraged_equity_etf_review": true,
+      "anchor_instrument_review": "Select Sector SPDR U.S. equity sector ETF; long-only unleveraged mandate reviewed from the issuer’s fund family description.",
+      "level": "Sector"
+    },
+    {
+      "id": "sector_energy",
+      "name": "Energy",
+      "scope": "U.S. listed companies classified in the Energy sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
+      "included": [
+        "Equity holdings of XLE"
+      ],
+      "excluded": [
+        "Companies outside the sector fund’s published holdings; ETF holdings participation is not an exhaustive measure of every company in this sector."
+      ],
+      "anchor": "XLE",
+      "parent_sector": null,
+      "anchor_rationale": "State Street’s Select Sector SPDR XLE is the plain long-only equity ETF for the Energy sector. Its official daily holdings file supplies the dated breadth universe. Selection follows stated mandate, not recent performance.",
+      "anchor_url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xle.xlsx",
+      "holdings_source": {
+        "provider": "State Street SPDR",
+        "method": "spdr_xlsx",
+        "url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xle.xlsx"
+      },
+      "representation_limit": "The Select Sector SPDR fund holdings define the ETF breadth sample. Industry classification views separately cover categories represented in the dated S&P 500 constituent table.",
+      "unleveraged_equity_etf_review": true,
+      "anchor_instrument_review": "Select Sector SPDR U.S. equity sector ETF; long-only unleveraged mandate reviewed from the issuer’s fund family description.",
+      "level": "Sector"
+    },
+    {
+      "id": "sector_financials",
+      "name": "Financials",
+      "scope": "U.S. listed companies classified in the Financials sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
+      "included": [
+        "Equity holdings of XLF"
+      ],
+      "excluded": [
+        "Companies outside the sector fund’s published holdings; ETF holdings participation is not an exhaustive measure of every company in this sector."
+      ],
+      "anchor": "XLF",
+      "parent_sector": null,
+      "anchor_rationale": "State Street’s Select Sector SPDR XLF is the plain long-only equity ETF for the Financials sector. Its official daily holdings file supplies the dated breadth universe. Selection follows stated mandate, not recent performance.",
+      "anchor_url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xlf.xlsx",
+      "holdings_source": {
+        "provider": "State Street SPDR",
+        "method": "spdr_xlsx",
+        "url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xlf.xlsx"
+      },
+      "representation_limit": "The Select Sector SPDR fund holdings define the ETF breadth sample. Industry classification views separately cover categories represented in the dated S&P 500 constituent table.",
+      "unleveraged_equity_etf_review": true,
+      "anchor_instrument_review": "Select Sector SPDR U.S. equity sector ETF; long-only unleveraged mandate reviewed from the issuer’s fund family description.",
+      "level": "Sector"
+    },
+    {
+      "id": "sector_health_care",
+      "name": "Health Care",
+      "scope": "U.S. listed companies classified in the Health Care sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
+      "included": [
+        "Equity holdings of XLV"
+      ],
+      "excluded": [
+        "Companies outside the sector fund’s published holdings; ETF holdings participation is not an exhaustive measure of every company in this sector."
+      ],
+      "anchor": "XLV",
+      "parent_sector": null,
+      "anchor_rationale": "State Street’s Select Sector SPDR XLV is the plain long-only equity ETF for the Health Care sector. Its official daily holdings file supplies the dated breadth universe. Selection follows stated mandate, not recent performance.",
+      "anchor_url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xlv.xlsx",
+      "holdings_source": {
+        "provider": "State Street SPDR",
+        "method": "spdr_xlsx",
+        "url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xlv.xlsx"
+      },
+      "representation_limit": "The Select Sector SPDR fund holdings define the ETF breadth sample. Industry classification views separately cover categories represented in the dated S&P 500 constituent table.",
+      "unleveraged_equity_etf_review": true,
+      "anchor_instrument_review": "Select Sector SPDR U.S. equity sector ETF; long-only unleveraged mandate reviewed from the issuer’s fund family description.",
+      "level": "Sector"
+    },
+    {
+      "id": "sector_industrials",
+      "name": "Industrials",
+      "scope": "U.S. listed companies classified in the Industrials sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
+      "included": [
+        "Equity holdings of XLI"
+      ],
+      "excluded": [
+        "Companies outside the sector fund’s published holdings; ETF holdings participation is not an exhaustive measure of every company in this sector."
+      ],
+      "anchor": "XLI",
+      "parent_sector": null,
+      "anchor_rationale": "State Street’s Select Sector SPDR XLI is the plain long-only equity ETF for the Industrials sector. Its official daily holdings file supplies the dated breadth universe. Selection follows stated mandate, not recent performance.",
+      "anchor_url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xli.xlsx",
+      "holdings_source": {
+        "provider": "State Street SPDR",
+        "method": "spdr_xlsx",
+        "url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xli.xlsx"
+      },
+      "representation_limit": "The Select Sector SPDR fund holdings define the ETF breadth sample. Industry classification views separately cover categories represented in the dated S&P 500 constituent table.",
+      "unleveraged_equity_etf_review": true,
+      "anchor_instrument_review": "Select Sector SPDR U.S. equity sector ETF; long-only unleveraged mandate reviewed from the issuer’s fund family description.",
+      "level": "Sector"
+    },
+    {
+      "id": "sector_information_technology",
+      "name": "Information Technology",
+      "scope": "U.S. listed companies classified in the Information Technology sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
+      "included": [
+        "Equity holdings of XLK"
+      ],
+      "excluded": [
+        "Companies outside the sector fund’s published holdings; ETF holdings participation is not an exhaustive measure of every company in this sector."
+      ],
+      "anchor": "XLK",
+      "parent_sector": null,
+      "anchor_rationale": "State Street’s Select Sector SPDR XLK is the plain long-only equity ETF for the Information Technology sector. Its official daily holdings file supplies the dated breadth universe. Selection follows stated mandate, not recent performance.",
+      "anchor_url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xlk.xlsx",
+      "holdings_source": {
+        "provider": "State Street SPDR",
+        "method": "spdr_xlsx",
+        "url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xlk.xlsx"
+      },
+      "representation_limit": "The Select Sector SPDR fund holdings define the ETF breadth sample. Industry classification views separately cover categories represented in the dated S&P 500 constituent table.",
+      "unleveraged_equity_etf_review": true,
+      "anchor_instrument_review": "Select Sector SPDR U.S. equity sector ETF; long-only unleveraged mandate reviewed from the issuer’s fund family description.",
+      "level": "Sector"
+    },
+    {
+      "id": "sector_materials",
+      "name": "Materials",
+      "scope": "U.S. listed companies classified in the Materials sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
+      "included": [
+        "Equity holdings of XLB"
+      ],
+      "excluded": [
+        "Companies outside the sector fund’s published holdings; ETF holdings participation is not an exhaustive measure of every company in this sector."
+      ],
+      "anchor": "XLB",
+      "parent_sector": null,
+      "anchor_rationale": "State Street’s Select Sector SPDR XLB is the plain long-only equity ETF for the Materials sector. Its official daily holdings file supplies the dated breadth universe. Selection follows stated mandate, not recent performance.",
+      "anchor_url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xlb.xlsx",
+      "holdings_source": {
+        "provider": "State Street SPDR",
+        "method": "spdr_xlsx",
+        "url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xlb.xlsx"
+      },
+      "representation_limit": "The Select Sector SPDR fund holdings define the ETF breadth sample. Industry classification views separately cover categories represented in the dated S&P 500 constituent table.",
+      "unleveraged_equity_etf_review": true,
+      "anchor_instrument_review": "Select Sector SPDR U.S. equity sector ETF; long-only unleveraged mandate reviewed from the issuer’s fund family description.",
+      "level": "Sector"
+    },
+    {
+      "id": "sector_real_estate",
+      "name": "Real Estate",
+      "scope": "U.S. listed companies classified in the Real Estate sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
+      "included": [
+        "Equity holdings of XLRE"
+      ],
+      "excluded": [
+        "Companies outside the sector fund’s published holdings; ETF holdings participation is not an exhaustive measure of every company in this sector."
+      ],
+      "anchor": "XLRE",
+      "parent_sector": null,
+      "anchor_rationale": "State Street’s Select Sector SPDR XLRE is the plain long-only equity ETF for the Real Estate sector. Its official daily holdings file supplies the dated breadth universe. Selection follows stated mandate, not recent performance.",
+      "anchor_url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xlre.xlsx",
+      "holdings_source": {
+        "provider": "State Street SPDR",
+        "method": "spdr_xlsx",
+        "url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xlre.xlsx"
+      },
+      "representation_limit": "The Select Sector SPDR fund holdings define the ETF breadth sample. Industry classification views separately cover categories represented in the dated S&P 500 constituent table.",
+      "unleveraged_equity_etf_review": true,
+      "anchor_instrument_review": "Select Sector SPDR U.S. equity sector ETF; long-only unleveraged mandate reviewed from the issuer’s fund family description.",
+      "level": "Sector"
+    },
+    {
+      "id": "sector_utilities",
+      "name": "Utilities",
+      "scope": "U.S. listed companies classified in the Utilities sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
+      "included": [
+        "Equity holdings of XLU"
+      ],
+      "excluded": [
+        "Companies outside the sector fund’s published holdings; ETF holdings participation is not an exhaustive measure of every company in this sector."
+      ],
+      "anchor": "XLU",
+      "parent_sector": null,
+      "anchor_rationale": "State Street’s Select Sector SPDR XLU is the plain long-only equity ETF for the Utilities sector. Its official daily holdings file supplies the dated breadth universe. Selection follows stated mandate, not recent performance.",
+      "anchor_url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xlu.xlsx",
+      "holdings_source": {
+        "provider": "State Street SPDR",
+        "method": "spdr_xlsx",
+        "url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xlu.xlsx"
+      },
+      "representation_limit": "The Select Sector SPDR fund holdings define the ETF breadth sample. Industry classification views separately cover categories represented in the dated S&P 500 constituent table.",
+      "unleveraged_equity_etf_review": true,
+      "anchor_instrument_review": "Select Sector SPDR U.S. equity sector ETF; long-only unleveraged mandate reviewed from the issuer’s fund family description.",
+      "level": "Sector"
+    },
     {
       "id": "semiconductors",
       "name": "Semiconductors",

@@ -1,6 +1,6 @@
 # ThemeScope v5
 
-An on-demand, end-of-day dashboard with **Market, Themes, and Watchlist**. It organizes ETFs and stocks for manual chart review. It does not generate entries, stops, position sizes or trades. The 15/20 pool and score weights are explicit conventions, not validated trading models.
+An on-demand, end-of-day dashboard with separate **Market, Sectors, Industries, Themes, and Watchlist** pages. It organizes ETFs and stocks for manual chart review. It does not generate entries, stops, position sizes or trades. The 15/20 pool and score weights are explicit conventions, not validated trading models.
 
 ## Open the delivered dashboard
 
@@ -37,14 +37,17 @@ A directory containing `latest_snapshot.json` and `raw_inputs.json` also works. 
 
 - Separate S&P 500 and Nasdaq-100 constituent breadth and short/medium market conditions.
 - Anchor ETF holdings breadth independent of curated watchlist membership or filing reviews.
-- Sector/Industry/Theme level metadata and filters.
+- All 11 standard GICS sector ETF anchors, using each Select Sector SPDR fund's official dated holdings.
+- Every GICS sub-industry label represented in the retrieved S&P 500 constituent classification, with actual constituent median returns and EMA participation. This describes the S&P 500 slice, not every listed company.
+- Six existing curated industry/theme ETF exposures remain on the Themes page. The theme taxonomy is open-ended; no private 400-theme taxonomy was present in the project files.
+- Sector ETF rankings, a searchable industry table and return scatter chart, plus separate page navigation in a left sidebar.
 - CurrentStrength = 70% 1M excess-return percentile + 30% EMA21 breadth.
 - MediumStrength = 70% 3M excess-return percentile + 30% EMA50 breadth.
 - ThemeScore = 60% CurrentStrength + 40% MediumStrength.
 - Supported `Core`/`Related` non-anchor stocks can enter curated watchlists; their ETF weight is missing, not zero. Obvious cases do not require an annual filing check. Ambiguous records can require one via `requires_filing_review`.
 - Original liquidity filters, stock-versus-ETF excess returns and Liquid/Liquid/Strong/Weak selection remain. Individual biotechnology exclusion remains; XBI remains a valid ETF.
 
-**The registry still has six ETFs. Scores and percentiles require at least ten valid peers and therefore remain unavailable for this registry.** Raw returns, price-only rankings, EMA facts and valid breadth remain usable. No ETFs were added merely to meet the threshold. Score fields work for a deliberately expanded qualifying registry and are tested with hand-calculated fixtures.
+There are now 17 primary ETF anchors: 11 sector funds and six curated industry/theme exposures. Scores and percentiles still require at least ten valid peers; if valid inputs fall below that threshold, fields remain unavailable. Industry classifications use the separate S&P 500 constituent aggregation and do not receive an invented ETF score.
 
 Breadth uses equal-company counts, not portfolio weights. Validity requires a universe no older than 35 days, eight valid companies and at least 80% price coverage. Missing prices are excluded from that metric's valid denominator but retained in its eligible coverage count. Cash, funds and other identified non-equities are excluded separately. Company share classes are deduplicated using verified issuer IDs; the alphabetically first mapped share class is used, never the best performer. Unverified foreign mappings remain missing rather than borrowing similarly named US tickers.
 
@@ -66,7 +69,7 @@ Mandatory market/anchor return data, primary holdings collection and index-unive
 
 Outputs are staged before publication; replacement errors roll back changed files. Invalid preexisting HTML is retained as `rejected_dashboard.html`, not advertised as successful. No empty first run is presented as completed. Imported v4 runs with valid ETF prices may be displayed as dated references with unavailable v5 fields.
 
-Run ZIP contents:
+Run ZIP contents now include sectors.csv and industries.csv in addition to the dashboard, snapshot, raw inputs, market and theme exports, stock lists, TradingView lists, source matrix and run report:
 
 - `dashboard.html`, `latest_snapshot.json`, `raw_inputs.json`, `source_matrix.csv`, `latest_run.md`
 - `market.csv`, `themes.csv` including raw values, dates, field statuses/reasons

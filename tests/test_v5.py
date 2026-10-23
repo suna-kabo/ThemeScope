@@ -2,7 +2,7 @@
 import copy
 import unittest
 from unittest.mock import patch
-from src.themescope.v5 import metric, percentiles, strength, overall_score, theme_state, market_condition, participation, map_universe, apply
+from src.themescope.v5 import metric, percentiles, strength, overall_score, theme_state, market_condition, participation, map_universe, index_category_views, apply
 
 
 class V5CalculationTests(unittest.TestCase):
@@ -61,6 +61,40 @@ class V5CalculationTests(unittest.TestCase):
         self.assertEqual(u['companies'][0]['symbols'],['GOOG','GOOGL'])
         self.assertEqual(u['companies'][1]['symbols'],[])
         self.assertEqual(len(u['excluded_rows']),1)
+
+    def test_standard_sector_anchors_are_complete_and_unique(self):
+        from scripts.generate_dashboard import ROOT
+        import json
+        config=json.loads((ROOT/'config/themes.json').read_text())
+        sectors=[t for t in config['themes'] if t.get('level')=='Sector']
+        self.assertEqual(len(sectors),11)
+        self.assertEqual(len({t['anchor'] for t in sectors}),11)
+        self.assertEqual({t['anchor'] for t in sectors},{'XLB','XLC','XLE','XLF','XLI','XLK','XLP','XLRE','XLU','XLV','XLY'})
+        self.assertTrue(all(t['holdings_source']['provider']=='State Street SPDR' for t in sectors))
+
+    def test_index_classifications_and_group_metrics_use_constituent_observations(self):
+        companies=[
+            {'company_id':'1','symbols':['AAA'],'sector':'Technology','industry':'Software'},
+            {'company_id':'2','symbols':['BBB'],'sector':'Technology','industry':'Software'},
+            {'company_id':'3','symbols':['CCC'],'sector':'Health','industry':'Biotech'},
+        ]
+        universe={'companies':companies}
+        charts={
+            symbol:{'meta':{'instrumentType':'EQUITY','symbol':symbol},'observations':[{'date':'2026-10-22','close':close}]}
+            for symbol,close in [('AAA',101),('BBB',99),('CCC',105)]
+        }
+        def fake_trend(chart,calendar,session,settings):
+            return {'ema21':100,'ema50':100}
+        def fake_return(chart,calendar,session,window):
+            values={'AAA':.10,'BBB':-.02,'CCC':.04}
+            return {'status':'valid','value':values[chart['meta']['symbol']]}
+        with patch('src.themescope.v5.trend_metric',side_effect=fake_trend), patch('src.themescope.v5.return_metric',side_effect=fake_return):
+            result=index_category_views(universe,charts,['2026-10-22'],'2026-10-22',{}, {'url':'https://example.test/source','as_of':'2026-10-22'})
+        tech=next(row for row in result['sectors'] if row['name']=='Technology')
+        software=next(row for row in result['industries'] if row['name']=='Software')
+        self.assertEqual((tech['company_count'],tech['above_ema21_count'],tech['valid_ema21_count'],tech['breadth21_pct']),(2,1,2,50))
+        self.assertEqual(tech['median_return21_pct'],4.0)
+        self.assertEqual((software['company_count'],software['coverage21_pct'],software['median_return21_pct']),(2,100.0,4.0))
 
     def test_full_score_path_and_prohibited_inputs(self):
         from scripts.generate_dashboard import ROOT

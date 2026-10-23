@@ -3,9 +3,9 @@
   "method": "Chromium DevTools Protocol Network.requestWillBeSent (Network panel backend)",
   "open_and_reload_external_requests": [],
   "requests": [
-    "http://127.0.0.1:40517/dashboard.html",
-    "http://127.0.0.1:40517/dashboard.html",
-    "http://127.0.0.1:40517/dashboard.html"
+    "http://127.0.0.1:39465/dashboard.html",
+    "http://127.0.0.1:39465/dashboard.html",
+    "http://127.0.0.1:39465/dashboard.html"
   ],
   "javascript_errors": [],
   "interaction_checks": "passed"

@@ -25,9 +25,24 @@ with sync_playwright() as p:
     assert page.locator('#theme-body tr').count()==6
     assert page.locator('#stock-body tr').count()>1
     assert 'Loading' not in page.inner_text('body')
-    assert page.locator('.card').count()==2
+    assert page.locator('.market-card').count()==2
+    assert page.locator('.state-pill').count()>=4
+    page.locator('#market .help-card summary').click()
+    assert 'Price coverage' in page.inner_text('#market .help-card')
     assert page.locator('html').get_attribute('data-mode')=='dark'
     page.screenshot(path='/tmp/themescope-dark.png',full_page=True)
+    page.click('.side-nav a[data-page=\"sectors\"]')
+    assert page.locator('#sectors').is_visible()
+    assert page.locator('#sector-body tr').count()==11
+    page.click('.side-nav a[data-page=\"industries\"]')
+    assert page.locator('#industries').is_visible()
+    assert page.locator('#industry-body tr').count()>20
+    assert page.locator('#industry-scatter circle').count()>10
+    page.fill('#industry-search','Semiconductors')
+    assert page.locator('#industry-body tr').count()>=1
+    assert all('semiconductor' in row.lower() for row in page.locator('#industry-body tr').all_inner_texts())
+    page.fill('#industry-search','')
+    page.click('.side-nav a[data-page=\"themes\"]')
     # Numeric sorting, stable ranks through filters, and missing-last are also unit tested.
     assert page.locator('#theme-sort').input_value()=='theme_score'
     page.select_option('#theme-sort','excess21')
@@ -41,7 +56,10 @@ with sync_playwright() as p:
     assert page.locator('#theme-body tr[data-theme]').count()==1
     page.click('#theme-body tr[data-theme]')
     assert 'Cloud' in page.inner_text('#active-name')
+    assert page.locator('#watchlist').is_visible()
+    page.click('.side-nav a[data-page=\"themes\"]')
     page.fill('#theme-search','')
+    page.click('.side-nav a[data-page=\"watchlist\"]')
     page.select_option('#pool','20');page.select_option('#pool','all');page.select_option('#pool','15')
     page.select_option('#stock-trend','Downtrend');page.select_option('#stock-trend','All')
     page.select_option('#stock-relative','Outperforming');page.select_option('#stock-relative','All')
@@ -56,7 +74,9 @@ with sync_playwright() as p:
         if button.startswith('a['):
             with zipfile.ZipFile(download.value.path()) as bundle:
                 assert 'dashboard.html' in bundle.namelist()
-                assert len(bundle.namelist()) == 11
+                assert 'sectors.csv' in bundle.namelist()
+                assert 'industries.csv' in bundle.namelist()
+                assert len(bundle.namelist()) == 13
     page.click('#mode');assert page.locator('html').get_attribute('data-mode')=='light'
     page.screenshot(path='/tmp/themescope-light.png',full_page=True)
     page.reload();page.wait_for_timeout(400)

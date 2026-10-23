@@ -4,8 +4,9 @@ import hashlib
 import math
 import re
 import time
+import statistics
 from .sources import _request, _TableParser, request_json, fetch_yahoo_chart, _YAHOO_BLOCKED_HOSTS
-from .metrics import observation_map, trend_metric
+from .metrics import observation_map, return_metric, trend_metric
 
 VERSION = 'themescope-v5.0'
 
@@ -32,7 +33,7 @@ def fetch_universes():
         if started:
             if len(row) != 8 or not row[6].isdigit():
                 break
-            rows.append({'ticker': row[0], 'company': row[1], 'company_id': str(int(row[6])), 'security_type': 'EQUITY'})
+            rows.append({'ticker': row[0], 'company': row[1], 'sector': row[2], 'industry': row[3], 'company_id': str(int(row[6])), 'security_type': 'EQUITY'})
     if len(rows) < 450:
         raise ValueError('S&P 500 constituent parser returned an incomplete list')
     spy = {'as_of': now[:10], 'asof_basis': 'Current constituent page observed at retrieval; not an official effective-date assertion', 'url': url, 'retrieved_at': now, 'source_sha256': hashlib.sha256(body).hexdigest(), 'rows': rows}
@@ -68,8 +69,14 @@ def map_universe(source, mapping, index=False):
         symbol = str(listing['ticker']).replace('.', '-') if mapped else None
         company_id = str(row.get('company_id') or (listing['cik'] if mapped else sid or ('unmapped:'+str(country)+':'+ticker)))
         if company_id not in companies:
-            companies[company_id] = {'company_id': company_id, 'company': row.get('company'), 'symbols': [], 'source_tickers': []}
+            companies[company_id] = {'company_id': company_id, 'company': row.get('company'), 'symbols': [], 'source_tickers': [], 'sector': row.get('sector'), 'industry': row.get('industry')}
         group = companies[company_id]
+        # Preserve the dated source classification for sector/industry browsing.
+        # CIK deduplication still counts an issuer once.
+        if not group.get('sector') and row.get('sector'):
+            group['sector'] = row['sector']
+        if not group.get('industry') and row.get('industry'):
+            group['industry'] = row['industry']
         group['source_tickers'].append(ticker)
         if symbol and symbol not in group['symbols']:
             group['symbols'].append(symbol)
@@ -78,6 +85,71 @@ def map_universe(source, mapping, index=False):
     for row in companies.values():
         row['symbols'].sort()
     return {'companies': list(companies.values()), 'excluded_rows': excluded, 'unresolved_mappings': unresolved, 'source_row_count': len(source.get('rows', []))}
+
+
+def index_category_views(universe, charts, calendar, session, settings, source):
+    """Build descriptive S&P 500 sector/sub-industry views from retrieved constituents."""
+    groups = {'sectors': {}, 'industries': {}}
+    for company in universe.get('companies', []):
+        sector = str(company.get('sector') or '').strip()
+        industry = str(company.get('industry') or '').strip()
+        for level, name, key in (('sectors', sector, 'sector'), ('industries', industry, 'industry')):
+            if not name:
+                continue
+            group = groups[level].setdefault(name, {'name': name, 'level': 'Sector' if level == 'sectors' else 'Industry', 'sector': sector if level == 'industries' else None, 'members': []})
+            group['members'].append(company)
+
+    def summarize(group):
+        eligible = len(group['members'])
+        valid = {21: [], 50: []}
+        above = {21: 0, 50: 0}
+        returns = {21: [], 63: []}
+        data_members = {21: 0, 50: 0}
+        for company in group['members']:
+            symbol = next(iter(company.get('symbols', [])), None)
+            chart = charts.get(symbol) if symbol else None
+            if not chart or (chart.get('meta', {}).get('instrumentType') not in (None, 'EQUITY')):
+                continue
+            prices = observation_map(chart)
+            close = prices.get(session, {}).get('close') if session else None
+            trend = trend_metric(chart, calendar, session, settings) if session else {}
+            for period in (21, 50):
+                ema_value = trend.get(f'ema{period}')
+                if isinstance(close, (int, float)) and math.isfinite(close) and isinstance(ema_value, (int, float)) and math.isfinite(ema_value):
+                    data_members[period] += 1
+                    valid[period].append(close)
+                    above[period] += int(close > ema_value)
+            for window in (21, 63):
+                metric_result = return_metric(chart, calendar, session, window) if session else {}
+                value = metric_result.get('value') if metric_result.get('status') == 'valid' else None
+                if isinstance(value, (int, float)) and math.isfinite(value):
+                    returns[window].append(value)
+        output = {
+            'name': group['name'], 'level': group['level'],
+            'sector': group.get('sector'),
+            'company_count': eligible,
+            'source': 'S&P 500 constituents classified by GICS Sector / GICS Sub-Industry',
+            'session_date': session,
+        }
+        for period in (21, 50):
+            count = data_members[period]
+            output[f'valid_ema{period}_count'] = count
+            output[f'above_ema{period}_count'] = above[period]
+            output[f'breadth{period}_pct'] = 100 * above[period] / count if count else None
+            output[f'coverage{period}_pct'] = 100 * count / eligible if eligible else None
+        for window in (21, 63):
+            values = returns[window]
+            output[f'median_return{window}_pct'] = 100 * statistics.median(values) if values else None
+            output[f'return{window}_valid_count'] = len(values)
+            output[f'return{window}_coverage_pct'] = 100 * len(values) / eligible if eligible else None
+        return output
+
+    output = {key: sorted((summarize(row) for row in groups[key].values()), key=lambda row: row['name'].casefold()) for key in groups}
+    output['source'] = {key: value for key, value in source.items() if key != 'rows'}
+    output['membership_count'] = len(universe.get('companies', []))
+    output['unclassified_count'] = sum(1 for row in universe.get('companies', []) if not row.get('sector') or not row.get('industry'))
+    output['method'] = 'Equal-company descriptive aggregates. Return columns are medians of split-adjusted constituent returns; breadth is the share of constituents with retrieved prices that close above their own EMA. This is an S&P 500 subset, not whole-market industry breadth.'
+    return output
 
 
 def collect_inputs(holdings, existing_charts, interval=1.5):
@@ -209,6 +281,10 @@ def apply(snapshot, raw):
         market['index_eligible_count'] = breadth['eligible_count']
         market['field_status'] = {}
         trend = trend_metric(raw['charts'][symbol], raw['session_calendar'], date_, snapshot['settings'])
+        market['ema21'] = trend.get('ema21')
+        market['ema50'] = trend.get('ema50')
+        market['ema21_distance'] = (market.get('price_close') / market['ema21'] - 1) if market.get('price_close') is not None and market.get('ema21') else None
+        market['ema50_distance'] = (market.get('price_close') / market['ema50'] - 1) if market.get('price_close') is not None and market.get('ema50') else None
         for period in (21, 50):
             item = breadth[str(period)]
             market[f'index_valid_ema{period}_count'] = item['valid_count']
@@ -219,6 +295,10 @@ def apply(snapshot, raw):
             market[f'above_ema{period}'] = market['price_close'] > trend[f'ema{period}'] if market.get('price_close') is not None and trend.get(f'ema{period}') is not None else None
             market['field_status'][f'index_breadth{period}_pct'] = item
             market['field_status'][f'market_condition{period}'] = condition
+    snapshot['classification_catalog'] = index_category_views(
+        mapped.get('SPY', {}), all_charts, raw.get('session_calendar', []), date_,
+        snapshot['settings'], inputs.get('index_universes', {}).get('SPY', {}),
+    )
     p21 = percentiles({t['id']: t['excess_returns']['21']['value'] if t.get('anchor_screen', {}).get('anchor_screen_valid', False) and t['excess_returns']['21'].get('status') == 'valid' else None for t in snapshot['themes']}, date_)
     p63 = percentiles({t['id']: t['excess_returns']['63']['value'] if t.get('anchor_screen', {}).get('anchor_screen_valid', False) and t['excess_returns']['63'].get('status') == 'valid' else None for t in snapshot['themes']}, date_)
     for theme in snapshot['themes']:
@@ -258,8 +338,9 @@ def apply(snapshot, raw):
     snapshot['sources']['partial'] = snapshot['sources'].get('partial', False) or bool(inputs.get('chart_errors'))
     snapshot['sources']['evidence_freshness_provider'] = 'SEC annual submissions only for membership records explicitly requiring deeper filing review'
     snapshot['limitations'] = [
-        'Six primary ETFs are retained. Percentiles require ten valid peers; scores remain unavailable without imputing or reweighting.',
+        f"{len(snapshot['themes'])} dated primary ETF anchors are included across {sum(1 for t in snapshot['themes'] if t.get('level') == 'Sector')} standard sectors and curated industry/theme exposures. Percentiles require ten valid peers; values remain unavailable when peer or breadth inputs fail, without imputing or reweighting.",
         'S&P 500 list is a reproducible current Wikipedia table, not an official point-in-time membership feed. Its as-of is the retrieval observation date.',
+        'Sector and industry summaries are equal-company descriptions of currently listed S&P 500 constituents, not whole-market rankings or validated trading scores. Industry names are the source table’s GICS Sub-Industry labels.',
         'Anchor breadth is equal-company participation of official equity holdings, not whole-industry breadth. Incomplete foreign listing mappings reduce price coverage.',
         'Yahoo adjusted close and split conventions are vendor definitions; there is no guaranteed availability or publication delay.',
         'Nasdaq does not supply a separate market-cap field timestamp; stock eligibility is provisional.',
