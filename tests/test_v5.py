@@ -2,7 +2,7 @@
 import copy
 import unittest
 from unittest.mock import patch
-from src.themescope.v5 import metric, percentiles, strength, overall_score, theme_state, market_condition, participation, map_universe, index_category_views, apply, _nasdaq_effective_date
+from src.themescope.v5 import metric, percentiles, strength, overall_score, theme_state, market_condition, participation, map_universe, index_category_views, apply, _nasdaq_effective_date, breadth_change
 
 
 class V5CalculationTests(unittest.TestCase):
@@ -84,6 +84,88 @@ class V5CalculationTests(unittest.TestCase):
         self.assertEqual(run(10,7)['status'],'unavailable')
         self.assertIsNone(run(0,0)['value'])
         self.assertEqual(run(10,10,'2026-08-01')['status'],'unavailable')
+
+    def test_price_coverage_is_primary_when_unresolved_holdings_drive_low_coverage(self):
+        universe = {
+            'companies': [
+                {'company_id': str(i), 'symbols': [] if i < 5 else [f'T{i}']}
+                for i in range(20)
+            ],
+            'unresolved_mappings': [{'ticker': f'U{i}'} for i in range(5)],
+        }
+        charts = {
+            f'T{i}': {
+                'meta': {'instrumentType': 'EQUITY'},
+                'observations': [{'date': '2026-10-22', 'close': 101}],
+            }
+            for i in range(5, 14)
+        }
+        settings = {
+            'ema_periods': [21],
+            'minimum_breadth_sample': 8,
+            'minimum_breadth_coverage': .8,
+            'maximum_holdings_age_days': 35,
+        }
+        with patch('src.themescope.v5.trend_metric', return_value={'ema21': 100}):
+            breadth = participation(
+                universe,
+                {'_configured': True, 'date_semantics': 'effective', 'as_of': '2026-10-22'},
+                charts, ['2026-10-22'], '2026-10-22', settings, '2026-10-22',
+            )
+        result = breadth['21']
+        self.assertEqual(result['reason_code'], 'price_coverage_low')
+        self.assertEqual((result['valid_count'], result['eligible_count']), (9, 20))
+        self.assertEqual(result['minimum_coverage_pct'], 80)
+        self.assertEqual(breadth['unresolved_mapping_count'], 5)
+
+    def test_current_observation_after_session_is_allowed_but_future_effective_date_is_not(self):
+        universe = {'companies': [{'company_id': str(i), 'symbols': [str(i)]} for i in range(10)]}
+        charts = {str(i): {'meta': {'instrumentType': 'EQUITY'}, 'observations': [{'date': '2026-10-23', 'close': 101 if i < 4 else 99}]} for i in range(10)}
+        settings = {'ema_periods': [21], 'minimum_breadth_sample': 8, 'minimum_breadth_coverage': .8, 'maximum_holdings_age_days': 35}
+        with patch('src.themescope.v5.trend_metric', return_value={'ema21': 100}):
+            observed = participation(
+                universe,
+                {'_configured': True, 'date_semantics': 'observation', 'as_of': '2026-10-24', 'observation_date': '2026-10-24', 'retrieved_at': '2026-10-24T02:00:00+00:00', 'rows': []},
+                charts, ['2026-10-23'], '2026-10-23', settings, '2026-10-23',
+            )['21']
+            future_effective = participation(
+                universe,
+                {'_configured': True, 'date_semantics': 'effective', 'as_of': '2026-10-24', 'effective_date': '2026-10-24', 'rows': []},
+                charts, ['2026-10-23'], '2026-10-23', settings, '2026-10-23',
+            )['21']
+            stale_observation = participation(
+                universe,
+                {'_configured': True, 'date_semantics': 'observation', 'as_of': '2026-08-01', 'observation_date': '2026-08-01', 'retrieved_at': '2026-10-24T02:00:00+00:00', 'rows': []},
+                charts, ['2026-10-23'], '2026-10-23', settings, '2026-10-23',
+            )['21']
+        self.assertEqual((observed['status'], observed['value'], observed['observation_date']), ('valid', 40, '2026-10-24'))
+        self.assertEqual(future_effective['reason_code'], 'effective_future')
+        self.assertEqual(future_effective['reason'], 'Holdings effective date is after the selected market session.')
+        self.assertEqual(stale_observation['reason_code'], 'stale')
+        self.assertEqual(stale_observation['reason'], 'Holdings are older than the configured freshness limit.')
+
+    def test_spy_breadth_uses_current_observed_constituents(self):
+        universe = {'companies': [{'company_id': str(i), 'symbols': [str(i)]} for i in range(499)]}
+        charts = {str(i): {'meta': {'instrumentType': 'EQUITY', 'symbol': str(i)}, 'observations': [{'date': '2026-10-23', 'close': 101 if i < 300 else 99}]} for i in range(499)}
+        def fake_trend(chart, calendar, session, settings):
+            index = int(chart['meta']['symbol'])
+            return {'ema21': 98 if index < 338 else 100, 'ema50': None if index >= 497 else 100}
+        settings = {'ema_periods': [21, 50], 'minimum_breadth_sample': 8, 'minimum_breadth_coverage': .8, 'maximum_holdings_age_days': 35}
+        source = {'_configured': True, 'date_semantics': 'observation', 'as_of': '2026-10-24', 'observation_date': '2026-10-24', 'retrieved_at': '2026-10-24T02:00:00+00:00', 'rows': []}
+        with patch('src.themescope.v5.trend_metric', side_effect=fake_trend):
+            breadth = participation(universe, source, charts, ['2026-10-23'], '2026-10-23', settings, '2026-10-23')
+        self.assertEqual(breadth['21']['status'], 'valid')
+        self.assertAlmostEqual(breadth['21']['value'], 67.7, places=1)
+        self.assertEqual(breadth['21']['eligible_count'], 499)
+        self.assertEqual(breadth['21']['valid_count'], 499)
+        self.assertEqual(breadth['50']['status'], 'valid')
+        self.assertAlmostEqual(breadth['50']['value'], 60.4, places=1)
+        self.assertEqual((breadth['50']['valid_count'], breadth['50']['eligible_count']), (497, 499))
+
+    def test_breadth_change_reports_missing_historical_observation_precisely(self):
+        change = breadth_change(metric(50), metric(reason='The earlier breadth observation required for change is unavailable.'))
+        self.assertEqual(change['reason_code'], 'historical_observation_missing')
+        self.assertEqual(change['reason'], 'The earlier breadth observation required for change is unavailable.')
 
     def test_share_class_mapping_and_foreign_collision(self):
         listings={'GOOG':{'ticker':'GOOG','cik':1},'GOOGL':{'ticker':'GOOGL','cik':1},'ABC':{'ticker':'ABC','cik':2}}

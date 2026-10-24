@@ -73,7 +73,8 @@ class RefreshTests(unittest.TestCase):
         record = next(row for row in registry['themes'] if row.get('anchor') == 'SMH')
         audit = _candidate_status(record, 'SMH', raw, self.snapshot, registry['settings'])
         self.assertEqual(audit['status'], 'eligible')
-        self.assertTrue(any('Official holdings refresh failed: HTTP 503' in reason for reason in audit['breadth_reasons']))
+        self.assertEqual(audit['breadth_reasons'], ['Holdings source retrieval failed for this run.'])
+        self.assertEqual(audit['breadth_diagnostics']['retrieval_error'], 'HTTP 503')
         self.assertIsNone(audit['holdings_effective_date'])
 
     def test_run_zip_import_and_export_values_match_snapshot(self):

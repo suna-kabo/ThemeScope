@@ -569,6 +569,10 @@ def build_snapshot(root: Path, requested_asof: str | None = None) -> tuple[dict[
         anchor_summary = _anchor_summary(theme, anchor_chart, spy_chart, calendar, run_session, settings, chart_errors.get(anchor))
 
         member_records = evidence_by_theme.get(theme["id"], {})
+        configured_stock_members = {
+            ticker: member for ticker, member in member_records.items()
+            if member.get("membership_tag") in ("Core", "Related")
+        }
         member_rows: list[dict[str, Any]] = []
         pending: list[dict[str, Any]] = []
         excluded: list[dict[str, Any]] = []
@@ -621,6 +625,18 @@ def build_snapshot(root: Path, requested_asof: str | None = None) -> tuple[dict[
             row["anchor"] = anchor
             row["theme_id"] = theme["id"]
         selected = select_candidates(eligible_companies, int(settings["watchlist_capacity"]))
+        member_collection_errors = {
+            ticker for ticker, member in configured_stock_members.items()
+            if ticker in chart_errors
+            or ticker in quote_errors
+            or (member.get("requires_filing_review", False) and str((member.get("evidence") or {}).get("cik") or "") in sec_errors)
+        }
+        stock_drilldown_status = (
+            "available" if selected else
+            "not_configured" if not configured_stock_members else
+            "retrieval_failed" if len(member_collection_errors) == len(configured_stock_members) else
+            "no_eligible"
+        )
         breadth = _breadth(eligible_companies, bool(review_theme_cfg.get(theme["id"], {}).get("review_complete", False)), holdings_fresh, settings)
         weight = lambda rows: sum(row.get("etf_weight_pct") or 0.0 for row in rows)
         weight_by_issuer: dict[str, float] = {}
@@ -672,6 +688,10 @@ def build_snapshot(root: Path, requested_asof: str | None = None) -> tuple[dict[
             "evidence_reviewed_holdings_count": sum(1 for ticker in holdings_lookup if ticker in member_records and member_records[ticker].get("category") == "Core business"),
             "reviewed_data_count": len(member_rows),
             "eligible_reviewed_count": len(eligible_companies),
+            "stock_membership_configured": bool(configured_stock_members),
+            "stock_membership_count": len(configured_stock_members),
+            "stock_collection_failure_count": len(member_collection_errors),
+            "stock_drilldown_status": stock_drilldown_status,
             "pending_count": len(pending),
             "excluded_count": len(excluded),
             "review_complete": bool(review_theme_cfg.get(theme["id"], {}).get("review_complete", False)),

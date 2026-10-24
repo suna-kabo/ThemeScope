@@ -38,13 +38,22 @@ def fetch_universes():
             rows.append({'ticker': row[0], 'company': row[1], 'sector': row[2], 'industry': row[3], 'company_id': str(int(row[6])), 'security_type': 'EQUITY'})
     if len(rows) < 450:
         raise ValueError('S&P 500 constituent parser returned an incomplete list')
-    spy = {'as_of': now[:10], 'asof_basis': 'Current constituent page observed at retrieval; not an official effective-date assertion', 'url': url, 'retrieved_at': now, 'source_sha256': hashlib.sha256(body).hexdigest(), 'rows': rows}
+    spy = {
+        'as_of': now[:10], 'observation_date': now[:10], 'effective_date': None,
+        'date_semantics': 'observation',
+        'universe_label': 'Current observed S&P 500 constituent list',
+        'asof_basis': 'Current constituent page observed at retrieval; not an official effective-date assertion',
+        'url': url, 'retrieved_at': now, 'source_sha256': hashlib.sha256(body).hexdigest(), 'rows': rows,
+    }
     url = 'https://api.nasdaq.com/api/quote/list-type/nasdaq100'
     data = request_json(url)['data']
     rows = [{'ticker': row['symbol'], 'company': row['companyName'], 'company_id': str(listings.get(row['symbol'], {}).get('cik') or row['symbol']), 'security_type': 'EQUITY'} for row in data['data']['rows']]
     if len(rows) != int(data['totalrecords']) or len(rows) < 90:
         raise ValueError('Nasdaq-100 constituent response incomplete')
-    qqq = {'as_of': _nasdaq_effective_date(data.get('date')), 'asof_basis': 'Nasdaq response date', 'url': url, 'retrieved_at': now, 'rows': rows}
+    qqq_date = _nasdaq_effective_date(data.get('date'))
+    qqq = {'as_of': qqq_date, 'observation_date': None, 'effective_date': qqq_date,
+           'date_semantics': 'effective', 'universe_label': 'Nasdaq-100 constituent list',
+           'asof_basis': 'Nasdaq response date', 'url': url, 'retrieved_at': now, 'rows': rows}
     return {'SPY': spy, 'QQQ': qqq}, mapping
 
 
@@ -398,11 +407,30 @@ def participation(universe, source, charts, calendar, session, settings, run_dat
             companies.append(company)
     n = len(companies)
     max_age = int(settings.get('maximum_holdings_age_days', 35))
+    date_semantics = source.get('date_semantics')
+    if not date_semantics:
+        date_semantics = 'observation' if 'observed at retrieval' in str(source.get('asof_basis', '')).casefold() else 'effective'
+    effective_date = source.get('effective_date') or (source.get('as_of') if date_semantics == 'effective' else None)
+    observation_date = source.get('observation_date') or (source.get('as_of') if date_semantics == 'observation' else None)
+    source_date = observation_date if date_semantics == 'observation' else effective_date
+    freshness_reason = None
+    age = None
     try:
-        age = (date.fromisoformat(run_date) - date.fromisoformat(source['as_of'])).days
-        fresh = 0 <= age <= max_age
+        if date_semantics == 'observation':
+            # The page observation may follow the latest completed market
+            # session. Measure its age against retrieval time, not that session.
+            retrieved_date = str(source.get('retrieved_at') or run_date)[:10]
+            age = (date.fromisoformat(retrieved_date) - date.fromisoformat(observation_date)).days
+        else:
+            effective = date.fromisoformat(effective_date)
+            metric_session = date.fromisoformat(session or run_date)
+            age = (metric_session - effective).days
+        if age < 0:
+            freshness_reason = 'effective_future' if date_semantics == 'effective' else 'observation_future'
+        elif age > max_age:
+            freshness_reason = 'stale'
     except (ValueError, KeyError, TypeError):
-        fresh = False
+        freshness_reason = 'date_missing'
     periods = tuple(int(period) for period in settings.get('ema_periods', (21, 50)))
     counts = {period: [0, 0] for period in periods}
     minimum_sample = int(settings.get('minimum_breadth_sample', 8))
@@ -424,12 +452,55 @@ def participation(universe, source, charts, calendar, session, settings, run_dat
                     counts[period][0] += int(above)
                     values[str(period)] = above
         company_metrics.append({'company_id': company['company_id'], 'symbol': symbol, 'above_ema': values})
-    output = {'eligible_count': n, 'holdings_asof': source.get('as_of'), 'excluded_count': len(universe.get('excluded_rows', [])) + len(instrument_exclusions), 'instrument_exclusions': instrument_exclusions, 'unresolved_mapping_count': len(universe.get('unresolved_mappings', [])), 'companies': company_metrics}
+    unresolved_count = len(universe.get('unresolved_mappings', []))
+    output = {
+        'eligible_count': n,
+        'holdings_asof': source_date or source.get('as_of'),
+        'observation_date': observation_date,
+        'effective_date': effective_date,
+        'date_semantics': date_semantics,
+        'universe_label': source.get('universe_label'),
+        'freshness_age_days': age,
+        'excluded_count': len(universe.get('excluded_rows', [])) + len(instrument_exclusions),
+        'instrument_exclusions': instrument_exclusions,
+        'unresolved_mapping_count': unresolved_count,
+        'source_diagnostic': source.get('_retrieval_error'),
+        'companies': company_metrics,
+    }
     for period, (above, valid) in counts.items():
         raw = 100 * above / valid if valid else None
         coverage = 100 * valid / n if n else None
-        reason = (f'Holdings/constituent date unavailable, future, or older than {max_age} days' if not fresh else 'No eligible equity companies' if not n else f'Only {valid} valid companies; at least {minimum_sample} required' if valid < minimum_sample else f'Price coverage {valid}/{n} below {minimum_coverage:.0%}' if valid/n < minimum_coverage else None)
-        output[str(period)] = metric(raw, reason, above_count=above, valid_count=valid, eligible_count=n, coverage_pct=coverage, session_date=session, as_of=source.get('as_of'), observation_count=valid)
+        configured = source.get('_configured', bool(source.get('rows') or source.get('as_of') or source.get('observation_date') or source.get('effective_date')))
+        unresolved_blocks_coverage = n > 0 and (n - unresolved_count) / n < minimum_coverage
+        reason_code, reason = None, None
+        if not configured:
+            reason_code, reason = 'not_configured', 'Official holdings source is not configured for this ETF.'
+        elif source.get('_retrieval_error'):
+            reason_code, reason = 'retrieval_failed', 'Holdings source retrieval failed for this run.'
+        elif freshness_reason == 'effective_future':
+            reason_code, reason = 'effective_future', 'Holdings effective date is after the selected market session.'
+        elif freshness_reason == 'stale':
+            reason_code, reason = 'stale', 'Holdings are older than the configured freshness limit.'
+        elif freshness_reason:
+            reason_code, reason = 'date_missing', 'Holdings effective or observation date is unavailable or invalid.'
+        elif not n:
+            reason_code, reason = 'no_eligible_holdings', 'No eligible equity holdings were obtained from the configured source.'
+        elif unresolved_blocks_coverage and valid == 0:
+            reason_code, reason = 'ticker_mapping_unresolved', 'Too many holdings could not be mapped to verified price symbols.'
+        elif valid < minimum_sample:
+            reason_code, reason = 'too_few_valid_holdings', 'Fewer than the configured minimum number of holdings have usable price data.'
+        elif coverage is not None and coverage / 100 < minimum_coverage:
+            reason_code, reason = 'price_coverage_low', 'Usable holding-price coverage is below the configured threshold.'
+        elif unresolved_blocks_coverage:
+            reason_code, reason = 'ticker_mapping_unresolved', 'Too many holdings could not be mapped to verified price symbols.'
+        output[str(period)] = metric(
+            raw, reason,
+            above_count=above, valid_count=valid, eligible_count=n, coverage_pct=coverage,
+            minimum_sample=minimum_sample, minimum_coverage_pct=minimum_coverage * 100,
+            session_date=session, as_of=source_date or source.get('as_of'),
+            date_semantics=date_semantics, observation_count=valid, reason_code=reason_code,
+            observation_date=observation_date, effective_date=effective_date, freshness_age_days=age,
+        )
     return output
 
 
@@ -481,12 +552,8 @@ def market_condition(price, ema, breadth, period, threshold=50):
 
 def breadth_change(current, earlier, current_session=None, earlier_session=None):
     if current.get('status') != 'valid' or earlier.get('status') != 'valid':
-        missing = []
-        if current.get('status') != 'valid':
-            missing.append('current breadth unavailable: ' + str(current.get('reason') or 'invalid observation'))
-        if earlier.get('status') != 'valid':
-            missing.append('five-session-prior breadth unavailable: ' + str(earlier.get('reason') or 'invalid observation'))
-        return metric(reason='; '.join(missing), current_session=current_session, earlier_session=earlier_session)
+        reason = current.get('reason') if current.get('status') != 'valid' else 'The earlier breadth observation required for change is unavailable.'
+        return metric(reason=reason or 'The earlier breadth observation required for change is unavailable.', reason_code=current.get('reason_code') if current.get('status') != 'valid' else 'historical_observation_missing', current_session=current_session, earlier_session=earlier_session, current_reason=current.get('reason'), earlier_reason=earlier.get('reason'))
     return metric(
         float(current['value'] - earlier['value']),
         current_session=current_session,
@@ -579,11 +646,13 @@ def apply(snapshot, raw):
     common = (all_charts, raw.get('session_calendar', []), date_, snapshot['settings'], freshness_reference)
     for market in snapshot['context']:
         symbol = market['ticker']
-        source = inputs.get('index_universes', {}).get(symbol) or raw.get('context_holdings', {}).get(symbol, {})
+        source = dict(inputs.get('index_universes', {}).get(symbol) or raw.get('context_holdings', {}).get(symbol, {}))
+        source['_configured'] = symbol in inputs.get('index_universes', {}) or symbol in raw.get('context_holdings', {})
+        source['_retrieval_error'] = raw.get('errors', {}).get('holdings', {}).get(symbol) or inputs.get('index_errors', {}).get(symbol)
         breadth = participation(mapped.get(symbol, {}), source, *common)
         market['index_breadth'] = breadth
         market['index_constituent_asof'] = source.get('as_of')
-        market['index_source'] = {k:v for k,v in source.items() if k != 'rows'}
+        market['index_source'] = {k: v for k, v in source.items() if k != 'rows' and not str(k).startswith('_')}
         market['index_eligible_count'] = breadth['eligible_count']
         market['field_status'] = {}
         market_chart = raw.get('charts', {}).get(symbol)
@@ -639,7 +708,10 @@ def apply(snapshot, raw):
         raise ValueError('Configured score_methodology is required to calculate v6.1 scores')
     threshold = float(weights['state_threshold'])
     for theme in snapshot['themes']:
-        source = raw.get('holdings', {}).get(theme['anchor'], {})
+        source = dict(raw.get('holdings', {}).get(theme['anchor'], {}))
+        configured_source = theme.get('holdings_source') or {}
+        source['_configured'] = bool(configured_source.get('provider') or configured_source.get('url') or theme['anchor'] in raw.get('holdings', {}))
+        source['_retrieval_error'] = raw.get('errors', {}).get('holdings', {}).get(theme['anchor'])
         breadth = participation(mapped.get(theme['anchor'], {}), source, *common)
         earlier_session = _five_sessions_before(raw.get('session_calendar', []), date_)
         earlier_breadth = participation(mapped.get(theme['anchor'], {}), source, all_charts, raw.get('session_calendar', []), earlier_session, snapshot['settings'], freshness_reference) if earlier_session else {}

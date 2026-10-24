@@ -5,7 +5,7 @@ from datetime import date, timedelta
 from pathlib import Path
 
 from src.themescope.cache import manifest_for_inputs
-from src.themescope.v6 import _candidate_status, apply_v6, prepare_registry_themes
+from src.themescope.v6 import _candidate_status, apply_v6, prepare_registry_themes, _validate_stock_watchlist_metadata
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -78,7 +78,8 @@ class V6RegistryTests(unittest.TestCase):
         no_holdings_parser = {key: value for key, value in record.items() if key != "holdings_source"}
         result_without_parser = _candidate_status(no_holdings_parser, "TST", {**raw, "holdings": {}}, snapshot, self.registry["settings"])
         self.assertEqual(result_without_parser["status"], "eligible")
-        self.assertTrue(any("holdings source and parser are not configured" in reason for reason in result_without_parser["breadth_reasons"]))
+        self.assertEqual(result_without_parser["breadth_status"], "breadth_not_configured")
+        self.assertTrue(any(reason == "Official holdings source is not configured for this ETF." for reason in result_without_parser["breadth_reasons"]))
 
     def test_missing_holdings_parser_does_not_reject_a_reviewed_anchor(self):
         dates = [(date(2026, 10, 22) - timedelta(days=i)).isoformat() for i in range(69, -1, -1)]
@@ -87,7 +88,8 @@ class V6RegistryTests(unittest.TestCase):
         result = _candidate_status(record, "ALT", raw, {"session_date": dates[-1]}, self.registry["settings"])
         self.assertEqual(result["status"], "eligible")
         self.assertFalse(any("holdings" in reason.lower() for reason in result["reasons"]))
-        self.assertTrue(any("official holdings source and parser are not configured" in reason for reason in result["breadth_reasons"]))
+        self.assertEqual(result["breadth_status"], "breadth_not_configured")
+        self.assertTrue(any(reason == "Official holdings source is not configured for this ETF." for reason in result["breadth_reasons"]))
 
     def test_alternate_candidate_requires_its_own_mandate_review(self):
         dates = [(date(2026, 10, 22) - timedelta(days=i)).isoformat() for i in range(69, -1, -1)]
@@ -203,6 +205,14 @@ class V6RegistryTests(unittest.TestCase):
         self.assertEqual(sector["selected"][0]["ticker"], "AAA")
         self.assertEqual(sector["selected"][0]["membership_tag"], "Core")
         self.assertIn("current S&P 500 source classifies", sector["selected"][0]["membership_rationale"])
+        self.assertEqual(sector["stock_scope"], "Curated watchlist")
+        self.assertTrue(sector["has_curated_watchlist"])
+        self.assertEqual(sector["curated_watchlist_count"], 1)
+
+    def test_stock_watchlist_validator_rejects_contradictory_metadata(self):
+        snapshot = {"themes": [{"id": "theme-test", "selected": [{}], "stock_scope": "ETF-only", "has_curated_watchlist": False, "curated_watchlist_count": 0, "stock_drilldown_status": "not_configured"}]}
+        with self.assertRaisesRegex(ValueError, "curated_watchlist_count does not match"):
+            _validate_stock_watchlist_metadata(snapshot)
 
     def test_manifest_hashes_normalized_inputs_deterministically(self):
         raw = {"charts": {"AAA": {"url": "https://example/AAA", "observations": [{"date": "2026-10-22", "close": 5}]}}, "holdings": {}, "quotes": {}}

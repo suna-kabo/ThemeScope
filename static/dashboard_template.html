@@ -39,7 +39,7 @@
         <details class="help-card"><summary>Score and state definitions</summary><p id="score-method-description">Score weights and inputs come from this snapshot’s configured methodology.</p><p><b>Improving</b> means the current score is in the stronger half while the medium score is in the weaker half. <b>Fading</b> means the reverse. These cross-sectional labels do not establish a time-series reversal or rotation.</p></details>
         <div id="theme-controls" class="controls"></div>
         <p id="theme-count" class="caption"></p>
-        <div class="table-wrap theme-table-wrap"><table><thead id="theme-head"></thead><tbody id="theme-body"></tbody></table></div>
+        <div class="table-wrap theme-table-wrap"><table class="data-table"><thead id="theme-head"></thead><tbody id="theme-body"></tbody></table></div>
         <div class="exports"><button id="theme-visible-csv">Download visible table CSV</button><a href="registry_audit.csv" download>Registry audit CSV</a><span id="theme-export-status" role="status"></span></div>
       </section>
 
@@ -53,7 +53,7 @@
         <div class="page-heading"><div><span class="eyebrow">SELECTED COMPANIES</span><h1 id="active-name">Watchlist</h1><p id="active-summary" class="watchlist-summary"></p></div></div>
         <p id="watchlist-message" class="watchlist-message" hidden></p>
         <div id="stock-controls" class="controls"></div><p id="coverage" class="caption"></p>
-        <div class="table-wrap" id="stock-table-wrap"><table><thead id="stock-head"></thead><tbody id="stock-body"></tbody></table></div>
+        <div class="table-wrap stock-table-wrap" id="stock-table-wrap"><table class="data-table"><thead id="stock-head"></thead><tbody id="stock-body"></tbody></table></div>
         <div class="exports" id="stock-exports"><button id="csv">Download visible CSV</button><button id="tv">Download TradingView list</button><a href="stock_diagnostics.csv" download>Stock eligibility audit</a><span id="export-status" role="status"></span></div>
       </section>
       <footer><a href="latest_run.md" download>Run report</a> · <a href="latest_snapshot.json" download>Snapshot JSON</a> · <a href="run_bundle.zip" download>Download complete run ZIP</a></footer>

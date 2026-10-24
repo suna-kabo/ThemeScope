@@ -60,7 +60,7 @@ def _source_status(raw: dict[str, Any], snapshot: dict[str, Any]) -> dict[str, A
             "effective_date": None,
             "unavailable_reason": None if indexes or context_holdings else "Index constituent sources unavailable",
             "errors": {},
-            "datasets": {symbol: {"status": "available", "url": item.get("url"), "retrieved_at": item.get("retrieved_at"), "effective_date": item.get("as_of"), "unavailable_reason": None} for symbol, item in {**indexes, **context_holdings}.items()},
+            "datasets": {symbol: {"status": "available", "url": item.get("url"), "retrieved_at": item.get("retrieved_at"), "date_semantics": item.get("date_semantics", "effective"), "observation_date": item.get("observation_date"), "effective_date": item.get("effective_date") or (item.get("as_of") if item.get("date_semantics") != "observation" else None), "unavailable_reason": None} for symbol, item in {**indexes, **context_holdings}.items()},
         },
         "volatility": {
             "provider": "Yahoo Finance chart API",
@@ -162,24 +162,25 @@ def _candidate_status(
     holdings = raw.get("holdings", {}).get(ticker) if holdings_configured else None
     source_date = (holdings or {}).get("as_of")
     if not holdings_configured:
-        breadth_reasons.append("Candidate-specific official holdings source and parser are not configured")
+        breadth_reasons.append("Official holdings source is not configured for this ETF.")
     elif ticker in raw.get("errors", {}).get("holdings", {}):
-        breadth_reasons.append("Official holdings refresh failed: " + str(raw["errors"]["holdings"][ticker]))
+        breadth_reasons.append("Holdings source retrieval failed for this run.")
         # A retained source object must never mask a current-run retrieval error.
         holdings = None
         source_date = None
-    if not holdings or not holdings.get("rows"):
-        breadth_reasons.append("Official holdings file unavailable or empty")
+    elif not holdings or not holdings.get("rows"):
+        breadth_reasons.append("No eligible equity holdings were obtained from the configured source.")
     ref_date = session or snapshot.get("requested_asof") or snapshot.get("run_date")
     age = None
-    try:
-        age = (date.fromisoformat(ref_date) - date.fromisoformat(source_date)).days
-    except (TypeError, ValueError):
-        breadth_reasons.append("Holdings effective date unavailable or invalid")
-    if age is not None and age < 0:
-        breadth_reasons.append(f"Holdings effective date {source_date} is after the requested session/reference date {ref_date}")
-    elif age is not None and age > int(settings.get("maximum_holdings_age_days", 35)):
-        breadth_reasons.append(f"Holdings are {age} days old; maximum allowed age is {settings.get('maximum_holdings_age_days', 35)} days")
+    if holdings_configured and holdings and holdings.get("rows") and not breadth_reasons:
+        try:
+            age = (date.fromisoformat(ref_date) - date.fromisoformat(source_date)).days
+        except (TypeError, ValueError):
+            breadth_reasons.append("Holdings effective date is unavailable or invalid.")
+        if age is not None and age < 0:
+            breadth_reasons.append("Holdings effective date is after the selected market session.")
+        elif age is not None and age > int(settings.get("maximum_holdings_age_days", 35)):
+            breadth_reasons.append("Holdings are older than the configured freshness limit.")
 
     mapped = raw.get("v5", {}).get("mapped_universes", {}).get(ticker, {}) if holdings_configured else {}
     breadth_count = len(mapped.get("companies", []))
@@ -195,8 +196,16 @@ def _candidate_status(
         "candidate_priority": priority + 1,
         "status": "eligible" if not reasons else "ineligible",
         "reasons": reasons,
-        "breadth_status": "unavailable" if breadth_reasons else "available_pending_completeness_checks",
+        "breadth_status": "breadth_not_configured" if not holdings_configured else "breadth_temporarily_unavailable" if ticker in raw.get("errors", {}).get("holdings", {}) else "breadth_supported",
         "breadth_reasons": breadth_reasons,
+        "breadth_diagnostics": {
+            "source_row_count": mapped_source_count,
+            "mapped_equity_count": breadth_count,
+            "unresolved_mapping_count": len(mapped.get("unresolved_mappings", [])),
+            "holdings_age_days": age,
+            "holdings_effective_date": source_date,
+            "retrieval_error": raw.get("errors", {}).get("holdings", {}).get(ticker),
+        },
         "adv30_usd": adv_value,
         "adv30_status": adv.get("status", "unavailable"),
         "minimum_adv30_usd": adv_floor,
@@ -383,6 +392,19 @@ def _populate_sector_watchlists(
         exposure["excluded_count"] = len(excluded) + sum(row.get("eligibility") != "eligible_provisional" for row in members)
         exposure["sector_member_exclusions"] = excluded
         exposure["stock_audit"] = members
+        exposure["stock_membership_configured"] = bool(records.get(exposure.get("id"), {}).get("holdings_source"))
+        exposure["stock_membership_count"] = len(members)
+        exposure["stock_collection_failure_count"] = int(
+            bool(raw.get("errors", {}).get("holdings", {}).get(exposure.get("anchor")))
+            or not holdings.get("rows")
+            or not index_companies
+        )
+        exposure["stock_drilldown_status"] = (
+            "available" if selected else
+            "retrieval_failed" if exposure["stock_collection_failure_count"] else
+            "no_eligible" if exposure["stock_membership_configured"] else
+            "not_configured"
+        )
         exposure["sector_membership_basis"] = {
             "index_source": source,
             "holdings_effective_date": holdings.get("as_of"),
@@ -541,6 +563,20 @@ def apply_v6(snapshot: dict[str, Any], raw: dict[str, Any], registry: dict[str, 
     snapshot["themes"] = [row for row in snapshot.get("themes", []) if row.get("id") in published_ids]
     _populate_sector_watchlists(snapshot, raw, registry)
     for row in snapshot["themes"]:
+        selected_count = len(row.get("selected") or [])
+        row["has_curated_watchlist"] = selected_count > 0
+        row["curated_watchlist_count"] = selected_count
+        row["stock_scope"] = "Curated watchlist" if selected_count else "ETF-only"
+        if selected_count:
+            row["stock_drilldown_status"] = "available"
+        elif row.get("stock_drilldown_status") not in {"retrieval_failed", "no_eligible", "not_configured"}:
+            configured = row.get("stock_membership_configured")
+            if configured is None:
+                configured = bool(row.get("stock_membership_count") or row.get("reviewed_data_count") or row.get("stock_audit") or row.get("level") == "Sector")
+                row["stock_membership_configured"] = configured
+            row["stock_drilldown_status"] = "no_eligible" if configured else "not_configured"
+    _validate_stock_watchlist_metadata(snapshot)
+    for row in snapshot["themes"]:
         for stock in row.get("selected", []):
             stock["theme_id"] = row["id"]
         for stock in row.get("reviewed_universe", []):
@@ -563,8 +599,6 @@ def apply_v6(snapshot: dict[str, Any], raw: dict[str, Any], registry: dict[str, 
         row["breadth_status_50"] = row.get("breadth_status_50", row.get("field_status", {}).get("etf_breadth50_pct", {}).get("status", "unavailable"))
         row["breadth_unavailable_reason_21"] = row.get("breadth_unavailable_reason_21", row.get("field_status", {}).get("etf_breadth21_pct", {}).get("reason"))
         row["breadth_unavailable_reason_50"] = row.get("breadth_unavailable_reason_50", row.get("field_status", {}).get("etf_breadth50_pct", {}).get("reason"))
-        row["has_curated_watchlist"] = bool(row.get("selected"))
-        row["curated_watchlist_count"] = len(row.get("selected", []))
         audit = diagnostic_by_id.get(row.get("id"), {})
         anchor_candidate = next((candidate for candidate in audit.get("candidates", []) if candidate.get("ticker") == row.get("anchor")), {})
         row["anchor_eligibility_status"] = anchor_candidate.get("status", "eligible")
@@ -579,3 +613,21 @@ def apply_v6(snapshot: dict[str, Any], raw: dict[str, Any], registry: dict[str, 
     snapshot.setdefault("collection_completed_at", snapshot.get("generated_at"))
     snapshot["schema_version"] = "6.2"
     return snapshot
+
+
+def _validate_stock_watchlist_metadata(snapshot: dict[str, Any]) -> None:
+    """Reject stale ETF-only/watchlist labels before generated output is published."""
+    for row in snapshot.get("themes", []):
+        count = len(row.get("selected") or [])
+        expected_scope = "Curated watchlist" if count else "ETF-only"
+        if row.get("curated_watchlist_count") != count:
+            raise ValueError(f"{row.get('id')}: curated_watchlist_count does not match selected stocks")
+        if row.get("has_curated_watchlist") is not (count > 0):
+            raise ValueError(f"{row.get('id')}: has_curated_watchlist does not match selected stocks")
+        if row.get("stock_scope") != expected_scope:
+            raise ValueError(f"{row.get('id')}: stock_scope does not match selected stocks")
+        status = row.get("stock_drilldown_status")
+        if count and status != "available":
+            raise ValueError(f"{row.get('id')}: populated watchlist must have available stock status")
+        if not count and status not in {"not_configured", "retrieval_failed", "no_eligible"}:
+            raise ValueError(f"{row.get('id')}: empty watchlist has contradictory status {status!r}")
