@@ -23,7 +23,7 @@
   </aside>
   <div class="app-shell">
     <header class="topbar">
-      <button id="app-back" type="button" aria-label="Go back within ThemeScope" disabled><svg class="control-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5M5 8h8"/></svg>Back</button>
+      <button id="app-back" type="button" aria-label="Go back within ThemeScope" disabled>Back</button>
       <p id="status" role="status"></p>
       <div class="timestamp-label"><span>Data through <b id="date">—</b></span><span>Generated <b id="generated-hkt">—</b></span></div>
     </header>
@@ -47,16 +47,16 @@
         <div id="watchlist-navigation" class="controls watchlist-navigation">
           <label>Search themes <input id="watchlist-theme-search" type="search" placeholder="Find sector or theme"></label>
           <label>Sector / Theme <select id="watchlist-theme-selector" aria-label="Select a sector or theme"></select></label>
-          <button id="previous-theme" type="button" aria-label="Previous eligible sector or theme"><svg class="control-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="m10 3-5 5 5 5"/></svg>Previous</button>
-          <button id="next-theme" type="button" aria-label="Next eligible sector or theme">Next<svg class="control-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg></button>
+          <button id="previous-theme" type="button" aria-label="Previous eligible sector or theme">Previous</button>
+          <button id="next-theme" type="button" aria-label="Next eligible sector or theme">Next</button>
         </div>
         <div class="page-heading"><div><span class="eyebrow">SELECTED COMPANIES</span><h1 id="active-name">Watchlist</h1><p id="active-summary" class="watchlist-summary"></p></div></div>
         <p id="watchlist-message" class="watchlist-message" hidden></p>
         <div id="stock-controls" class="controls"></div><p id="coverage" class="caption"></p>
         <div class="table-wrap" id="stock-table-wrap"><table><thead id="stock-head"></thead><tbody id="stock-body"></tbody></table></div>
-        <div class="exports" id="stock-exports"><button id="csv">Download visible CSV</button><button id="tv">Download TradingView list</button><a href="stock_diagnostics.csv" download>Stock eligibility audit</a><a href="run_bundle.zip" download>Download complete run ZIP</a><span id="export-status" role="status"></span></div>
+        <div class="exports" id="stock-exports"><button id="csv">Download visible CSV</button><button id="tv">Download TradingView list</button><a href="stock_diagnostics.csv" download>Stock eligibility audit</a><span id="export-status" role="status"></span></div>
       </section>
-      <footer><a href="latest_run.md" download>Run report</a> · <a href="latest_snapshot.json" download>Snapshot JSON</a></footer>
+      <footer><a href="latest_run.md" download>Run report</a> · <a href="latest_snapshot.json" download>Snapshot JSON</a> · <a href="run_bundle.zip" download>Download complete run ZIP</a></footer>
     </main>
   </div>
   <script id="snapshot-data" type="application/json">{{SNAPSHOT_JSON}}</script>

@@ -44,7 +44,11 @@
     "market_breadth_threshold": 50,
     "watchlist_capacity": 20,
     "watchlist_default_limit": 15,
-    "business_revenue_materiality_percent": 20
+    "business_revenue_materiality_percent": 20,
+    "maximum_raw_inputs_bytes": 99000000,
+    "maximum_dashboard_bytes": 20000000,
+    "maximum_run_bundle_bytes": 95000000,
+    "anchor_adv30_floor_rationale": "The existing $10,000,000 ADV30 floor is retained for continuity with the v6.2 screening rule pending a documented volatility and execution-cost calibration. Current reports count candidates excluded by this rule alone."
   },
   "themes": [
     {
@@ -75,7 +79,16 @@
       ],
       "preferred_candidate": "XLC",
       "charter": "U.S. listed companies classified in the Communication Services sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
-      "charter_status": "reviewed"
+      "charter_status": "reviewed",
+      "candidate_reviews": {
+        "XLC": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.ssga.com/us/en/intermediary/etfs/state-street-communication-services-select-sector-spdr-etf-xlc",
+          "source_type": "issuer_product_page",
+          "rationale": "State Street's current fund page identifies XLC as a Select Sector SPDR equity ETF tracking its U.S. sector index. The mandate is long-only sector-company equity exposure, not inverse, leveraged, options-income, or commodity-futures-only exposure."
+        }
+      }
     },
     {
       "id": "sector-consumer-discretionary",
@@ -105,7 +118,16 @@
       ],
       "preferred_candidate": "XLY",
       "charter": "U.S. listed companies classified in the Consumer Discretionary sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
-      "charter_status": "reviewed"
+      "charter_status": "reviewed",
+      "candidate_reviews": {
+        "XLY": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.ssga.com/us/en/intermediary/etfs/state-street-consumer-discretionary-select-sector-spdr-etf-xly",
+          "source_type": "issuer_product_page",
+          "rationale": "State Street's current fund page identifies XLY as a Select Sector SPDR equity ETF tracking its U.S. sector index. The mandate is long-only sector-company equity exposure, not inverse, leveraged, options-income, or commodity-futures-only exposure."
+        }
+      }
     },
     {
       "id": "sector-consumer-staples",
@@ -135,7 +157,16 @@
       ],
       "preferred_candidate": "XLP",
       "charter": "U.S. listed companies classified in the Consumer Staples sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
-      "charter_status": "reviewed"
+      "charter_status": "reviewed",
+      "candidate_reviews": {
+        "XLP": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.ssga.com/us/en/intermediary/etfs/state-street-consumer-staples-select-sector-spdr-etf-xlp",
+          "source_type": "issuer_product_page",
+          "rationale": "State Street's current fund page identifies XLP as a Select Sector SPDR equity ETF tracking its U.S. sector index. The mandate is long-only sector-company equity exposure, not inverse, leveraged, options-income, or commodity-futures-only exposure."
+        }
+      }
     },
     {
       "id": "sector-energy",
@@ -165,7 +196,16 @@
       ],
       "preferred_candidate": "XLE",
       "charter": "U.S. listed companies classified in the Energy sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
-      "charter_status": "reviewed"
+      "charter_status": "reviewed",
+      "candidate_reviews": {
+        "XLE": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.ssga.com/us/en/intermediary/etfs/state-street-energy-select-sector-spdr-etf-xle",
+          "source_type": "issuer_product_page",
+          "rationale": "State Street's current fund page identifies XLE as a Select Sector SPDR equity ETF tracking its U.S. sector index. The mandate is long-only sector-company equity exposure, not inverse, leveraged, options-income, or commodity-futures-only exposure."
+        }
+      }
     },
     {
       "id": "sector-financials",
@@ -195,7 +235,16 @@
       ],
       "preferred_candidate": "XLF",
       "charter": "U.S. listed companies classified in the Financials sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
-      "charter_status": "reviewed"
+      "charter_status": "reviewed",
+      "candidate_reviews": {
+        "XLF": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.ssga.com/us/en/intermediary/etfs/state-street-financial-select-sector-spdr-etf-xlf",
+          "source_type": "issuer_product_page",
+          "rationale": "State Street's current fund page identifies XLF as a Select Sector SPDR equity ETF tracking its U.S. sector index. The mandate is long-only sector-company equity exposure, not inverse, leveraged, options-income, or commodity-futures-only exposure."
+        }
+      }
     },
     {
       "id": "sector-health-care",
@@ -225,7 +274,16 @@
       ],
       "preferred_candidate": "XLV",
       "charter": "U.S. listed companies classified in the Health Care sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
-      "charter_status": "reviewed"
+      "charter_status": "reviewed",
+      "candidate_reviews": {
+        "XLV": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.ssga.com/us/en/intermediary/etfs/state-street-health-care-select-sector-spdr-etf-xlv",
+          "source_type": "issuer_product_page",
+          "rationale": "State Street's current fund page identifies XLV as a Select Sector SPDR equity ETF tracking its U.S. sector index. The mandate is long-only sector-company equity exposure, not inverse, leveraged, options-income, or commodity-futures-only exposure."
+        }
+      }
     },
     {
       "id": "sector-industrials",
@@ -255,7 +313,16 @@
       ],
       "preferred_candidate": "XLI",
       "charter": "U.S. listed companies classified in the Industrials sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
-      "charter_status": "reviewed"
+      "charter_status": "reviewed",
+      "candidate_reviews": {
+        "XLI": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.ssga.com/us/en/intermediary/etfs/state-street-industrials-select-sector-spdr-etf-xli",
+          "source_type": "issuer_product_page",
+          "rationale": "State Street's current fund page identifies XLI as a Select Sector SPDR equity ETF tracking its U.S. sector index. The mandate is long-only sector-company equity exposure, not inverse, leveraged, options-income, or commodity-futures-only exposure."
+        }
+      }
     },
     {
       "id": "sector-information-technology",
@@ -285,7 +352,16 @@
       ],
       "preferred_candidate": "XLK",
       "charter": "U.S. listed companies classified in the Information Technology sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
-      "charter_status": "reviewed"
+      "charter_status": "reviewed",
+      "candidate_reviews": {
+        "XLK": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.ssga.com/us/en/intermediary/etfs/state-street-technology-select-sector-spdr-etf-xlk",
+          "source_type": "issuer_product_page",
+          "rationale": "State Street's current fund page identifies XLK as a Select Sector SPDR equity ETF tracking its U.S. sector index. The mandate is long-only sector-company equity exposure, not inverse, leveraged, options-income, or commodity-futures-only exposure."
+        }
+      }
     },
     {
       "id": "sector-materials",
@@ -315,7 +391,16 @@
       ],
       "preferred_candidate": "XLB",
       "charter": "U.S. listed companies classified in the Materials sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
-      "charter_status": "reviewed"
+      "charter_status": "reviewed",
+      "candidate_reviews": {
+        "XLB": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.ssga.com/us/en/intermediary/etfs/state-street-materials-select-sector-spdr-etf-xlb",
+          "source_type": "issuer_product_page",
+          "rationale": "State Street's current fund page identifies XLB as a Select Sector SPDR equity ETF tracking its U.S. sector index. The mandate is long-only sector-company equity exposure, not inverse, leveraged, options-income, or commodity-futures-only exposure."
+        }
+      }
     },
     {
       "id": "sector-real-estate",
@@ -345,7 +430,16 @@
       ],
       "preferred_candidate": "XLRE",
       "charter": "U.S. listed companies classified in the Real Estate sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
-      "charter_status": "reviewed"
+      "charter_status": "reviewed",
+      "candidate_reviews": {
+        "XLRE": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.ssga.com/us/en/intermediary/etfs/state-street-real-estate-select-sector-spdr-etf-xlre",
+          "source_type": "issuer_product_page",
+          "rationale": "State Street's current fund page identifies XLRE as a Select Sector SPDR equity ETF tracking its U.S. sector index. The mandate is long-only sector-company equity exposure, not inverse, leveraged, options-income, or commodity-futures-only exposure."
+        }
+      }
     },
     {
       "id": "sector-utilities",
@@ -375,7 +469,16 @@
       ],
       "preferred_candidate": "XLU",
       "charter": "U.S. listed companies classified in the Utilities sector. The sector ETF anchor follows the corresponding Select Sector SPDR mandate.",
-      "charter_status": "reviewed"
+      "charter_status": "reviewed",
+      "candidate_reviews": {
+        "XLU": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.ssga.com/us/en/intermediary/etfs/state-street-utilities-select-sector-spdr-etf-xlu",
+          "source_type": "issuer_product_page",
+          "rationale": "State Street's current fund page identifies XLU as a Select Sector SPDR equity ETF tracking its U.S. sector index. The mandate is long-only sector-company equity exposure, not inverse, leveraged, options-income, or commodity-futures-only exposure."
+        }
+      }
     },
     {
       "id": "theme-semiconductors",
@@ -410,7 +513,33 @@
       ],
       "preferred_candidate": "SMH",
       "charter": "Semiconductor design, foundry manufacturing, memory, and fabrication equipment.",
-      "charter_status": "reviewed"
+      "charter_status": "reviewed",
+      "candidate_reviews": {
+        "SMH": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1137360/000113736026000117/vanecksemiconductoretfsmh4.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-01-30",
+          "rationale": "VanEck Semiconductor ETF tracks the MVIS U.S. Listed Semiconductor 25 Index; the current fund objective is long-only exposure to semiconductor company securities."
+        },
+        "SOXX": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1100663/000119312526327967/d132214d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-07-31",
+          "rationale": "SEC summary prospectus filed 2026-07-31 identifies iShares Semiconductor ETF: “The Fund seeks to track the investment results of the NYSE Semiconductor Index (the “ Underlying Index ” ), which measures the performance of the equity securities of the 30 largest U.S.-listed companies that are classified according to the ICE Uniform Sector Classification schema within…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "XSD": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1064642/000119312525256792/d59772d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2025-10-30",
+          "rationale": "SEC summary prospectus filed 2025-10-30 identifies State Street SPDR S&P Semiconductor ETF: “The State Street SPDR S&P Semiconductor ETF (the “ Fund ” ) seeks to provide investment results that, before fees and expenses, correspond generally to the total return performance of an index derived from the semiconductor segment of a U.S. total market composite index. Fees and Expenses…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-software",
@@ -424,7 +553,25 @@
       "charter": "Working scope for Software: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Software: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Software: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "IGV": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1100663/000119312526327903/d39199d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-07-31",
+          "rationale": "SEC summary prospectus filed 2026-07-31 identifies iShares Expanded Tech-Software Sector ETF: “The Fund seeks to track the investment results of the S&P North American Expanded Technology Software Index TM (the “ Underlying Index ” ), which measures the performance of U.S.-traded stocks from the software industry and select companies from the interactive home entertainment and…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "XSW": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1064642/000119312525256811/d98446d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2025-10-30",
+          "rationale": "SEC summary prospectus filed 2025-10-30 identifies State Street SPDR S&P Software & Services ETF: “The State Street SPDR S&P Software & Services ETF (the “ Fund ” ) seeks to provide investment results that, before fees and expenses, correspond generally to the total return performance of an index derived from the computer software segment of a U.S. total market composite index. Fees…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-cloud-computing",
@@ -458,7 +605,32 @@
       ],
       "preferred_candidate": "SKYY",
       "charter": "Public cloud infrastructure, cloud platforms, and established software services primarily delivered through cloud deployment.",
-      "charter_status": "reviewed"
+      "charter_status": "reviewed",
+      "candidate_reviews": {
+        "SKYY": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.ftportfolios.com/Retail/Etf/EtfSummary.aspx?Ticker=SKYY",
+          "source_type": "issuer_product_page",
+          "rationale": "First Trust's current product page identifies SKYY as an ETF tracking an equity index of companies in its theme. This is a long-only company-equity mandate, not inverse, leveraged, options-income, or commodity-futures-only exposure."
+        },
+        "CLOU": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1432353/000143235326000466/a497kcloudcomputing.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-03-31",
+          "rationale": "SEC summary prospectus filed 2026-03-31 identifies Global X Cloud Computing ETF: “The Fund invests at least 80% of its total assets in the securities of the Indxx Global Cloud Computing Index (\"Underlying Index\") and in American Depositary Receipts (\"ADRs\") and Global Depositary Receipts (\"GDRs\") based on the securities in the Underlying Index. The Fund's 80%…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "WCLD": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1350487/000121465926012312/wcld926497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-09-30",
+          "rationale": "SEC summary prospectus filed 2026-09-30 identifies WisdomTree Cloud Computing Fund: “of the Fund The Fund employs a “passive management” – or indexing – investment approach designed to track the performance of the Index. The Fund generally uses a representative sampling strategy to achieve its investment WisdomTree Trust Prospectus 1 objective, meaning it generally will…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-cybersecurity",
@@ -491,7 +663,32 @@
       ],
       "preferred_candidate": "CIBR",
       "charter": "Companies whose established products directly protect networks, endpoints, identities, applications, or enterprise data.",
-      "charter_status": "reviewed"
+      "charter_status": "reviewed",
+      "candidate_reviews": {
+        "CIBR": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.ftportfolios.com/Retail/Etf/EtfSummary.aspx?Ticker=CIBR",
+          "source_type": "issuer_product_page",
+          "rationale": "First Trust's current product page identifies CIBR as an ETF tracking an equity index of companies in its theme. This is a long-only company-equity mandate, not inverse, leveraged, options-income, or commodity-futures-only exposure."
+        },
+        "HACK": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1633061/000121390026008346/ea0273008-17_497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-01-28",
+          "rationale": "SEC summary prospectus filed 2026-01-28 identifies Amplify Cybersecurity ETF: “The Amplify Cybersecurity ETF seeks investment results that generally correlate (before fees and expenses) to the total return performance of the Nasdaq ISE Cyber Security Select Index (the “Index”). FUND FEES AND EXPENSES This table describes the fees and expenses that you may pay if you…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "BUG": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1432353/000143235326000467/a497kcybersecurity.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-03-31",
+          "rationale": "SEC summary prospectus filed 2026-03-31 identifies Global X Cybersecurity ETF: “The Fund invests at least 80% of its total assets in the securities of the Indxx Cybersecurity Index (\"Underlying Index\") and in American Depositary Receipts (\"ADRs\") and Global Depositary Receipts (\"GDRs\") based on the securities in the Underlying Index. The Fund will also invest, under…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-internet",
@@ -504,7 +701,17 @@
       "charter": "Working scope for Internet: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Internet: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Internet: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "FDN": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1329377/000144554626003279/etf1_fdn497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-05-01",
+          "rationale": "The First Trust summary prospectus says FDN invests at least 90% in Dow Jones Internet Index securities; the index holds internet commerce and services equities."
+        }
+      }
     },
     {
       "id": "theme-artificial-intelligence",
@@ -518,7 +725,25 @@
       "charter": "Working scope for Artificial Intelligence & Big Data: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Artificial Intelligence & Big Data: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Artificial Intelligence & Big Data: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "AIQ": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1432353/000143235326000464/a497kartificialintelligenc.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-03-31",
+          "rationale": "SEC summary prospectus filed 2026-03-31 identifies Global X Artificial Intelligence & Technology ETF: “The Fund invests at least 80% of its total assets in the securities of the Indxx Artificial Intelligence & Big Data Index (\"Underlying Index\"). The Underlying Index is designed to track the performance of companies involved in the development and utilization of artificial intelligence…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "THNQ": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1452937/000121390026095070/ea0301683-15_497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-08-28",
+          "rationale": "SEC summary prospectus filed 2026-08-28 identifies Robo Global Artificial Intelligence ETF: “The Fund normally invests in securities comprising the Index and in depositary receipts representing securities comprising the Index. The Index, which is owned and provided by ROBO Global Index LLC, a wholly owned subsidiary of VettaFi LLC (the “Index Provider”), is designed to measure…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-robotics-automation",
@@ -532,7 +757,25 @@
       "charter": "Working scope for Robotics & Automation: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Robotics & Automation: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Robotics & Automation: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "BOTZ": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1432353/000143235326000461/a497kroboticsartificialint.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-03-31",
+          "rationale": "SEC summary prospectus filed 2026-03-31 identifies Global X Robotics & Artificial Intelligence ETF: “The Fund invests at least 80% of its total assets in the securities of the Indxx Global Robotics & Artificial Intelligence Thematic Index (\"Underlying Index\"). The Fund's 80% investment policy is non-fundamental and requires 60 days prior written notice to shareholders before it can be…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "ROBO": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1452937/000121390026095070/ea0301683-15_497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-08-28",
+          "rationale": "SEC summary prospectus filed 2026-08-28 identifies Robo Global Robotics and Automation Index ETF: “. The Fund generally will use a replication methodology, meaning it will invest in all of the securities comprising the Index in proportion to the weightings in the Index. However, the Fund may utilize a sampling methodology under various circumstances, including when it may not be…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-quantum-computing",
@@ -545,7 +788,17 @@
       "charter": "Working scope for Quantum Computing: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Quantum Computing: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Quantum Computing: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "QTUM": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1540305/000089418926025003/qtumsummary.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-09-02",
+          "rationale": "SEC summary prospectus filed 2026-09-02 identifies Defiance Quantum ETF: “The Fund uses a “passive management” (or indexing) approach to track the total return performance, before fees and expenses, of the Index. BlueStar® Quantum Computing and Machine Learning Index The Index consists of a modified equal-weighted portfolio of the stock of companies that derive…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-fintech",
@@ -559,7 +812,25 @@
       "charter": "Working scope for Fintech: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Fintech: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Fintech: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "FINX": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1432353/000143235326000459/a497kfintech.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-03-31",
+          "rationale": "SEC summary prospectus filed 2026-03-31 identifies Global X FinTech ETF: “The Fund invests at least 80% of its total assets in the securities of the Indxx Global Fintech Thematic Index (\"Underlying Index\"). The Fund's 80% investment policy is non-fundamental and requires 60 days prior written notice to shareholders before it can be changed. The Fund may lend…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "ARKF": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1579982/000121390025115994/ea0266434-04_497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2025-11-28",
+          "rationale": "SEC summary prospectus filed 2025-11-28 identifies ARK Blockchain & Fintech Innovation ETF: “The Fund is an actively -managed exchange -traded fund (“ETF”) that will invest under normal circumstances primarily (at least 80% of its assets) in domestic and foreign equity securities of companies that are engaged in the Fund’s investment theme of Blockchain & Fintech innovation. A…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-blockchain",
@@ -573,7 +844,25 @@
       "charter": "Working scope for Blockchain & Digital-Asset Companies: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Blockchain & Digital-Asset Companies: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Blockchain & Digital-Asset Companies: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "BLOK": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1633061/000121390026008334/ea0273008-08_497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-01-28",
+          "rationale": "SEC summary prospectus filed 2026-01-28 identifies Amplify Blockchain Technology ETF: “The Fund is an actively managed ETF that seeks to provide total return by investing at least 80% of its net assets (plus borrowings for investment purposes) in the equity securities of companies actively involved in the development and utilization of blockchain technologies. The Fund may…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "BKCH": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1432353/000143235326000475/a497kblockchain.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-03-31",
+          "rationale": "SEC summary prospectus filed 2026-03-31 identifies Global X Blockchain ETF: “The Fund invests at least 80% of its total assets, plus borrowings for investment purposes (if any), in the securities of the Solactive Blockchain Index (the \"Underlying Index\") and in American Depositary Receipts (\"ADRs\") and Global Depositary Receipts (\"GDRs\") based on the securities in…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-data-centers",
@@ -587,7 +876,26 @@
       "charter": "Working scope for Data Centers & Digital Infrastructure: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Data Centers & Digital Infrastructure: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Data Centers & Digital Infrastructure: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "SRVR": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1616668/000089418926024267/summary-pacerdatainfrastru.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-08-31",
+          "rationale": "SEC summary prospectus filed 2026-08-31 identifies Pacer Data & Infrastructure Real Estate ETF: “of the Fund The Fund employs a “passive management” (or indexing) investment approach designed to track the total return performance, before fees and expenses, of the Index. The Index was developed by Global Property Research B.V. and Solactive AG (the “Index Provider”), and measures the…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "VPN": {
+          "status": "rejected",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.globalxetfs.com/funds/vpn/",
+          "source_type": "issuer_or_sec_evidence",
+          "rationale": "On 2026-10-24 the issuer product endpoint returned HTTP 404, exact-ticker ETF search returned no current listing, and both configured Yahoo chart hosts returned HTTP 404. No current issuer prospectus, listing, instrument type, or mandate could be verified, so VPN fails the evidence gate and is rejected.",
+          "source_checked_date": "2026-10-24",
+          "source_http_status": 404
+        }
+      }
     },
     {
       "id": "theme-autonomous-electric-vehicles",
@@ -602,7 +910,33 @@
       "charter": "Working scope for Autonomous & Electric Vehicles: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Autonomous & Electric Vehicles: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Autonomous & Electric Vehicles: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "DRIV": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1432353/000143235326000463/a497kautonomouselectricveh.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-03-31",
+          "rationale": "SEC summary prospectus filed 2026-03-31 identifies Global X Autonomous & Electric Vehicles ETF: “The Fund invests at least 80% of its total assets in the securities of the Solactive Autonomous & Electric Vehicles Index (\"Underlying Index\"). The Fund's 80% investment policy is non-fundamental and requires 60 days prior written notice to shareholders before it can be changed. The Fund…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "KARS": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1547576/000182912626008204/kraneshares-kars_497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-07-31",
+          "rationale": "SEC summary prospectus filed 2026-07-31 identifies KraneShares Electric Vehicles and Future Mobility Index ETF: “Under normal circumstances, the Fund will invest at least 80% of its net assets (plus borrowings for investment purposes) in instruments in its Underlying Index or in instruments that have economic characteristics similar to those in the Underlying Index. The Underlying Index is designed…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "IDRV": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1100663/000119312525302134/d64992d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2025-11-28",
+          "rationale": "SEC summary prospectus filed 2025-11-28 identifies iShares Self-Driving EV and Tech ETF: “The Fund seeks to track the investment results of the NYSE ® FactSet ® Global Autonomous Driving and Electric Vehicle Index (the “ Underlying Index ” ), which measures the performance of equity securities issued by companies that produce autonomous driving vehicles, electric vehicles,…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-video-games",
@@ -616,7 +950,25 @@
       "charter": "Working scope for Video Games & Esports: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Video Games & Esports: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Video Games & Esports: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "GAMR": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1633061/000121390026008361/ea0273008-30_497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-01-28",
+          "rationale": "SEC summary prospectus filed 2026-01-28 identifies Amplify Video Game Leaders ETF: “Under normal circumstances, the Fund will invest at least 80% of its net assets (plus borrowings for investment purposes) in equity securities in the video gaming industry that comprise the Index. The Fund uses a “passive” or indexing approach to try to achieve the Fund’s investment…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "HERO": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1432353/000143235326000469/a497kvideogamesesports.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-03-31",
+          "rationale": "SEC summary prospectus filed 2026-03-31 identifies Global X Video Games & Esports ETF: “The Fund invests at least 80% of its total assets in the securities of the Solactive Video Games & Esports Index (\"Underlying Index\") and in American Depositary Receipts (\"ADRs\") and Global Depositary Receipts (\"GDRs\") based on the securities in the Underlying Index. The Fund will also…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-ecommerce",
@@ -630,7 +982,25 @@
       "charter": "Working scope for E-Commerce: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for E-Commerce: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for E-Commerce: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "IBUY": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1633061/000121390026008352/ea0273008-23_497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-01-28",
+          "rationale": "SEC summary prospectus filed 2026-01-28 identifies Amplify Online Retail ETF: “The Fund invests at least 80% of its net assets (plus borrowings for investment purposes) in global equity securities that comprise the Index, which will primarily include common stocks and/or depositary receipts, such as American Depositary Receipts (“ADRs”) and Global Depositary…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "ONLN": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1174610/000117461026000911/f46146d1.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-09-28",
+          "rationale": "SEC summary prospectus filed 2026-09-28 identifies ProShares Online Retail ETF: “The Fund invests in financial instruments that ProShare Advisors believes, in combination, should track the performance of the Index. The Index is designed to measure the performance of U.S.-listed companies deemed to be “Online Retailers.” The Index includes U.S. and non-U.S. companies…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-biotechnology",
@@ -661,7 +1031,24 @@
       ],
       "preferred_candidate": "XBI",
       "charter": "Biotechnology industry ETF performance context.",
-      "charter_status": "reviewed"
+      "charter_status": "reviewed",
+      "candidate_reviews": {
+        "XBI": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.ssga.com/us/en/intermediary/etfs/state-street-spdr-sp-biotech-etf-xbi",
+          "source_type": "issuer_product_page",
+          "rationale": "State Street's current fund page identifies XBI as a Select Sector SPDR equity ETF tracking its U.S. sector index. The mandate is long-only sector-company equity exposure, not inverse, leveraged, options-income, or commodity-futures-only exposure."
+        },
+        "IBB": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1100663/000119312526327962/d130539d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-07-31",
+          "rationale": "SEC summary prospectus filed 2026-07-31 identifies iShares Biotechnology ETF: “The Fund seeks to track the investment results of the NYSE Biotechnology Index (the “ Underlying Index ” ), which measures the performance of U.S.-listed securities of companies that are classified according to the ICE Uniform Sector Classification schema within the Biotechnology…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-pharmaceuticals",
@@ -675,7 +1062,25 @@
       "charter": "Working scope for Pharmaceuticals: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Pharmaceuticals: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Pharmaceuticals: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "XPH": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1064642/000119312525256790/d53122d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2025-10-30",
+          "rationale": "SEC summary prospectus filed 2025-10-30 identifies State Street SPDR S&P Pharmaceuticals ETF: “The State Street SPDR S&P Pharmaceuticals ETF (the “ Fund ” ) seeks to provide investment results that, before fees and expenses, correspond generally to the total return performance of an index derived from the pharmaceuticals segment of a U.S. total market composite index. Fees and…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "PJP": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1209466/000119312526372152/d177078d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-08-28",
+          "rationale": "SEC summary prospectus filed 2026-08-28 identifies Invesco Pharmaceuticals ETF: “The Fund is an index fund that seeks to track the investment results of the Underlying Index. Strictly in accordance with its guidelines and mandated procedures, ICE Data Indices, LLC (“ICE Data” or the “Index Provider”) compiles and maintains the Underlying Index, which is composed of…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-medical-devices",
@@ -689,7 +1094,25 @@
       "charter": "Working scope for Medical Devices: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Medical Devices: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Medical Devices: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "IHI": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1100663/000119312526327981/d147643d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-07-31",
+          "rationale": "SEC summary prospectus filed 2026-07-31 identifies iShares U.S. Medical Devices ETF: “The Fund seeks to track the investment results of the Dow Jones U.S. Select Medical Equipment Index (the “ Underlying Index ” ), which measures the performance of the medical equipment sector of the U.S. equity market, as defined by S&P Dow Jones Indices LLC (the “ Index Provider ” or “…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "XHE": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1064642/000119312525256782/d31900d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2025-10-30",
+          "rationale": "SEC summary prospectus filed 2025-10-30 identifies State Street SPDR S&P Health Care Equipment ETF: “The State Street SPDR S&P Health Care Equipment ETF (the “ Fund ” ) seeks to provide investment results that, before fees and expenses, correspond generally to the total return performance of an index derived from the health care equipment and supplies segment of a U.S. total market…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-healthcare-providers",
@@ -703,7 +1126,25 @@
       "charter": "Working scope for Healthcare Providers: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Healthcare Providers: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Healthcare Providers: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "IHF": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1100663/000119312526327975/d143841d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-07-31",
+          "rationale": "SEC summary prospectus filed 2026-07-31 identifies iShares U.S. Healthcare Providers ETF: “The Fund seeks to track the investment results of the Dow Jones U.S. Select Health Care Providers Index (the “ Underlying Index ” ), which measures the performance of the healthcare providers sector of the U.S. equity market, as defined by S&P Dow Jones Indices LLC (the “ Index Provider ”…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "XHS": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1064642/000119312525256784/d33014d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2025-10-30",
+          "rationale": "SEC summary prospectus filed 2025-10-30 identifies State Street SPDR S&P Health Care Services ETF: “The State Street SPDR S&P Health Care Services ETF (the “ Fund ” ) seeks to provide investment results that, before fees and expenses, correspond generally to the total return performance of an index derived from the health care providers and services segment of a U.S. total market…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-genomics",
@@ -717,7 +1158,25 @@
       "charter": "Working scope for Genomics: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Genomics: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Genomics: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "ARKG": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1579982/000121390025115995/ea0266434-05_497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2025-11-28",
+          "rationale": "SEC summary prospectus filed 2025-11-28 identifies ARK Genomic Revolution ETF: “The Fund is an actively -managed exchange -traded fund (“ETF”) that will invest under normal circumstances primarily (at least 80% of its assets) in domestic and foreign equity securities of companies across multiple sectors, including healthcare, information technology, materials, energy…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "GNOM": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1432353/000143235326000465/a497kgenomicsbiotechnology.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-03-31",
+          "rationale": "SEC summary prospectus filed 2026-03-31 identifies Global X Genomics & Biotechnology ETF: “The Fund invests at least 80% of its total assets in the securities of the Solactive Genomics Index (\"Underlying Index\"). The Fund's 80% investment policy is non-fundamental and requires 60 days prior written notice to shareholders before it can be changed. The Fund may lend securities…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-cannabis",
@@ -731,7 +1190,26 @@
       "charter": "Working scope for Cannabis: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Cannabis: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Cannabis: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "MSOS": {
+          "status": "rejected",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1408970/000182912625008584/advisorshares-msos_497k.htm",
+          "source_type": "issuer_or_sec_evidence",
+          "rationale": "The AdvisorShares summary prospectus says MSOS uses total-return swaps alongside cannabis-company stock for core exposure. Because the mandate relies on synthetic derivatives, it does not meet the plain long-only cash-equity rule.",
+          "source_checked_date": "2026-10-24",
+          "source_filed_date": "2025-10-30"
+        },
+        "MJ": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1633061/000121390026008329/ea0273008-03_497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-01-28",
+          "rationale": "SEC summary prospectus filed 2026-01-28 identifies Amplify Alternative Harvest ETF: “The Fund uses a “passive” or indexing approach to try to achieve the Fund’s investment objective. Unlike many investment companies, the Fund does not try to “beat” the Prime Alternative Harvest Index (the “ Index ”) and does not seek temporary defensive positions when markets decline or…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-aerospace-defense",
@@ -764,7 +1242,32 @@
       ],
       "preferred_candidate": "ITA",
       "charter": "U.S.-listed companies with established aerospace manufacturing, defense systems, or mission-critical components as a core business.",
-      "charter_status": "reviewed"
+      "charter_status": "reviewed",
+      "candidate_reviews": {
+        "ITA": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1100663/000119312526327946/d124021d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-07-31",
+          "rationale": "SEC summary prospectus filed 2026-07-31 identifies iShares U.S. Aerospace & Defense ETF: “The Fund seeks to track the investment results of the Dow Jones U.S. Select Aerospace & Defense Index (the “ Underlying Index ” ), which measures the performance of the aerospace and defense sector of the U.S. equity market, as defined by S&P Dow Jones Indices LLC (the “ Index Provider ”…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "XAR": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.ssga.com/us/en/intermediary/etfs/state-street-spdr-sp-aerospace-defense-etf-xar",
+          "source_type": "issuer_product_page",
+          "rationale": "State Street's current fund page identifies XAR as a Select Sector SPDR equity ETF tracking its U.S. sector index. The mandate is long-only sector-company equity exposure, not inverse, leveraged, options-income, or commodity-futures-only exposure."
+        },
+        "PPA": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1209466/000119312526372120/d177078d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-08-28",
+          "rationale": "SEC summary prospectus filed 2026-08-28 identifies Invesco Aerospace & Defense ETF: “The Fund is an index fund that seeks to track the investment results of the Underlying Index. Strictly in accordance with its guidelines and mandated procedures, SPADE Indexes LLC (“SPADE Indexes” or the “Index Provider”) compiles, maintains, and calculates the Underlying Index, which is…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-space",
@@ -778,7 +1281,25 @@
       "charter": "Working scope for Space Economy: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Space Economy: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Space Economy: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "UFO": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1727398/000089418926004513/procurespaceetfsummaryinfo.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-02-24",
+          "rationale": "SEC summary prospectus filed 2026-02-24 identifies Procure Space ETF: “Procure Space ETF ® (the “Fund”) seeks investment results that correspond generally to the performance, before the Fund’s fees and expenses, of an equity index called the “S-Network Space Index” (the “Underlying Index”) developed by VettaFi, LLC (the “Index Provider”). Fees and Expenses…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "ARKX": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1579982/000121390025115997/ea0266434-07_497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2025-11-28",
+          "rationale": "SEC summary prospectus filed 2025-11-28 identifies ARK Space & Defense Innovation ETF: “The Fund is an actively -managed exchange -traded fund (“ETF”) that will invest under normal circumstances primarily (at least 80% of its assets) in domestic and foreign equity securities of companies that are engaged in the Fund’s investment theme of Space & Defense Innovation. The…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-us-infrastructure",
@@ -792,7 +1313,25 @@
       "charter": "Working scope for US Infrastructure: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for US Infrastructure: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for US Infrastructure: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "PAVE": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1432353/000143235326000462/a497kusinfrastructuredevel.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-03-31",
+          "rationale": "SEC summary prospectus filed 2026-03-31 identifies Global X U.S. Infrastructure Development ETF: “The Fund invests at least 80% of its total assets in the securities of the Indxx U.S. Infrastructure Development Index (\"Underlying Index\"). The Fund's 80% investment policy is non-fundamental and requires 60 days prior written notice to shareholders before it can be changed. The Fund may…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "IFRA": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1100663/000119312526327901/d25590d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-07-31",
+          "rationale": "SEC summary prospectus filed 2026-07-31 identifies iShares U.S. Infrastructure ETF: “The Fund seeks to track the investment results of the NYSE ® FactSet U.S. Infrastructure Index (the “ Underlying Index ” ), which is designed to measure the performance of equity securities of U.S. companies involved in U.S.-focused infrastructure activities (as determined by ICE Data…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-transportation",
@@ -806,7 +1345,25 @@
       "charter": "Working scope for Transportation: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Transportation: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Transportation: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "IYT": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1100663/000119312526375925/d44459d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-08-31",
+          "rationale": "SEC summary prospectus filed 2026-08-31 identifies iShares Transportation Average ETF: “The Fund seeks to track the investment results of the S&P Transportation Select Industry FMC Capped Index (the “ Underlying Index ” ), which measures the performance of companies within the transportation sector of the U.S. equity market as determined by S&P Dow Jones Indices LLC (the “…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "XTN": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1064642/000119312525256794/d64146d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2025-10-30",
+          "rationale": "SEC summary prospectus filed 2025-10-30 identifies State Street SPDR S&P Transportation ETF: “The State Street SPDR S&P Transportation ETF (the “ Fund ” ) seeks to provide investment results that, before fees and expenses, correspond generally to the total return performance of an index derived from the transportation segment of a U.S. total market composite index. Fees and…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-airlines",
@@ -819,7 +1376,17 @@
       "charter": "Working scope for Airlines: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Airlines: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Airlines: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "JETS": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1540305/000089418926013955/jetssummary.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-04-30",
+          "rationale": "The current U.S. Global Jets ETF summary prospectus identifies Trading Symbol JETS and an objective tracking the U.S. Global Jets Index. It is a long-only equity ETF; the earlier false match to Direxion leveraged funds is not its filing."
+        }
+      }
     },
     {
       "id": "theme-shipping",
@@ -832,7 +1399,17 @@
       "charter": "Working scope for Shipping: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Shipping: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Shipping: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "BOAT": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1742912/000199937126016401/boat-497k_073026.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-07-30",
+          "rationale": "SEC summary prospectus filed 2026-07-30 identifies SonicShares Global Shipping ETF: “The Fund uses a “passive management” (or indexing) approach to track the performance, before fees and expenses, of the Index. The Index was developed in 2021 and is administered by Solactive AG (the “Index Provider”). Solactive Global Shipping Index The Index is a rules-based index that…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-water",
@@ -846,7 +1423,25 @@
       "charter": "Working scope for Water: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Water: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Water: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "PHO": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1209466/000119312526372187/d177078d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-08-28",
+          "rationale": "SEC summary prospectus filed 2026-08-28 identifies Invesco Water Resources ETF: “The Fund is an index fund that seeks to track the investment results of the Underlying Index. Strictly in accordance with its guidelines and mandated procedures, Nasdaq, Inc. (“Nasdaq” or the “Index Provider”) compiles the Underlying Index, which seeks to track the performance of…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "FIW": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1329377/000144554626003280/etf1_fiw497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-05-01",
+          "rationale": "SEC summary prospectus filed 2026-05-01 identifies First Trust Water ETF: “The Fund will normally invest at least 90% of its net assets (including investment borrowings) in the securities that comprise the Index. The Fund, using an indexing investment approach, attempts to replicate, before fees and expenses, the performance of the Index. The Index is developed…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-agribusiness",
@@ -860,7 +1455,25 @@
       "charter": "Working scope for Agribusiness: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Agribusiness: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Agribusiness: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "MOO": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1137360/000113736026000492/vaneckagribusinessetfmoosu.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-04-30",
+          "rationale": "SEC summary prospectus filed 2026-04-30 identifies VanEck Agribusiness ETF: “The Fund normally invests at least 80% of its total assets in securities that comprise the Fund’s benchmark index. For purposes of this policy, the term “assets” means net assets plus the amount of any borrowings for investment purposes. The Agribusiness Index includes equity securities…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "VEGI": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/930667/000119312525336646/d51750d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2025-12-30",
+          "rationale": "The iShares summary prospectus says VEGI tracks an index of global equities of companies primarily engaged in agriculture; the mandate is long-only equity exposure."
+        }
+      }
     },
     {
       "id": "theme-oil-gas-exploration",
@@ -874,7 +1487,25 @@
       "charter": "Working scope for Oil & Gas Exploration & Production: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Oil & Gas Exploration & Production: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Oil & Gas Exploration & Production: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "XOP": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1064642/000119312525256789/d51831d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2025-10-30",
+          "rationale": "SEC summary prospectus filed 2025-10-30 identifies State Street SPDR S&P Oil & Gas Exploration & Production ETF: “The State Street SPDR S&P Oil & Gas Exploration & Production ETF (the “ Fund ” ) seeks to provide investment results that, before fees and expenses, correspond generally to the total return performance of an index derived from the oil and gas exploration and production segment of a U.S.…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "IEO": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1100663/000119312526327939/d121351d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-07-31",
+          "rationale": "SEC summary prospectus filed 2026-07-31 identifies iShares U.S. Oil & Gas Exploration & Production ETF: “The Fund seeks to track the investment results of the Dow Jones U.S. Select Oil Exploration & Production Index (the “ Underlying Index ” ), which measures the performance of the oil exploration and production sector of the U.S. equity market, as defined by S&P Dow Jones Indices LLC (the “…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-oil-services",
@@ -888,7 +1519,25 @@
       "charter": "Working scope for Oil Services: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Oil Services: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Oil Services: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "OIH": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1137360/000113736026000499/vaneckoilservicesetfoihsum.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-04-30",
+          "rationale": "SEC summary prospectus filed 2026-04-30 identifies VanEck Oil Services ETF: “The Fund normally invests at least 80% of its total assets in securities that comprise the Fund’s benchmark index. For purposes of this policy, the term “assets” means net assets plus the amount of any borrowings for investment purposes. The Oil Services Index includes common stocks and…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "IEZ": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1100663/000119312526327899/d14716d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-07-31",
+          "rationale": "SEC summary prospectus filed 2026-07-31 identifies iShares U.S. Oil Equipment & Services ETF: “The Fund seeks to track the investment results of the Dow Jones U.S. Select Oil Equipment & Services Index (the “ Underlying Index ” ), which measures the performance of the oil equipment and services sector of the U.S. equity market, as defined by S&P Dow Jones Indices LLC (the “ Index…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-midstream",
@@ -902,7 +1551,25 @@
       "charter": "Working scope for Midstream & MLP Infrastructure: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Midstream & MLP Infrastructure: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Midstream & MLP Infrastructure: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "AMLP": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1414040/000139834426005876/fp0097939-1_485bposixbrl.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-03-30",
+          "rationale": "The ALPS prospectus says AMLP normally invests at least 90% in index securities comprising publicly traded energy-infrastructure MLP units; this is long-only exchange-traded equity-like exposure, not futures exposure."
+        },
+        "MLPX": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1432353/000143235326000434/a497kmlpenergyinfrastructu.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-03-31",
+          "rationale": "SEC summary prospectus filed 2026-03-31 identifies Global X MLP & Energy Infrastructure ETF: “The Fund invests at least 80% of its total assets in the securities of the Solactive MLP & Energy Infrastructure Index (\"Underlying Index\"). The Fund also invests at least 80% of its total assets in securities of master limited partnerships (\"MLPs\") and energy infrastructure corporations.…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-natural-gas-equities",
@@ -915,7 +1582,17 @@
       "charter": "Working scope for Natural Gas Companies: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Natural Gas Companies: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Natural Gas Companies: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "FCG": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1329377/000144554626003275/etf1_fcg497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-05-01",
+          "rationale": "SEC summary prospectus filed 2026-05-01 identifies First Trust Natural Gas ETF: “The Fund will normally invest at least 90% of its net assets (including investment borrowings) in the securities that comprise the Index. The Fund, using an indexing investment approach, attempts to replicate, before fees and expenses, the performance of the Index. The Index is developed…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-clean-energy",
@@ -949,7 +1626,33 @@
       ],
       "preferred_candidate": "ICLN",
       "charter": "Renewable electricity generation and established equipment or services directly used to generate or manage renewable power.",
-      "charter_status": "reviewed"
+      "charter_status": "reviewed",
+      "candidate_reviews": {
+        "ICLN": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1100663/000119312526375955/d156775d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-08-31",
+          "rationale": "The iShares summary prospectus says ICLN tracks an index composed of global equities in the clean energy sector; this is a long-only equity index mandate."
+        },
+        "PBW": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1209466/000119312526372188/d177078d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-08-28",
+          "rationale": "SEC summary prospectus filed 2026-08-28 identifies Invesco WilderHill Clean Energy ETF: “The Fund is an index fund that seeks to track the investment results of the Underlying Index. Strictly in accordance with its guidelines and mandated procedures, WilderShares, LLC (the “Index Provider”) compiles and maintains the Underlying Index, which is comprised of stocks of publicly…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "QCLN": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1329377/000144554626003291/etf1_qcln497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-05-01",
+          "rationale": "SEC summary prospectus filed 2026-05-01 identifies First Trust NASDAQ Clean Edge Green Energy Index Fund: “The Fund will normally invest at least 90% of its net assets (including investment borrowings) in the securities that comprise the Index. The Fund, using an indexing investment approach, attempts to replicate, before fees and expenses, the performance of the Index. The Index is developed,…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-solar",
@@ -962,7 +1665,16 @@
       "charter": "Working scope for Solar: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Solar: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Solar: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "TAN": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.invesco.com/us/en/financial-products/etfs/invesco-solar-etf.html",
+          "source_type": "issuer_product_page",
+          "rationale": "Invesco's current product page identifies Invesco Solar ETF (TAN) as an Equity ETF tracking a solar/timber company index. This is a long-only equity mandate, not inverse, leveraged, options-income, or commodity-futures-only exposure."
+        }
+      }
     },
     {
       "id": "theme-wind",
@@ -975,7 +1687,16 @@
       "charter": "Working scope for Wind Energy: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Wind Energy: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Wind Energy: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "FAN": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.ftportfolios.com/Retail/Etf/EtfSummary.aspx?Ticker=FAN",
+          "source_type": "issuer_product_page",
+          "rationale": "First Trust's current product page identifies FAN as an ETF tracking an equity index of companies in its theme. This is a long-only company-equity mandate, not inverse, leveraged, options-income, or commodity-futures-only exposure."
+        }
+      }
     },
     {
       "id": "theme-uranium-miners",
@@ -989,7 +1710,26 @@
       "charter": "Working scope for Uranium Miners: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Uranium Miners: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Uranium Miners: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "URA": {
+          "status": "rejected",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1432353/000143235326000203/a497kuranium.htm",
+          "source_type": "issuer_or_sec_evidence",
+          "rationale": "The Global X summary prospectus allows uranium investment trusts whose primary purpose is physical uranium exposure alongside company securities. That physical-commodity sleeve is incompatible with the plain-equity-only mandate.",
+          "source_checked_date": "2026-10-24",
+          "source_filed_date": "2026-02-27"
+        },
+        "URNM": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1728683/000182912626004461/sprott_497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-05-04",
+          "rationale": "SEC summary prospectus filed 2026-05-04 identifies Sprott Uranium Miners ETF: “of the Fund The Fund will, under normal circumstances, invest at least 80% of its total assets in securities of the Index. The Index is designed to track the performance of companies that devote at least 50% of their assets to (i) mining, exploration, development, and production of…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-nuclear-energy",
@@ -1003,7 +1743,25 @@
       "charter": "Working scope for Nuclear Energy: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Nuclear Energy: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Nuclear Energy: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "NLR": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1137360/000113736026000504/vaneckuraniumandnuclearetf.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-04-30",
+          "rationale": "SEC summary prospectus filed 2026-04-30 identifies VanEck Uranium and Nuclear ETF: “The Fund normally invests at least 80% of its total assets in securities that comprise the Fund’s benchmark index. For purposes of this policy, the term “assets” means net assets plus the amount of any borrowings for investment purposes. The Nuclear Energy Index includes equity securities…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "NUKZ": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1452937/000121390026036350/ea0282657-07_497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-03-30",
+          "rationale": "SEC summary prospectus filed 2026-03-30 identifies Range Nuclear Renaissance ETF: “The Fund normally invests in securities comprising the Index. The Index is designed to track the performance of companies that are involved in the nuclear fuel and energy industry (the “Nuclear Industry”), particularly in the areas of (i) advanced reactors; (ii) utilities; (iii)…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-lithium-batteries",
@@ -1017,7 +1775,25 @@
       "charter": "Working scope for Lithium & Battery Technology: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Lithium & Battery Technology: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Lithium & Battery Technology: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "LIT": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1432353/000143235326000207/a497klithiumbatterytech.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-02-27",
+          "rationale": "SEC summary prospectus filed 2026-02-27 identifies Global X Lithium & Battery Tech ETF: “The Fund invests at least 80% of its total assets in the securities of the Solactive Global Lithium Index (the \"Underlying Index\") and in American Depositary Receipts (\"ADRs\") and Global Depositary Receipts (\"GDRs\") based on the securities in the Underlying Index. The Fund also invests at…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "BATT": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1633061/000121390026008351/ea0273008-22_497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-01-28",
+          "rationale": "SEC summary prospectus filed 2026-01-28 identifies Amplify Lithium & Battery Technology ETF: “The Fund will normally invest at least 80% of its net assets (plus borrowings for investment purposes) in the securities that comprise the Index. The Fund employs a “passive management” investment strategy in seeking to achieve its investment objective. Using an indexing investment…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-copper-miners",
@@ -1030,7 +1806,17 @@
       "charter": "Working scope for Copper Miners: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Copper Miners: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Copper Miners: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "COPX": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1432353/000143235326000197/a497kcopperminers.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-02-27",
+          "rationale": "SEC summary prospectus filed 2026-02-27 identifies Global X Copper Miners ETF: “The Fund invests at least 80% of its total assets in the securities of the Solactive Global Copper Miners Total Return Index (the \"Underlying Index\") and in American Depositary Receipts (\"ADRs\") and Global Depositary Receipts (\"GDRs\") based on the securities in the Underlying Index. The…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-rare-earths",
@@ -1044,7 +1830,25 @@
       "charter": "Working scope for Rare Earth & Strategic Materials: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Rare Earth & Strategic Materials: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Rare Earth & Strategic Materials: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "REMX": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1137360/000113736026000500/vaneckrareearthandstrategi.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-04-30",
+          "rationale": "SEC summary prospectus filed 2026-04-30 identifies VanEck Rare Earth and Strategic Metals ETF: “The Fund normally invests at least 80% of its total assets in securities that comprise the Fund’s benchmark index. For purposes of this policy, the term “assets” means net assets plus the amount of any borrowings for investment purposes. The Rare Earth/Strategic Metals Index includes…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "EART": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1432353/000143235326000231/a497krareearthcriticalmate.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-02-27",
+          "rationale": "SEC summary prospectus filed 2026-02-27 identifies Global X Rare Earth & Critical : “The Fund invests at least 80% of its total assets, plus borrowings for investment purposes (if any), in the securities of the Solactive Rare Earth and Critical Materials Index (the \"Underlying Index\") and in American Depositary Receipts (\"ADRs\") and Global Depositary Receipts (\"GDRs\")…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-gold-miners",
@@ -1058,7 +1862,24 @@
       "charter": "Working scope for Gold Miners: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Gold Miners: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Gold Miners: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "GDX": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1137360/000113736026000495/vaneckgoldminersetfgdxsump.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-04-30",
+          "rationale": "SEC summary prospectus filed 2026-04-30 identifies VanEck Gold Miners ETF: “The Fund normally invests at least 80% of its total assets in securities that comprise the Fund’s benchmark index. For purposes of this policy, the term “assets” means net assets plus the amount of any borrowings for investment purposes. Such companies may include small- and…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "RING": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.ishares.com/us/products/239654/ishares-msci-global-gold-miners-etf",
+          "source_type": "issuer_product_page",
+          "rationale": "The current iShares product page identifies RING as an equity ETF tracking an index of global global gold miners companies. This is long-only company-equity exposure, not an inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-silver-miners",
@@ -1072,7 +1893,24 @@
       "charter": "Working scope for Silver Miners: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Silver Miners: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Silver Miners: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "SIL": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1432353/000143235326000199/a497ksilverminers.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-02-27",
+          "rationale": "SEC summary prospectus filed 2026-02-27 identifies Global X Silver Miners ETF: “The Fund invests at least 80% of its total assets in the securities of the Solactive Global Silver Miners Total Return Index (the \"Underlying Index\") and in American Depositary Receipts (\"ADRs\") and Global Depositary Receipts (\"GDRs\") based on the securities in the Underlying Index. The…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "SLVP": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.ishares.com/us/products/239656/ishares-msci-global-silver-and-metals-miners-etf",
+          "source_type": "issuer_product_page",
+          "rationale": "The current iShares product page identifies SLVP as an equity ETF tracking an index of global global silver and metals miners companies. This is long-only company-equity exposure, not an inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-steel",
@@ -1085,7 +1923,17 @@
       "charter": "Working scope for Steel Producers: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Steel Producers: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Steel Producers: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "SLX": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1137360/000113736026000502/vanecksteeletfslxsumpro050.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-04-30",
+          "rationale": "SEC summary prospectus filed 2026-04-30 identifies VanEck Steel ETF: “The Fund normally invests at least 80% of its total assets in securities that comprise the Fund’s benchmark index. For purposes of this policy, the term “assets” means net assets plus the amount of any borrowings for investment purposes. The Steel Index is a modified market-capitalization…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-metals-mining",
@@ -1099,7 +1947,24 @@
       "charter": "Working scope for Diversified Metals & Mining: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Diversified Metals & Mining: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Diversified Metals & Mining: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "PICK": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.ishares.com/us/products/239655/ishares-msci-global-metals-mining-producers-etf",
+          "source_type": "issuer_product_page",
+          "rationale": "The current iShares product page identifies PICK as an equity ETF tracking an index of global global metals and mining producers companies. This is long-only company-equity exposure, not an inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "XME": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1064642/000119312525256788/d49319d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2025-10-30",
+          "rationale": "SEC summary prospectus filed 2025-10-30 identifies State Street SPDR S&P Metals & Mining ETF: “The State Street SPDR S&P Metals & Mining ETF (the “ Fund ” ) seeks to provide investment results that, before fees and expenses, correspond generally to the total return performance of an index derived from the metals and mining segment of a U.S. total market composite index. Fees and…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-timber-forestry",
@@ -1113,7 +1978,24 @@
       "charter": "Working scope for Timber & Forestry: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Timber & Forestry: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Timber & Forestry: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "WOOD": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1100663/000119312526327940/d121579d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-07-31",
+          "rationale": "SEC summary prospectus filed 2026-07-31 identifies iShares Global Timber & Forestry ETF: “The Fund seeks to track the investment results of the S&P Global Timber & Forestry Index TM (the “ Underlying Index ” ), which measures the performance of companies engaged in the ownership, management or upstream supply chain of forests and timberlands from both developed and emerging…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "CUT": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.invesco.com/us/en/financial-products/etfs/invesco-msci-global-timber-etf.html",
+          "source_type": "issuer_product_page",
+          "rationale": "Invesco's current product page identifies Invesco MSCI Global Timber ETF (CUT) as an Equity ETF tracking a solar/timber company index. This is a long-only equity mandate, not inverse, leveraged, options-income, or commodity-futures-only exposure."
+        }
+      }
     },
     {
       "id": "theme-regional-banks",
@@ -1127,7 +2009,25 @@
       "charter": "Working scope for Regional Banks: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Regional Banks: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Regional Banks: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "KRE": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1064642/000119312525256810/d97079d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2025-10-30",
+          "rationale": "SEC summary prospectus filed 2025-10-30 identifies State Street SPDR S&P Regional Banking ETF: “The State Street SPDR S&P Regional Banking ETF (the “ Fund ” ) seeks to provide investment results that, before fees and expenses, correspond generally to the total return performance of an index derived from the regional banking segment of the U.S. banking industry. Fees and Expenses of…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "IAT": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1100663/000119312526327927/d109380d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-07-31",
+          "rationale": "SEC summary prospectus filed 2026-07-31 identifies iShares U.S. Regional Banks ETF: “The Fund seeks to track the investment results of the Dow Jones U.S. Select Regional Banks Index (the “ Underlying Index ” ), which measures the performance of the regional bank sector of the U.S. equity market, as defined by S&P Dow Jones Indices LLC (the “ Index Provider ” or “ SPDJI ”…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-insurance",
@@ -1141,7 +2041,25 @@
       "charter": "Working scope for Insurance: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Insurance: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Insurance: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "KIE": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1064642/000119312525256809/d94089d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2025-10-30",
+          "rationale": "SEC summary prospectus filed 2025-10-30 identifies State Street SPDR S&P Insurance ETF: “The State Street SPDR S&P Insurance ETF (the “ Fund ” ) seeks to provide investment results that, before fees and expenses, correspond generally to the total return performance of an index that tracks the performance of publicly traded companies in the insurance industry. Fees and…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "IAK": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1100663/000119312526327966/d131746d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-07-31",
+          "rationale": "SEC summary prospectus filed 2026-07-31 identifies iShares U.S. Insurance ETF: “The Fund seeks to track the investment results of the Dow Jones U.S. Select Insurance Index (the “ Underlying Index ” ), which measures the performance of the insurance sector of the U.S. equity market, as defined by S&P Dow Jones Indices LLC (the “ Index Provider ” or “ SPDJI ” ). The…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-capital-markets",
@@ -1154,7 +2072,17 @@
       "charter": "Working scope for Broker-Dealers & Capital Markets: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Broker-Dealers & Capital Markets: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Broker-Dealers & Capital Markets: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "IAI": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1100663/000119312526327961/d129310d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-07-31",
+          "rationale": "SEC summary prospectus filed 2026-07-31 identifies iShares U.S. Broker-Dealers & Securities Exchanges ETF: “The Fund seeks to track the investment results of the Dow Jones U.S. Select Investment Services Index (the “ Underlying Index ” ), which measures the performance of the investment services sector of the U.S. equity market, as defined by S&P Dow Jones Indices LLC (the “ Index Provider ” or…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-homebuilders",
@@ -1168,7 +2096,25 @@
       "charter": "Working scope for Homebuilders: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Homebuilders: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Homebuilders: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "ITB": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1100663/000119312526327982/d148019d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-07-31",
+          "rationale": "SEC summary prospectus filed 2026-07-31 identifies iShares U.S. Home Construction ETF: “The Fund seeks to track the investment results of the Dow Jones U.S. Select Home Construction Index (the “ Underlying Index ” ), which measures the performance of the home construction sector of the U.S. equity market, as defined by S&P Dow Jones Indices LLC (the “ Index Provider ” or “…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "XHB": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1064642/000119312525256785/d35585d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2025-10-30",
+          "rationale": "SEC summary prospectus filed 2025-10-30 identifies State Street SPDR S&P Homebuilders ETF: “The State Street SPDR S&P Homebuilders ETF (the “ Fund ” ) seeks to provide investment results that, before fees and expenses, correspond generally to the total return performance of an index derived from the homebuilding segment of a U.S. total market composite index. Fees and Expenses…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-retail",
@@ -1182,7 +2128,25 @@
       "charter": "Working scope for Retail: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Retail: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Retail: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "XRT": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1064642/000119312525256791/d58412d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2025-10-30",
+          "rationale": "SEC summary prospectus filed 2025-10-30 identifies State Street SPDR S&P Retail ETF: “The State Street SPDR S&P Retail ETF (the “ Fund ” ) seeks to provide investment results that, before fees and expenses, correspond generally to the total return performance of an index derived from the retail segment of a U.S. total market composite index. Fees and Expenses of the Fund…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "RTH": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1137360/000113736026000119/vaneckretailetfrth497k0201.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-01-30",
+          "rationale": "SEC summary prospectus filed 2026-01-30 identifies VanEck Retail ETF: “The Fund normally invests at least 80% of its total assets in securities that comprise the Fund’s benchmark index. For purposes of this policy, the term “assets” means net assets plus the amount of any borrowings for investment purposes. To be initially eligible for the Retail Index,…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-leisure-entertainment",
@@ -1195,7 +2159,17 @@
       "charter": "Working scope for Leisure & Entertainment: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Leisure & Entertainment: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Leisure & Entertainment: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "PEJ": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1209466/000119312526372146/d177078d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-08-28",
+          "rationale": "SEC summary prospectus filed 2026-08-28 identifies Invesco Dynamic Leisure and Entertainment ETF: “The Fund is an index fund that seeks to track the investment results of the Underlying Index. Strictly in accordance with its guidelines and mandated procedures, ICE Data Indices, LLC (“ICE Data” or the “Index Provider”) compiles and maintains the Underlying Index, which is composed of…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-food-beverage",
@@ -1208,7 +2182,17 @@
       "charter": "Working scope for Food & Beverage: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Food & Beverage: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Food & Beverage: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "PBJ": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1209466/000119312526372139/d177078d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-08-28",
+          "rationale": "SEC summary prospectus filed 2026-08-28 identifies Invesco Food & Beverage ETF: “The Fund is an index fund that seeks to track the investment results of the Underlying Index. Strictly in accordance with its guidelines and mandated procedures, ICE Data Indices, LLC (“ICE Data” or the “Index Provider”) compiles and maintains the Underlying Index, which is composed of…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-residential-real-estate",
@@ -1221,7 +2205,17 @@
       "charter": "Working scope for Residential Real Estate: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Residential Real Estate: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Residential Real Estate: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "REZ": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1100663/000119312526327907/d48321d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-07-31",
+          "rationale": "SEC summary prospectus filed 2026-07-31 identifies iShares Residential and Multisector Real Estate ETF: “The Fund seeks to track the investment results of the FTSE Nareit All Residential Capped Index (the “ Underlying Index ” ), which measures the performance of the residential apartments, manufactured homes, healthcare and self-storage real estate sectors of the U.S. equity market, as…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     },
     {
       "id": "theme-mortgage-reits",
@@ -1235,7 +2229,25 @@
       "charter": "Working scope for Mortgage REITs: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
       "charter_status": "needs_review",
       "anchor_rationale": null,
-      "scope": "Working scope for Mortgage REITs: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned."
+      "scope": "Working scope for Mortgage REITs: companies with a principal business or established material business line directly tied to this exposure. Specific inclusion and exclusion boundaries need curator review before stock membership is assigned.",
+      "candidate_reviews": {
+        "REM": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1100663/000119312526327957/d127398d497k.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-07-31",
+          "rationale": "SEC summary prospectus filed 2026-07-31 identifies iShares Mortgage Real Estate Capped ETF: “The Fund seeks to track the investment results of the FTSE Nareit All Mortgage Capped Index (the “ Underlying Index ” ), which measures the performance of the residential and commercial mortgage real estate, mortgage finance and savings associations sectors of the U.S. equity market, as…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        },
+        "MORT": {
+          "status": "reviewed",
+          "reviewed_date": "2026-10-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1137360/000113736026000488/vaneckmortgagereitincomeet.htm",
+          "source_type": "sec_prospectus",
+          "source_filed_date": "2026-04-30",
+          "rationale": "SEC summary prospectus filed 2026-04-30 identifies VanEck Mortgage REIT Income ETF: “The Fund normally invests at least 80% of its total assets in securities that comprise the Fund’s benchmark index. For purposes of this policy, the term “assets” means net assets plus the amount of any borrowings for investment purposes. The Mortgage REIT Index is comprised of publicly…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate."
+        }
+      }
     }
   ],
   "methodology_version": "6.2",

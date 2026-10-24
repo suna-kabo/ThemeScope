@@ -27,13 +27,46 @@ sys.path.insert(0, str(ROOT))
 from src.themescope.collect import build_snapshot  # noqa: E402
 from src.themescope.presentation import enrich, validate
 from src.themescope.v5 import apply as apply_v5, apply_historical_ranks
-from src.themescope.v6 import apply_v6
+from src.themescope.v6 import apply_v6, prepare_registry_themes
 from src.themescope.metrics import return_metric, trend_metric
 
 
 def _write_json(path: Path, data: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False, allow_nan=False) + "\n", encoding="utf-8")
+
+
+def _write_bounded_json(path: Path, data: Any, maximum_bytes: int, artifact_name: str) -> None:
+    encoded = json.dumps(data, indent=2, ensure_ascii=False, allow_nan=False) + "\n"
+    size = len(encoded.encode("utf-8"))
+    if size > maximum_bytes:
+        raise ValueError(f"{artifact_name} is {size:,} bytes; configured limit is {maximum_bytes:,}. Reduce retained inputs or raise the corresponding maximum_*_bytes setting deliberately.")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(encoded, encoding="utf-8")
+
+
+def _dashboard_snapshot(snapshot: dict[str, Any]) -> dict[str, Any]:
+    """Keep the offline UI payload small; detailed audit data remains downloadable."""
+    payload = dict(snapshot)
+    for key in ("candidate_metrics", "registry_diagnostics", "historical_rank_metrics", "source_matrix", "classification_catalog"):
+        payload.pop(key, None)
+    theme_internal = {
+        "scope", "included", "excluded", "anchor_rationale", "anchor_url", "parent_sector",
+        "representation_limit", "representation_status", "holdings_source", "holdings_age_days",
+        "holdings_fresh", "official_holdings_count", "official_unique_ticker_count",
+        "duplicate_holding_ticker_rows", "evidence_reviewed_holdings_count", "reviewed_data_count",
+        "eligible_reviewed_count", "pending_count", "excluded_count", "review_complete", "review_reason",
+        "evidence_freshness_check_count", "stale_evidence_count", "unavailable_evidence_freshness_count",
+        "unresolved_evidence_count", "pending_evidence_count", "anchor_screen", "parent_comparison",
+        "reviewed_universe", "pending_holdings", "exclusions", "all_holdings", "source_error", "history",
+        "curated_subset_breadth_diagnostic", "sector_member_exclusions", "stock_audit",
+        "sector_membership_basis",
+    }
+    payload["themes"] = [
+        {key: value for key, value in row.items() if key not in theme_internal}
+        for row in snapshot.get("themes", [])
+    ]
+    return payload
 
 
 def _ensure_v61_market_records(snapshot: dict[str, Any], raw: dict[str, Any], registry: dict[str, Any]) -> None:
@@ -150,11 +183,11 @@ def make_source_matrix(snapshot: dict[str, Any], raw: dict[str, Any], root: Path
 
 
 EXPORT_COLUMNS = [
-    "membership_tag", "membership_source", "membership_rationale", "is_anchor_holding", "price_close", "return5", "excess5_pp", "above_ema21", "above_ema50",
+    "membership_tag", "membership_source", "membership_rationale", "is_anchor_holding", "price_close", "return5_pct", "excess5_pp", "above_ema21", "above_ema50",
     "theme", "theme_id", "anchor", "selection_slot", "selection_queue", "selection_queue_rank",
     "selection_reason", "ticker", "company", "exchange", "security_type", "evidence_category",
     "evidence_note", "evidence_url", "evidence_filed_date", "reviewed_date", "etf_weight_pct",
-    "market_cap_usd", "market_cap_retrieved_at", "adv30_usd", "return21", "return63",
+    "market_cap_usd", "market_cap_retrieved_at", "adv30_usd", "return21_pct", "return63_pct",
     "excess21_pp", "excess63_pp", "relative_state", "price_trend", "session_date", "generated_at", "chart_url",
 ]
 
@@ -163,6 +196,35 @@ def _number(metric: dict[str, Any] | None) -> float | None:
     if not metric or metric.get("status") != "valid":
         return None
     return metric.get("value")
+
+
+def _theme_csv_row(record: dict[str, Any]) -> dict[str, Any]:
+    """Flatten public theme metrics at the CSV boundary with explicit units."""
+    ambiguous = {"return5", "return21", "return63", "return1m_pct", "return3m_pct", "excess5", "excess21", "excess63"}
+    row = {key: value for key, value in record.items() if key not in ambiguous and (value is None or isinstance(value, (str, int, float, bool)))}
+    if isinstance(row.get('daily_change'), (int, float)):
+        row['daily_change_pct'] = row.pop('daily_change') * 100
+    row['global_rank'] = record.get('global_rank')
+    row['type'] = 'Sector' if record.get('level') == 'Sector' else 'Theme'
+    for window in ('5', '21', '63'):
+        value = _number(record.get('returns', {}).get(window))
+        row[f'return{window}_pct'] = value * 100 if value is not None else None
+        value = _number(record.get('excess_returns', {}).get(window))
+        row[f'excess{window}_pp'] = value * 100 if value is not None else None
+    row['relative_strength_series_json'] = json.dumps(record.get('relative_strength_series', []), separators=(",", ":"), ensure_ascii=False)
+    for period in (21, 50):
+        breadth = record.get('holdings_breadth', {}).get(str(period), {})
+        row[f'breadth{period}_t_minus_5'] = record.get(f'breadth{period}_t_minus_5')
+        row[f'breadth{period}_change_5_pp'] = record.get(f'breadth{period}_change_5_pp')
+        row[f'breadth{period}_valid_count'] = breadth.get('valid_count')
+        row[f'breadth{period}_eligible_count'] = breadth.get('eligible_count')
+    row['rank_current'] = record.get('rank_current')
+    row['rank_t_minus_5'] = record.get('rank_t_minus_5')
+    row['rank_change_5'] = record.get('rank_change_5')
+    row['historical_rank_peer_count'] = record.get('historical_rank_peer_count')
+    row['historical_rank_status'] = record.get('historical_rank_status')
+    row['historical_rank_reason'] = record.get('historical_rank_reason')
+    return row
 
 
 def _all_selected(snapshot: dict[str, Any], limit: int) -> list[dict[str, Any]]:
@@ -175,7 +237,7 @@ def _all_selected(snapshot: dict[str, Any], limit: int) -> list[dict[str, Any]]:
             evidence = stock.get("evidence") or {}
             rows.append({
                 **{key: stock.get(key) for key in ('membership_tag','membership_source','membership_rationale','is_anchor_holding','price_close')},
-                'return5': _number(stock.get('returns', {}).get('5')),
+                'return5_pct': (value * 100 if (value := _number(stock.get('returns', {}).get('5'))) is not None else None),
                 'excess5_pp': (value*100 if (value := _number(stock.get('excess_returns', {}).get('5'))) is not None else None),
                 'above_ema21': stock.get('price_close') > stock['ema21'] if stock.get('price_close') is not None and stock.get('ema21') is not None else None,
                 'above_ema50': stock.get('price_close') > stock['ema50'] if stock.get('price_close') is not None and stock.get('ema50') is not None else None,
@@ -188,8 +250,8 @@ def _all_selected(snapshot: dict[str, Any], limit: int) -> list[dict[str, Any]]:
                 "evidence_filed_date": evidence.get("filed_date"), "reviewed_date": stock.get("reviewed_date"),
                 "etf_weight_pct": stock.get("etf_weight_pct"), "market_cap_usd": stock.get("market_cap_usd"),
                 "market_cap_retrieved_at": stock.get("market_cap_retrieved_at"), "adv30_usd": stock.get("adv30_usd"),
-                "return21": _number(stock.get("returns", {}).get("21")),
-                "return63": _number(stock.get("returns", {}).get("63")),
+                "return21_pct": (value * 100 if (value := _number(stock.get("returns", {}).get("21"))) is not None else None),
+                "return63_pct": (value * 100 if (value := _number(stock.get("returns", {}).get("63"))) is not None else None),
                 "excess21_pp": (value * 100 if (value := _number(stock.get("excess_returns", {}).get("21"))) is not None else None),
                 "excess63_pp": (value * 100 if (value := _number(stock.get("excess_returns", {}).get("63"))) is not None else None),
                 "relative_state": stock.get("relative_state"), "price_trend": stock.get("trend"),
@@ -262,8 +324,10 @@ def _stock_diagnostics(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
                 'exchange': row.get('exchange'), 'market_cap_usd': row.get('market_cap_usd'),
                 'market_cap_status': row.get('market_cap_status'), 'market_cap_retrieved_at': row.get('market_cap_retrieved_at'),
                 'raw_close': row.get('raw_close'), 'adv30_usd': row.get('adv30_usd'),
-                'return5': _number(row.get('returns', {}).get('5')), 'return21': _number(row.get('returns', {}).get('21')),
-                'return63': _number(row.get('returns', {}).get('63')),
+                'return5_pct': (100 * value if (value := _number(row.get('returns', {}).get('5'))) is not None else None),
+                'excess5_pp': (100 * value if (value := _number(row.get('excess_returns', {}).get('5'))) is not None else None),
+                'return21_pct': (100 * value if (value := _number(row.get('returns', {}).get('21'))) is not None else None),
+                'return63_pct': (100 * value if (value := _number(row.get('returns', {}).get('63'))) is not None else None),
                 'excess21_pp': (100 * value if (value := _number(row.get('excess_returns', {}).get('21'))) is not None else None),
                 'excess63_pp': (100 * value if (value := _number(row.get('excess_returns', {}).get('63'))) is not None else None),
                 'selection_slot': row.get('selection_slot'), 'selection_queue': row.get('selection_queue'),
@@ -373,12 +437,39 @@ def _run_report(snapshot: dict[str, Any], raw: dict[str, Any], matrix: list[dict
     lines += ['', '## Layer totals', f"- Eligible ETF anchors with no configured holdings parser (restored by removing holdings-parser eligibility gate): {restored}.", f"- ETF score failures: {score_failures}; only ETF/SPY return data and peer availability affect these.", f"- ETF breadth failures: {breadth_failures}; they do not affect ETF eligibility or score.", f"- Curated stock drilldown unavailable: {drilldown_unavailable}; it does not affect ETF eligibility or score."]
     diagnostics = snapshot.get('registry_diagnostics', [])
     active = sum(row.get('status') == 'selected_anchor' for row in diagnostics)
-    lines += ['', '## Registry audit', f"- Registry records: {len(diagnostics)}; runtime eligible anchors: {active}; inactive or unresolved this run: {len(diagnostics)-active}."]
+    themes = snapshot.get('themes', [])
+    inactive = [row for row in diagnostics if row.get('status') != 'selected_anchor']
+    by_reason = {}
+    for row in inactive:
+        reason = next((candidate.get('reasons', [None])[0] for candidate in row.get('candidates', []) if candidate.get('reasons')), 'No ETF candidate configured')
+        by_reason[reason] = by_reason.get(reason, 0) + 1
+    review_count = sum(len(row.get('candidates', [])) for row in diagnostics)
+    completed_review_count = sum(candidate.get('mandate_review_complete', False) for row in diagnostics for candidate in row.get('candidates', []))
+    reviewed_count = sum(candidate.get('mandate_review_status') == 'reviewed' for row in diagnostics for candidate in row.get('candidates', []))
+    rejected_review_count = sum(candidate.get('mandate_review_status') == 'rejected' for row in diagnostics for candidate in row.get('candidates', []))
+    adv_only = {
+        candidate.get('ticker')
+        for row in diagnostics for candidate in row.get('candidates', [])
+        if candidate.get('status') == 'ineligible'
+        and len(candidate.get('reasons', [])) == 1
+        and 'average dollar volume' in candidate.get('reasons', [''])[0]
+    }
+    breadth_unavailable = sum(row.get('breadth_status_21') != 'valid' or row.get('breadth_status_50') != 'valid' for row in themes)
+    drilldown = sum(bool(row.get('selected')) for row in themes)
+    lines += ['', '## Registry coverage',
+        f"- Registry records: {len(diagnostics)}; eligible published exposures: {active}; inactive exposures: {len(diagnostics)-active}.",
+        '- Inactive exposures by first current eligibility reason: ' + (', '.join(f'{reason}: {count}' for reason, count in sorted(by_reason.items())) if by_reason else 'none') + '.',
+        f"- ETF-only published exposures: {sum(not row.get('selected') for row in themes)}; published exposures with unavailable EMA21 or EMA50 breadth: {breadth_unavailable}.",
+        f"- Published exposures with curated stock drilldowns: {drilldown}; without curated stock drilldowns: {len(themes)-drilldown}.",
+        f"- Candidate mandate review outcomes: {completed_review_count}/{review_count} complete ({reviewed_count} compatible, {rejected_review_count} rejected); ETFs otherwise passing current checks but excluded by the ADV30 floor alone: {len(adv_only)} ({', '.join(sorted(adv_only)) or 'none'}).",
+        f"- ETF mandate compatibility requires a dated issuer source and a candidate-specific rationale. The $10 million ADV30 floor is retained; it is a configurable screening convention, not a claim of universal suitability.",
+        '', '## Registry audit', f"- Registry records: {len(diagnostics)}; runtime eligible anchors: {active}; inactive or unresolved this run: {len(diagnostics)-active}."]
     for row in diagnostics:
         lines.append(f"- {row.get('name')} ({row.get('id')}): {row.get('status')}; selected {row.get('selected_anchor') or 'none'}.")
         for candidate in row.get('candidates', []):
             reasons = '; '.join(candidate.get('reasons', [])) or 'passed configured runtime checks'
             lines.append(f"  - {candidate.get('ticker')}: {candidate.get('status')}; {reasons}")
+            lines.append(f"    - Mandate review: {candidate.get('mandate_review_status')}; reviewed {candidate.get('mandate_review_date') or 'no review date'}; source filed {candidate.get('mandate_review_source_filed_date') or 'not applicable'}; {candidate.get('mandate_review_source') or 'no issuer source'}; {candidate.get('mandate_review_rationale') or 'no review rationale'}.")
             breadth_reasons = '; '.join(candidate.get('breadth_reasons', []))
             if breadth_reasons:
                 lines.append(f"    - Breadth only: {breadth_reasons}")
@@ -386,6 +477,8 @@ def _run_report(snapshot: dict[str, Any], raw: dict[str, Any], matrix: list[dict
     scores = snapshot.get('score_methodology', {})
     lines += ['', '## Methodology and limits',
         f"- ETF candidates require at least {settings.get('anchor_minimum_history_sessions')} valid price sessions and ${settings.get('anchor_adv30_floor_usd', 0):,.0f} 30-session average dollar volume; AUM/spread are reported unavailable when a reproducible source is not configured.",
+        '- CSV return fields use percentage values (`return5_pct`, `return21_pct`, `return63_pct`); excess returns and breadth changes use percentage points (`excess*_pp`, `breadth*_change_5_pp`).',
+        '- Current and five-session-prior ranks use descending average ranks for exact score ties; rank change is t-5 rank minus current rank. Unavailable current scores sort last and have no numeric rank.',
         f"- Holdings breadth requires a dated official equity holdings source, at least {settings.get('minimum_breadth_sample')} valid companies, {settings.get('minimum_breadth_coverage', 0)*100:g}% price coverage, and holdings no older than {settings.get('maximum_holdings_age_days')} days. These checks do not enter scoring.",
         f"- Score weights are configured as {json.dumps(scores, sort_keys=True)}. This is a consistent relative-strength ranking for manual review, not a prediction or entry signal.",
         '- Missing score inputs are not imputed or reweighted. ETF and index breadth use complete sourced equity universes independently of curated stock watchlists.',
@@ -394,7 +487,7 @@ def _run_report(snapshot: dict[str, Any], raw: dict[str, Any], matrix: list[dict
         '- Ineligible anchors, unavailable ETF scores, unavailable breadth, and missing curated stock drilldowns are separate statuses. Missing breadth or stocks does not make an ETF ineligible.',
         '', '## Source errors', '```json', json.dumps({'core': raw.get('errors', {}), 'constituent_histories':raw.get('v5', {}).get('chart_errors', {})}, indent=2), '```',
         '', '## Sector stock-list scope', 'Sector stock candidates are the current S&P 500 sector classification intersected with official selected-sector ETF holdings, then filtered by the configured listed-equity, price, market-cap and ADV rules. This is not every listed company in each sector. Per-company evidence and exclusions are in stock_diagnostics.csv.',
-        '', '## Local files', 'dashboard.html, market.csv, themes.csv, registry_audit.csv, stock_diagnostics.csv, latest_snapshot.json, raw_inputs.json, iwm_breadth_prices.csv.gz, Inter-LICENSE.txt, source_matrix.csv, watchlist_15.csv, watchlist_20.csv, tradingview_15.txt, tradingview_20.txt, run_bundle.zip.', 'Refresh with python scripts/generate_dashboard.py. Failed refreshes preserve existing valid exports and write refresh_status.json/failed_refresh.md separately.']
+        '', '## Local files', 'dashboard.html, market.csv, themes.csv, registry_audit.csv, stock_diagnostics.csv, latest_snapshot.json, raw_inputs.json, iwm_breadth_prices.csv.gz, Inter-LICENSE.txt, source_matrix.csv, watchlist_15.csv, watchlist_20.csv, tradingview_15.txt, tradingview_20.txt, run_bundle.zip.', 'Generated runs are ignored under dist/ or output/. Refresh with python scripts/generate_dashboard.py. Failed refreshes preserve existing valid exports and write refresh_status.json/failed_refresh.md separately.']
     return '\n'.join(lines)+'\n'
 
 
@@ -414,7 +507,7 @@ RUN_OUTPUT_FILES = (
 )
 
 
-def _write_run_bundle(output_dir: Path) -> Path:
+def _write_run_bundle(output_dir: Path, maximum_bytes: int = 95_000_000) -> Path:
     bundle_path = output_dir / "run_bundle.zip"
     with zipfile.ZipFile(bundle_path, "w", compression=zipfile.ZIP_DEFLATED) as bundle:
         for filename in RUN_OUTPUT_FILES:
@@ -422,6 +515,10 @@ def _write_run_bundle(output_dir: Path) -> Path:
             if not source.is_file():
                 raise FileNotFoundError(f"Missing run output required for bundle: {source}")
             bundle.write(source, arcname=filename)
+    size = bundle_path.stat().st_size
+    if size > maximum_bytes:
+        bundle_path.unlink(missing_ok=True)
+        raise ValueError(f"run_bundle.zip is {size:,} bytes; configured limit is {maximum_bytes:,}. Reduce retained run inputs or raise settings.maximum_run_bundle_bytes deliberately.")
     return bundle_path
 
 
@@ -431,42 +528,27 @@ def _generate(snapshot, raw, output_dir):
     iwm_charts = raw.get("v5", {}).get("iwm_breadth_charts", {})
     _write_iwm_sidecar(output_dir / "iwm_breadth_prices.csv.gz", iwm_charts)
     output_dir.mkdir(parents=True, exist_ok=True)
+    settings = snapshot.get('settings', {})
     _write_json(output_dir / "latest_snapshot.json", snapshot)
     raw_output = dict(raw)
     raw_v5_output = dict(raw.get("v5", {}))
     raw_v5_output.pop("iwm_breadth_charts", None)
     raw_v5_output["iwm_breadth_sidecar"] = {"file": "iwm_breadth_prices.csv.gz", "chart_count": len(iwm_charts), "encoding": "gzip CSV; JSON payload per normalized chart"}
     raw_output["v5"] = raw_v5_output
-    _write_json(output_dir / "raw_inputs.json", raw_output)
+    _write_bounded_json(output_dir / "raw_inputs.json", raw_output, int(settings.get('maximum_raw_inputs_bytes', 99_000_000)), 'raw_inputs.json')
     shutil.copyfile(ROOT / "static/Inter-LICENSE.txt", output_dir / "Inter-LICENSE.txt")
     _write_csv(output_dir / "source_matrix.csv", matrix, list(matrix[0].keys()) if matrix else [])
 
-    theme_records = sorted(snapshot.get('themes', []), key=lambda row: row.get('global_rank', 10**9))
+    theme_records = sorted(snapshot.get('themes', []), key=lambda row: (
+        row.get('global_rank') is None,
+        row.get('global_rank') if row.get('global_rank') is not None else float('inf'),
+        str(row.get('id', '')),
+    ))
     market_records = list(snapshot.get('context', [])) + list(snapshot.get('volatility_context', []))
     for filename, records in [('market.csv', market_records), ('themes.csv', theme_records)]:
         flat = []
         for record in records:
-            row = {k:v for k,v in record.items() if v is None or isinstance(v, (str,int,float,bool))}
-            if filename == 'themes.csv':
-                row['global_rank'] = record.get('global_rank')
-                row['type'] = 'Sector' if record.get('level') == 'Sector' else 'Theme'
-                row['return1m_pct'] = (value * 100 if (value := _number(record.get('returns', {}).get('21'))) is not None else None)
-                row['return3m_pct'] = (value * 100 if (value := _number(record.get('returns', {}).get('63'))) is not None else None)
-                row['excess21_pp'] = (value * 100 if (value := _number(record.get('excess_returns', {}).get('21'))) is not None else None)
-                row['excess63_pp'] = (value * 100 if (value := _number(record.get('excess_returns', {}).get('63'))) is not None else None)
-                row['relative_strength_series_json'] = json.dumps(record.get('relative_strength_series', []), separators=(",", ":"), ensure_ascii=False)
-                for period in (21, 50):
-                    breadth = record.get('holdings_breadth', {}).get(str(period), {})
-                    row[f'breadth{period}_t_minus_5'] = record.get(f'breadth{period}_t_minus_5')
-                    row[f'breadth{period}_change_5_pp'] = record.get(f'breadth{period}_change_5_pp')
-                    row[f'breadth{period}_valid_count'] = breadth.get('valid_count')
-                    row[f'breadth{period}_eligible_count'] = breadth.get('eligible_count')
-                row['rank_current'] = record.get('rank_current')
-                row['rank_t_minus_5'] = record.get('rank_t_minus_5')
-                row['rank_change_5'] = record.get('rank_change_5')
-                row['historical_rank_peer_count'] = record.get('historical_rank_peer_count')
-                row['historical_rank_status'] = record.get('historical_rank_status')
-                row['historical_rank_reason'] = record.get('historical_rank_reason')
+            row = _theme_csv_row(record) if filename == 'themes.csv' else {k:v for k,v in record.items() if v is None or isinstance(v, (str,int,float,bool))}
             row['session_date'] = snapshot['session_date']
             row['generated_at'] = snapshot.get('dashboard_generated_at') or snapshot['generated_at']
             if record.get('instrument_type') == 'volatility_index':
@@ -485,11 +567,17 @@ def _generate(snapshot, raw, output_dir):
             for key, item in record.get('field_status', {}).items():
                 for part in ('status','reason','observation_count','session_date','input_version','above_count','valid_count','eligible_count','coverage_pct','peer_count'):
                     row[key+'_'+part] = item.get(part)
-            if record.get('instrument_type') != 'volatility_index':
-                for window in ('5','21','63'):
-                    row['return'+window] = _number(record.get('returns', {}).get(window))
-                    value = _number(record.get('excess_returns', {}).get(window))
-                    row['excess'+window+'_pp'] = value*100 if value is not None else None
+            if isinstance(row.get('daily_change'), (int, float)):
+                row['daily_change_pct'] = row.pop('daily_change') * 100
+            for window in ('5','21','63'):
+                legacy = row.pop('return'+window, None)
+                row.pop('excess'+window, None)
+                value = _number(record.get('returns', {}).get(window))
+                if value is None:
+                    value = legacy
+                row['return'+window+'_pct'] = value*100 if isinstance(value, (int, float)) else None
+                value = _number(record.get('excess_returns', {}).get(window))
+                row['excess'+window+'_pp'] = value*100 if value is not None else None
             flat.append(row)
         columns = list(dict.fromkeys(k for row in flat for k in row))
         _write_csv(output_dir / filename, flat, columns)
@@ -503,6 +591,11 @@ def _generate(snapshot, raw, output_dir):
                 'selected_anchor_reason': exposure.get('selected_anchor_reason'), 'candidate_ticker': candidate.get('ticker'),
                 'candidate_priority': candidate.get('candidate_priority'), 'candidate_status': candidate.get('status'),
                 'candidate_reasons': '; '.join(candidate.get('reasons', [])), 'fund_name': candidate.get('fund_name'),
+                'mandate_review_status': candidate.get('mandate_review_status'),
+                'mandate_review_date': candidate.get('mandate_review_date'),
+                'mandate_review_source': candidate.get('mandate_review_source'),
+                'mandate_review_source_filed_date': candidate.get('mandate_review_source_filed_date'),
+                'mandate_review_rationale': candidate.get('mandate_review_rationale'),
                 'exchange': candidate.get('exchange'), 'listing_status': candidate.get('listing_status'),
                 'instrument_type': candidate.get('instrument_type'), 'currency': candidate.get('currency'),
                 'history_status': candidate.get('history_status'), 'valid_history_sessions': candidate.get('valid_history_sessions'),
@@ -518,7 +611,7 @@ def _generate(snapshot, raw, output_dir):
             })
     _write_csv(output_dir / 'registry_audit.csv', registry_rows, list(registry_rows[0]) if registry_rows else ['id','name','type','status'])
     stock_rows = _stock_diagnostics(snapshot)
-    stock_columns = list(stock_rows[0]) if stock_rows else ['theme_id','theme','type','anchor','ticker','company','eligibility','eligibility_reasons','session_date']
+    stock_columns = list(stock_rows[0]) if stock_rows else ['theme_id','theme','type','anchor','ticker','company','eligibility','eligibility_reasons','return5_pct','return21_pct','return63_pct','excess5_pp','excess21_pp','excess63_pp','session_date']
     _write_csv(output_dir / 'stock_diagnostics.csv', stock_rows, stock_columns)
     rows15 = _all_selected(snapshot, 15)
     rows20 = _all_selected(snapshot, 20)
@@ -534,13 +627,18 @@ def _generate(snapshot, raw, output_dir):
     template = (ROOT / "static/dashboard_template.html").read_text(encoding="utf-8")
     style = (ROOT / "static/dashboard.css").read_text(encoding="utf-8")
     script = (ROOT / "static/dashboard.js").read_text(encoding="utf-8")
-    payload = json.dumps(snapshot, ensure_ascii=False, separators=(",", ":"), allow_nan=False).replace("</", "<\\/").replace("\u2028", "\\u2028").replace("\u2029", "\\u2029")
+    ui_snapshot = _dashboard_snapshot(snapshot)
+    payload = json.dumps(ui_snapshot, ensure_ascii=False, separators=(",", ":"), allow_nan=False).replace("</", "<\\/").replace("\u2028", "\\u2028").replace("\u2029", "\\u2029")
     font_data = base64.b64encode((ROOT / "static/InterVariable.woff2").read_bytes()).decode("ascii")
     html = template.replace("{{STYLE}}", style.replace("{{FONT_DATA}}", font_data)).replace("{{SCRIPT}}", script).replace("{{SNAPSHOT_JSON}}", payload)
     if "{{STYLE}}" in html or "{{SCRIPT}}" in html or "{{SNAPSHOT_JSON}}" in html or "{{FONT_DATA}}" in html:
         raise RuntimeError("Dashboard template placeholder replacement failed")
+    html_size = len(html.encode('utf-8'))
+    max_dashboard_bytes = int(settings.get('maximum_dashboard_bytes', 20_000_000))
+    if html_size > max_dashboard_bytes:
+        raise ValueError(f"dashboard.html is {html_size:,} bytes; configured limit is {max_dashboard_bytes:,}. Remove UI-irrelevant data or raise settings.maximum_dashboard_bytes deliberately.")
     (output_dir / "dashboard.html").write_text(html, encoding="utf-8")
-    bundle_path = _write_run_bundle(output_dir)
+    bundle_path = _write_run_bundle(output_dir, int(settings.get('maximum_run_bundle_bytes', 95_000_000)))
 
     return bundle_path
 
@@ -594,12 +692,17 @@ def main(argv: list[str] | None = None) -> int:
         if args.as_of:
             snapshot['requested_asof'] = args.as_of
         registry = json.loads((ROOT / 'config/themes.json').read_text(encoding='utf-8'))
+        snapshot['settings'] = dict(registry.get('settings', snapshot.get('settings', {})))
         _ensure_v61_market_records(snapshot, raw, registry)
         snapshot['score_methodology'] = registry.get('score_methodology', {})
         snapshot['ui_configuration'] = registry.get('ui', {})
         snapshot['methodology_version'] = registry.get('methodology_version', registry.get('registry_version'))
         for theme in snapshot.get('themes', []):
-            configured = next((t for t in registry['themes'] if t['id'] == theme['id'] and t['anchor'] == theme['anchor']), {})
+            configured = next((t for t in registry['themes'] if t.get('id') == theme.get('id') and t.get('anchor') == theme.get('anchor')), {})
+            theme.setdefault('level', configured.get('level', 'Theme'))
+        prepare_registry_themes(snapshot, raw, registry)
+        for theme in snapshot.get('themes', []):
+            configured = next((t for t in registry['themes'] if t['id'] == theme['id']), {})
             theme.setdefault('level', configured.get('level', 'Theme'))
         enrich(snapshot, raw)
         if snapshot.get("context") and snapshot.get("session_date") and all(

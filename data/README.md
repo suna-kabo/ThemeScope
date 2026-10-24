@@ -1,5 +1,3 @@
-# Retained v4 regression inputs
+# Run data
 
-The JSON/CSV files in this directory are the original dated v4 real-data regression fixture. They intentionally do not contain the later v5 constituent-history collection. Tests use these compact inputs to verify compatibility and safe refresh behavior.
-
-The current v5 delivery snapshot is `dist/latest_snapshot.json`. Its complete actual raw inputs are inside `dist/run_bundle.zip`; use `--import-run dist/run_bundle.zip` for an offline v5 regeneration. Ordinary live runs place new raw inputs in the ignored local `output/` directory.
+Generated dashboards and raw run payloads are local outputs under the ignored `output/` or `dist/` directory. Historical schema samples live under `tests/fixtures/` with their version in the path; production generation never reads test fixtures implicitly.

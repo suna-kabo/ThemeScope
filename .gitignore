@@ -2,4 +2,6 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 /output/
+/dist/
+/exports/
 /ThemeScope-delivery.zip

@@ -38,3 +38,6 @@ Environment limitation: managed Chromium blocks `file://` URLs by administrator 
 Business-evidence membership reviews remain incomplete across all six themes. The all-reviewed view is explicitly a subset, not a full eligible universe. Nasdaq does not publish the market-cap field timestamp; cap eligibility is provisional. Annual SEC freshness checks do not classify all subsequent material disclosures. Those limits are preserved in the diagnostic exports and contextual warning. Current data access succeeded here; access from the user's Windows network remains unverified.
 
 The checked-in demonstration is a deliberate delivery snapshot. Normal user runs write only to their ignored local `output/` folder and never commit or push anything.
+# Archive notice
+
+This workflow verification is historical. Its UI, formulas, counts, and page structure may differ from the current implementation.

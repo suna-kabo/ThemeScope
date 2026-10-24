@@ -13,6 +13,7 @@ from src.themescope.v5 import (
     metric,
     normalize_price_symbol,
 )
+from src.themescope.ranking import average_ranks
 from scripts.generate_dashboard import _ensure_v61_market_records, _load_iwm_sidecar, _write_iwm_sidecar
 
 
@@ -94,6 +95,28 @@ class V62IwmTests(unittest.TestCase):
 
 
 class V62MetricTests(unittest.TestCase):
+    def test_current_average_ranks_match_historical_tie_convention(self):
+        scores = {"a": 10, "b": 9, "c": 8, "d": 7, "e": 6, "f": 5, "g": 5, "h": 4, "missing": None}
+        ranks = average_ranks(scores)
+        self.assertEqual(ranks["f"], 6.5)
+        self.assertEqual(ranks["g"], 6.5)
+        self.assertEqual(ranks["h"], 8)
+        self.assertIsNone(ranks["missing"])
+        same_score = average_ranks({"one": 42, "two": 42})
+        self.assertEqual(set(same_score.values()), {1.5})
+
+    def test_rank_change_uses_current_average_rank(self):
+        from src.themescope.v5 import apply_historical_ranks
+        snapshot = {"session_date": "2026-10-22", "score_methodology": {"minimum_peers": 1}, "themes": [
+            {"id": "a", "global_rank": 6.5, "field_status": {}},
+            {"id": "b", "global_rank": 6.5, "field_status": {}},
+        ]}
+        historical = {key: {"rank_t_minus_5": 8.5, "historical_rank_status": "valid", "historical_rank_peer_count": 10, "historical_rank_session": "2026-10-15"} for key in ("a", "b")}
+        with patch("src.themescope.v5.historical_rank_metrics", return_value=historical):
+            apply_historical_ranks(snapshot, {"v5": {}, "session_calendar": []})
+        self.assertEqual([row["rank_current"] for row in snapshot["themes"]], [6.5, 6.5])
+        self.assertEqual([row["rank_change_5"] for row in snapshot["themes"]], [2.0, 2.0])
+
     def test_five_session_breadth_change_requires_both_valid_observations(self):
         result = breadth_change(metric(63.0), metric(42.0), "2026-10-22", "2026-10-15")
         self.assertEqual(result["value"], 21.0)

@@ -8,6 +8,7 @@ import time
 import statistics
 from .sources import _request, _TableParser, request_json, fetch_yahoo_chart, _YAHOO_BLOCKED_HOSTS
 from .metrics import observation_map, return_metric, trend_metric
+from .ranking import average_ranks
 
 VERSION = 'themescope-v6.2'
 
@@ -548,14 +549,9 @@ def historical_rank_metrics(themes, charts, calendar, session, score_methodology
         for key in candidates
         if p21[key].get('status') == 'valid' and p63[key].get('status') == 'valid'
     }
-    ordered = sorted(scores, key=lambda key: (-scores[key], key))
-    start = 0
-    while start < len(ordered):
-        end = start + 1
-        while end < len(ordered) and scores[ordered[end]] == scores[ordered[start]]:
-            end += 1
-        average_rank = (start + 1 + end) / 2
-        for key in ordered[start:end]:
+    historical_ranks = average_ranks(scores)
+    for key, average_rank in historical_ranks.items():
+        if average_rank is not None:
             output[key] = {
                 'rank_t_minus_5': average_rank,
                 'rank_t_minus_5_status': 'valid',
@@ -566,7 +562,6 @@ def historical_rank_metrics(themes, charts, calendar, session, score_methodology
                 'historical_rank_session': earlier_session,
                 'historical_theme_score': scores[key],
             }
-        start = end
     for key, item in output.items():
         if key not in scores:
             item['rank_t_minus_5_reason'] = 'Historical ETF/SPY return endpoints are missing'

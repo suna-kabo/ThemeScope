@@ -42,5 +42,6 @@
       ],
       "returned_symbol": "XAR"
     }
-  ]
+  ],
+  "archive_notice": "Historical source review; not current ThemeScope behavior."
 }

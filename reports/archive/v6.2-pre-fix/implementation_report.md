@@ -42,3 +42,5 @@ The generated VIX snapshot is level 19.45, +2.21% for the day, -2.70% over five 
 - Current additional source failures: four unavailable IWM charts above; one VPN chart returned Yahoo HTTP 404; 15 Nasdaq quote summaries were unavailable. These details remain in `dist/latest_run.md`, `dist/source_matrix.csv`, the raw input diagnostics, and the registry audit. The 17 eligible primary anchors and IWM breadth metrics remain populated.
 
 These ranks, score colours, breadth changes, and ratio sparkline are descriptive tools for manual review. They are not predictions, trade signals, or allocation advice.
+
+> Archive notice: this report predates the current ranking, export, registry-audit, and UI corrections. Its UI, formulas, counts, and page structure are historical and are not current ThemeScope behavior.
