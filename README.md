@@ -1,4 +1,4 @@
-# ThemeScope
+# ThemeScope (WIP)
 
 ThemeScope is an on-demand, end-of-day US equity sector and theme dashboard. It presents SPY, QQQ and IWM market context, ranks eligible ETF exposures by price-relative strength, and offers optional sourced stock drilldowns. It does not produce entries, trade recommendations, sizing, allocations, orders, or predictive claims.
 
