@@ -49,3 +49,5 @@ The industry table shows each category's median 1M and 3M adjusted return, count
 ## Regeneration
 
 Use Python 3.10+ and run `py -3 scripts/generate_dashboard.py` on Windows or `python3 scripts/generate_dashboard.py` on macOS/Linux. Generated files stay in the user's local `output/` folder. To render this dated retrieved run offline, run `py -3 scripts/generate_dashboard.py --import-run dist/run_bundle.zip`.
+
+> Archive notice: this report describes the v5 implementation. Its UI, formulas, counts, and page structure are historical and are not current ThemeScope behavior.

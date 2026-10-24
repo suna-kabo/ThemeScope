@@ -11,6 +11,8 @@
       return row.returns && row.returns["21"] && row.returns["21"].value;
     if (key === "return63")
       return row.returns && row.returns["63"] && row.returns["63"].value;
+    if (key === "excess5")
+      return row.excess_returns && row.excess_returns["5"] && row.excess_returns["5"].value;
     if (key === "excess21")
       return (
         row.excess_returns &&
@@ -115,7 +117,7 @@
   }
 
   function themeRowsToCsv(rows, session, generatedAt) {
-    var columns = ["rank_current", "rank_t_minus_5", "rank_change_5", "historical_rank_peer_count", "historical_rank_status", "historical_rank_reason", "type", "name", "anchor_etf", "state", "theme_score", "current_strength", "medium_strength", "return21_pct", "excess21_pp", "return63_pct", "excess63_pp", "holdings_breadth21_pct", "breadth21_above", "breadth21_valid", "breadth21_t_minus_5", "breadth21_change_5_pp", "holdings_breadth50_pct", "breadth50_above", "breadth50_valid", "breadth50_t_minus_5", "breadth50_change_5_pp", "holdings_asof", "score_status", "score_reason", "session_date", "generated_at"];
+    var columns = ["rank_current", "rank_t_minus_5", "rank_change_5", "historical_rank_peer_count", "historical_rank_status", "historical_rank_reason", "type", "name", "anchor_etf", "state", "theme_score", "current_strength", "medium_strength", "return5_pct", "excess5_pp", "return21_pct", "excess21_pp", "return63_pct", "excess63_pp", "holdings_breadth21_pct", "breadth21_above", "breadth21_valid", "breadth21_t_minus_5", "breadth21_change_5_pp", "holdings_breadth50_pct", "breadth50_above", "breadth50_valid", "breadth50_t_minus_5", "breadth50_change_5_pp", "holdings_asof", "score_status", "score_reason", "session_date", "generated_at"];
     var lines = [columns.map(csvEscape).join(",")];
     rows.forEach(function (row) {
       var b21 = row.holdings_breadth && row.holdings_breadth["21"] || {};
@@ -124,6 +126,7 @@
         row.historical_rank_peer_count, row.historical_rank_status, row.historical_rank_reason,
         row.level === "Sector" ? "Sector" : "Theme", row.name, row.anchor, row.theme_state,
         row.theme_score, row.current_strength_score, row.medium_strength_score,
+        finiteNumber(valueAt(row, "return5")) ? valueAt(row, "return5") * 100 : null, finiteNumber(valueAt(row, "excess5")) ? valueAt(row, "excess5") * 100 : null,
         finiteNumber(valueAt(row, "return21")) ? valueAt(row, "return21") * 100 : null, finiteNumber(valueAt(row, "excess21")) ? valueAt(row, "excess21") * 100 : null,
         finiteNumber(valueAt(row, "return63")) ? valueAt(row, "return63") * 100 : null, finiteNumber(valueAt(row, "excess63")) ? valueAt(row, "excess63") * 100 : null,
         row.etf_breadth21_pct, b21.above_count, b21.valid_count, row.breadth21_t_minus_5, row.breadth21_change_5_pp,
@@ -142,7 +145,8 @@
       "generated_at",
       "visible_rank",
       "price_close",
-      "return5",
+      "return5_pct",
+      "excess5_pp",
       "selection_slot",
       "selection_queue",
       "ticker",
@@ -158,8 +162,8 @@
       "evidence_note",
       "etf_weight_pct",
       "adv30_usd",
-      "return21",
-      "return63",
+      "return21_pct",
+      "return63_pct",
       "excess21_pp",
       "excess63_pp",
       "relative_state",
@@ -175,7 +179,11 @@
         generated_at: row.generated_at,
         visible_rank: row.display_rank,
         price_close: row.price_close,
-        return5: valueAt(row, "return5"),
+        return5_pct: valueAt(row, "return5") === null || valueAt(row, "return5") === undefined ? null : valueAt(row, "return5") * 100,
+        excess5_pp:
+          valueAt(row, "excess5") === null || valueAt(row, "excess5") === undefined
+            ? null
+            : valueAt(row, "excess5") * 100,
         theme_id: row.theme_id,
         selection_slot: row.selection_slot,
         selection_queue: row.selection_queue,
@@ -198,8 +206,8 @@
         evidence_note: row.evidence_note,
         etf_weight_pct: row.etf_weight_pct,
         adv30_usd: row.adv30_usd,
-        return21: valueAt(row, "return21"),
-        return63: valueAt(row, "return63"),
+        return21_pct: valueAt(row, "return21") === null || valueAt(row, "return21") === undefined ? null : valueAt(row, "return21") * 100,
+        return63_pct: valueAt(row, "return63") === null || valueAt(row, "return63") === undefined ? null : valueAt(row, "return63") * 100,
         excess21_pp:
           valueAt(row, "excess21") === null ||
           valueAt(row, "excess21") === undefined
@@ -901,7 +909,9 @@
       $("stock-controls").hidden = false;
       $("stock-table-wrap").hidden = false;
       $("watchlist-message").hidden = true;
-      $("active-name").textContent = "Watchlist · " + selected.name + " / " + selected.anchor;
+      $("active-name").textContent = selected.name
+        ? selected.name + (selected.anchor ? " / " + selected.anchor : "")
+        : "Watchlist";
       const priorRank = finite(selected.rank_t_minus_5) ? selected.rank_t_minus_5.toFixed(selected.rank_t_minus_5 % 1 ? 1 : 0) : "unavailable";
       const rankMove = finite(selected.rank_change_5) ? '<span class="' + (selected.rank_change_5 > 0 ? "positive" : selected.rank_change_5 < 0 ? "negative" : "") + '">' + (selected.rank_change_5 > 0 ? "+" : "") + selected.rank_change_5.toFixed(selected.rank_change_5 % 1 ? 1 : 0) + '</span>' : '<span title="' + esc(selected.historical_rank_reason || "Historical ranking unavailable") + '">unavailable</span>';
       $("active-summary").innerHTML = '<div class="summary-scores">' + stateBadge(selected.theme_state) + ' ' + score(selected, "theme_score") + ' ' + score(selected, "current_strength_score") + ' ' + score(selected, "medium_strength_score") + '</div>' +

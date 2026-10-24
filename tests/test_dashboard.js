@@ -65,6 +65,15 @@ assert.deepEqual(
 const csv = ui.rowsToCsv([rows[0]]);
 assert.match(csv, /"Alpha ""One"""/);
 assert.match(csv, /"semiconductors"/);
+assert.match(csv, /return5_pct/);
+assert.doesNotMatch(csv.split("\r\n")[0], /(?:^|,)return(?:5|21|63)(?:,|$)/);
+const csvUnits = ui.rowsToCsv([{ticker:"U", returns:{"5":{value:0.1075}}, excess_returns:{"5":{value:0.0125}}}]);
+assert.match(csvUnits, /10\.75/);
+assert.match(csvUnits, /1\.25/);
+const themeCsv = ui.themeRowsToCsv([{id:"u", name:"Unit", returns:{"5":{value:0.1075}}, excess_returns:{"5":{value:0.0125}}}], "2026-10-22", "generated");
+assert.match(themeCsv.split("\r\n")[0], /return5_pct/);
+assert.match(themeCsv, /10\.75/);
+assert.match(themeCsv, /1\.25/);
 const tradingView = ui.tradingViewExport([rows[0], rows[1], rows[2], rows[3]]);
 assert.equal(tradingView.count, 2);
 assert.equal(tradingView.duplicates, 1);

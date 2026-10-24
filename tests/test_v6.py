@@ -5,7 +5,7 @@ from datetime import date, timedelta
 from pathlib import Path
 
 from src.themescope.cache import manifest_for_inputs
-from src.themescope.v6 import _candidate_status, apply_v6
+from src.themescope.v6 import _candidate_status, apply_v6, prepare_registry_themes
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -38,6 +38,14 @@ class V6RegistryTests(unittest.TestCase):
         self.assertEqual(len({row["id"] for row in rows}), 65)
         self.assertTrue(all(row.get("candidate_anchors") for row in rows))
         self.assertTrue(all(len(row["candidate_anchors"]) == len(set(row["candidate_anchors"])) for row in rows))
+        for row in rows:
+            self.assertEqual(set(row.get("candidate_reviews", {})), set(row["candidate_anchors"]))
+            for ticker, review in row["candidate_reviews"].items():
+                if review.get("status") in {"reviewed", "rejected"}:
+                    self.assertTrue(review.get("reviewed_date"), (row["id"], ticker))
+                    self.assertTrue(str(review.get("source_url", "")).startswith("https://"), (row["id"], ticker))
+                    self.assertTrue(review.get("rationale"), (row["id"], ticker))
+            self.assertTrue(all(review.get("status") in {"reviewed", "rejected"} for review in row["candidate_reviews"].values()))
         self.assertEqual(
             {row["id"] for row in sectors},
             {"sector-communication-services", "sector-consumer-discretionary", "sector-consumer-staples", "sector-energy", "sector-financials", "sector-health-care", "sector-industrials", "sector-information-technology", "sector-materials", "sector-real-estate", "sector-utilities"},
@@ -50,7 +58,8 @@ class V6RegistryTests(unittest.TestCase):
         session = dates[-1]
         record = {
             "id": "test-theme", "name": "Test Theme", "anchor": "TST", "candidate_anchors": ["TST"],
-            "unleveraged_equity_etf_review": True,
+            "unleveraged_equity_etf_review": True, "mandate_review_date": "2026-10-22",
+            "anchor_url": "https://issuer.example/TST", "anchor_instrument_review": "Long-only unleveraged equity exposure.",
             "holdings_source": {"provider": "Issuer", "method": "csv", "url": "https://issuer.example/holdings.csv"},
         }
         raw = {
@@ -73,16 +82,73 @@ class V6RegistryTests(unittest.TestCase):
 
     def test_missing_holdings_parser_does_not_reject_a_reviewed_anchor(self):
         dates = [(date(2026, 10, 22) - timedelta(days=i)).isoformat() for i in range(69, -1, -1)]
-        record = {"id": "test-theme", "name": "Test Theme", "anchor": "ALT", "candidate_anchors": ["ALT"], "unleveraged_equity_etf_review": True}
+        record = {"id": "test-theme", "name": "Test Theme", "anchor": "ALT", "candidate_anchors": ["ALT"], "unleveraged_equity_etf_review": True, "mandate_review_date": "2026-10-22", "anchor_url": "https://issuer.example/ALT", "anchor_instrument_review": "Long-only unleveraged equity exposure."}
         raw = {"charts": {"ALT": chart_fixture("ALT", dates)}, "session_calendar": dates, "holdings": {}}
         result = _candidate_status(record, "ALT", raw, {"session_date": dates[-1]}, self.registry["settings"])
         self.assertEqual(result["status"], "eligible")
         self.assertFalse(any("holdings" in reason.lower() for reason in result["reasons"]))
         self.assertTrue(any("official holdings source and parser are not configured" in reason for reason in result["breadth_reasons"]))
 
+    def test_alternate_candidate_requires_its_own_mandate_review(self):
+        dates = [(date(2026, 10, 22) - timedelta(days=i)).isoformat() for i in range(69, -1, -1)]
+        record = {
+            "id": "test-theme", "name": "Test Theme", "anchor": "TST", "candidate_anchors": ["TST", "ALT"],
+            "candidate_reviews": {"TST": {"status": "reviewed", "reviewed_date": "2026-10-22", "source_url": "https://issuer.example/TST", "rationale": "Long-only equity mandate."}},
+        }
+        raw = {"charts": {"ALT": chart_fixture("ALT", dates)}, "session_calendar": dates}
+        result = _candidate_status(record, "ALT", raw, {"session_date": dates[-1]}, self.registry["settings"])
+        self.assertEqual(result["mandate_review_status"], "incomplete")
+        self.assertTrue(any(reason.startswith("ETF mandate review is incomplete") for reason in result["reasons"]))
+
+    def test_rejected_candidate_has_complete_review_but_is_not_eligible(self):
+        dates = [(date(2026, 10, 22) - timedelta(days=i)).isoformat() for i in range(69, -1, -1)]
+        rationale = "The current prospectus permits total-return swaps for the fund's core exposure."
+        record = {
+            "id": "theme-test", "name": "Test", "anchor": "BAD", "candidate_anchors": ["BAD"],
+            "candidate_reviews": {"BAD": {
+                "status": "rejected", "reviewed_date": "2026-10-24",
+                "source_url": "https://issuer.example/BAD/prospectus", "rationale": rationale,
+            }},
+        }
+        raw = {"charts": {"BAD": chart_fixture("BAD", dates)}, "session_calendar": dates}
+        result = _candidate_status(record, "BAD", raw, {"session_date": dates[-1]}, self.registry["settings"])
+        self.assertEqual(result["status"], "ineligible")
+        self.assertEqual(result["mandate_review_status"], "rejected")
+        self.assertTrue(result["mandate_review_complete"])
+        self.assertIn("ETF mandate review rejected: " + rationale, result["reasons"])
+        self.assertFalse(any(reason.startswith("ETF mandate review is incomplete") for reason in result["reasons"]))
+
+    def test_selected_alternate_gets_its_own_price_metrics_before_scoring(self):
+        dates = [(date(2026, 10, 22) - timedelta(days=i)).isoformat() for i in range(69, -1, -1)]
+        record = {
+            "id": "theme-test", "name": "Test Theme", "level": "Theme", "anchor": "OLD",
+            "candidate_anchors": ["OLD", "NEW"], "preferred_candidate": "NEW",
+            "candidate_reviews": {"NEW": {
+                "status": "reviewed", "reviewed_date": "2026-10-24",
+                "source_url": "https://issuer.example/NEW/prospectus", "rationale": "Long-only equity-index objective.",
+            }},
+        }
+        raw = {
+            "charts": {"NEW": chart_fixture("NEW", dates), "SPY": chart_fixture("SPY", dates)},
+            "session_calendar": dates,
+        }
+        snapshot = {
+            "session_date": dates[-1], "settings": self.registry["settings"],
+            "themes": [{"id": "theme-test", "name": "Test Theme", "anchor": "OLD", "selected": [{"ticker": "STALE"}]}],
+        }
+        prepare_registry_themes(snapshot, raw, {"themes": [record]})
+        self.assertEqual(len(snapshot["themes"]), 1)
+        theme = snapshot["themes"][0]
+        self.assertEqual(theme["anchor"], "NEW")
+        self.assertEqual(theme["selected"], [])
+        self.assertEqual(theme["returns"]["21"]["status"], "valid")
+        self.assertEqual(theme["excess_returns"]["63"]["status"], "valid")
+        self.assertTrue(theme["anchor_screen"]["anchor_screen_valid"])
+        self.assertEqual(theme["anchor_screen"]["mandate_review_note"], "Long-only equity-index objective.")
+
     def test_v6_snapshot_records_unavailable_sources_and_candidate_reasons(self):
         session = "2026-10-22"
-        record = {"id": "theme-test", "name": "Test", "anchor": "TST", "candidate_anchors": ["TST"], "level": "Theme", "charter": "Review required", "charter_status": "needs_review", "unleveraged_equity_etf_review": True, "holdings_source": {"provider": "Issuer", "method": "csv", "url": "https://issuer.example/holdings.csv"}}
+        record = {"id": "theme-test", "name": "Test", "anchor": "TST", "candidate_anchors": ["TST"], "level": "Theme", "charter": "Review required", "charter_status": "needs_review", "unleveraged_equity_etf_review": True, "mandate_review_date": "2026-10-22", "anchor_url": "https://issuer.example/TST", "anchor_instrument_review": "Long-only unleveraged equity exposure.", "holdings_source": {"provider": "Issuer", "method": "csv", "url": "https://issuer.example/holdings.csv"}}
         theme = {"id": "theme-test", "name": "Test", "anchor": "TST", "selected": [], "returns": {}, "excess_returns": {}, "field_status": {}}
         snapshot = {"session_date": session, "run_date": session, "generated_at": "2026-10-23T16:00:00+00:00", "themes": [theme], "context": [], "settings": self.registry["settings"]}
         raw = {"charts": {}, "holdings": {}, "quotes": {}, "errors": {"charts": {}, "holdings": {}, "quotes": {}}, "v5": {}}
@@ -108,7 +174,8 @@ class V6RegistryTests(unittest.TestCase):
         record = {
             "id": "sector-communication-services", "name": "Communication Services", "level": "Sector",
             "anchor": "XLC", "candidate_anchors": ["XLC"], "preferred_candidate": "XLC",
-            "unleveraged_equity_etf_review": True,
+            "unleveraged_equity_etf_review": True, "mandate_review_date": "2026-10-22",
+            "anchor_url": "https://issuer.example/XLC", "anchor_instrument_review": "Long-only unleveraged equity exposure.",
             "holdings_source": {"provider": "Issuer", "method": "csv", "url": "https://issuer.example/XLC.csv"},
         }
         company = {"company_id": "1", "company": "Alpha Inc", "symbols": ["AAA"], "source_tickers": ["AAA"], "sector": "Communication Services"}

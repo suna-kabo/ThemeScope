@@ -4,6 +4,7 @@ import re
 import sys
 import functools
 import platform
+import shutil
 import threading
 import zipfile
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
@@ -17,7 +18,11 @@ server = ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(SimpleHTTPReque
 threading.Thread(target=server.serve_forever, daemon=True).start()
 url = f'http://127.0.0.1:{server.server_port}/{path.name}'
 with sync_playwright() as p:
-    browser = p.chromium.launch(executable_path='/usr/bin/chromium', headless=True, args=['--no-sandbox','--disable-dev-shm-usage','--disable-gpu'])
+    launch_options = {'headless': True, 'args': ['--no-sandbox','--disable-dev-shm-usage','--disable-gpu']}
+    system_chromium = shutil.which('chromium') or shutil.which('chromium-browser')
+    if system_chromium:
+        launch_options['executable_path'] = system_chromium
+    browser = p.chromium.launch(**launch_options)
     page = browser.new_page(viewport={'width':1440,'height':1000}, accept_downloads=True)
     cdp = page.context.new_cdp_session(page)
     cdp.send('Network.enable')
@@ -59,8 +64,8 @@ with sync_playwright() as p:
         page.select_option('#theme-sort','theme_score')
         page.click('#theme-direction')
         assert rows.count() >= 1
-        assert page.locator('#theme-head').inner_text().find('1M Return') >= 0
-        assert page.locator('#theme-head').inner_text().find('Rank Δ 5D') >= 0
+        assert '1M' in page.locator('#theme-head').inner_text()
+        assert 'Rk−5D' in page.locator('#theme-head').inner_text()
         assert page.locator('#theme-body .score-chip').count() > 0
         assert not page.locator('#watchlist-navigation #back-to-themes').count()
         with page.expect_download() as download:
@@ -71,6 +76,11 @@ with sync_playwright() as p:
         page.fill('#theme-search','')
         page.locator('#theme-body tr[data-theme]').first.click()
         assert page.locator('#watchlist').is_visible()
+        assert not page.locator('#active-name').inner_text().startswith('Watchlist ·')
+        assert page.locator('#app-back').inner_text() == 'Back'
+        assert page.locator('#previous-theme').inner_text() == 'Previous'
+        assert page.locator('#next-theme').inner_text() == 'Next'
+        assert page.locator('#app-back svg, #previous-theme svg, #next-theme svg').count() == 0
         assert not page.locator('#app-back').is_disabled()
         page.click('#app-back')
         assert page.locator('#sectors-themes').is_visible()
@@ -92,6 +102,12 @@ with sync_playwright() as p:
         assert page.locator('#watchlist-message').inner_text() in ('No curated stock drilldown is available for this theme.', '')
 
     page.click('.side-nav a[data-page="watchlist"]')
+    page.set_viewport_size({'width':390,'height':844})
+    assert page.locator('#previous-theme').is_visible()
+    assert page.locator('#next-theme').is_visible()
+    for control in ('#app-back','#previous-theme','#next-theme'):
+        assert page.locator(control).bounding_box()['width'] > 0
+        assert page.evaluate('(selector) => getComputedStyle(document.querySelector(selector)).fontFamily', control) == page.evaluate('getComputedStyle(document.body).fontFamily')
     if not page.locator('#stock-table-wrap').is_hidden():
         page.select_option('#pool','20');page.select_option('#pool','15')
         page.select_option('#ema-filter','above21');page.select_option('#ema-filter','all')
@@ -111,6 +127,7 @@ with sync_playwright() as p:
         assert {'dashboard.html','themes.csv','registry_audit.csv','latest_snapshot.json','raw_inputs.json','iwm_breadth_prices.csv.gz','Inter-LICENSE.txt'} <= names
         assert 'sectors.csv' not in names and 'industries.csv' not in names
 
+    page.set_viewport_size({'width':1440,'height':1000})
     page.click('#mode');assert page.locator('html').get_attribute('data-mode')=='light'
     page.screenshot(path='/tmp/themescope-light.png',full_page=True)
     page.reload();page.wait_for_timeout(400)

@@ -5,10 +5,53 @@ import unittest
 import zipfile
 from pathlib import Path
 
-from scripts.generate_dashboard import RUN_OUTPUT_FILES, _write_run_bundle, make_source_matrix
+from scripts.generate_dashboard import (
+    EXPORT_COLUMNS, RUN_OUTPUT_FILES, _all_selected, _dashboard_snapshot,
+    _theme_csv_row, _write_bounded_json, _write_run_bundle, make_source_matrix,
+)
 
 
 class RunBundleTests(unittest.TestCase):
+    def test_python_csv_exports_use_explicit_percent_and_percentage_point_units(self) -> None:
+        metric = lambda value: {"status": "valid", "value": value}
+        row = _theme_csv_row({
+            "id": "theme", "name": "Theme", "level": "Theme", "return21": 0.1075,
+            "return1m_pct": 10.75, "returns": {"5": metric(0.05), "21": metric(0.1075), "63": metric(0.2)},
+            "excess_returns": {"5": metric(0.0125), "21": metric(0.025), "63": metric(-0.01)},
+        })
+        self.assertAlmostEqual(row["return21_pct"], 10.75)
+        self.assertAlmostEqual(row["excess5_pp"], 1.25)
+        self.assertNotIn("return21", row)
+        self.assertNotIn("return1m_pct", row)
+        self.assertNotIn("excess21", row)
+
+        stock = {"ticker": "AAA", "returns": {"5": metric(0.1075), "21": metric(0.1075), "63": metric(0.2)}, "excess_returns": {"5": metric(0.0125), "21": metric(0.025), "63": metric(-0.01)}}
+        exported = _all_selected({"themes": [{"name": "Theme", "id": "theme", "anchor": "ETF", "selected": [stock]}]}, 15)[0]
+        self.assertAlmostEqual(exported["return5_pct"], 10.75)
+        self.assertAlmostEqual(exported["excess5_pp"], 1.25)
+        self.assertIn("return21_pct", EXPORT_COLUMNS)
+        self.assertNotIn("return21", EXPORT_COLUMNS)
+
+    def test_dashboard_payload_omits_large_audit_collections_but_keeps_ui_fields(self) -> None:
+        payload = _dashboard_snapshot({
+            "themes": [{"name": "Theme", "selected": [], "history": [1], "stock_audit": [2], "holdings_breadth": {"21": {"value": 50}}}],
+            "candidate_metrics": [1], "registry_diagnostics": [2], "source_matrix": [3],
+            "settings": {"watchlist_capacity": 20},
+        })
+        self.assertNotIn("candidate_metrics", payload)
+        self.assertNotIn("registry_diagnostics", payload)
+        self.assertNotIn("source_matrix", payload)
+        self.assertNotIn("stock_audit", payload["themes"][0])
+        self.assertIn("selected", payload["themes"][0])
+        self.assertIn("holdings_breadth", payload["themes"][0])
+
+    def test_bounded_json_rejects_output_before_writing_oversized_file(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_dir:
+            path = Path(temporary_dir) / "raw_inputs.json"
+            with self.assertRaisesRegex(ValueError, "configured limit"):
+                _write_bounded_json(path, {"payload": "large"}, 5, "raw_inputs.json")
+            self.assertFalse(path.exists())
+
     def test_bundle_contains_each_run_file_but_not_itself(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_dir:
             output_dir = Path(temporary_dir)

@@ -12,8 +12,8 @@ from src.themescope.presentation import enrich, validate
 class RefreshTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.snapshot = json.loads((ROOT / 'data/latest_snapshot.json').read_text(encoding='utf-8'))
-        cls.raw = json.loads((ROOT / 'data/raw_inputs.json').read_text(encoding='utf-8'))
+        cls.snapshot = json.loads((ROOT / 'tests/fixtures/v1/latest_snapshot.json').read_text(encoding='utf-8'))
+        cls.raw = json.loads((ROOT / 'tests/fixtures/v1/raw_inputs.json').read_text(encoding='utf-8'))
 
     def test_failure_preserves_all_prior_outputs_and_date(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -90,7 +90,7 @@ class RefreshTests(unittest.TestCase):
             by_id = {t['id']:t for t in snapshot['themes']}
             for row in rows:
                 self.assertEqual(row['session_date'],snapshot['session_date'])
-                self.assertAlmostEqual(float(row['return21']),by_id[row['id']]['returns']['21']['value'])
+                self.assertAlmostEqual(float(row['return21_pct']),100*by_id[row['id']]['returns']['21']['value'])
                 self.assertEqual(row['theme_score'],'')
                 self.assertEqual(row['theme_score_status'],'unavailable')
 
@@ -103,7 +103,7 @@ class RefreshTests(unittest.TestCase):
     def test_import_is_offline_and_preserves_date(self):
         with tempfile.TemporaryDirectory() as tmp:
             with patch('scripts.generate_dashboard.build_snapshot', side_effect=AssertionError('Must not collect')):
-                self.assertEqual(main(['--import-run', str(ROOT / 'data'), '--output-dir', str(Path(tmp) / 'run')]), 0)
+                self.assertEqual(main(['--import-run', str(ROOT / 'tests/fixtures/v1'), '--output-dir', str(Path(tmp) / 'run')]), 0)
             imported = json.loads((Path(tmp) / 'run/latest_snapshot.json').read_text())
             self.assertEqual(imported['session_date'], self.snapshot['session_date'])
             self.assertEqual(imported['generated_at'], self.snapshot['generated_at'])

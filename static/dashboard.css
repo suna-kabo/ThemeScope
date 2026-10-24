@@ -120,7 +120,7 @@ input { max-width: 220px; }
 #mode, #app-back, #previous-theme, #next-theme, #stock-direction, #theme-direction {
   font: 11px/1.3 "Inter Variable", Inter, sans-serif;
   font-weight: 550;
-  padding: 6px 9px;
+  padding: 6px 13px;
 }
 .app-shell { min-height: 100vh; margin-left: 232px; }
 .topbar { position: sticky; top: 0; z-index: 3; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 16px; min-height: 58px; padding: 0 34px; background: var(--bg); border-bottom: 1px solid var(--line); }

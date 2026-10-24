@@ -4,8 +4,10 @@ from __future__ import annotations
 
 from datetime import date
 from typing import Any
+from urllib.parse import urlparse
 
 from .metrics import adv30_metric, observation_map
+from .ranking import average_ranks
 
 
 def _valid_number(value: Any) -> bool:
@@ -119,9 +121,34 @@ def _candidate_status(
     meta = (chart or {}).get("meta", {})
     if meta.get("instrumentType") != "ETF" or meta.get("currency") != "USD":
         reasons.append("Retrieved instrument is not verified as a USD ETF")
-    reviewed_ticker = record.get("anchor") == ticker and bool(record.get("unleveraged_equity_etf_review"))
-    if not reviewed_ticker:
-        reasons.append("Unleveraged diversified-equity mandate has not been reviewed for this candidate")
+    mandate_review = (record.get("candidate_reviews") or {}).get(ticker)
+    if not mandate_review and record.get("anchor") == ticker and record.get("unleveraged_equity_etf_review"):
+        mandate_review = {
+            "status": "reviewed",
+            "reviewed_date": record.get("mandate_review_date"),
+            "source_url": record.get("anchor_url"),
+            "rationale": record.get("anchor_instrument_review"),
+        }
+    review_url = urlparse(str((mandate_review or {}).get("source_url", "")))
+    review_date = (mandate_review or {}).get("reviewed_date")
+    try:
+        date.fromisoformat(str(review_date))
+        review_date_valid = True
+    except ValueError:
+        review_date_valid = False
+    review_outcome = (mandate_review or {}).get("status")
+    review_complete = bool(
+        mandate_review
+        and review_outcome in {"reviewed", "rejected"}
+        and review_date_valid
+        and review_url.scheme == "https"
+        and review_url.netloc
+        and mandate_review.get("rationale")
+    )
+    if not review_complete:
+        reasons.append("ETF mandate review is incomplete: dated issuer source and rationale are required")
+    elif review_outcome == "rejected":
+        reasons.append("ETF mandate review rejected: " + str(mandate_review["rationale"]))
 
     adv = adv30_metric(chart, raw.get("session_calendar", []), session, int(settings.get("adv30_sessions", 30))) if chart and session else {"value": None, "reason": "No session-aligned volume history"}
     adv_value = adv.get("value")
@@ -176,6 +203,12 @@ def _candidate_status(
         "valid_history_sessions": valid_history,
         "minimum_history_sessions": history_min,
         "instrument_type": meta.get("instrumentType"),
+        "mandate_review_status": review_outcome if review_complete else "incomplete",
+        "mandate_review_complete": review_complete,
+        "mandate_review_date": mandate_review.get("reviewed_date") if mandate_review else None,
+        "mandate_review_source": mandate_review.get("source_url") if mandate_review else None,
+        "mandate_review_source_filed_date": mandate_review.get("source_filed_date") if mandate_review else None,
+        "mandate_review_rationale": mandate_review.get("rationale") if mandate_review else None,
         "currency": meta.get("currency"),
         "fund_name": meta.get("longName") or meta.get("shortName"),
         "exchange": meta.get("fullExchangeName") or meta.get("exchangeName"),
@@ -359,6 +392,109 @@ def _populate_sector_watchlists(
         exposure["representation_status"] = "S&P 500 and official sector ETF holdings intersection" if selected else "No stock passed sourced membership and eligibility checks"
 
 
+def _select_anchor(record: dict[str, Any], candidates: list[dict[str, Any]], current_anchor: str | None = None) -> str | None:
+    eligible = [item for item in candidates if item.get("status") == "eligible"]
+    if current_anchor and any(item.get("ticker") == current_anchor for item in eligible):
+        return current_anchor
+    if not eligible:
+        return None
+
+    def selection_key(candidate: dict[str, Any]) -> tuple[Any, ...]:
+        ticker = candidate["ticker"]
+        return (
+            0 if ticker == record.get("preferred_candidate") else 1,
+            -float(candidate.get("adv30_usd") or 0),
+            float(candidate.get("median_spread_pct") or float("inf")),
+            -float(candidate.get("aum_usd") or 0),
+            -int(candidate.get("valid_history_sessions") or 0),
+            int(candidate.get("candidate_priority") or 10**9),
+            ticker,
+        )
+
+    return sorted(eligible, key=selection_key)[0]["ticker"]
+
+
+def prepare_registry_themes(snapshot: dict[str, Any], raw: dict[str, Any], registry: dict[str, Any]) -> dict[str, Any]:
+    """Build price-metric rows for the runtime-selected ETF from every registry record.
+
+    Imported v6.1 snapshots contain only their earlier anchors. Resolve current
+    candidate eligibility first, then materialize a row for each eligible
+    exposure so the shared v5 score calculation ranks the expanded universe.
+    """
+    from .collect import _anchor_summary
+
+    settings = snapshot.get("settings", {})
+    session = snapshot.get("session_date")
+    calendar = raw.get("session_calendar", [])
+    charts = raw.get("charts", {})
+    old_themes = snapshot.get("themes", [])
+    by_id = {row.get("id"): row for row in old_themes}
+    rows_by_ticker = {row.get("anchor"): row for row in old_themes}
+    spy_chart = charts.get("SPY")
+    result = []
+
+    for record in registry.get("themes", []):
+        old = by_id.get(record.get("id"))
+        if old is None and record.get("anchor"):
+            old = rows_by_ticker.get(record.get("anchor"))
+        candidates = [
+            _candidate_status(record, ticker, raw, snapshot, settings)
+            for ticker in record.get("candidate_anchors", [])
+        ]
+        selected = _select_anchor(record, candidates, old.get("anchor") if old else None)
+        if not selected:
+            continue
+
+        same_anchor = bool(old and old.get("anchor") == selected)
+        review = (record.get("candidate_reviews") or {}).get(selected, {})
+        profile = {
+            **record,
+            "anchor": selected,
+            "unleveraged_equity_etf_review": review.get("status") == "reviewed",
+            "anchor_instrument_review": review.get("rationale"),
+            "anchor_url": review.get("source_url"),
+        }
+        chart = charts.get(selected)
+        anchor_summary = _anchor_summary(
+            profile, chart, spy_chart, calendar, session, settings,
+            raw.get("errors", {}).get("charts", {}).get(selected),
+        )
+        theme = dict(old) if same_anchor else {}
+        for key in (
+            "id", "name", "scope", "included", "excluded", "parent_sector",
+            "representation_limit", "level",
+        ):
+            if key in record:
+                theme[key] = record[key]
+        theme.update({
+            "id": record.get("id"),
+            "name": record.get("name"),
+            "anchor": selected,
+            "level": record.get("level", "Theme"),
+            "anchor_url": review.get("source_url"),
+            "anchor_instrument_review": review.get("rationale"),
+            "anchor_rationale": record.get("anchor_rationale") if selected == record.get("anchor") else "Selected by current candidate mandate, instrument, history, and liquidity checks.",
+            "holdings_source": dict(record.get("holdings_source") or {}) if same_anchor else {},
+            "selected": list(old.get("selected", [])) if same_anchor else [],
+            "reviewed_universe": list(old.get("reviewed_universe", [])) if same_anchor else [],
+            "anchor_screen": anchor_summary,
+            "returns": anchor_summary["returns"],
+            "excess_returns": anchor_summary["excess_returns"],
+            "relative_state": anchor_summary["relative_state"],
+            "trend": anchor_summary["trend"],
+            "trend_status": anchor_summary["trend_status"],
+            "trend_reason": anchor_summary["trend_reason"],
+            "ema21": anchor_summary["ema21"],
+            "ema50": anchor_summary["ema50"],
+            "ema21_slope_5": anchor_summary["ema21_slope_5"],
+            "session_date": session,
+        })
+        result.append(theme)
+
+    snapshot["themes"] = result
+    return snapshot
+
+
 def apply_v6(snapshot: dict[str, Any], raw: dict[str, Any], registry: dict[str, Any]) -> dict[str, Any]:
     """Audit all configured candidates and publish only runtime-eligible anchors."""
     by_id = {row.get("id"): row for row in snapshot.get("themes", [])}
@@ -378,23 +514,7 @@ def apply_v6(snapshot: dict[str, Any], raw: dict[str, Any], registry: dict[str, 
         candidates = []
         for ticker in record.get("candidate_anchors", []):
             candidates.append(_candidate_status(record, ticker, raw, snapshot, settings))
-        eligible = [item for item in candidates if item.get("status") == "eligible"]
-        selected = None
-        if theme and theme.get("anchor") and any(item["ticker"] == theme["anchor"] for item in eligible):
-            selected = theme["anchor"]
-        elif eligible:
-            def selection_key(candidate: dict[str, Any]) -> tuple[Any, ...]:
-                ticker = candidate["ticker"]
-                return (
-                    0 if ticker == record.get("preferred_candidate") else 1,
-                    -float(candidate.get("adv30_usd") or 0),
-                    float(candidate.get("median_spread_pct") or float("inf")),
-                    -float(candidate.get("aum_usd") or 0),
-                    -int(candidate.get("valid_history_sessions") or 0),
-                    int(candidate.get("candidate_priority") or 10**9),
-                    ticker,
-                )
-            selected = sorted(eligible, key=selection_key)[0]["ticker"]
+        selected = _select_anchor(record, candidates, theme.get("anchor") if theme else None)
         if selected:
             published_ids.add(record["id"])
             status = "selected_anchor"
@@ -425,14 +545,10 @@ def apply_v6(snapshot: dict[str, Any], raw: dict[str, Any], registry: dict[str, 
             stock["theme_id"] = row["id"]
         for stock in row.get("reviewed_universe", []):
             stock["theme_id"] = row["id"]
-    sorted_rows = sorted(snapshot["themes"], key=lambda row: (
-        row.get("theme_score") is None,
-        -(row.get("theme_score") if _valid_number(row.get("theme_score")) else 0),
-        str(row.get("id", "")),
-    ))
-    for rank, row in enumerate(sorted_rows, 1):
-        row["global_rank"] = rank
-        row["rank_method"] = "ThemeScore descending; unavailable scores last; stable ID tie-break"
+    rank_map = average_ranks({row.get("id", ""): row.get("theme_score") for row in snapshot["themes"]})
+    for row in snapshot["themes"]:
+        row["global_rank"] = rank_map.get(row.get("id"))
+        row["rank_method"] = "ThemeScore descending; equal valid scores receive average rank; unavailable scores unranked and last; stable ID display order"
     snapshot["registry_diagnostics"] = diagnostics
     snapshot["source_status"] = _source_status(raw, snapshot)
     diagnostic_by_id = {row.get("id"): row for row in diagnostics}

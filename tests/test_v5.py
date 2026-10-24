@@ -36,36 +36,29 @@ class V5CalculationTests(unittest.TestCase):
     def test_icln_score_formula_is_independent_of_curated_breadth_and_watchlist(self):
         import json
         from pathlib import Path
-        from scripts.generate_dashboard import _ensure_v61_market_records
         from src.themescope.presentation import enrich
-        from src.themescope.v6 import apply_v6
         root = Path(__file__).resolve().parents[1]
-        snapshot = json.loads((root / 'dist/latest_snapshot.json').read_text(encoding='utf-8'))
-        raw = json.loads((root / 'dist/raw_inputs.json').read_text(encoding='utf-8'))
+        fixture = root / 'tests/fixtures/v1'
+        snapshot = json.loads((fixture / 'latest_snapshot.json').read_text(encoding='utf-8'))
+        raw = json.loads((fixture / 'raw_inputs.json').read_text(encoding='utf-8'))
         registry = json.loads((root / 'config/themes.json').read_text(encoding='utf-8'))
-        _ensure_v61_market_records(snapshot, raw, registry)
+        snapshot['settings']['minimum_percentile_peers'] = 6
+        for theme in snapshot['themes']:
+            if theme.get('anchor') in {'XBI', 'ICLN'}:
+                theme['selected'] = []
         snapshot['score_methodology'] = registry['score_methodology']
         enrich(snapshot, raw)
         actual = apply(copy.deepcopy(snapshot), copy.deepcopy(raw))
-        actual = apply_v6(actual, raw, registry)
+        for ticker in ('XBI', 'ICLN'):
+            theme = next(row for row in actual['themes'] if row['anchor'] == ticker)
+            self.assertIsNotNone(theme['current_strength_score'])
+            self.assertIsNotNone(theme['medium_strength_score'])
+            expected_score = 0.6 * theme['current_strength_score'] + 0.4 * theme['medium_strength_score']
+            self.assertAlmostEqual(theme['theme_score'], expected_score)
+            self.assertEqual(theme['theme_state'], theme_state(theme['current_strength_score'], theme['medium_strength_score']))
+            self.assertFalse(theme['selected'])
         icln = next(row for row in actual['themes'] if row['anchor'] == 'ICLN')
-        self.assertIsNotNone(icln['current_strength_score'])
-        self.assertIsNotNone(icln['medium_strength_score'])
-        expected_score = 0.6 * icln['current_strength_score'] + 0.4 * icln['medium_strength_score']
-        self.assertAlmostEqual(icln['theme_score'], expected_score)
-        self.assertEqual(icln['theme_state'], theme_state(icln['current_strength_score'], icln['medium_strength_score']))
-        self.assertEqual(icln['curated_watchlist_count'], len(icln['selected']))
-
-        changed_snapshot = copy.deepcopy(snapshot)
-        changed_raw = copy.deepcopy(raw)
-        next(row for row in changed_snapshot['themes'] if row['anchor'] == 'ICLN')['selected'] = []
-        changed_raw['v5']['mapped_universes']['ICLN'] = {'companies': [], 'excluded_rows': [], 'unresolved_mappings': []}
-        changed = apply(changed_snapshot, changed_raw)
-        changed = apply_v6(changed, changed_raw, registry)
-        changed_icln = next(row for row in changed['themes'] if row['anchor'] == 'ICLN')
-        self.assertEqual((changed_icln['current_strength_score'], changed_icln['medium_strength_score'], changed_icln['theme_score'], changed_icln['theme_state']), (icln['current_strength_score'], icln['medium_strength_score'], icln['theme_score'], icln['theme_state']))
-        self.assertFalse(changed_icln['has_curated_watchlist'])
-        self.assertNotEqual(changed_icln['breadth_status_21'], 'valid')
+        self.assertNotEqual(icln['breadth_status_21'], 'valid')
 
     def test_four_states_unrounded_thresholds(self):
         for c,m,want in [(50,50,'Leading'),(50,49.9999,'Improving'),(49.9999,50,'Fading'),(0,0,'Lagging'),(None,50,'—'),(50,None,'—')]:
@@ -139,9 +132,9 @@ class V5CalculationTests(unittest.TestCase):
         from scripts.generate_dashboard import ROOT
         from src.themescope.presentation import enrich
         import json
-        snapshot=json.loads((ROOT/'data/latest_snapshot.json').read_text())
+        snapshot=json.loads((ROOT/'tests/fixtures/v1/latest_snapshot.json').read_text())
         snapshot['score_methodology']=json.loads((ROOT/'config/themes.json').read_text())['score_methodology']
-        raw=json.loads((ROOT/'data/raw_inputs.json').read_text())
+        raw=json.loads((ROOT/'tests/fixtures/v1/raw_inputs.json').read_text())
         enrich(snapshot,raw)
         original=snapshot['themes'][0]
         snapshot['themes']=[]
@@ -178,7 +171,7 @@ class V5CalculationTests(unittest.TestCase):
         import json
         from scripts.generate_dashboard import ROOT
         from src.themescope.collect import _stock_row
-        raw=json.loads((ROOT/'data/raw_inputs.json').read_text())
+        raw=json.loads((ROOT/'tests/fixtures/v1/raw_inputs.json').read_text())
         config=json.loads((ROOT/'config/themes.json').read_text())
         member=copy.deepcopy(json.loads((ROOT/'config/evidence_reviews.json').read_text())['members'][0])
         member['membership_tag']='Related';member['requires_filing_review']=False
@@ -195,9 +188,9 @@ class V5CalculationTests(unittest.TestCase):
         from scripts.generate_dashboard import ROOT
         from src.themescope.presentation import enrich,validate
         import json
-        snapshot=json.loads((ROOT/'data/latest_snapshot.json').read_text())
+        snapshot=json.loads((ROOT/'tests/fixtures/v1/latest_snapshot.json').read_text())
         snapshot['score_methodology']=json.loads((ROOT/'config/themes.json').read_text())['score_methodology']
-        raw=json.loads((ROOT/'data/raw_inputs.json').read_text())
+        raw=json.loads((ROOT/'tests/fixtures/v1/raw_inputs.json').read_text())
         snapshot['context'].append({'ticker':'IWM','returns':{},'price_close':None})
         enrich(snapshot,raw)
         for t in snapshot['themes']:

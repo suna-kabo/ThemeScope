@@ -1,7 +1,7 @@
 # ThemeScope v6.2 run report
 
 Market session: 2026-10-23
-Dashboard generated: 2026-10-23T21:54:53+00:00 (24 Oct 2026, 05:54 AM HKT)
+Dashboard generated: 2026-10-24T00:23:06+00:00 (24 Oct 2026, 08:23 AM HKT)
 Latest source retrieval: 2026-10-23T21:21:54+00:00
 Base collection: 2026-10-23T20:56:51+00:00 to 2026-10-23T21:21:54+00:00
 Requested as-of: latest verified completed common session
@@ -45,483 +45,1001 @@ IWM history retrieval errors:
 
 ## Eligible primary ETF ranking
 Current is the 21-session excess-return percentile; Medium is the 63-session excess-return percentile; Theme Score = 60% Current + 40% Medium. Percentiles require at least 10 valid peers. Breadth and curated stocks do not enter score or state.
-- Communication Services (XLC), Sector: score 22.5; state Lagging; current rank 14; t-5 rank 11.0; rank change -3.0; historical peers 17; curated stock drilldown available (18); anchor eligibility eligible.
-  - percentile_excess21: 12.5; valid; valid
-  - percentile_excess63: 37.5; valid; valid
+- Communication Services (XLC), Sector: score 41.53846153846154; state Fading; current rank 31.0; t-5 rank 19.0; rank change -12.0; historical peers 53; curated stock drilldown available (18); anchor eligibility eligible.
+  - percentile_excess21: 30.76923076923077; valid; valid
+  - percentile_excess63: 57.69230769230769; valid; valid
   - etf_breadth21_pct: 31.57894736842105; valid; valid
   - etf_breadth50_pct: 26.31578947368421; valid; valid
-  - current_strength_score: 12.5; valid; valid
-  - medium_strength_score: 37.5; valid; valid
-  - theme_score: 22.5; valid; valid
-  - Score peers: 21-session 17; 63-session 17; method price_relative_strength_v6_2; unavailable reason none.
+  - current_strength_score: 30.76923076923077; valid; valid
+  - medium_strength_score: 57.69230769230769; valid; valid
+  - theme_score: 41.53846153846154; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
   - Breadth: EMA21 valid: valid; t-5 26.31578947368421; change 5.2631578947368425 pp. EMA50 valid: valid; t-5 31.57894736842105; change -5.2631578947368425 pp.
   - 2 excluded source rows; 1 unresolved equity mappings remain in coverage denominator.
-- Consumer Discretionary (XLY), Sector: score 62.5; state Leading; current rank 8; t-5 rank 5.0; rank change -3.0; historical peers 17; curated stock drilldown available (20); anchor eligibility eligible.
-  - percentile_excess21: 62.5; valid; valid
-  - percentile_excess63: 62.5; valid; valid
+- Consumer Discretionary (XLY), Sector: score 70.38461538461539; state Leading; current rank 14.5; t-5 rank 11.0; rank change -3.5; historical peers 53; curated stock drilldown available (20); anchor eligibility eligible.
+  - percentile_excess21: 71.15384615384616; valid; valid
+  - percentile_excess63: 69.23076923076923; valid; valid
   - etf_breadth21_pct: 61.702127659574465; valid; valid
   - etf_breadth50_pct: 55.319148936170215; valid; valid
-  - current_strength_score: 62.5; valid; valid
-  - medium_strength_score: 62.5; valid; valid
-  - theme_score: 62.5; valid; valid
-  - Score peers: 21-session 17; 63-session 17; method price_relative_strength_v6_2; unavailable reason none.
+  - current_strength_score: 71.15384615384616; valid; valid
+  - medium_strength_score: 69.23076923076923; valid; valid
+  - theme_score: 70.38461538461539; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
   - Breadth: EMA21 valid: valid; t-5 68.08510638297872; change -6.382978723404257 pp. EMA50 valid: valid; t-5 53.191489361702125; change 2.1276595744680904 pp.
   - 2 excluded source rows; 1 unresolved equity mappings remain in coverage denominator.
-- Consumer Staples (XLP), Sector: score 80.0; state Leading; current rank 3; t-5 rank 3.0; rank change 0.0; historical peers 17; curated stock drilldown available (20); anchor eligibility eligible.
-  - percentile_excess21: 87.5; valid; valid
-  - percentile_excess63: 68.75; valid; valid
+- Consumer Staples (XLP), Sector: score 84.61538461538461; state Leading; current rank 8.0; t-5 rank 5.5; rank change -2.5; historical peers 53; curated stock drilldown available (20); anchor eligibility eligible.
+  - percentile_excess21: 92.3076923076923; valid; valid
+  - percentile_excess63: 73.07692307692308; valid; valid
   - etf_breadth21_pct: 90.9090909090909; valid; valid
   - etf_breadth50_pct: 75.75757575757575; valid; valid
-  - current_strength_score: 87.5; valid; valid
-  - medium_strength_score: 68.75; valid; valid
-  - theme_score: 80.0; valid; valid
-  - Score peers: 21-session 17; 63-session 17; method price_relative_strength_v6_2; unavailable reason none.
+  - current_strength_score: 92.3076923076923; valid; valid
+  - medium_strength_score: 73.07692307692308; valid; valid
+  - theme_score: 84.61538461538461; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
   - Breadth: EMA21 valid: valid; t-5 87.87878787878788; change 3.030303030303031 pp. EMA50 valid: valid; t-5 78.78787878787878; change -3.030303030303031 pp.
   - 3 excluded source rows; 1 unresolved equity mappings remain in coverage denominator.
-- Energy (XLE), Sector: score 97.5; state Leading; current rank 1; t-5 rank 1.0; rank change 0.0; historical peers 17; curated stock drilldown available (20); anchor eligibility eligible.
+- Energy (XLE), Sector: score 96.92307692307693; state Leading; current rank 1.0; t-5 rank 1.0; rank change 0.0; historical peers 53; curated stock drilldown available (20); anchor eligibility eligible.
   - percentile_excess21: 100.0; valid; valid
-  - percentile_excess63: 93.75; valid; valid
+  - percentile_excess63: 92.3076923076923; valid; valid
   - etf_breadth21_pct: 85.71428571428571; valid; valid
   - etf_breadth50_pct: 85.71428571428571; valid; valid
   - current_strength_score: 100.0; valid; valid
-  - medium_strength_score: 93.75; valid; valid
-  - theme_score: 97.5; valid; valid
-  - Score peers: 21-session 17; 63-session 17; method price_relative_strength_v6_2; unavailable reason none.
+  - medium_strength_score: 92.3076923076923; valid; valid
+  - theme_score: 96.92307692307693; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
   - Breadth: EMA21 valid: valid; t-5 80.95238095238095; change 4.761904761904759 pp. EMA50 valid: valid; t-5 76.19047619047619; change 9.523809523809518 pp.
   - 2 excluded source rows; 1 unresolved equity mappings remain in coverage denominator.
-- Financials (XLF), Sector: score 51.25; state Improving; current rank 9; t-5 rank 7.0; rank change -2.0; historical peers 17; curated stock drilldown available (20); anchor eligibility eligible.
-  - percentile_excess21: 56.25; valid; valid
-  - percentile_excess63: 43.75; valid; valid
+- Financials (XLF), Sector: score 66.15384615384615; state Leading; current rank 16.0; t-5 rank 12.5; rank change -3.5; historical peers 53; curated stock drilldown available (20); anchor eligibility eligible.
+  - percentile_excess21: 69.23076923076923; valid; valid
+  - percentile_excess63: 61.53846153846154; valid; valid
   - etf_breadth21_pct: 65.78947368421052; valid; valid
   - etf_breadth50_pct: 55.26315789473684; valid; valid
-  - current_strength_score: 56.25; valid; valid
-  - medium_strength_score: 43.75; valid; valid
-  - theme_score: 51.25; valid; valid
-  - Score peers: 21-session 17; 63-session 17; method price_relative_strength_v6_2; unavailable reason none.
+  - current_strength_score: 69.23076923076923; valid; valid
+  - medium_strength_score: 61.53846153846154; valid; valid
+  - theme_score: 66.15384615384615; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
   - Breadth: EMA21 valid: valid; t-5 63.1578947368421; change 2.6315789473684177 pp. EMA50 valid: valid; t-5 46.05263157894737; change 9.210526315789473 pp.
   - 3 excluded source rows; 1 unresolved equity mappings remain in coverage denominator.
-- Health Care (XLV), Sector: score 81.25; state Leading; current rank 2; t-5 rank 2.0; rank change 0.0; historical peers 17; curated stock drilldown available (20); anchor eligibility eligible.
-  - percentile_excess21: 81.25; valid; valid
-  - percentile_excess63: 81.25; valid; valid
+- Health Care (XLV), Sector: score 85.38461538461539; state Leading; current rank 7.0; t-5 rank 3.0; rank change -4.0; historical peers 53; curated stock drilldown available (20); anchor eligibility eligible.
+  - percentile_excess21: 84.61538461538461; valid; valid
+  - percentile_excess63: 86.53846153846153; valid; valid
   - etf_breadth21_pct: 90.0; valid; valid
   - etf_breadth50_pct: 90.0; valid; valid
-  - current_strength_score: 81.25; valid; valid
-  - medium_strength_score: 81.25; valid; valid
-  - theme_score: 81.25; valid; valid
-  - Score peers: 21-session 17; 63-session 17; method price_relative_strength_v6_2; unavailable reason none.
+  - current_strength_score: 84.61538461538461; valid; valid
+  - medium_strength_score: 86.53846153846153; valid; valid
+  - theme_score: 85.38461538461539; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
   - Breadth: EMA21 valid: valid; t-5 90.0; change 0.0 pp. EMA50 valid: valid; t-5 83.33333333333333; change 6.666666666666671 pp.
   - 3 excluded source rows; 1 unresolved equity mappings remain in coverage denominator.
-- Industrials (XLI), Sector: score 27.5; state Lagging; current rank 13; t-5 rank 12.0; rank change -1.0; historical peers 17; curated stock drilldown available (20); anchor eligibility eligible.
-  - percentile_excess21: 37.5; valid; valid
-  - percentile_excess63: 12.5; valid; valid
+- Industrials (XLI), Sector: score 40.38461538461538; state Improving; current rank 32.0; t-5 rank 22.0; rank change -10.0; historical peers 53; curated stock drilldown available (20); anchor eligibility eligible.
+  - percentile_excess21: 51.92307692307692; valid; valid
+  - percentile_excess63: 23.076923076923077; valid; valid
   - etf_breadth21_pct: 57.83132530120482; valid; valid
   - etf_breadth50_pct: 48.148148148148145; valid; valid
-  - current_strength_score: 37.5; valid; valid
-  - medium_strength_score: 12.5; valid; valid
-  - theme_score: 27.5; valid; valid
-  - Score peers: 21-session 17; 63-session 17; method price_relative_strength_v6_2; unavailable reason none.
+  - current_strength_score: 51.92307692307692; valid; valid
+  - medium_strength_score: 23.076923076923077; valid; valid
+  - theme_score: 40.38461538461538; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
   - Breadth: EMA21 valid: valid; t-5 57.83132530120482; change 0.0 pp. EMA50 valid: valid; t-5 41.97530864197531; change 6.172839506172835 pp.
   - 2 excluded source rows; 1 unresolved equity mappings remain in coverage denominator.
-- Information Technology (XLK), Sector: score 41.25; state Fading; current rank 10; t-5 rank 8.5; rank change -1.5; historical peers 17; curated stock drilldown available (20); anchor eligibility eligible.
-  - percentile_excess21: 18.75; valid; valid
+- Information Technology (XLK), Sector: score 51.92307692307692; state Fading; current rank 27.0; t-5 rank 15.0; rank change -12.0; historical peers 53; curated stock drilldown available (20); anchor eligibility eligible.
+  - percentile_excess21: 36.53846153846154; valid; valid
   - percentile_excess63: 75.0; valid; valid
   - etf_breadth21_pct: 46.666666666666664; valid; valid
   - etf_breadth50_pct: 46.666666666666664; valid; valid
-  - current_strength_score: 18.75; valid; valid
+  - current_strength_score: 36.53846153846154; valid; valid
   - medium_strength_score: 75.0; valid; valid
-  - theme_score: 41.25; valid; valid
-  - Score peers: 21-session 17; 63-session 17; method price_relative_strength_v6_2; unavailable reason none.
+  - theme_score: 51.92307692307692; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
   - Breadth: EMA21 valid: valid; t-5 28.0; change 18.666666666666664 pp. EMA50 valid: valid; t-5 36.0; change 10.666666666666664 pp.
   - 2 excluded source rows; 1 unresolved equity mappings remain in coverage denominator.
-- Materials (XLB), Sector: score 67.5; state Leading; current rank 5; t-5 rank 4.0; rank change -1.0; historical peers 17; curated stock drilldown available (20); anchor eligibility eligible.
-  - percentile_excess21: 75.0; valid; valid
-  - percentile_excess63: 56.25; valid; valid
+- Materials (XLB), Sector: score 75.38461538461539; state Leading; current rank 10.0; t-5 rank 10.0; rank change 0.0; historical peers 53; curated stock drilldown available (20); anchor eligibility eligible.
+  - percentile_excess21: 80.76923076923077; valid; valid
+  - percentile_excess63: 67.3076923076923; valid; valid
   - etf_breadth21_pct: 75.0; valid; valid
   - etf_breadth50_pct: 70.83333333333333; valid; valid
-  - current_strength_score: 75.0; valid; valid
-  - medium_strength_score: 56.25; valid; valid
-  - theme_score: 67.5; valid; valid
-  - Score peers: 21-session 17; 63-session 17; method price_relative_strength_v6_2; unavailable reason none.
+  - current_strength_score: 80.76923076923077; valid; valid
+  - medium_strength_score: 67.3076923076923; valid; valid
+  - theme_score: 75.38461538461539; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
   - Breadth: EMA21 valid: valid; t-5 83.33333333333333; change -8.333333333333329 pp. EMA50 valid: valid; t-5 62.5; change 8.333333333333329 pp.
   - 2 excluded source rows; 1 unresolved equity mappings remain in coverage denominator.
-- Real Estate (XLRE), Sector: score 37.5; state Improving; current rank 12; t-5 rank 13.0; rank change 1.0; historical peers 17; curated stock drilldown available (20); anchor eligibility eligible.
-  - percentile_excess21: 50.0; valid; valid
-  - percentile_excess63: 18.75; valid; valid
+- Real Estate (XLRE), Sector: score 54.230769230769226; state Improving; current rank 25.0; t-5 rank 24.0; rank change -1.0; historical peers 53; curated stock drilldown available (20); anchor eligibility eligible.
+  - percentile_excess21: 67.3076923076923; valid; valid
+  - percentile_excess63: 34.61538461538461; valid; valid
   - etf_breadth21_pct: 76.66666666666667; valid; valid
   - etf_breadth50_pct: 46.666666666666664; valid; valid
-  - current_strength_score: 50.0; valid; valid
-  - medium_strength_score: 18.75; valid; valid
-  - theme_score: 37.5; valid; valid
-  - Score peers: 21-session 17; 63-session 17; method price_relative_strength_v6_2; unavailable reason none.
+  - current_strength_score: 67.3076923076923; valid; valid
+  - medium_strength_score: 34.61538461538461; valid; valid
+  - theme_score: 54.230769230769226; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
   - Breadth: EMA21 valid: valid; t-5 53.333333333333336; change 23.333333333333336 pp. EMA50 valid: valid; t-5 26.666666666666668; change 19.999999999999996 pp.
   - 2 excluded source rows; 1 unresolved equity mappings remain in coverage denominator.
-- Utilities (XLU), Sector: score 66.25; state Improving; current rank 6; t-5 rank 6.0; rank change 0.0; historical peers 17; curated stock drilldown available (20); anchor eligibility eligible.
-  - percentile_excess21: 93.75; valid; valid
-  - percentile_excess63: 25.0; valid; valid
+- Utilities (XLU), Sector: score 71.92307692307692; state Improving; current rank 13.0; t-5 rank 17.5; rank change 4.5; historical peers 53; curated stock drilldown available (20); anchor eligibility eligible.
+  - percentile_excess21: 94.23076923076923; valid; valid
+  - percentile_excess63: 38.46153846153846; valid; valid
   - etf_breadth21_pct: 87.09677419354838; valid; valid
   - etf_breadth50_pct: 80.64516129032258; valid; valid
-  - current_strength_score: 93.75; valid; valid
-  - medium_strength_score: 25.0; valid; valid
-  - theme_score: 66.25; valid; valid
-  - Score peers: 21-session 17; 63-session 17; method price_relative_strength_v6_2; unavailable reason none.
+  - current_strength_score: 94.23076923076923; valid; valid
+  - medium_strength_score: 38.46153846153846; valid; valid
+  - theme_score: 71.92307692307692; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
   - Breadth: EMA21 valid: valid; t-5 93.54838709677419; change -6.451612903225808 pp. EMA50 valid: valid; t-5 70.96774193548387; change 9.677419354838705 pp.
   - 2 excluded source rows; 1 unresolved equity mappings remain in coverage denominator.
-- Semiconductors (SMH), Theme: score 12.5; state Lagging; current rank 16; t-5 rank 14.0; rank change -2.0; historical peers 17; curated stock drilldown available (13); anchor eligibility eligible.
-  - percentile_excess21: 0.0; valid; valid
-  - percentile_excess63: 31.25; valid; valid
+- Semiconductors (SMH), Theme: score 25.76923076923077; state Lagging; current rank 42.0; t-5 rank 33.0; rank change -9.0; historical peers 53; curated stock drilldown available (13); anchor eligibility eligible.
+  - percentile_excess21: 13.461538461538462; valid; valid
+  - percentile_excess63: 44.23076923076923; valid; valid
   - etf_breadth21_pct: 4.3478260869565215; valid; valid
   - etf_breadth50_pct: 8.695652173913043; valid; valid
-  - current_strength_score: 0.0; valid; valid
-  - medium_strength_score: 31.25; valid; valid
-  - theme_score: 12.5; valid; valid
-  - Score peers: 21-session 17; 63-session 17; method price_relative_strength_v6_2; unavailable reason none.
+  - current_strength_score: 13.461538461538462; valid; valid
+  - medium_strength_score: 44.23076923076923; valid; valid
+  - theme_score: 25.76923076923077; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
   - Breadth: EMA21 valid: valid; t-5 0.0; change 4.3478260869565215 pp. EMA50 valid: valid; t-5 8.695652173913043; change 0.0 pp.
   - 2 excluded source rows; 1 unresolved equity mappings remain in coverage denominator.
-- Cloud Computing (SKYY), Theme: score 66.25; state Fading; current rank 7; t-5 rank 8.5; rank change 1.5; historical peers 17; curated stock drilldown available (10); anchor eligibility eligible.
-  - percentile_excess21: 43.75; valid; valid
-  - percentile_excess63: 100.0; valid; valid
+- Software (IGV), Theme: score 85.76923076923077; state Leading; current rank 6.0; t-5 rank 9.0; rank change 3.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 78.84615384615384; valid; valid
+  - percentile_excess63: 96.15384615384616; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 78.84615384615384; valid; valid
+  - medium_strength_score: 96.15384615384616; valid; valid
+  - theme_score: 85.76923076923077; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Cloud Computing (SKYY), Theme: score 75.0; state Leading; current rank 11.0; t-5 rank 12.5; rank change 1.5; historical peers 53; curated stock drilldown available (10); anchor eligibility eligible.
+  - percentile_excess21: 59.61538461538461; valid; valid
+  - percentile_excess63: 98.07692307692308; valid; valid
   - etf_breadth21_pct: 73.84615384615384; valid; valid
   - etf_breadth50_pct: 76.92307692307692; valid; valid
-  - current_strength_score: 43.75; valid; valid
-  - medium_strength_score: 100.0; valid; valid
-  - theme_score: 66.25; valid; valid
-  - Score peers: 21-session 17; 63-session 17; method price_relative_strength_v6_2; unavailable reason none.
+  - current_strength_score: 59.61538461538461; valid; valid
+  - medium_strength_score: 98.07692307692308; valid; valid
+  - theme_score: 75.0; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
   - Breadth: EMA21 valid: valid; t-5 46.15384615384615; change 27.692307692307686 pp. EMA50 valid: valid; t-5 55.38461538461539; change 21.538461538461533 pp.
   - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
-- Cybersecurity (CIBR), Theme: score 76.25; state Leading; current rank 4; t-5 rank 10.0; rank change 6.0; historical peers 17; curated stock drilldown available (10); anchor eligibility eligible.
-  - percentile_excess21: 68.75; valid; valid
-  - percentile_excess63: 87.5; valid; valid
+- Cybersecurity (CIBR), Theme: score 82.3076923076923; state Leading; current rank 9.0; t-5 rank 16.0; rank change 7.0; historical peers 53; curated stock drilldown available (10); anchor eligibility eligible.
+  - percentile_excess21: 76.92307692307692; valid; valid
+  - percentile_excess63: 90.38461538461539; valid; valid
   - etf_breadth21_pct: 82.92682926829268; valid; valid
   - etf_breadth50_pct: 82.92682926829268; valid; valid
-  - current_strength_score: 68.75; valid; valid
-  - medium_strength_score: 87.5; valid; valid
-  - theme_score: 76.25; valid; valid
-  - Score peers: 21-session 17; 63-session 17; method price_relative_strength_v6_2; unavailable reason none.
+  - current_strength_score: 76.92307692307692; valid; valid
+  - medium_strength_score: 90.38461538461539; valid; valid
+  - theme_score: 82.3076923076923; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
   - Breadth: EMA21 valid: valid; t-5 31.70731707317073; change 51.21951219512195 pp. EMA50 valid: valid; t-5 51.21951219512195; change 31.707317073170728 pp.
   - 0 excluded source rows; 4 unresolved equity mappings remain in coverage denominator.
-- Biotechnology (XBI), Theme: score 38.75; state Fading; current rank 11; t-5 rank 15.0; rank change 4.0; historical peers 17; curated stock drilldown unavailable; anchor eligibility eligible.
-  - percentile_excess21: 31.25; valid; valid
+- Internet (FDN), Theme: score 60.38461538461539; state Fading; current rank 19.0; t-5 rank 17.5; rank change -1.5; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 48.07692307692308; valid; valid
+  - percentile_excess63: 78.84615384615384; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 48.07692307692308; valid; valid
+  - medium_strength_score: 78.84615384615384; valid; valid
+  - theme_score: 60.38461538461539; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Artificial Intelligence & Big Data (AIQ), Theme: score 57.30769230769231; state Fading; current rank 22.0; t-5 rank 21.0; rank change -1.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 40.38461538461539; valid; valid
+  - percentile_excess63: 82.6923076923077; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 40.38461538461539; valid; valid
+  - medium_strength_score: 82.6923076923077; valid; valid
+  - theme_score: 57.30769230769231; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Robotics & Automation (BOTZ), Theme: score 39.230769230769226; state Lagging; current rank 33.0; t-5 rank 38.0; rank change 5.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 34.61538461538461; valid; valid
+  - percentile_excess63: 46.15384615384615; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 34.61538461538461; valid; valid
+  - medium_strength_score: 46.15384615384615; valid; valid
+  - theme_score: 39.230769230769226; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Quantum Computing (QTUM), Theme: score 30.384615384615383; state Fading; current rank 38.0; t-5 rank 37.0; rank change -1.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 17.307692307692307; valid; valid
   - percentile_excess63: 50.0; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 17.307692307692307; valid; valid
+  - medium_strength_score: 50.0; valid; valid
+  - theme_score: 30.384615384615383; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Blockchain & Digital-Asset Companies (BLOK), Theme: score 9.23076923076923; state Lagging; current rank 50.0; t-5 rank 47.0; rank change -3.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 3.8461538461538463; valid; valid
+  - percentile_excess63: 17.307692307692307; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 3.8461538461538463; valid; valid
+  - medium_strength_score: 17.307692307692307; valid; valid
+  - theme_score: 9.23076923076923; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Autonomous & Electric Vehicles (IDRV), Theme: score 19.23076923076923; state Lagging; current rank 46.0; t-5 rank 48.0; rank change 2.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 23.076923076923077; valid; valid
+  - percentile_excess63: 13.461538461538462; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 23.076923076923077; valid; valid
+  - medium_strength_score: 13.461538461538462; valid; valid
+  - theme_score: 19.23076923076923; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Biotechnology (XBI), Theme: score 53.07692307692308; state Fading; current rank 26.0; t-5 rank 40.0; rank change 14.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 46.15384615384615; valid; valid
+  - percentile_excess63: 63.46153846153846; valid; valid
   - etf_breadth21_pct: 28.662420382165607; valid; valid
   - etf_breadth50_pct: 22.22222222222222; valid; valid
-  - current_strength_score: 31.25; valid; valid
-  - medium_strength_score: 50.0; valid; valid
-  - theme_score: 38.75; valid; valid
-  - Score peers: 21-session 17; 63-session 17; method price_relative_strength_v6_2; unavailable reason none.
+  - current_strength_score: 46.15384615384615; valid; valid
+  - medium_strength_score: 63.46153846153846; valid; valid
+  - theme_score: 53.07692307692308; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
   - Breadth: EMA21 valid: valid; t-5 11.464968152866241; change 17.197452229299365 pp. EMA50 valid: valid; t-5 15.032679738562091; change 7.18954248366013 pp.
   - 10 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
-- Aerospace & Defense (XAR), Theme: score 3.75; state Lagging; current rank 17; t-5 rank 16.0; rank change -1.0; historical peers 17; curated stock drilldown available (10); anchor eligibility eligible.
-  - percentile_excess21: 6.25; valid; valid
-  - percentile_excess63: 0.0; valid; valid
+- Pharmaceuticals (XPH), Theme: score 36.15384615384615; state Lagging; current rank 36.0; t-5 rank 42.0; rank change 6.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 42.30769230769231; valid; valid
+  - percentile_excess63: 26.923076923076923; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 42.30769230769231; valid; valid
+  - medium_strength_score: 26.923076923076923; valid; valid
+  - theme_score: 36.15384615384615; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Medical Devices (IHI), Theme: score 86.92307692307693; state Leading; current rank 5.0; t-5 rank 5.5; rank change 0.5; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 88.46153846153847; valid; valid
+  - percentile_excess63: 84.61538461538461; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 88.46153846153847; valid; valid
+  - medium_strength_score: 84.61538461538461; valid; valid
+  - theme_score: 86.92307692307693; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Healthcare Providers (IHF), Theme: score 91.15384615384616; state Leading; current rank 3.0; t-5 rank 7.0; rank change 4.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 98.07692307692308; valid; valid
+  - percentile_excess63: 80.76923076923077; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 98.07692307692308; valid; valid
+  - medium_strength_score: 80.76923076923077; valid; valid
+  - theme_score: 91.15384615384616; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Genomics (ARKG), Theme: score 51.53846153846154; state Fading; current rank 28.0; t-5 rank 27.0; rank change -1.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 19.23076923076923; valid; valid
+  - percentile_excess63: 100.0; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 19.23076923076923; valid; valid
+  - medium_strength_score: 100.0; valid; valid
+  - theme_score: 51.53846153846154; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Aerospace & Defense (XAR), Theme: score 16.53846153846154; state Lagging; current rank 48.0; t-5 rank 44.0; rank change -4.0; historical peers 53; curated stock drilldown available (10); anchor eligibility eligible.
+  - percentile_excess21: 25.0; valid; valid
+  - percentile_excess63: 3.8461538461538463; valid; valid
   - etf_breadth21_pct: 30.0; valid; valid
   - etf_breadth50_pct: 13.043478260869565; valid; valid
-  - current_strength_score: 6.25; valid; valid
-  - medium_strength_score: 0.0; valid; valid
-  - theme_score: 3.75; valid; valid
-  - Score peers: 21-session 17; 63-session 17; method price_relative_strength_v6_2; unavailable reason none.
+  - current_strength_score: 25.0; valid; valid
+  - medium_strength_score: 3.8461538461538463; valid; valid
+  - theme_score: 16.53846153846154; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
   - Breadth: EMA21 valid: valid; t-5 32.0; change -2.0 pp. EMA50 valid: valid; t-5 6.521739130434782; change 6.521739130434782 pp.
   - 2 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
-- Clean Energy (ICLN), Theme: score 17.5; state Lagging; current rank 15; t-5 rank 17.0; rank change 2.0; historical peers 17; curated stock drilldown available (4); anchor eligibility eligible.
-  - percentile_excess21: 25.0; valid; valid
-  - percentile_excess63: 6.25; valid; valid
+- Space Economy (UFO), Theme: score 27.307692307692307; state Lagging; current rank 41.0; t-5 rank 46.0; rank change 5.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 28.846153846153847; valid; valid
+  - percentile_excess63: 25.0; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 28.846153846153847; valid; valid
+  - medium_strength_score: 25.0; valid; valid
+  - theme_score: 27.307692307692307; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- US Infrastructure (PAVE), Theme: score 37.69230769230769; state Improving; current rank 34.5; t-5 rank 20.0; rank change -14.5; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 50.0; valid; valid
+  - percentile_excess63: 19.23076923076923; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 50.0; valid; valid
+  - medium_strength_score: 19.23076923076923; valid; valid
+  - theme_score: 37.69230769230769; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Transportation (IYT), Theme: score 49.61538461538461; state Improving; current rank 29.0; t-5 rank 29.0; rank change 0.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 63.46153846153846; valid; valid
+  - percentile_excess63: 28.846153846153847; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 63.46153846153846; valid; valid
+  - medium_strength_score: 28.846153846153847; valid; valid
+  - theme_score: 49.61538461538461; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Airlines (JETS), Theme: score 20.76923076923077; state Lagging; current rank 45.0; t-5 rank 45.0; rank change 0.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 26.923076923076923; valid; valid
+  - percentile_excess63: 11.538461538461538; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 26.923076923076923; valid; valid
+  - medium_strength_score: 11.538461538461538; valid; valid
+  - theme_score: 20.76923076923077; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Agribusiness (MOO), Theme: score 57.30769230769231; state Leading; current rank 22.0; t-5 rank 32.0; rank change 10.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 55.76923076923077; valid; valid
+  - percentile_excess63: 59.61538461538461; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 55.76923076923077; valid; valid
+  - medium_strength_score: 59.61538461538461; valid; valid
+  - theme_score: 57.30769230769231; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Oil & Gas Exploration & Production (XOP), Theme: score 95.38461538461539; state Leading; current rank 2.0; t-5 rank 2.0; rank change 0.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 96.15384615384616; valid; valid
+  - percentile_excess63: 94.23076923076923; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 96.15384615384616; valid; valid
+  - medium_strength_score: 94.23076923076923; valid; valid
+  - theme_score: 95.38461538461539; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Oil Services (OIH), Theme: score 65.38461538461539; state Leading; current rank 17.0; t-5 rank 27.0; rank change 10.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 61.53846153846154; valid; valid
+  - percentile_excess63: 71.15384615384616; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 61.53846153846154; valid; valid
+  - medium_strength_score: 71.15384615384616; valid; valid
+  - theme_score: 65.38461538461539; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Midstream & MLP Infrastructure (AMLP), Theme: score 60.769230769230774; state Leading; current rank 18.0; t-5 rank 30.0; rank change 12.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 57.69230769230769; valid; valid
+  - percentile_excess63: 65.38461538461539; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 57.69230769230769; valid; valid
+  - medium_strength_score: 65.38461538461539; valid; valid
+  - theme_score: 60.769230769230774; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Natural Gas Companies (FCG), Theme: score 89.61538461538461; state Leading; current rank 4.0; t-5 rank 4.0; rank change 0.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 90.38461538461539; valid; valid
+  - percentile_excess63: 88.46153846153847; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 90.38461538461539; valid; valid
+  - medium_strength_score: 88.46153846153847; valid; valid
+  - theme_score: 89.61538461538461; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Clean Energy (ICLN), Theme: score 31.53846153846154; state Lagging; current rank 37.0; t-5 rank 43.0; rank change 6.0; historical peers 53; curated stock drilldown available (4); anchor eligibility eligible.
+  - percentile_excess21: 38.46153846153846; valid; valid
+  - percentile_excess63: 21.153846153846153; valid; valid
   - etf_breadth21_pct: 14.285714285714286; unavailable; Price coverage 14/103 below 80%
   - etf_breadth50_pct: 7.142857142857143; unavailable; Price coverage 14/103 below 80%
-  - current_strength_score: 25.0; valid; valid
-  - medium_strength_score: 6.25; valid; valid
-  - theme_score: 17.5; valid; valid
-  - Score peers: 21-session 17; 63-session 17; method price_relative_strength_v6_2; unavailable reason none.
+  - current_strength_score: 38.46153846153846; valid; valid
+  - medium_strength_score: 21.153846153846153; valid; valid
+  - theme_score: 31.53846153846154; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
   - Breadth: EMA21 unavailable: Price coverage 14/103 below 80%; t-5 None; change None pp. EMA50 unavailable: Price coverage 14/103 below 80%; t-5 None; change None pp.
   - 36 excluded source rows; 89 unresolved equity mappings remain in coverage denominator.
+- Solar (TAN), Theme: score 27.30769230769231; state Lagging; current rank 40.0; t-5 rank 49.0; rank change 9.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 44.23076923076923; valid; valid
+  - percentile_excess63: 1.9230769230769231; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 44.23076923076923; valid; valid
+  - medium_strength_score: 1.9230769230769231; valid; valid
+  - theme_score: 27.30769230769231; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Uranium Miners (URNM), Theme: score 8.461538461538462; state Lagging; current rank 51.0; t-5 rank 52.0; rank change 1.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 7.6923076923076925; valid; valid
+  - percentile_excess63: 9.615384615384615; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 7.6923076923076925; valid; valid
+  - medium_strength_score: 9.615384615384615; valid; valid
+  - theme_score: 8.461538461538462; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Nuclear Energy (NLR), Theme: score 8.076923076923077; state Lagging; current rank 52.0; t-5 rank 50.0; rank change -2.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 9.615384615384615; valid; valid
+  - percentile_excess63: 5.769230769230769; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 9.615384615384615; valid; valid
+  - medium_strength_score: 5.769230769230769; valid; valid
+  - theme_score: 8.076923076923077; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Lithium & Battery Technology (LIT), Theme: score 15.384615384615383; state Lagging; current rank 49.0; t-5 rank 41.0; rank change -8.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 15.384615384615385; valid; valid
+  - percentile_excess63: 15.384615384615385; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 15.384615384615385; valid; valid
+  - medium_strength_score: 15.384615384615385; valid; valid
+  - theme_score: 15.384615384615383; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Copper Miners (COPX), Theme: score 18.076923076923077; state Lagging; current rank 47.0; t-5 rank 25.0; rank change -22.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 5.769230769230769; valid; valid
+  - percentile_excess63: 36.53846153846154; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 5.769230769230769; valid; valid
+  - medium_strength_score: 36.53846153846154; valid; valid
+  - theme_score: 18.076923076923077; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Rare Earth & Strategic Materials (REMX), Theme: score 0.0; state Lagging; current rank 53.0; t-5 rank 53.0; rank change 0.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 0.0; valid; valid
+  - percentile_excess63: 0.0; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 0.0; valid; valid
+  - medium_strength_score: 0.0; valid; valid
+  - theme_score: 0.0; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Gold Miners (GDX), Theme: score 37.69230769230769; state Fading; current rank 34.5; t-5 rank 23.0; rank change -11.5; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 11.538461538461538; valid; valid
+  - percentile_excess63: 76.92307692307692; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 11.538461538461538; valid; valid
+  - medium_strength_score: 76.92307692307692; valid; valid
+  - theme_score: 37.69230769230769; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Silver Miners (SIL), Theme: score 22.692307692307693; state Fading; current rank 43.5; t-5 rank 39.0; rank change -4.5; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 1.9230769230769231; valid; valid
+  - percentile_excess63: 53.84615384615385; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 1.9230769230769231; valid; valid
+  - medium_strength_score: 53.84615384615385; valid; valid
+  - theme_score: 22.692307692307693; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Diversified Metals & Mining (PICK), Theme: score 29.615384615384613; state Lagging; current rank 39.0; t-5 rank 31.0; rank change -8.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 21.153846153846153; valid; valid
+  - percentile_excess63: 42.30769230769231; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 21.153846153846153; valid; valid
+  - medium_strength_score: 42.30769230769231; valid; valid
+  - theme_score: 29.615384615384613; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Regional Banks (KRE), Theme: score 58.46153846153847; state Improving; current rank 20.0; t-5 rank 35.0; rank change 15.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 65.38461538461539; valid; valid
+  - percentile_excess63: 48.07692307692308; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 65.38461538461539; valid; valid
+  - medium_strength_score: 48.07692307692308; valid; valid
+  - theme_score: 58.46153846153847; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Insurance (KIE), Theme: score 70.38461538461539; state Leading; current rank 14.5; t-5 rank 14.0; rank change -0.5; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 82.6923076923077; valid; valid
+  - percentile_excess63: 51.92307692307692; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 82.6923076923077; valid; valid
+  - medium_strength_score: 51.92307692307692; valid; valid
+  - theme_score: 70.38461538461539; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Broker-Dealers & Capital Markets (IAI), Theme: score 48.46153846153847; state Improving; current rank 30.0; t-5 rank 36.0; rank change 6.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 53.84615384615385; valid; valid
+  - percentile_excess63: 40.38461538461539; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 53.84615384615385; valid; valid
+  - medium_strength_score: 40.38461538461539; valid; valid
+  - theme_score: 48.46153846153847; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Homebuilders (ITB), Theme: score 56.92307692307693; state Improving; current rank 24.0; t-5 rank 34.0; rank change 10.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 73.07692307692308; valid; valid
+  - percentile_excess63: 32.69230769230769; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 73.07692307692308; valid; valid
+  - medium_strength_score: 32.69230769230769; valid; valid
+  - theme_score: 56.92307692307693; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Retail (XRT), Theme: score 74.23076923076923; state Leading; current rank 12.0; t-5 rank 8.0; rank change -4.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 86.53846153846153; valid; valid
+  - percentile_excess63: 55.76923076923077; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 86.53846153846153; valid; valid
+  - medium_strength_score: 55.76923076923077; valid; valid
+  - theme_score: 74.23076923076923; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Residential Real Estate (REZ), Theme: score 57.30769230769231; state Improving; current rank 22.0; t-5 rank 27.0; rank change 5.0; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 75.0; valid; valid
+  - percentile_excess63: 30.76923076923077; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 75.0; valid; valid
+  - medium_strength_score: 30.76923076923077; valid; valid
+  - theme_score: 57.30769230769231; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
+- Mortgage REITs (REM), Theme: score 22.692307692307693; state Lagging; current rank 43.5; t-5 rank 51.0; rank change 7.5; historical peers 53; curated stock drilldown unavailable; anchor eligibility eligible.
+  - percentile_excess21: 32.69230769230769; valid; valid
+  - percentile_excess63: 7.6923076923076925; valid; valid
+  - etf_breadth21_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - etf_breadth50_pct: None; unavailable; Holdings/constituent date unavailable, future, or older than 35 days
+  - current_strength_score: 32.69230769230769; valid; valid
+  - medium_strength_score: 7.6923076923076925; valid; valid
+  - theme_score: 22.692307692307693; valid; valid
+  - Score peers: 21-session 53; 63-session 53; method price_relative_strength_v6_2; unavailable reason none.
+  - Breadth: EMA21 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp. EMA50 unavailable: Holdings/constituent date unavailable, future, or older than 35 days; t-5 None; change None pp.
+  - 0 excluded source rows; 0 unresolved equity mappings remain in coverage denominator.
 
 ## ICLN score and breadth diagnostic
-- Current 25.0; Medium 6.25; Theme Score 17.5; state Lagging.
+- Current 38.46153846153846; Medium 21.153846153846153; Theme Score 31.53846153846154; state Lagging.
 - EMA21 breadth: unavailable; Price coverage 14/103 below 80%.
 - EMA50 breadth: unavailable; Price coverage 14/103 below 80%.
 - Mapped holdings: 103; unresolved equity mappings: 89; official source rows: 139.
 
 ## Layer totals
-- Eligible ETF anchors with no configured holdings parser (restored by removing holdings-parser eligibility gate): 0.
+- Eligible ETF anchors with no configured holdings parser (restored by removing holdings-parser eligibility gate): 36.
 - ETF score failures: 0; only ETF/SPY return data and peer availability affect these.
-- ETF breadth failures: 1; they do not affect ETF eligibility or score.
-- Curated stock drilldown unavailable: 1; it does not affect ETF eligibility or score.
+- ETF breadth failures: 37; they do not affect ETF eligibility or score.
+- Curated stock drilldown unavailable: 37; it does not affect ETF eligibility or score.
+
+## Registry coverage
+- Registry records: 65; eligible published exposures: 53; inactive exposures: 12.
+- Inactive exposures by first current eligibility reason: 30-session average dollar volume $1,145,304 is below $10,000,000: 1, 30-session average dollar volume $1,219,731 is below $10,000,000: 1, 30-session average dollar volume $1,515,400 is below $10,000,000: 1, 30-session average dollar volume $1,645,789 is below $10,000,000: 1, 30-session average dollar volume $2,834,073 is below $10,000,000: 1, 30-session average dollar volume $3,548,022 is below $10,000,000: 1, 30-session average dollar volume $4,788,136 is below $10,000,000: 1, 30-session average dollar volume $55,092 is below $10,000,000: 1, 30-session average dollar volume $553,809 is below $10,000,000: 1, 30-session average dollar volume $7,630,248 is below $10,000,000: 1, 30-session average dollar volume $973,945 is below $10,000,000: 1, ETF mandate review rejected: The AdvisorShares summary prospectus says MSOS uses total-return swaps alongside cannabis-company stock for core exposure. Because the mandate relies on synthetic derivatives, it does not meet the plain long-only cash-equity rule.: 1.
+- ETF-only published exposures: 37; published exposures with unavailable EMA21 or EMA50 breadth: 37.
+- Published exposures with curated stock drilldowns: 16; without curated stock drilldowns: 37.
+- Candidate mandate review outcomes: 112/112 complete (109 compatible, 3 rejected); ETFs otherwise passing current checks but excluded by the ADV30 floor alone: 33 (ARKF, BATT, BKCH, BOAT, CLOU, CUT, DRIV, EART, FAN, FINX, FIW, GAMR, GNOM, HERO, IBUY, KARS, MJ, NUKZ, ONLN, PBJ, PEJ, PHO, PJP, QCLN, RTH, SLVP, SLX, SRVR, THNQ, VEGI, WOOD, XHE, XHS).
+- ETF mandate compatibility requires a dated issuer source and a candidate-specific rationale. The $10 million ADV30 floor is retained; it is a configurable screening convention, not a claim of universal suitability.
 
 ## Registry audit
-- Registry records: 65; runtime eligible anchors: 17; inactive or unresolved this run: 48.
+- Registry records: 65; runtime eligible anchors: 53; inactive or unresolved this run: 12.
 - Communication Services (sector-communication-services): selected_anchor; selected XLC.
   - XLC: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed not applicable; https://www.ssga.com/us/en/intermediary/etfs/state-street-communication-services-select-sector-spdr-etf-xlc; State Street's current fund page identifies XLC as a Select Sector SPDR equity ETF tracking its U.S. sector index. The mandate is long-only sector-company equity exposure, not inverse, leveraged, options-income, or commodity-futures-only exposure..
 - Consumer Discretionary (sector-consumer-discretionary): selected_anchor; selected XLY.
   - XLY: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed not applicable; https://www.ssga.com/us/en/intermediary/etfs/state-street-consumer-discretionary-select-sector-spdr-etf-xly; State Street's current fund page identifies XLY as a Select Sector SPDR equity ETF tracking its U.S. sector index. The mandate is long-only sector-company equity exposure, not inverse, leveraged, options-income, or commodity-futures-only exposure..
 - Consumer Staples (sector-consumer-staples): selected_anchor; selected XLP.
   - XLP: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed not applicable; https://www.ssga.com/us/en/intermediary/etfs/state-street-consumer-staples-select-sector-spdr-etf-xlp; State Street's current fund page identifies XLP as a Select Sector SPDR equity ETF tracking its U.S. sector index. The mandate is long-only sector-company equity exposure, not inverse, leveraged, options-income, or commodity-futures-only exposure..
 - Energy (sector-energy): selected_anchor; selected XLE.
   - XLE: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed not applicable; https://www.ssga.com/us/en/intermediary/etfs/state-street-energy-select-sector-spdr-etf-xle; State Street's current fund page identifies XLE as a Select Sector SPDR equity ETF tracking its U.S. sector index. The mandate is long-only sector-company equity exposure, not inverse, leveraged, options-income, or commodity-futures-only exposure..
 - Financials (sector-financials): selected_anchor; selected XLF.
   - XLF: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed not applicable; https://www.ssga.com/us/en/intermediary/etfs/state-street-financial-select-sector-spdr-etf-xlf; State Street's current fund page identifies XLF as a Select Sector SPDR equity ETF tracking its U.S. sector index. The mandate is long-only sector-company equity exposure, not inverse, leveraged, options-income, or commodity-futures-only exposure..
 - Health Care (sector-health-care): selected_anchor; selected XLV.
   - XLV: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed not applicable; https://www.ssga.com/us/en/intermediary/etfs/state-street-health-care-select-sector-spdr-etf-xlv; State Street's current fund page identifies XLV as a Select Sector SPDR equity ETF tracking its U.S. sector index. The mandate is long-only sector-company equity exposure, not inverse, leveraged, options-income, or commodity-futures-only exposure..
 - Industrials (sector-industrials): selected_anchor; selected XLI.
   - XLI: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed not applicable; https://www.ssga.com/us/en/intermediary/etfs/state-street-industrials-select-sector-spdr-etf-xli; State Street's current fund page identifies XLI as a Select Sector SPDR equity ETF tracking its U.S. sector index. The mandate is long-only sector-company equity exposure, not inverse, leveraged, options-income, or commodity-futures-only exposure..
 - Information Technology (sector-information-technology): selected_anchor; selected XLK.
   - XLK: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed not applicable; https://www.ssga.com/us/en/intermediary/etfs/state-street-technology-select-sector-spdr-etf-xlk; State Street's current fund page identifies XLK as a Select Sector SPDR equity ETF tracking its U.S. sector index. The mandate is long-only sector-company equity exposure, not inverse, leveraged, options-income, or commodity-futures-only exposure..
 - Materials (sector-materials): selected_anchor; selected XLB.
   - XLB: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed not applicable; https://www.ssga.com/us/en/intermediary/etfs/state-street-materials-select-sector-spdr-etf-xlb; State Street's current fund page identifies XLB as a Select Sector SPDR equity ETF tracking its U.S. sector index. The mandate is long-only sector-company equity exposure, not inverse, leveraged, options-income, or commodity-futures-only exposure..
 - Real Estate (sector-real-estate): selected_anchor; selected XLRE.
   - XLRE: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed not applicable; https://www.ssga.com/us/en/intermediary/etfs/state-street-real-estate-select-sector-spdr-etf-xlre; State Street's current fund page identifies XLRE as a Select Sector SPDR equity ETF tracking its U.S. sector index. The mandate is long-only sector-company equity exposure, not inverse, leveraged, options-income, or commodity-futures-only exposure..
 - Utilities (sector-utilities): selected_anchor; selected XLU.
   - XLU: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed not applicable; https://www.ssga.com/us/en/intermediary/etfs/state-street-utilities-select-sector-spdr-etf-xlu; State Street's current fund page identifies XLU as a Select Sector SPDR equity ETF tracking its U.S. sector index. The mandate is long-only sector-company equity exposure, not inverse, leveraged, options-income, or commodity-futures-only exposure..
 - Semiconductors (theme-semiconductors): selected_anchor; selected SMH.
   - SMH: eligible; passed configured runtime checks
-  - SOXX: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-01-30; https://www.sec.gov/Archives/edgar/data/1137360/000113736026000117/vanecksemiconductoretfsmh4.htm; VanEck Semiconductor ETF tracks the MVIS U.S. Listed Semiconductor 25 Index; the current fund objective is long-only exposure to semiconductor company securities..
+  - SOXX: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-07-31; https://www.sec.gov/Archives/edgar/data/1100663/000119312526327967/d132214d497k.htm; SEC summary prospectus filed 2026-07-31 identifies iShares Semiconductor ETF: “The Fund seeks to track the investment results of the NYSE Semiconductor Index (the “ Underlying Index ” ), which measures the performance of the equity securities of the 30 largest U.S.-listed companies that are classified according to the ICE Uniform Sector Classification schema within…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - XSD: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+  - XSD: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2025-10-30; https://www.sec.gov/Archives/edgar/data/1064642/000119312525256792/d59772d497k.htm; SEC summary prospectus filed 2025-10-30 identifies State Street SPDR S&P Semiconductor ETF: “The State Street SPDR S&P Semiconductor ETF (the “ Fund ” ) seeks to provide investment results that, before fees and expenses, correspond generally to the total return performance of an index derived from the semiconductor segment of a U.S. total market composite index. Fees and Expenses…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Software (theme-software): inactive_this_run; selected none.
-  - IGV: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Software (theme-software): selected_anchor; selected IGV.
+  - IGV: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-07-31; https://www.sec.gov/Archives/edgar/data/1100663/000119312526327903/d39199d497k.htm; SEC summary prospectus filed 2026-07-31 identifies iShares Expanded Tech-Software Sector ETF: “The Fund seeks to track the investment results of the S&P North American Expanded Technology Software Index TM (the “ Underlying Index ” ), which measures the performance of U.S.-traded stocks from the software industry and select companies from the interactive home entertainment and…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - XSW: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+  - XSW: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2025-10-30; https://www.sec.gov/Archives/edgar/data/1064642/000119312525256811/d98446d497k.htm; SEC summary prospectus filed 2025-10-30 identifies State Street SPDR S&P Software & Services ETF: “The State Street SPDR S&P Software & Services ETF (the “ Fund ” ) seeks to provide investment results that, before fees and expenses, correspond generally to the total return performance of an index derived from the computer software segment of a U.S. total market composite index. Fees…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
 - Cloud Computing (theme-cloud-computing): selected_anchor; selected SKYY.
   - SKYY: eligible; passed configured runtime checks
-  - CLOU: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $7,780,396 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed not applicable; https://www.ftportfolios.com/Retail/Etf/EtfSummary.aspx?Ticker=SKYY; First Trust's current product page identifies SKYY as an ETF tracking an equity index of companies in its theme. This is a long-only company-equity mandate, not inverse, leveraged, options-income, or commodity-futures-only exposure..
+  - CLOU: ineligible; 30-session average dollar volume $7,780,396 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-03-31; https://www.sec.gov/Archives/edgar/data/1432353/000143235326000466/a497kcloudcomputing.htm; SEC summary prospectus filed 2026-03-31 identifies Global X Cloud Computing ETF: “The Fund invests at least 80% of its total assets in the securities of the Indxx Global Cloud Computing Index ("Underlying Index") and in American Depositary Receipts ("ADRs") and Global Depositary Receipts ("GDRs") based on the securities in the Underlying Index. The Fund's 80%…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - WCLD: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+  - WCLD: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-09-30; https://www.sec.gov/Archives/edgar/data/1350487/000121465926012312/wcld926497k.htm; SEC summary prospectus filed 2026-09-30 identifies WisdomTree Cloud Computing Fund: “of the Fund The Fund employs a “passive management” – or indexing – investment approach designed to track the performance of the Index. The Fund generally uses a representative sampling strategy to achieve its investment WisdomTree Trust Prospectus 1 objective, meaning it generally will…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
 - Cybersecurity (theme-cybersecurity): selected_anchor; selected CIBR.
   - CIBR: eligible; passed configured runtime checks
-  - HACK: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed not applicable; https://www.ftportfolios.com/Retail/Etf/EtfSummary.aspx?Ticker=CIBR; First Trust's current product page identifies CIBR as an ETF tracking an equity index of companies in its theme. This is a long-only company-equity mandate, not inverse, leveraged, options-income, or commodity-futures-only exposure..
+  - HACK: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-01-28; https://www.sec.gov/Archives/edgar/data/1633061/000121390026008346/ea0273008-17_497k.htm; SEC summary prospectus filed 2026-01-28 identifies Amplify Cybersecurity ETF: “The Amplify Cybersecurity ETF seeks investment results that generally correlate (before fees and expenses) to the total return performance of the Nasdaq ISE Cyber Security Select Index (the “Index”). FUND FEES AND EXPENSES This table describes the fees and expenses that you may pay if you…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - BUG: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+  - BUG: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-03-31; https://www.sec.gov/Archives/edgar/data/1432353/000143235326000467/a497kcybersecurity.htm; SEC summary prospectus filed 2026-03-31 identifies Global X Cybersecurity ETF: “The Fund invests at least 80% of its total assets in the securities of the Indxx Cybersecurity Index ("Underlying Index") and in American Depositary Receipts ("ADRs") and Global Depositary Receipts ("GDRs") based on the securities in the Underlying Index. The Fund will also invest, under…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Internet (theme-internet): inactive_this_run; selected none.
-  - FDN: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Internet (theme-internet): selected_anchor; selected FDN.
+  - FDN: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-05-01; https://www.sec.gov/Archives/edgar/data/1329377/000144554626003279/etf1_fdn497k.htm; The First Trust summary prospectus says FDN invests at least 90% in Dow Jones Internet Index securities; the index holds internet commerce and services equities..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Artificial Intelligence & Big Data (theme-artificial-intelligence): inactive_this_run; selected none.
-  - AIQ: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Artificial Intelligence & Big Data (theme-artificial-intelligence): selected_anchor; selected AIQ.
+  - AIQ: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-03-31; https://www.sec.gov/Archives/edgar/data/1432353/000143235326000464/a497kartificialintelligenc.htm; SEC summary prospectus filed 2026-03-31 identifies Global X Artificial Intelligence & Technology ETF: “The Fund invests at least 80% of its total assets in the securities of the Indxx Artificial Intelligence & Big Data Index ("Underlying Index"). The Underlying Index is designed to track the performance of companies involved in the development and utilization of artificial intelligence…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - THNQ: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $4,278,916 is below $10,000,000
+  - THNQ: ineligible; 30-session average dollar volume $4,278,916 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-08-28; https://www.sec.gov/Archives/edgar/data/1452937/000121390026095070/ea0301683-15_497k.htm; SEC summary prospectus filed 2026-08-28 identifies Robo Global Artificial Intelligence ETF: “The Fund normally invests in securities comprising the Index and in depositary receipts representing securities comprising the Index. The Index, which is owned and provided by ROBO Global Index LLC, a wholly owned subsidiary of VettaFi LLC (the “Index Provider”), is designed to measure…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Robotics & Automation (theme-robotics-automation): inactive_this_run; selected none.
-  - BOTZ: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Robotics & Automation (theme-robotics-automation): selected_anchor; selected BOTZ.
+  - BOTZ: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-03-31; https://www.sec.gov/Archives/edgar/data/1432353/000143235326000461/a497kroboticsartificialint.htm; SEC summary prospectus filed 2026-03-31 identifies Global X Robotics & Artificial Intelligence ETF: “The Fund invests at least 80% of its total assets in the securities of the Indxx Global Robotics & Artificial Intelligence Thematic Index ("Underlying Index"). The Fund's 80% investment policy is non-fundamental and requires 60 days prior written notice to shareholders before it can be…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - ROBO: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+  - ROBO: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-08-28; https://www.sec.gov/Archives/edgar/data/1452937/000121390026095070/ea0301683-15_497k.htm; SEC summary prospectus filed 2026-08-28 identifies Robo Global Robotics and Automation Index ETF: “. The Fund generally will use a replication methodology, meaning it will invest in all of the securities comprising the Index in proportion to the weightings in the Index. However, the Fund may utilize a sampling methodology under various circumstances, including when it may not be…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Quantum Computing (theme-quantum-computing): inactive_this_run; selected none.
-  - QTUM: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Quantum Computing (theme-quantum-computing): selected_anchor; selected QTUM.
+  - QTUM: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-09-02; https://www.sec.gov/Archives/edgar/data/1540305/000089418926025003/qtumsummary.htm; SEC summary prospectus filed 2026-09-02 identifies Defiance Quantum ETF: “The Fund uses a “passive management” (or indexing) approach to track the total return performance, before fees and expenses, of the Index. BlueStar® Quantum Computing and Machine Learning Index The Index consists of a modified equal-weighted portfolio of the stock of companies that derive…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
 - Fintech (theme-fintech): inactive_this_run; selected none.
-  - FINX: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $973,945 is below $10,000,000
+  - FINX: ineligible; 30-session average dollar volume $973,945 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-03-31; https://www.sec.gov/Archives/edgar/data/1432353/000143235326000459/a497kfintech.htm; SEC summary prospectus filed 2026-03-31 identifies Global X FinTech ETF: “The Fund invests at least 80% of its total assets in the securities of the Indxx Global Fintech Thematic Index ("Underlying Index"). The Fund's 80% investment policy is non-fundamental and requires 60 days prior written notice to shareholders before it can be changed. The Fund may lend…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - ARKF: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $5,090,389 is below $10,000,000
+  - ARKF: ineligible; 30-session average dollar volume $5,090,389 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2025-11-28; https://www.sec.gov/Archives/edgar/data/1579982/000121390025115994/ea0266434-04_497k.htm; SEC summary prospectus filed 2025-11-28 identifies ARK Blockchain & Fintech Innovation ETF: “The Fund is an actively -managed exchange -traded fund (“ETF”) that will invest under normal circumstances primarily (at least 80% of its assets) in domestic and foreign equity securities of companies that are engaged in the Fund’s investment theme of Blockchain & Fintech innovation. A…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Blockchain & Digital-Asset Companies (theme-blockchain): inactive_this_run; selected none.
-  - BLOK: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Blockchain & Digital-Asset Companies (theme-blockchain): selected_anchor; selected BLOK.
+  - BLOK: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-01-28; https://www.sec.gov/Archives/edgar/data/1633061/000121390026008334/ea0273008-08_497k.htm; SEC summary prospectus filed 2026-01-28 identifies Amplify Blockchain Technology ETF: “The Fund is an actively managed ETF that seeks to provide total return by investing at least 80% of its net assets (plus borrowings for investment purposes) in the equity securities of companies actively involved in the development and utilization of blockchain technologies. The Fund may…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - BKCH: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $4,729,674 is below $10,000,000
+  - BKCH: ineligible; 30-session average dollar volume $4,729,674 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-03-31; https://www.sec.gov/Archives/edgar/data/1432353/000143235326000475/a497kblockchain.htm; SEC summary prospectus filed 2026-03-31 identifies Global X Blockchain ETF: “The Fund invests at least 80% of its total assets, plus borrowings for investment purposes (if any), in the securities of the Solactive Blockchain Index (the "Underlying Index") and in American Depositary Receipts ("ADRs") and Global Depositary Receipts ("GDRs") based on the securities in…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
 - Data Centers & Digital Infrastructure (theme-data-centers): inactive_this_run; selected none.
-  - SRVR: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $3,548,022 is below $10,000,000
+  - SRVR: ineligible; 30-session average dollar volume $3,548,022 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-08-31; https://www.sec.gov/Archives/edgar/data/1616668/000089418926024267/summary-pacerdatainfrastru.htm; SEC summary prospectus filed 2026-08-31 identifies Pacer Data & Infrastructure Real Estate ETF: “of the Fund The Fund employs a “passive management” (or indexing) investment approach designed to track the total return performance, before fees and expenses, of the Index. The Index was developed by Global Property Research B.V. and Solactive AG (the “Index Provider”), and measures the…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - VPN: ineligible; ETF price history unavailable; Requires 64 valid price sessions; 0 available; Retrieved instrument is not verified as a USD ETF; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume unavailable; Price retrieval error: RuntimeError: Source request failed for https://query1.finance.yahoo.com/v8/finance/chart/VPN?period1=1729544270&period2=1792875470&interval=1d&events=div%2Csplits&includeAdjustedClose=true: HTTP Error 404: Not Found; Source request failed for https://query2.finance.yahoo.com/v8/finance/chart/VPN?period1=1729544270&period2=1792875470&interval=1d&events=div%2Csplits&includeAdjustedClose=true: HTTP Error 404: Not Found
+  - VPN: ineligible; ETF price history unavailable; Requires 64 valid price sessions; 0 available; Retrieved instrument is not verified as a USD ETF; ETF mandate review rejected: On 2026-10-24 the issuer product endpoint returned HTTP 404, exact-ticker ETF search returned no current listing, and both configured Yahoo chart hosts returned HTTP 404. No current issuer prospectus, listing, instrument type, or mandate could be verified, so VPN fails the evidence gate and is rejected.; 30-session average dollar volume unavailable; Price retrieval error: RuntimeError: Source request failed for https://query1.finance.yahoo.com/v8/finance/chart/VPN?period1=1729544270&period2=1792875470&interval=1d&events=div%2Csplits&includeAdjustedClose=true: HTTP Error 404: Not Found; Source request failed for https://query2.finance.yahoo.com/v8/finance/chart/VPN?period1=1729544270&period2=1792875470&interval=1d&events=div%2Csplits&includeAdjustedClose=true: HTTP Error 404: Not Found
+    - Mandate review: rejected; reviewed 2026-10-24; source filed not applicable; https://www.globalxetfs.com/funds/vpn/; On 2026-10-24 the issuer product endpoint returned HTTP 404, exact-ticker ETF search returned no current listing, and both configured Yahoo chart hosts returned HTTP 404. No current issuer prospectus, listing, instrument type, or mandate could be verified, so VPN fails the evidence gate and is rejected..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Autonomous & Electric Vehicles (theme-autonomous-electric-vehicles): inactive_this_run; selected none.
-  - DRIV: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $1,376,545 is below $10,000,000
+- Autonomous & Electric Vehicles (theme-autonomous-electric-vehicles): selected_anchor; selected IDRV.
+  - DRIV: ineligible; 30-session average dollar volume $1,376,545 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-03-31; https://www.sec.gov/Archives/edgar/data/1432353/000143235326000463/a497kautonomouselectricveh.htm; SEC summary prospectus filed 2026-03-31 identifies Global X Autonomous & Electric Vehicles ETF: “The Fund invests at least 80% of its total assets in the securities of the Solactive Autonomous & Electric Vehicles Index ("Underlying Index"). The Fund's 80% investment policy is non-fundamental and requires 60 days prior written notice to shareholders before it can be changed. The Fund…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - KARS: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $219,654 is below $10,000,000
+  - KARS: ineligible; 30-session average dollar volume $219,654 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-07-31; https://www.sec.gov/Archives/edgar/data/1547576/000182912626008204/kraneshares-kars_497k.htm; SEC summary prospectus filed 2026-07-31 identifies KraneShares Electric Vehicles and Future Mobility Index ETF: “Under normal circumstances, the Fund will invest at least 80% of its net assets (plus borrowings for investment purposes) in instruments in its Underlying Index or in instruments that have economic characteristics similar to those in the Underlying Index. The Underlying Index is designed…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - IDRV: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+  - IDRV: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2025-11-28; https://www.sec.gov/Archives/edgar/data/1100663/000119312525302134/d64992d497k.htm; SEC summary prospectus filed 2025-11-28 identifies iShares Self-Driving EV and Tech ETF: “The Fund seeks to track the investment results of the NYSE ® FactSet ® Global Autonomous Driving and Electric Vehicle Index (the “ Underlying Index ” ), which measures the performance of equity securities issued by companies that produce autonomous driving vehicles, electric vehicles,…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
 - Video Games & Esports (theme-video-games): inactive_this_run; selected none.
-  - GAMR: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $55,092 is below $10,000,000
+  - GAMR: ineligible; 30-session average dollar volume $55,092 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-01-28; https://www.sec.gov/Archives/edgar/data/1633061/000121390026008361/ea0273008-30_497k.htm; SEC summary prospectus filed 2026-01-28 identifies Amplify Video Game Leaders ETF: “Under normal circumstances, the Fund will invest at least 80% of its net assets (plus borrowings for investment purposes) in equity securities in the video gaming industry that comprise the Index. The Fund uses a “passive” or indexing approach to try to achieve the Fund’s investment…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - HERO: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $364,759 is below $10,000,000
+  - HERO: ineligible; 30-session average dollar volume $364,759 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-03-31; https://www.sec.gov/Archives/edgar/data/1432353/000143235326000469/a497kvideogamesesports.htm; SEC summary prospectus filed 2026-03-31 identifies Global X Video Games & Esports ETF: “The Fund invests at least 80% of its total assets in the securities of the Solactive Video Games & Esports Index ("Underlying Index") and in American Depositary Receipts ("ADRs") and Global Depositary Receipts ("GDRs") based on the securities in the Underlying Index. The Fund will also…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
 - E-Commerce (theme-ecommerce): inactive_this_run; selected none.
-  - IBUY: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $553,809 is below $10,000,000
+  - IBUY: ineligible; 30-session average dollar volume $553,809 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-01-28; https://www.sec.gov/Archives/edgar/data/1633061/000121390026008352/ea0273008-23_497k.htm; SEC summary prospectus filed 2026-01-28 identifies Amplify Online Retail ETF: “The Fund invests at least 80% of its net assets (plus borrowings for investment purposes) in global equity securities that comprise the Index, which will primarily include common stocks and/or depositary receipts, such as American Depositary Receipts (“ADRs”) and Global Depositary…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - ONLN: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $173,212 is below $10,000,000
+  - ONLN: ineligible; 30-session average dollar volume $173,212 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-09-28; https://www.sec.gov/Archives/edgar/data/1174610/000117461026000911/f46146d1.htm; SEC summary prospectus filed 2026-09-28 identifies ProShares Online Retail ETF: “The Fund invests in financial instruments that ProShare Advisors believes, in combination, should track the performance of the Index. The Index is designed to measure the performance of U.S.-listed companies deemed to be “Online Retailers.” The Index includes U.S. and non-U.S. companies…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
 - Biotechnology (theme-biotechnology): selected_anchor; selected XBI.
   - XBI: eligible; passed configured runtime checks
-  - IBB: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed not applicable; https://www.ssga.com/us/en/intermediary/etfs/state-street-spdr-sp-biotech-etf-xbi; State Street's current fund page identifies XBI as a Select Sector SPDR equity ETF tracking its U.S. sector index. The mandate is long-only sector-company equity exposure, not inverse, leveraged, options-income, or commodity-futures-only exposure..
+  - IBB: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-07-31; https://www.sec.gov/Archives/edgar/data/1100663/000119312526327962/d130539d497k.htm; SEC summary prospectus filed 2026-07-31 identifies iShares Biotechnology ETF: “The Fund seeks to track the investment results of the NYSE Biotechnology Index (the “ Underlying Index ” ), which measures the performance of U.S.-listed securities of companies that are classified according to the ICE Uniform Sector Classification schema within the Biotechnology…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Pharmaceuticals (theme-pharmaceuticals): inactive_this_run; selected none.
-  - XPH: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Pharmaceuticals (theme-pharmaceuticals): selected_anchor; selected XPH.
+  - XPH: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2025-10-30; https://www.sec.gov/Archives/edgar/data/1064642/000119312525256790/d53122d497k.htm; SEC summary prospectus filed 2025-10-30 identifies State Street SPDR S&P Pharmaceuticals ETF: “The State Street SPDR S&P Pharmaceuticals ETF (the “ Fund ” ) seeks to provide investment results that, before fees and expenses, correspond generally to the total return performance of an index derived from the pharmaceuticals segment of a U.S. total market composite index. Fees and…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - PJP: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $4,489,284 is below $10,000,000
+  - PJP: ineligible; 30-session average dollar volume $4,489,284 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-08-28; https://www.sec.gov/Archives/edgar/data/1209466/000119312526372152/d177078d497k.htm; SEC summary prospectus filed 2026-08-28 identifies Invesco Pharmaceuticals ETF: “The Fund is an index fund that seeks to track the investment results of the Underlying Index. Strictly in accordance with its guidelines and mandated procedures, ICE Data Indices, LLC (“ICE Data” or the “Index Provider”) compiles and maintains the Underlying Index, which is composed of…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Medical Devices (theme-medical-devices): inactive_this_run; selected none.
-  - IHI: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Medical Devices (theme-medical-devices): selected_anchor; selected IHI.
+  - IHI: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-07-31; https://www.sec.gov/Archives/edgar/data/1100663/000119312526327981/d147643d497k.htm; SEC summary prospectus filed 2026-07-31 identifies iShares U.S. Medical Devices ETF: “The Fund seeks to track the investment results of the Dow Jones U.S. Select Medical Equipment Index (the “ Underlying Index ” ), which measures the performance of the medical equipment sector of the U.S. equity market, as defined by S&P Dow Jones Indices LLC (the “ Index Provider ” or “…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - XHE: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $3,722,888 is below $10,000,000
+  - XHE: ineligible; 30-session average dollar volume $3,722,888 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2025-10-30; https://www.sec.gov/Archives/edgar/data/1064642/000119312525256782/d31900d497k.htm; SEC summary prospectus filed 2025-10-30 identifies State Street SPDR S&P Health Care Equipment ETF: “The State Street SPDR S&P Health Care Equipment ETF (the “ Fund ” ) seeks to provide investment results that, before fees and expenses, correspond generally to the total return performance of an index derived from the health care equipment and supplies segment of a U.S. total market…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Healthcare Providers (theme-healthcare-providers): inactive_this_run; selected none.
-  - IHF: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Healthcare Providers (theme-healthcare-providers): selected_anchor; selected IHF.
+  - IHF: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-07-31; https://www.sec.gov/Archives/edgar/data/1100663/000119312526327975/d143841d497k.htm; SEC summary prospectus filed 2026-07-31 identifies iShares U.S. Healthcare Providers ETF: “The Fund seeks to track the investment results of the Dow Jones U.S. Select Health Care Providers Index (the “ Underlying Index ” ), which measures the performance of the healthcare providers sector of the U.S. equity market, as defined by S&P Dow Jones Indices LLC (the “ Index Provider ”…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - XHS: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $5,232,190 is below $10,000,000
+  - XHS: ineligible; 30-session average dollar volume $5,232,190 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2025-10-30; https://www.sec.gov/Archives/edgar/data/1064642/000119312525256784/d33014d497k.htm; SEC summary prospectus filed 2025-10-30 identifies State Street SPDR S&P Health Care Services ETF: “The State Street SPDR S&P Health Care Services ETF (the “ Fund ” ) seeks to provide investment results that, before fees and expenses, correspond generally to the total return performance of an index derived from the health care providers and services segment of a U.S. total market…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Genomics (theme-genomics): inactive_this_run; selected none.
-  - ARKG: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Genomics (theme-genomics): selected_anchor; selected ARKG.
+  - ARKG: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2025-11-28; https://www.sec.gov/Archives/edgar/data/1579982/000121390025115995/ea0266434-05_497k.htm; SEC summary prospectus filed 2025-11-28 identifies ARK Genomic Revolution ETF: “The Fund is an actively -managed exchange -traded fund (“ETF”) that will invest under normal circumstances primarily (at least 80% of its assets) in domestic and foreign equity securities of companies across multiple sectors, including healthcare, information technology, materials, energy…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - GNOM: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $2,475,767 is below $10,000,000
+  - GNOM: ineligible; 30-session average dollar volume $2,475,767 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-03-31; https://www.sec.gov/Archives/edgar/data/1432353/000143235326000465/a497kgenomicsbiotechnology.htm; SEC summary prospectus filed 2026-03-31 identifies Global X Genomics & Biotechnology ETF: “The Fund invests at least 80% of its total assets in the securities of the Solactive Genomics Index ("Underlying Index"). The Fund's 80% investment policy is non-fundamental and requires 60 days prior written notice to shareholders before it can be changed. The Fund may lend securities…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
 - Cannabis (theme-cannabis): inactive_this_run; selected none.
-  - MSOS: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+  - MSOS: ineligible; ETF mandate review rejected: The AdvisorShares summary prospectus says MSOS uses total-return swaps alongside cannabis-company stock for core exposure. Because the mandate relies on synthetic derivatives, it does not meet the plain long-only cash-equity rule.
+    - Mandate review: rejected; reviewed 2026-10-24; source filed 2025-10-30; https://www.sec.gov/Archives/edgar/data/1408970/000182912625008584/advisorshares-msos_497k.htm; The AdvisorShares summary prospectus says MSOS uses total-return swaps alongside cannabis-company stock for core exposure. Because the mandate relies on synthetic derivatives, it does not meet the plain long-only cash-equity rule..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - MJ: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $723,067 is below $10,000,000
+  - MJ: ineligible; 30-session average dollar volume $723,067 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-01-28; https://www.sec.gov/Archives/edgar/data/1633061/000121390026008329/ea0273008-03_497k.htm; SEC summary prospectus filed 2026-01-28 identifies Amplify Alternative Harvest ETF: “The Fund uses a “passive” or indexing approach to try to achieve the Fund’s investment objective. Unlike many investment companies, the Fund does not try to “beat” the Prime Alternative Harvest Index (the “ Index ”) and does not seek temporary defensive positions when markets decline or…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
 - Aerospace & Defense (theme-aerospace-defense): selected_anchor; selected XAR.
-  - ITA: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+  - ITA: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-07-31; https://www.sec.gov/Archives/edgar/data/1100663/000119312526327946/d124021d497k.htm; SEC summary prospectus filed 2026-07-31 identifies iShares U.S. Aerospace & Defense ETF: “The Fund seeks to track the investment results of the Dow Jones U.S. Select Aerospace & Defense Index (the “ Underlying Index ” ), which measures the performance of the aerospace and defense sector of the U.S. equity market, as defined by S&P Dow Jones Indices LLC (the “ Index Provider ”…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
   - XAR: eligible; passed configured runtime checks
-  - PPA: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed not applicable; https://www.ssga.com/us/en/intermediary/etfs/state-street-spdr-sp-aerospace-defense-etf-xar; State Street's current fund page identifies XAR as a Select Sector SPDR equity ETF tracking its U.S. sector index. The mandate is long-only sector-company equity exposure, not inverse, leveraged, options-income, or commodity-futures-only exposure..
+  - PPA: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-08-28; https://www.sec.gov/Archives/edgar/data/1209466/000119312526372120/d177078d497k.htm; SEC summary prospectus filed 2026-08-28 identifies Invesco Aerospace & Defense ETF: “The Fund is an index fund that seeks to track the investment results of the Underlying Index. Strictly in accordance with its guidelines and mandated procedures, SPADE Indexes LLC (“SPADE Indexes” or the “Index Provider”) compiles, maintains, and calculates the Underlying Index, which is…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Space Economy (theme-space): inactive_this_run; selected none.
-  - UFO: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Space Economy (theme-space): selected_anchor; selected UFO.
+  - UFO: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-02-24; https://www.sec.gov/Archives/edgar/data/1727398/000089418926004513/procurespaceetfsummaryinfo.htm; SEC summary prospectus filed 2026-02-24 identifies Procure Space ETF: “Procure Space ETF ® (the “Fund”) seeks investment results that correspond generally to the performance, before the Fund’s fees and expenses, of an equity index called the “S-Network Space Index” (the “Underlying Index”) developed by VettaFi, LLC (the “Index Provider”). Fees and Expenses…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - ARKX: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+  - ARKX: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2025-11-28; https://www.sec.gov/Archives/edgar/data/1579982/000121390025115997/ea0266434-07_497k.htm; SEC summary prospectus filed 2025-11-28 identifies ARK Space & Defense Innovation ETF: “The Fund is an actively -managed exchange -traded fund (“ETF”) that will invest under normal circumstances primarily (at least 80% of its assets) in domestic and foreign equity securities of companies that are engaged in the Fund’s investment theme of Space & Defense Innovation. The…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- US Infrastructure (theme-us-infrastructure): inactive_this_run; selected none.
-  - PAVE: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- US Infrastructure (theme-us-infrastructure): selected_anchor; selected PAVE.
+  - PAVE: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-03-31; https://www.sec.gov/Archives/edgar/data/1432353/000143235326000462/a497kusinfrastructuredevel.htm; SEC summary prospectus filed 2026-03-31 identifies Global X U.S. Infrastructure Development ETF: “The Fund invests at least 80% of its total assets in the securities of the Indxx U.S. Infrastructure Development Index ("Underlying Index"). The Fund's 80% investment policy is non-fundamental and requires 60 days prior written notice to shareholders before it can be changed. The Fund may…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - IFRA: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+  - IFRA: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-07-31; https://www.sec.gov/Archives/edgar/data/1100663/000119312526327901/d25590d497k.htm; SEC summary prospectus filed 2026-07-31 identifies iShares U.S. Infrastructure ETF: “The Fund seeks to track the investment results of the NYSE ® FactSet U.S. Infrastructure Index (the “ Underlying Index ” ), which is designed to measure the performance of equity securities of U.S. companies involved in U.S.-focused infrastructure activities (as determined by ICE Data…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Transportation (theme-transportation): inactive_this_run; selected none.
-  - IYT: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Transportation (theme-transportation): selected_anchor; selected IYT.
+  - IYT: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-08-31; https://www.sec.gov/Archives/edgar/data/1100663/000119312526375925/d44459d497k.htm; SEC summary prospectus filed 2026-08-31 identifies iShares Transportation Average ETF: “The Fund seeks to track the investment results of the S&P Transportation Select Industry FMC Capped Index (the “ Underlying Index ” ), which measures the performance of companies within the transportation sector of the U.S. equity market as determined by S&P Dow Jones Indices LLC (the “…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - XTN: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+  - XTN: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2025-10-30; https://www.sec.gov/Archives/edgar/data/1064642/000119312525256794/d64146d497k.htm; SEC summary prospectus filed 2025-10-30 identifies State Street SPDR S&P Transportation ETF: “The State Street SPDR S&P Transportation ETF (the “ Fund ” ) seeks to provide investment results that, before fees and expenses, correspond generally to the total return performance of an index derived from the transportation segment of a U.S. total market composite index. Fees and…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Airlines (theme-airlines): inactive_this_run; selected none.
-  - JETS: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Airlines (theme-airlines): selected_anchor; selected JETS.
+  - JETS: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-04-30; https://www.sec.gov/Archives/edgar/data/1540305/000089418926013955/jetssummary.htm; The current U.S. Global Jets ETF summary prospectus identifies Trading Symbol JETS and an objective tracking the U.S. Global Jets Index. It is a long-only equity ETF; the earlier false match to Direxion leveraged funds is not its filing..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
 - Shipping (theme-shipping): inactive_this_run; selected none.
-  - BOAT: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $7,630,248 is below $10,000,000
+  - BOAT: ineligible; 30-session average dollar volume $7,630,248 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-07-30; https://www.sec.gov/Archives/edgar/data/1742912/000199937126016401/boat-497k_073026.htm; SEC summary prospectus filed 2026-07-30 identifies SonicShares Global Shipping ETF: “The Fund uses a “passive management” (or indexing) approach to track the performance, before fees and expenses, of the Index. The Index was developed in 2021 and is administered by Solactive AG (the “Index Provider”). Solactive Global Shipping Index The Index is a rules-based index that…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
 - Water (theme-water): inactive_this_run; selected none.
-  - PHO: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $4,788,136 is below $10,000,000
+  - PHO: ineligible; 30-session average dollar volume $4,788,136 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-08-28; https://www.sec.gov/Archives/edgar/data/1209466/000119312526372187/d177078d497k.htm; SEC summary prospectus filed 2026-08-28 identifies Invesco Water Resources ETF: “The Fund is an index fund that seeks to track the investment results of the Underlying Index. Strictly in accordance with its guidelines and mandated procedures, Nasdaq, Inc. (“Nasdaq” or the “Index Provider”) compiles the Underlying Index, which seeks to track the performance of…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - FIW: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $4,775,037 is below $10,000,000
+  - FIW: ineligible; 30-session average dollar volume $4,775,037 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-05-01; https://www.sec.gov/Archives/edgar/data/1329377/000144554626003280/etf1_fiw497k.htm; SEC summary prospectus filed 2026-05-01 identifies First Trust Water ETF: “The Fund will normally invest at least 90% of its net assets (including investment borrowings) in the securities that comprise the Index. The Fund, using an indexing investment approach, attempts to replicate, before fees and expenses, the performance of the Index. The Index is developed…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Agribusiness (theme-agribusiness): inactive_this_run; selected none.
-  - MOO: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Agribusiness (theme-agribusiness): selected_anchor; selected MOO.
+  - MOO: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-04-30; https://www.sec.gov/Archives/edgar/data/1137360/000113736026000492/vaneckagribusinessetfmoosu.htm; SEC summary prospectus filed 2026-04-30 identifies VanEck Agribusiness ETF: “The Fund normally invests at least 80% of its total assets in securities that comprise the Fund’s benchmark index. For purposes of this policy, the term “assets” means net assets plus the amount of any borrowings for investment purposes. The Agribusiness Index includes equity securities…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - VEGI: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $2,004,358 is below $10,000,000
+  - VEGI: ineligible; 30-session average dollar volume $2,004,358 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2025-12-30; https://www.sec.gov/Archives/edgar/data/930667/000119312525336646/d51750d497k.htm; The iShares summary prospectus says VEGI tracks an index of global equities of companies primarily engaged in agriculture; the mandate is long-only equity exposure..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Oil & Gas Exploration & Production (theme-oil-gas-exploration): inactive_this_run; selected none.
-  - XOP: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Oil & Gas Exploration & Production (theme-oil-gas-exploration): selected_anchor; selected XOP.
+  - XOP: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2025-10-30; https://www.sec.gov/Archives/edgar/data/1064642/000119312525256789/d51831d497k.htm; SEC summary prospectus filed 2025-10-30 identifies State Street SPDR S&P Oil & Gas Exploration & Production ETF: “The State Street SPDR S&P Oil & Gas Exploration & Production ETF (the “ Fund ” ) seeks to provide investment results that, before fees and expenses, correspond generally to the total return performance of an index derived from the oil and gas exploration and production segment of a U.S.…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - IEO: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+  - IEO: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-07-31; https://www.sec.gov/Archives/edgar/data/1100663/000119312526327939/d121351d497k.htm; SEC summary prospectus filed 2026-07-31 identifies iShares U.S. Oil & Gas Exploration & Production ETF: “The Fund seeks to track the investment results of the Dow Jones U.S. Select Oil Exploration & Production Index (the “ Underlying Index ” ), which measures the performance of the oil exploration and production sector of the U.S. equity market, as defined by S&P Dow Jones Indices LLC (the “…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Oil Services (theme-oil-services): inactive_this_run; selected none.
-  - OIH: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Oil Services (theme-oil-services): selected_anchor; selected OIH.
+  - OIH: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-04-30; https://www.sec.gov/Archives/edgar/data/1137360/000113736026000499/vaneckoilservicesetfoihsum.htm; SEC summary prospectus filed 2026-04-30 identifies VanEck Oil Services ETF: “The Fund normally invests at least 80% of its total assets in securities that comprise the Fund’s benchmark index. For purposes of this policy, the term “assets” means net assets plus the amount of any borrowings for investment purposes. The Oil Services Index includes common stocks and…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - IEZ: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+  - IEZ: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-07-31; https://www.sec.gov/Archives/edgar/data/1100663/000119312526327899/d14716d497k.htm; SEC summary prospectus filed 2026-07-31 identifies iShares U.S. Oil Equipment & Services ETF: “The Fund seeks to track the investment results of the Dow Jones U.S. Select Oil Equipment & Services Index (the “ Underlying Index ” ), which measures the performance of the oil equipment and services sector of the U.S. equity market, as defined by S&P Dow Jones Indices LLC (the “ Index…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Midstream & MLP Infrastructure (theme-midstream): inactive_this_run; selected none.
-  - AMLP: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Midstream & MLP Infrastructure (theme-midstream): selected_anchor; selected AMLP.
+  - AMLP: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-03-30; https://www.sec.gov/Archives/edgar/data/1414040/000139834426005876/fp0097939-1_485bposixbrl.htm; The ALPS prospectus says AMLP normally invests at least 90% in index securities comprising publicly traded energy-infrastructure MLP units; this is long-only exchange-traded equity-like exposure, not futures exposure..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - MLPX: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+  - MLPX: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-03-31; https://www.sec.gov/Archives/edgar/data/1432353/000143235326000434/a497kmlpenergyinfrastructu.htm; SEC summary prospectus filed 2026-03-31 identifies Global X MLP & Energy Infrastructure ETF: “The Fund invests at least 80% of its total assets in the securities of the Solactive MLP & Energy Infrastructure Index ("Underlying Index"). The Fund also invests at least 80% of its total assets in securities of master limited partnerships ("MLPs") and energy infrastructure corporations.…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Natural Gas Companies (theme-natural-gas-equities): inactive_this_run; selected none.
-  - FCG: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Natural Gas Companies (theme-natural-gas-equities): selected_anchor; selected FCG.
+  - FCG: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-05-01; https://www.sec.gov/Archives/edgar/data/1329377/000144554626003275/etf1_fcg497k.htm; SEC summary prospectus filed 2026-05-01 identifies First Trust Natural Gas ETF: “The Fund will normally invest at least 90% of its net assets (including investment borrowings) in the securities that comprise the Index. The Fund, using an indexing investment approach, attempts to replicate, before fees and expenses, the performance of the Index. The Index is developed…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
 - Clean Energy (theme-clean-energy): selected_anchor; selected ICLN.
   - ICLN: eligible; passed configured runtime checks
-  - PBW: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-08-31; https://www.sec.gov/Archives/edgar/data/1100663/000119312526375955/d156775d497k.htm; The iShares summary prospectus says ICLN tracks an index composed of global equities in the clean energy sector; this is a long-only equity index mandate..
+  - PBW: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-08-28; https://www.sec.gov/Archives/edgar/data/1209466/000119312526372188/d177078d497k.htm; SEC summary prospectus filed 2026-08-28 identifies Invesco WilderHill Clean Energy ETF: “The Fund is an index fund that seeks to track the investment results of the Underlying Index. Strictly in accordance with its guidelines and mandated procedures, WilderShares, LLC (the “Index Provider”) compiles and maintains the Underlying Index, which is comprised of stocks of publicly…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - QCLN: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $5,019,953 is below $10,000,000
+  - QCLN: ineligible; 30-session average dollar volume $5,019,953 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-05-01; https://www.sec.gov/Archives/edgar/data/1329377/000144554626003291/etf1_qcln497k.htm; SEC summary prospectus filed 2026-05-01 identifies First Trust NASDAQ Clean Edge Green Energy Index Fund: “The Fund will normally invest at least 90% of its net assets (including investment borrowings) in the securities that comprise the Index. The Fund, using an indexing investment approach, attempts to replicate, before fees and expenses, the performance of the Index. The Index is developed,…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Solar (theme-solar): inactive_this_run; selected none.
-  - TAN: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Solar (theme-solar): selected_anchor; selected TAN.
+  - TAN: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed not applicable; https://www.invesco.com/us/en/financial-products/etfs/invesco-solar-etf.html; Invesco's current product page identifies Invesco Solar ETF (TAN) as an Equity ETF tracking a solar/timber company index. This is a long-only equity mandate, not inverse, leveraged, options-income, or commodity-futures-only exposure..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
 - Wind Energy (theme-wind): inactive_this_run; selected none.
-  - FAN: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $1,515,400 is below $10,000,000
+  - FAN: ineligible; 30-session average dollar volume $1,515,400 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed not applicable; https://www.ftportfolios.com/Retail/Etf/EtfSummary.aspx?Ticker=FAN; First Trust's current product page identifies FAN as an ETF tracking an equity index of companies in its theme. This is a long-only company-equity mandate, not inverse, leveraged, options-income, or commodity-futures-only exposure..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Uranium Miners (theme-uranium-miners): inactive_this_run; selected none.
-  - URA: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Uranium Miners (theme-uranium-miners): selected_anchor; selected URNM.
+  - URA: ineligible; ETF mandate review rejected: The Global X summary prospectus allows uranium investment trusts whose primary purpose is physical uranium exposure alongside company securities. That physical-commodity sleeve is incompatible with the plain-equity-only mandate.
+    - Mandate review: rejected; reviewed 2026-10-24; source filed 2026-02-27; https://www.sec.gov/Archives/edgar/data/1432353/000143235326000203/a497kuranium.htm; The Global X summary prospectus allows uranium investment trusts whose primary purpose is physical uranium exposure alongside company securities. That physical-commodity sleeve is incompatible with the plain-equity-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - URNM: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+  - URNM: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-05-04; https://www.sec.gov/Archives/edgar/data/1728683/000182912626004461/sprott_497k.htm; SEC summary prospectus filed 2026-05-04 identifies Sprott Uranium Miners ETF: “of the Fund The Fund will, under normal circumstances, invest at least 80% of its total assets in securities of the Index. The Index is designed to track the performance of companies that devote at least 50% of their assets to (i) mining, exploration, development, and production of…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Nuclear Energy (theme-nuclear-energy): inactive_this_run; selected none.
-  - NLR: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Nuclear Energy (theme-nuclear-energy): selected_anchor; selected NLR.
+  - NLR: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-04-30; https://www.sec.gov/Archives/edgar/data/1137360/000113736026000504/vaneckuraniumandnuclearetf.htm; SEC summary prospectus filed 2026-04-30 identifies VanEck Uranium and Nuclear ETF: “The Fund normally invests at least 80% of its total assets in securities that comprise the Fund’s benchmark index. For purposes of this policy, the term “assets” means net assets plus the amount of any borrowings for investment purposes. The Nuclear Energy Index includes equity securities…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - NUKZ: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $6,185,044 is below $10,000,000
+  - NUKZ: ineligible; 30-session average dollar volume $6,185,044 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-03-30; https://www.sec.gov/Archives/edgar/data/1452937/000121390026036350/ea0282657-07_497k.htm; SEC summary prospectus filed 2026-03-30 identifies Range Nuclear Renaissance ETF: “The Fund normally invests in securities comprising the Index. The Index is designed to track the performance of companies that are involved in the nuclear fuel and energy industry (the “Nuclear Industry”), particularly in the areas of (i) advanced reactors; (ii) utilities; (iii)…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Lithium & Battery Technology (theme-lithium-batteries): inactive_this_run; selected none.
-  - LIT: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Lithium & Battery Technology (theme-lithium-batteries): selected_anchor; selected LIT.
+  - LIT: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-02-27; https://www.sec.gov/Archives/edgar/data/1432353/000143235326000207/a497klithiumbatterytech.htm; SEC summary prospectus filed 2026-02-27 identifies Global X Lithium & Battery Tech ETF: “The Fund invests at least 80% of its total assets in the securities of the Solactive Global Lithium Index (the "Underlying Index") and in American Depositary Receipts ("ADRs") and Global Depositary Receipts ("GDRs") based on the securities in the Underlying Index. The Fund also invests at…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - BATT: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $547,780 is below $10,000,000
+  - BATT: ineligible; 30-session average dollar volume $547,780 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-01-28; https://www.sec.gov/Archives/edgar/data/1633061/000121390026008351/ea0273008-22_497k.htm; SEC summary prospectus filed 2026-01-28 identifies Amplify Lithium & Battery Technology ETF: “The Fund will normally invest at least 80% of its net assets (plus borrowings for investment purposes) in the securities that comprise the Index. The Fund employs a “passive management” investment strategy in seeking to achieve its investment objective. Using an indexing investment…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Copper Miners (theme-copper-miners): inactive_this_run; selected none.
-  - COPX: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Copper Miners (theme-copper-miners): selected_anchor; selected COPX.
+  - COPX: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-02-27; https://www.sec.gov/Archives/edgar/data/1432353/000143235326000197/a497kcopperminers.htm; SEC summary prospectus filed 2026-02-27 identifies Global X Copper Miners ETF: “The Fund invests at least 80% of its total assets in the securities of the Solactive Global Copper Miners Total Return Index (the "Underlying Index") and in American Depositary Receipts ("ADRs") and Global Depositary Receipts ("GDRs") based on the securities in the Underlying Index. The…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Rare Earth & Strategic Materials (theme-rare-earths): inactive_this_run; selected none.
-  - REMX: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Rare Earth & Strategic Materials (theme-rare-earths): selected_anchor; selected REMX.
+  - REMX: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-04-30; https://www.sec.gov/Archives/edgar/data/1137360/000113736026000500/vaneckrareearthandstrategi.htm; SEC summary prospectus filed 2026-04-30 identifies VanEck Rare Earth and Strategic Metals ETF: “The Fund normally invests at least 80% of its total assets in securities that comprise the Fund’s benchmark index. For purposes of this policy, the term “assets” means net assets plus the amount of any borrowings for investment purposes. The Rare Earth/Strategic Metals Index includes…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - EART: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $535,493 is below $10,000,000
+  - EART: ineligible; 30-session average dollar volume $535,493 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-02-27; https://www.sec.gov/Archives/edgar/data/1432353/000143235326000231/a497krareearthcriticalmate.htm; SEC summary prospectus filed 2026-02-27 identifies Global X Rare Earth & Critical : “The Fund invests at least 80% of its total assets, plus borrowings for investment purposes (if any), in the securities of the Solactive Rare Earth and Critical Materials Index (the "Underlying Index") and in American Depositary Receipts ("ADRs") and Global Depositary Receipts ("GDRs")…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Gold Miners (theme-gold-miners): inactive_this_run; selected none.
-  - GDX: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Gold Miners (theme-gold-miners): selected_anchor; selected GDX.
+  - GDX: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-04-30; https://www.sec.gov/Archives/edgar/data/1137360/000113736026000495/vaneckgoldminersetfgdxsump.htm; SEC summary prospectus filed 2026-04-30 identifies VanEck Gold Miners ETF: “The Fund normally invests at least 80% of its total assets in securities that comprise the Fund’s benchmark index. For purposes of this policy, the term “assets” means net assets plus the amount of any borrowings for investment purposes. Such companies may include small- and…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - RING: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+  - RING: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed not applicable; https://www.ishares.com/us/products/239654/ishares-msci-global-gold-miners-etf; The current iShares product page identifies RING as an equity ETF tracking an index of global global gold miners companies. This is long-only company-equity exposure, not an inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Silver Miners (theme-silver-miners): inactive_this_run; selected none.
-  - SIL: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Silver Miners (theme-silver-miners): selected_anchor; selected SIL.
+  - SIL: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-02-27; https://www.sec.gov/Archives/edgar/data/1432353/000143235326000199/a497ksilverminers.htm; SEC summary prospectus filed 2026-02-27 identifies Global X Silver Miners ETF: “The Fund invests at least 80% of its total assets in the securities of the Solactive Global Silver Miners Total Return Index (the "Underlying Index") and in American Depositary Receipts ("ADRs") and Global Depositary Receipts ("GDRs") based on the securities in the Underlying Index. The…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - SLVP: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $7,558,988 is below $10,000,000
+  - SLVP: ineligible; 30-session average dollar volume $7,558,988 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed not applicable; https://www.ishares.com/us/products/239656/ishares-msci-global-silver-and-metals-miners-etf; The current iShares product page identifies SLVP as an equity ETF tracking an index of global global silver and metals miners companies. This is long-only company-equity exposure, not an inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
 - Steel Producers (theme-steel): inactive_this_run; selected none.
-  - SLX: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $1,219,731 is below $10,000,000
+  - SLX: ineligible; 30-session average dollar volume $1,219,731 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-04-30; https://www.sec.gov/Archives/edgar/data/1137360/000113736026000502/vanecksteeletfslxsumpro050.htm; SEC summary prospectus filed 2026-04-30 identifies VanEck Steel ETF: “The Fund normally invests at least 80% of its total assets in securities that comprise the Fund’s benchmark index. For purposes of this policy, the term “assets” means net assets plus the amount of any borrowings for investment purposes. The Steel Index is a modified market-capitalization…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Diversified Metals & Mining (theme-metals-mining): inactive_this_run; selected none.
-  - PICK: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Diversified Metals & Mining (theme-metals-mining): selected_anchor; selected PICK.
+  - PICK: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed not applicable; https://www.ishares.com/us/products/239655/ishares-msci-global-metals-mining-producers-etf; The current iShares product page identifies PICK as an equity ETF tracking an index of global global metals and mining producers companies. This is long-only company-equity exposure, not an inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - XME: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+  - XME: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2025-10-30; https://www.sec.gov/Archives/edgar/data/1064642/000119312525256788/d49319d497k.htm; SEC summary prospectus filed 2025-10-30 identifies State Street SPDR S&P Metals & Mining ETF: “The State Street SPDR S&P Metals & Mining ETF (the “ Fund ” ) seeks to provide investment results that, before fees and expenses, correspond generally to the total return performance of an index derived from the metals and mining segment of a U.S. total market composite index. Fees and…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
 - Timber & Forestry (theme-timber-forestry): inactive_this_run; selected none.
-  - WOOD: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $1,645,789 is below $10,000,000
+  - WOOD: ineligible; 30-session average dollar volume $1,645,789 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-07-31; https://www.sec.gov/Archives/edgar/data/1100663/000119312526327940/d121579d497k.htm; SEC summary prospectus filed 2026-07-31 identifies iShares Global Timber & Forestry ETF: “The Fund seeks to track the investment results of the S&P Global Timber & Forestry Index TM (the “ Underlying Index ” ), which measures the performance of companies engaged in the ownership, management or upstream supply chain of forests and timberlands from both developed and emerging…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - CUT: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $45,398 is below $10,000,000
+  - CUT: ineligible; 30-session average dollar volume $45,398 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed not applicable; https://www.invesco.com/us/en/financial-products/etfs/invesco-msci-global-timber-etf.html; Invesco's current product page identifies Invesco MSCI Global Timber ETF (CUT) as an Equity ETF tracking a solar/timber company index. This is a long-only equity mandate, not inverse, leveraged, options-income, or commodity-futures-only exposure..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Regional Banks (theme-regional-banks): inactive_this_run; selected none.
-  - KRE: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Regional Banks (theme-regional-banks): selected_anchor; selected KRE.
+  - KRE: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2025-10-30; https://www.sec.gov/Archives/edgar/data/1064642/000119312525256810/d97079d497k.htm; SEC summary prospectus filed 2025-10-30 identifies State Street SPDR S&P Regional Banking ETF: “The State Street SPDR S&P Regional Banking ETF (the “ Fund ” ) seeks to provide investment results that, before fees and expenses, correspond generally to the total return performance of an index derived from the regional banking segment of the U.S. banking industry. Fees and Expenses of…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - IAT: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+  - IAT: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-07-31; https://www.sec.gov/Archives/edgar/data/1100663/000119312526327927/d109380d497k.htm; SEC summary prospectus filed 2026-07-31 identifies iShares U.S. Regional Banks ETF: “The Fund seeks to track the investment results of the Dow Jones U.S. Select Regional Banks Index (the “ Underlying Index ” ), which measures the performance of the regional bank sector of the U.S. equity market, as defined by S&P Dow Jones Indices LLC (the “ Index Provider ” or “ SPDJI ”…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Insurance (theme-insurance): inactive_this_run; selected none.
-  - KIE: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Insurance (theme-insurance): selected_anchor; selected KIE.
+  - KIE: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2025-10-30; https://www.sec.gov/Archives/edgar/data/1064642/000119312525256809/d94089d497k.htm; SEC summary prospectus filed 2025-10-30 identifies State Street SPDR S&P Insurance ETF: “The State Street SPDR S&P Insurance ETF (the “ Fund ” ) seeks to provide investment results that, before fees and expenses, correspond generally to the total return performance of an index that tracks the performance of publicly traded companies in the insurance industry. Fees and…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - IAK: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+  - IAK: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-07-31; https://www.sec.gov/Archives/edgar/data/1100663/000119312526327966/d131746d497k.htm; SEC summary prospectus filed 2026-07-31 identifies iShares U.S. Insurance ETF: “The Fund seeks to track the investment results of the Dow Jones U.S. Select Insurance Index (the “ Underlying Index ” ), which measures the performance of the insurance sector of the U.S. equity market, as defined by S&P Dow Jones Indices LLC (the “ Index Provider ” or “ SPDJI ” ). The…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Broker-Dealers & Capital Markets (theme-capital-markets): inactive_this_run; selected none.
-  - IAI: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Broker-Dealers & Capital Markets (theme-capital-markets): selected_anchor; selected IAI.
+  - IAI: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-07-31; https://www.sec.gov/Archives/edgar/data/1100663/000119312526327961/d129310d497k.htm; SEC summary prospectus filed 2026-07-31 identifies iShares U.S. Broker-Dealers & Securities Exchanges ETF: “The Fund seeks to track the investment results of the Dow Jones U.S. Select Investment Services Index (the “ Underlying Index ” ), which measures the performance of the investment services sector of the U.S. equity market, as defined by S&P Dow Jones Indices LLC (the “ Index Provider ” or…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Homebuilders (theme-homebuilders): inactive_this_run; selected none.
-  - ITB: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Homebuilders (theme-homebuilders): selected_anchor; selected ITB.
+  - ITB: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-07-31; https://www.sec.gov/Archives/edgar/data/1100663/000119312526327982/d148019d497k.htm; SEC summary prospectus filed 2026-07-31 identifies iShares U.S. Home Construction ETF: “The Fund seeks to track the investment results of the Dow Jones U.S. Select Home Construction Index (the “ Underlying Index ” ), which measures the performance of the home construction sector of the U.S. equity market, as defined by S&P Dow Jones Indices LLC (the “ Index Provider ” or “…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - XHB: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+  - XHB: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2025-10-30; https://www.sec.gov/Archives/edgar/data/1064642/000119312525256785/d35585d497k.htm; SEC summary prospectus filed 2025-10-30 identifies State Street SPDR S&P Homebuilders ETF: “The State Street SPDR S&P Homebuilders ETF (the “ Fund ” ) seeks to provide investment results that, before fees and expenses, correspond generally to the total return performance of an index derived from the homebuilding segment of a U.S. total market composite index. Fees and Expenses…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Retail (theme-retail): inactive_this_run; selected none.
-  - XRT: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Retail (theme-retail): selected_anchor; selected XRT.
+  - XRT: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2025-10-30; https://www.sec.gov/Archives/edgar/data/1064642/000119312525256791/d58412d497k.htm; SEC summary prospectus filed 2025-10-30 identifies State Street SPDR S&P Retail ETF: “The State Street SPDR S&P Retail ETF (the “ Fund ” ) seeks to provide investment results that, before fees and expenses, correspond generally to the total return performance of an index derived from the retail segment of a U.S. total market composite index. Fees and Expenses of the Fund…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - RTH: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $844,702 is below $10,000,000
+  - RTH: ineligible; 30-session average dollar volume $844,702 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-01-30; https://www.sec.gov/Archives/edgar/data/1137360/000113736026000119/vaneckretailetfrth497k0201.htm; SEC summary prospectus filed 2026-01-30 identifies VanEck Retail ETF: “The Fund normally invests at least 80% of its total assets in securities that comprise the Fund’s benchmark index. For purposes of this policy, the term “assets” means net assets plus the amount of any borrowings for investment purposes. To be initially eligible for the Retail Index,…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
 - Leisure & Entertainment (theme-leisure-entertainment): inactive_this_run; selected none.
-  - PEJ: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $2,834,073 is below $10,000,000
+  - PEJ: ineligible; 30-session average dollar volume $2,834,073 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-08-28; https://www.sec.gov/Archives/edgar/data/1209466/000119312526372146/d177078d497k.htm; SEC summary prospectus filed 2026-08-28 identifies Invesco Dynamic Leisure and Entertainment ETF: “The Fund is an index fund that seeks to track the investment results of the Underlying Index. Strictly in accordance with its guidelines and mandated procedures, ICE Data Indices, LLC (“ICE Data” or the “Index Provider”) compiles and maintains the Underlying Index, which is composed of…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
 - Food & Beverage (theme-food-beverage): inactive_this_run; selected none.
-  - PBJ: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate; 30-session average dollar volume $1,145,304 is below $10,000,000
+  - PBJ: ineligible; 30-session average dollar volume $1,145,304 is below $10,000,000
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-08-28; https://www.sec.gov/Archives/edgar/data/1209466/000119312526372139/d177078d497k.htm; SEC summary prospectus filed 2026-08-28 identifies Invesco Food & Beverage ETF: “The Fund is an index fund that seeks to track the investment results of the Underlying Index. Strictly in accordance with its guidelines and mandated procedures, ICE Data Indices, LLC (“ICE Data” or the “Index Provider”) compiles and maintains the Underlying Index, which is composed of…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Residential Real Estate (theme-residential-real-estate): inactive_this_run; selected none.
-  - REZ: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Residential Real Estate (theme-residential-real-estate): selected_anchor; selected REZ.
+  - REZ: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-07-31; https://www.sec.gov/Archives/edgar/data/1100663/000119312526327907/d48321d497k.htm; SEC summary prospectus filed 2026-07-31 identifies iShares Residential and Multisector Real Estate ETF: “The Fund seeks to track the investment results of the FTSE Nareit All Residential Capped Index (the “ Underlying Index ” ), which measures the performance of the residential apartments, manufactured homes, healthcare and self-storage real estate sectors of the U.S. equity market, as…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-- Mortgage REITs (theme-mortgage-reits): inactive_this_run; selected none.
-  - REM: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+- Mortgage REITs (theme-mortgage-reits): selected_anchor; selected REM.
+  - REM: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-07-31; https://www.sec.gov/Archives/edgar/data/1100663/000119312526327957/d127398d497k.htm; SEC summary prospectus filed 2026-07-31 identifies iShares Mortgage Real Estate Capped ETF: “The Fund seeks to track the investment results of the FTSE Nareit All Mortgage Capped Index (the “ Underlying Index ” ), which measures the performance of the residential and commercial mortgage real estate, mortgage finance and savings associations sectors of the U.S. equity market, as…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
-  - MORT: ineligible; Unleveraged diversified-equity mandate has not been reviewed for this candidate
+  - MORT: eligible; passed configured runtime checks
+    - Mandate review: reviewed; reviewed 2026-10-24; source filed 2026-04-30; https://www.sec.gov/Archives/edgar/data/1137360/000113736026000488/vaneckmortgagereitincomeet.htm; SEC summary prospectus filed 2026-04-30 identifies VanEck Mortgage REIT Income ETF: “The Fund normally invests at least 80% of its total assets in securities that comprise the Fund’s benchmark index. For purposes of this policy, the term “assets” means net assets plus the amount of any borrowings for investment purposes. The Mortgage REIT Index is comprised of publicly…” The reviewed objective is long-only equity exposure, with no inverse, leveraged, options-income, or commodity-futures-only mandate..
     - Breadth only: Candidate-specific official holdings source and parser are not configured; Official holdings file unavailable or empty; Holdings effective date unavailable or invalid
 
 ## Methodology and limits
 - ETF candidates require at least 64 valid price sessions and $10,000,000 30-session average dollar volume; AUM/spread are reported unavailable when a reproducible source is not configured.
+- CSV return fields use percentage values (`return5_pct`, `return21_pct`, `return63_pct`); excess returns and breadth changes use percentage points (`excess*_pp`, `breadth*_change_5_pp`).
+- Current and five-session-prior ranks use descending average ranks for exact score ties; rank change is t-5 rank minus current rank. Unavailable current scores sort last and have no numeric rank.
 - Holdings breadth requires a dated official equity holdings source, at least 8 valid companies, 80% price coverage, and holdings no older than 35 days. These checks do not enter scoring.
 - Score weights are configured as {"current_strength_weights": {"excess21_percentile": 1.0}, "medium_strength_weights": {"excess63_percentile": 1.0}, "minimum_peers": 10, "purpose": "Consistent relative-strength ranking for manual review; not a prediction or entry signal", "score_method": "price_relative_strength_v6_2", "state_threshold": 50.0, "theme_score_weights": {"current_strength": 0.6, "medium_strength": 0.4}}. This is a consistent relative-strength ranking for manual review, not a prediction or entry signal.
 - Missing score inputs are not imputed or reweighted. ETF and index breadth use complete sourced equity universes independently of curated stock watchlists.
@@ -565,4 +1083,4 @@ Sector stock candidates are the current S&P 500 sector classification intersecte
 
 ## Local files
 dashboard.html, market.csv, themes.csv, registry_audit.csv, stock_diagnostics.csv, latest_snapshot.json, raw_inputs.json, iwm_breadth_prices.csv.gz, Inter-LICENSE.txt, source_matrix.csv, watchlist_15.csv, watchlist_20.csv, tradingview_15.txt, tradingview_20.txt, run_bundle.zip.
-Refresh with python scripts/generate_dashboard.py. Failed refreshes preserve existing valid exports and write refresh_status.json/failed_refresh.md separately.
+Generated runs are ignored under dist/ or output/. Refresh with python scripts/generate_dashboard.py. Failed refreshes preserve existing valid exports and write refresh_status.json/failed_refresh.md separately.
