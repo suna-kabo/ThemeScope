@@ -25,26 +25,14 @@
       "provider": "iShares Russell 2000 ETF official holdings",
       "method": "ishares_csv",
       "url": "https://www.ishares.com/us/products/239710/ishares-russell-2000-etf/latest-holdings.csv",
-      "limitations": "ETF holdings breadth is a practical Russell 2000 proxy, not official Russell 2000 constituent breadth."
+      "limitations": "IWM holdings are a practical Russell 2000 breadth proxy, not official Russell 2000 constituents."
     }
   },
   "volatility": {
     "provider": "Yahoo Finance chart API",
-    "symbols": ["^VIX"],
+    "symbols": [
+      "^VIX"
+    ],
     "description": "VIX is displayed as volatility context only; no constituent breadth or score dependency."
-  },
-  "security_mapping": {
-    "provider": "SEC company ticker and exchange file",
-    "url": "https://www.sec.gov/files/company_tickers_exchange.json"
-  },
-  "stock_market_metadata": {
-    "provider": "Nasdaq quote summary",
-    "url_template": "https://api.nasdaq.com/api/quote/{symbol}/summary?assetclass=stocks",
-    "limitations": "The retrieved market-cap field has no separate observation timestamp."
-  },
-  "etf_metadata": {
-    "aum": null,
-    "bid_ask_spread": null,
-    "limitations": "No reproducible daily AUM and bid/ask history adapter is configured; both remain unavailable and are not inferred."
   }
 }

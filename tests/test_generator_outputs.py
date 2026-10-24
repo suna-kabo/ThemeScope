@@ -34,7 +34,7 @@ class RunBundleTests(unittest.TestCase):
 
     def test_dashboard_payload_omits_large_audit_collections_but_keeps_ui_fields(self) -> None:
         payload = _dashboard_snapshot({
-            "themes": [{"name": "Theme", "selected": [], "history": [1], "stock_audit": [2], "holdings_breadth": {"21": {"value": 50}}}],
+            "themes": [{"name": "Theme", "selected": [], "history": [1], "stock_audit": [2], "holdings_breadth": {"21": {"value": 50}}, "theme_watchlist_breadth": {"21": {"value": 50, "coverage_pct": 100, "prior": {"value": 40}}}}],
             "candidate_metrics": [1], "registry_diagnostics": [2], "source_matrix": [3],
             "settings": {"watchlist_capacity": 20},
         })
@@ -43,7 +43,10 @@ class RunBundleTests(unittest.TestCase):
         self.assertNotIn("source_matrix", payload)
         self.assertNotIn("stock_audit", payload["themes"][0])
         self.assertIn("selected", payload["themes"][0])
-        self.assertIn("holdings_breadth", payload["themes"][0])
+        self.assertNotIn("holdings_breadth", payload["themes"][0])
+        self.assertEqual(payload["themes"][0]["theme_watchlist_breadth"]["21"]["value"], 50)
+        self.assertNotIn("coverage_pct", payload["themes"][0]["theme_watchlist_breadth"]["21"])
+        self.assertNotIn("prior", payload["themes"][0]["theme_watchlist_breadth"]["21"])
 
     def test_bounded_json_rejects_output_before_writing_oversized_file(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_dir:

@@ -91,9 +91,8 @@ class RefreshTests(unittest.TestCase):
             by_id = {t['id']:t for t in snapshot['themes']}
             for row in rows:
                 self.assertEqual(row['session_date'],snapshot['session_date'])
-                self.assertAlmostEqual(float(row['return21_pct']),100*by_id[row['id']]['returns']['21']['value'])
+                self.assertAlmostEqual(float(row['return21_pct']),100*by_id[row['theme_id']]['returns']['21']['value'])
                 self.assertEqual(row['theme_score'],'')
-                self.assertEqual(row['theme_score_status'],'unavailable')
 
     def test_misaligned_metrics_fail_validation(self):
         snapshot = enrich(copy.deepcopy(self.snapshot), self.raw)

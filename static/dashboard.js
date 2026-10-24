@@ -117,21 +117,19 @@
   }
 
   function themeRowsToCsv(rows, session, generatedAt) {
-    var columns = ["rank_current", "rank_t_minus_5", "rank_change_5", "historical_rank_peer_count", "historical_rank_status", "historical_rank_reason", "type", "name", "anchor_etf", "state", "theme_score", "current_strength", "medium_strength", "return5_pct", "excess5_pp", "return21_pct", "excess21_pp", "return63_pct", "excess63_pp", "holdings_breadth21_pct", "breadth21_above", "breadth21_valid", "breadth21_t_minus_5", "breadth21_change_5_pp", "holdings_breadth50_pct", "breadth50_above", "breadth50_valid", "breadth50_t_minus_5", "breadth50_change_5_pp", "holdings_asof", "score_status", "score_reason", "session_date", "generated_at"];
+    var columns = ["rank_current", "rank_t_minus_5", "rank_change_5", "type", "theme_id", "name", "anchor_etf", "state", "theme_score", "current_strength", "medium_strength", "return21_pct", "excess21_pp", "return63_pct", "excess63_pp", "theme_breadth21_pct", "breadth21_above", "breadth21_valid", "breadth21_change_5_pp", "theme_breadth50_pct", "breadth50_above", "breadth50_valid", "breadth50_change_5_pp", "configured_watchlist_count", "session_date", "generated_at"];
     var lines = [columns.map(csvEscape).join(",")];
     rows.forEach(function (row) {
-      var b21 = row.holdings_breadth && row.holdings_breadth["21"] || {};
-      var b50 = row.holdings_breadth && row.holdings_breadth["50"] || {};
+      var b21 = row.theme_watchlist_breadth && row.theme_watchlist_breadth["21"] || {};
+      var b50 = row.theme_watchlist_breadth && row.theme_watchlist_breadth["50"] || {};
       var values = [row.rank_current ?? row.global_rank, row.rank_t_minus_5, row.rank_change_5,
-        row.historical_rank_peer_count, row.historical_rank_status, row.historical_rank_reason,
-        row.level === "Sector" ? "Sector" : "Theme", row.name, row.anchor, row.theme_state,
+        row.level === "Sector" ? "Sector" : "Theme", row.id, row.name, row.anchor, row.theme_state,
         row.theme_score, row.current_strength_score, row.medium_strength_score,
-        finiteNumber(valueAt(row, "return5")) ? valueAt(row, "return5") * 100 : null, finiteNumber(valueAt(row, "excess5")) ? valueAt(row, "excess5") * 100 : null,
         finiteNumber(valueAt(row, "return21")) ? valueAt(row, "return21") * 100 : null, finiteNumber(valueAt(row, "excess21")) ? valueAt(row, "excess21") * 100 : null,
         finiteNumber(valueAt(row, "return63")) ? valueAt(row, "return63") * 100 : null, finiteNumber(valueAt(row, "excess63")) ? valueAt(row, "excess63") * 100 : null,
-        row.etf_breadth21_pct, b21.above_count, b21.valid_count, row.breadth21_t_minus_5, row.breadth21_change_5_pp,
-        row.etf_breadth50_pct, b50.above_count, b50.valid_count, row.breadth50_t_minus_5, row.breadth50_change_5_pp,
-        row.holdings_asof, row.field_status?.theme_score?.status, row.field_status?.theme_score?.reason, session, generatedAt];
+        row.etf_breadth21_pct, b21.above_count, b21.valid_count, row.breadth21_change_5_pp,
+        row.etf_breadth50_pct, b50.above_count, b50.valid_count, row.breadth50_change_5_pp,
+        row.configured_watchlist_count, session, generatedAt];
       lines.push(values.map(csvEscape).join(","));
     });
     return lines.join("\r\n");
@@ -153,14 +151,11 @@
       "company",
       "exchange",
       "membership_tag",
-      "membership_source",
       "membership_rationale",
-      "is_anchor_holding",
       "above_ema21",
       "above_ema50",
-      "evidence_category",
-      "evidence_note",
-      "etf_weight_pct",
+      "ema21",
+      "ema50",
       "adv30_usd",
       "return21_pct",
       "return63_pct",
@@ -191,9 +186,7 @@
         company: row.company,
         exchange: row.exchange,
         membership_tag: row.membership_tag,
-        membership_source: row.membership_source,
         membership_rationale: row.membership_rationale,
-        is_anchor_holding: row.is_anchor_holding,
         above_ema21:
           row.price_close != null && row.ema21 != null
             ? row.price_close > row.ema21
@@ -202,9 +195,8 @@
           row.price_close != null && row.ema50 != null
             ? row.price_close > row.ema50
             : null,
-        evidence_category: row.evidence_category,
-        evidence_note: row.evidence_note,
-        etf_weight_pct: row.etf_weight_pct,
+        ema21: row.ema21,
+        ema50: row.ema50,
         adv30_usd: row.adv30_usd,
         return21_pct: valueAt(row, "return21") === null || valueAt(row, "return21") === undefined ? null : valueAt(row, "return21") * 100,
         return63_pct: valueAt(row, "return63") === null || valueAt(row, "return63") === undefined ? null : valueAt(row, "return63") * 100,
@@ -320,8 +312,8 @@
       medium_strength_score: "The ETF's 63-session return minus SPY's 63-session return, converted to a percentile among all eligible sector/theme ETFs.",
       excess21: "The ETF's 21-session percentage return minus SPY's 21-session percentage return, expressed in percentage points.",
       excess63: "The ETF's 63-session percentage return minus SPY's 63-session percentage return, expressed in percentage points.",
-      etf_breadth21_pct: "The percentage of valid equity holdings in the anchor ETF trading above EMA21. This describes participation and does not determine the ETF's score or state.",
-      etf_breadth50_pct: "The percentage of valid equity holdings in the anchor ETF trading above EMA50. This describes participation and does not determine the ETF's score or state.",
+      etf_breadth21_pct: "The percentage of configured theme-watchlist stocks trading above EMA21. It describes participation in the current tradable list and does not affect Theme Score or state.",
+      etf_breadth50_pct: "The percentage of configured theme-watchlist stocks trading above EMA50. It describes participation in the current tradable list and does not affect Theme Score or state.",
       rank_current: "The global rank of this ETF exposure by Theme Score among eligible exposures. Equal Theme Scores receive average ranks. Breadth and stock drilldown do not affect rank.",
       facts: "Expanded facts and status for this exposure, including returns, EMA context, breadth availability, and five-session rank history."
     };
@@ -438,46 +430,10 @@
       if (!metric) return "Unavailable";
       if (metric.reason_code === "not_configured") return "Not configured";
       if (metric.reason_code === "retrieval_failed") return "Unavailable this run";
-      if (metric.reason_code === "price_coverage_low" && finite(metric.valid_count) && finite(metric.eligible_count)) {
-        return metric.valid_count + "/" + metric.eligible_count + " < " + (finite(metric.minimum_coverage_pct) ? metric.minimum_coverage_pct.toFixed(0) : "80") + "%";
-      }
-      if (metric.reason_code === "too_few_valid_holdings") return "Too few prices";
-      if (metric.reason_code === "ticker_mapping_unresolved") return "Mapping unresolved";
-      if (metric.reason_code === "effective_future") return "Future effective date";
-      if (metric.reason_code === "stale") return "Stale holdings";
-      if (metric.reason_code === "no_eligible_holdings") return "No eligible holdings";
+      if (metric.reason_code === "price_coverage_low") return "Fewer than 80% valid";
+      if (metric.reason_code === "too_few_valid_members") return "Fewer than 8 valid members";
+      if (metric.reason_code === "historical_observation_missing") return "5-session prior unavailable";
       return metric.reason || "Unavailable";
-    }
-    function breadth(row, period, index = false) {
-      const m = (index ? row.index_breadth : row.holdings_breadth)?.[
-        String(period)
-      ];
-      if (!m || m.value === null || m.status !== "valid")
-        return (
-          '<span title="' +
-          esc(m?.reason || "Breadth is unavailable or fails its configured sample, freshness, or completeness rule") +
-          '">—</span>'
-        );
-      return (
-        '<span class="' +
-        (m.status === "valid" ? "" : "warning") +
-        '" title="' +
-        esc(
-        (m.reason || "Valid") +
-            "; above EMA: " + m.above_count + "/" + m.valid_count +
-            "; holdings as of " +
-            m.as_of,
-        ) +
-        '">' +
-        m.value.toFixed(1) +
-        "% <small>(" +
-            m.above_count +
-            "/" +
-            m.valid_count +
-            ")</small>" +
-        (m.status === "valid" ? "" : " ⚠") +
-        "</span>"
-      );
     }
     function marketBreadth(row, period) {
       const m = row.index_breadth?.[String(period)];
@@ -486,6 +442,9 @@
       const changeLine = finite(change)
         ? '<small class="breadth-change ' + (change > 0 ? "positive" : change < 0 ? "negative" : "") + '">5-session change ' + (change > 0 ? "+" : "") + change.toFixed(1) + ' pp</small>'
         : '<small class="breadth-change" title="' + esc(row.field_status?.["breadth" + period + "_change_5_pp"]?.reason || "Both observations must pass the breadth validity rule") + '">5-session change unavailable</small>';
+      const staleLine = row.index_breadth_stale
+        ? '<small class="breadth-stale" title="Price data are ' + esc(row.price_session_date || "current") + '; breadth is from an earlier observation.">Stale breadth · as of ' + esc(row.index_breadth_observation_date || "date unavailable") + '</small>'
+        : '';
       if (!m || !finite(m.value) || m.status !== "valid") {
         const count = m && finite(m.valid_count) && finite(m.eligible_count) ? m.valid_count.toLocaleString("en-US") + "/" + m.eligible_count.toLocaleString("en-US") + " mapped" : "Counts unavailable";
         const reason = m?.reason || "Price history unavailable";
@@ -494,7 +453,7 @@
         const diagnostic = "Breadth unavailable · " + count + " · " + reason + " · 5-session change unavailable: " + changeReason;
         return '<div class="indicator-box"><div class="indicator-label">' + title + '</div><div class="breadth-unavailable" title="' + esc(diagnostic) + '"><b>Breadth unavailable</b><small>' + esc(count) + '</small><small class="breadth-reason">' + esc(shortReason) + '</small><small class="breadth-change">5-session change unavailable</small></div></div>';
       }
-      return '<div class="indicator-box"><div class="indicator-label">' + title + '</div><div class="breadth-row"><b class="breadth-value">' + m.value.toFixed(1) + '%</b><span class="breadth-count">' + m.above_count.toLocaleString("en-US") + '/' + m.valid_count.toLocaleString("en-US") + '</span></div><div class="meter"><i style="width:' + Math.max(0, Math.min(100, m.value)) + '%"></i></div>' + changeLine + '</div>';
+      return '<div class="indicator-box"><div class="indicator-label">' + title + '</div><div class="breadth-row"><b class="breadth-value">' + m.value.toFixed(1) + '%</b><span class="breadth-count">' + m.above_count.toLocaleString("en-US") + '/' + m.valid_count.toLocaleString("en-US") + '</span></div><div class="meter"><i style="width:' + Math.max(0, Math.min(100, m.value)) + '%"></i></div>' + changeLine + staleLine + '</div>';
     }
     function conditionCard(row, period) {
       const movingAverage = row["ema" + period];
@@ -902,17 +861,15 @@
       return '<span class="state-tag state-' + themeStateType(value) + '" aria-label="' + esc(value || "State unavailable") + ': ' + esc(help) + '">' + esc(value || "—") + "</span>";
     }
     function themeBreadthCell(row, period) {
-      const metric = row.holdings_breadth?.[String(period)];
+      const metric = row.theme_watchlist_breadth?.[String(period)];
       const value = row["etf_breadth" + period + "_pct"];
       if (!metric || !finite(value) || metric.status !== "valid") {
-        const count = metric && finite(metric.valid_count) && finite(metric.eligible_count) ? metric.valid_count + '/' + metric.eligible_count + ' holdings' : 'counts unavailable';
-        const reason = metric?.reason || row["breadth_unavailable_reason_" + period] || "Holdings breadth is unavailable";
-        const coverage = finite(metric?.coverage_pct) ? " · " + metric.coverage_pct.toFixed(1) + "% coverage" : "";
-        const threshold = finite(metric?.minimum_coverage_pct) ? metric.minimum_coverage_pct.toFixed(0) + "%" : "80%";
-        const detail = "Breadth unavailable · " + count + coverage + " · " + reason + (metric?.reason_code === "price_coverage_low" ? " Required: " + threshold + "." : "");
-        return '<span class="breadth-unavailable-cell" title="' + esc(detail) + '" aria-label="' + esc(detail) + '">N/A<small>' + esc(breadthUnavailableShort(metric)) + '</small></span>';
+        const count = metric && finite(metric.valid_count) && finite(metric.eligible_count) ? metric.valid_count + '/' + metric.eligible_count + ' valid members' : 'counts unavailable';
+        const reason = metric?.reason || row["breadth_unavailable_reason_" + period] || "Theme breadth is unavailable";
+        const detail = "Theme-watchlist breadth unavailable · " + count + " · " + reason;
+        return '<span class="breadth-unavailable-cell" title="' + esc(detail) + '" aria-label="' + esc(detail) + '">N/A<small>' + esc(count) + '</small><small>' + esc(breadthUnavailableShort(metric)) + '</small></span>';
       }
-      return '<span title="Holdings as of ' + esc(metric.as_of || "unknown") + '">' + value.toFixed(1) + '% <small>(' + metric.above_count + '/' + metric.valid_count + ')</small></span>';
+      return '<span title="Configured watchlist; reviewed ' + esc(row.watchlist_reviewed_date || "date unavailable") + '. Theme breadth does not affect score or state.">' + value.toFixed(1) + '% <small>(' + metric.above_count + '/' + metric.valid_count + ')</small></span>';
     }
     function themeBreadthChangeCell(row, period) {
       const value = row["breadth" + period + "_change_5_pp"];
@@ -924,20 +881,20 @@
       return finite(value) ? '<span class="' + (value > 0 ? "positive" : value < 0 ? "negative" : "") + '">' + (value > 0 ? "+" : "") + value.toFixed(value % 1 ? 1 : 0) + '</span>' : '<span title="' + esc(row.historical_rank_reason || "Historical ranking unavailable") + '">—</span>';
     }
     function breadthSummary(row, period) {
-      const metric = row.holdings_breadth?.[String(period)];
+      const metric = row.theme_watchlist_breadth?.[String(period)];
       const change = row["breadth" + period + "_change_5_pp"];
       if (!metric || metric.status !== "valid" || !finite(row["etf_breadth" + period + "_pct"])) {
-        const count = metric && finite(metric.valid_count) && finite(metric.eligible_count) ? metric.valid_count + "/" + metric.eligible_count + " holdings" : "counts unavailable";
+        const count = metric && finite(metric.valid_count) && finite(metric.eligible_count) ? metric.valid_count + "/" + metric.eligible_count + " valid members" : "counts unavailable";
         return (metric?.reason || "Breadth unavailable") + " (" + count + ")";
       }
       return row["etf_breadth" + period + "_pct"].toFixed(1) + "%" + (finite(change) ? " · " + (change > 0 ? "+" : "") + change.toFixed(1) + " pp over 5 sessions" : " · 5-session change unavailable");
     }
     function stockDrilldownMessage(row) {
       var status = row.stock_drilldown_status;
-      if (!status) status = row.stock_membership_configured || row.reviewed_data_count || row.stock_audit?.length ? "no_eligible" : "not_configured";
-      if (status === "not_configured") return "ETF-only exposure. No stock drilldown is configured.";
+      if (!status) status = row.watchlist_status === "configured" ? "available" : "not_configured";
+      if (status === "not_configured") return "Theme watchlist not configured.";
       if (status === "retrieval_failed") return "Stock drilldown unavailable this run because the configured company list could not be retrieved.";
-      return "No reviewed companies passed the current stock eligibility rules.";
+      return "No configured stocks are available in this watchlist.";
     }
     function select(id) {
       state.themeNavigationOrder = visibleThemes.map((row) => row.id);
@@ -961,20 +918,20 @@
         ["#", "rank_current", null, "rank_current", "Current rank", "col-rank"], ["Type", null, null, null, "Exposure type", "col-type"], ["Name", "name", null, null, "Sector or theme name", "col-name"], ["ETF", null, null, null, "Anchor ETF", "col-etf"], ["State", "theme_state", null, "state", "State", "col-state"],
         ["Score", "theme_score", null, "theme_score", "Theme Score", "col-score"], ["Now", "current_strength_score", null, "current_strength_score", "Current strength", "col-score"], ["Med", "medium_strength_score", null, "medium_strength_score", "Medium strength", "col-score"],
         ["1M", "return21", null, null, "21-session return", "col-return"], ["1M−SPY", "excess21", null, "excess21", "21-session excess return vs SPY", "col-excess"], ["3M", "return63", null, null, "63-session return", "col-return"], ["3M−SPY", "excess63", null, "excess63", "63-session excess return vs SPY", "col-excess"],
-        ["EMA21", "etf_breadth21_pct", null, "etf_breadth21_pct", "Holdings above EMA21", "col-breadth"], ["Δ5D 21", null, null, null, "EMA21 breadth change over five sessions", "col-change col-change-ema21"], ["EMA50", "etf_breadth50_pct", null, "etf_breadth50_pct", "Holdings above EMA50", "col-breadth"], ["Δ5D 50", null, null, null, "EMA50 breadth change over five sessions", "col-change col-change-ema50"], ["Rk−5D", null, null, null, "Rank five sessions ago", "col-rank-history"], ["Δ", null, null, null, "Rank change over five sessions", "col-rank-change"], ["Facts", null, null, "facts", "Facts and status", "col-facts"],
+        ["% > EMA21", "etf_breadth21_pct", null, "etf_breadth21_pct", "Theme-watchlist members above EMA21. Does not affect Theme Score or state.", "col-breadth"], ["Δ5D", null, null, null, "EMA21 theme-watchlist breadth change over five completed sessions", "col-change col-change-ema21"], ["% > EMA50", "etf_breadth50_pct", null, "etf_breadth50_pct", "Theme-watchlist members above EMA50. Does not affect Theme Score or state.", "col-breadth"], ["Δ5D", null, null, null, "EMA50 theme-watchlist breadth change over five completed sessions", "col-change col-change-ema50"], ["Rk−5D", null, null, null, "Rank five sessions ago", "col-rank-history"], ["Δ", null, null, null, "Rank change over five sessions", "col-rank-change"], ["Facts", null, null, "facts", "Facts and status", "col-facts"],
       ]);
       $("theme-body").innerHTML = visibleThemes.map(function (row) {
         const type = row.level === "Sector" ? "Sector" : "Theme";
         const details = [
           "ETF 5/21/63-session returns: " + pct(valueAt(row, "return5")) + " / " + pct(valueAt(row, "return21")) + " / " + pct(valueAt(row, "return63")),
           "ETF close vs EMA21/50: " + ema(row, 21) + " / " + ema(row, 50),
-          "Holdings effective date: " + (row.holdings_asof || "unavailable"),
+          "Theme watchlist reviewed: " + (row.watchlist_reviewed_date || "not configured"),
           "Current rank " + (row.rank_current ?? row.global_rank) + "; rank five sessions ago " + (row.rank_t_minus_5 ?? "unavailable") + "; rank change " + (finite(row.rank_change_5) ? row.rank_change_5 : row.historical_rank_reason || "unavailable"),
           "Historical rank peers: " + (row.historical_rank_peer_count ?? 0) + "; session " + (row.historical_rank_session || "unavailable"),
-          "EMA21 breadth: " + (row.holdings_breadth?.["21"]?.reason || (row.etf_breadth21_pct ?? "unavailable")),
-          "EMA50 breadth: " + (row.holdings_breadth?.["50"]?.reason || (row.etf_breadth50_pct ?? "unavailable")),
-          "Breadth source: " + (row.breadth_source_status || "unavailable") + (Array.isArray(row.breadth_source_reasons) && row.breadth_source_reasons.length ? " · " + row.breadth_source_reasons.join("; ") : ""),
-          "Stock drilldown: " + (row.stock_drilldown_status || "unavailable") + " · " + (row.curated_watchlist_count || 0) + " selected companies",
+          "EMA21 theme breadth: " + (row.theme_watchlist_breadth?.["21"]?.reason || (row.etf_breadth21_pct ?? "unavailable")),
+          "EMA50 theme breadth: " + (row.theme_watchlist_breadth?.["50"]?.reason || (row.etf_breadth50_pct ?? "unavailable")),
+          "Theme watchlist: " + (row.watchlist_status === "configured" ? row.configured_watchlist_count + " configured members" : "not configured"),
+          "Stock drilldown: " + (row.stock_drilldown_status || "unavailable") + " · " + (row.watchlist_member_count || 0) + " configured companies",
           "EMA21 breadth five-session change: " + (finite(row.breadth21_change_5_pp) ? row.breadth21_change_5_pp + " pp" : row.field_status?.breadth21_change_5_pp?.reason || "unavailable"),
         ].join("<br>");
         return '<tr data-theme="' + esc(row.id) + '" class="' + (row.id === state.theme ? "active" : "") + '">' +
@@ -1031,7 +988,7 @@
       $("active-summary").innerHTML = '<div class="summary-scores">' + stateBadge(selected.theme_state) + ' ' + score(selected, "theme_score") + ' ' + score(selected, "current_strength_score") + ' ' + score(selected, "medium_strength_score") + '</div>' +
         '<div class="summary-returns"><span>1M return ' + pct(valueAt(selected, "return21")) + '</span><span>1M vs SPY ' + pct(valueAt(selected, "excess21"), true) + '</span><span>3M return ' + pct(valueAt(selected, "return63")) + '</span><span>3M vs SPY ' + pct(valueAt(selected, "excess63"), true) + '</span></div>' +
         '<div class="summary-rank">Rank ' + (selected.rank_current ?? selected.global_rank ?? "unavailable") + ' · 5 sessions ago ' + priorRank + ' · change ' + rankMove + ' · ' + (selected.historical_rank_peer_count ?? 0) + ' peers</div>' +
-        '<div class="summary-breadth">Holdings breadth — EMA21 ' + breadthSummary(selected, 21) + ' · EMA50 ' + breadthSummary(selected, 50) + '</div>' +
+        '<div class="summary-breadth">Theme breadth — EMA21 ' + breadthSummary(selected, 21) + ' · EMA50 ' + breadthSummary(selected, 50) + '</div>' +
         '<div class="rs-spark-row"><span>63-session ETF / SPY</span>' + spark(selected.relative_strength_series, "ratio", "ETF to SPY adjusted-close ratio") + '</div>';
       var pool = $("pool").value;
       var base = limitSelection(selected.selected || [], Number(pool));

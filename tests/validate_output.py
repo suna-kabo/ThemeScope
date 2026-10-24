@@ -1,9 +1,10 @@
-"""Validate the generated deliverables and cross-file calculation contracts."""
+"""Validate v7 deliverables and their calculation contracts."""
 import csv
 import json
 import math
 import re
 import sys
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -14,55 +15,97 @@ from src.themescope.v5 import theme_state
 
 out = Path(sys.argv[1]).resolve()
 snapshot = json.loads((out / "latest_snapshot.json").read_text(encoding="utf-8"))
-config = json.loads(Path("config/themes.json").read_text(encoding="utf-8"))
+raw = json.loads((out / "raw_inputs.json").read_text(encoding="utf-8"))
+registry = json.loads((ROOT / "config/themes.json").read_text(encoding="utf-8"))
+anchors = json.loads((ROOT / "config/active_anchors.json").read_text(encoding="utf-8"))
+watchlists = json.loads((ROOT / "config/theme_watchlists.json").read_text(encoding="utf-8"))
 html = (out / "dashboard.html").read_text(encoding="utf-8")
 assert snapshot.get("session_date")
-assert snapshot.get("schema_version") == "6.2"
+assert snapshot.get("schema_version") == "7.0"
+assert not {"holdings", "quotes", "sec_annual_checks", "evidence_freshness"} & set(raw)
+assert not {"holdings", "mapped_universes", "iwm_breadth_diagnostics"} & set(raw.get("v5", {}))
+assert not {"security_mapping", "stock_market_metadata", "etf_metadata"} & set(raw.get("source_configuration", {}))
 assert "connect-src 'none'" in html
 assert "candidate_metrics" not in html and "registry_diagnostics" not in html
+assert "ETF holdings breadth" not in html
 
-diagnostics = snapshot.get("registry_diagnostics", [])
-assert {row.get("id") for row in diagnostics} == {row.get("id") for row in config["themes"]}
-assert all(row.get("candidates") for row in diagnostics)
-selected = {row["id"]: row["selected_anchor"] for row in diagnostics if row.get("status") == "selected_anchor"}
-ranked = {row["id"]: row.get("anchor") for row in snapshot.get("themes", [])}
-assert ranked == selected
-candidate_count = sum(len(row["candidates"]) for row in diagnostics)
-assert candidate_count == sum(len(row.get("candidate_anchors", [])) for row in config["themes"])
+themes = snapshot.get("themes", [])
+active = anchors.get("anchors", {})
+assert len(active) == 53
+assert {row["id"]: row["anchor"] for row in themes} == active
+assert len({row["id"] for row in themes}) == len(themes)
 
-current = average_ranks({row["id"]: row.get("theme_score") for row in snapshot.get("themes", [])})
+ranking = average_ranks({row["id"]: row.get("theme_score") for row in themes})
 weights = snapshot.get("score_methodology", {}).get("theme_score_weights", {})
 threshold = snapshot.get("score_methodology", {}).get("state_threshold", 50)
-for row in snapshot.get("themes", []):
+memberships = {row["theme_id"]: row for row in watchlists.get("watchlists", [])}
+minimum = int(snapshot["settings"].get("minimum_breadth_sample", 8))
+coverage_floor = float(snapshot["settings"].get("minimum_breadth_coverage", 0.8))
+for row in themes:
     score = row.get("theme_score")
-    c, m = row.get("current_strength_score"), row.get("medium_strength_score")
+    current, medium = row.get("current_strength_score"), row.get("medium_strength_score")
     if score is not None:
-        assert c is not None and m is not None
-        assert math.isclose(score, weights["current_strength"] * c + weights["medium_strength"] * m, abs_tol=1e-9)
-    if c is not None and m is not None:
-        assert row.get("theme_state") == theme_state(c, m, threshold)
-    assert row.get("global_rank") == current[row["id"]]
-    assert row.get("rank_current") == current[row["id"]]
+        assert current is not None and medium is not None
+        assert math.isclose(score, weights["current_strength"] * current + weights["medium_strength"] * medium, abs_tol=1e-9)
+    if current is not None and medium is not None:
+        assert row.get("theme_state") == theme_state(current, medium, threshold)
+    assert row.get("global_rank") == ranking[row["id"]]
+    assert row.get("rank_current") == ranking[row["id"]]
     if row.get("rank_t_minus_5") is not None and row.get("rank_current") is not None:
         assert math.isclose(row["rank_change_5"], row["rank_t_minus_5"] - row["rank_current"], abs_tol=1e-9)
-    if row.get("theme_score") is not None and not row.get("selected"):
-        assert row.get("global_rank") is not None
+    configured = memberships.get(row["id"])
+    expected = len(configured.get("members", [])) if configured and configured.get("anchor") == row["anchor"] else 0
+    assert row.get("watchlist_member_count") == expected
+    assert row.get("has_watchlist") is (expected > 0)
+    for period in ("21", "50"):
+        metric = row["theme_watchlist_breadth"][period]
+        assert metric.get("configured_count") == expected
+        if expected == 0:
+            assert metric.get("reason_code") == "not_configured"
+        if metric.get("status") == "valid":
+            assert metric["valid_count"] >= minimum
+            assert metric["valid_count"] / expected >= coverage_floor
+            assert math.isclose(metric["value"], 100 * metric["above_count"] / metric["valid_count"], abs_tol=1e-9)
 
-for name in ("market.csv", "themes.csv", "stock_diagnostics.csv", "watchlist_15.csv", "watchlist_20.csv"):
-    with (out / name).open(encoding="utf-8-sig", newline="") as handle:
-        reader = csv.DictReader(handle)
-        columns = reader.fieldnames or []
-        assert all(not re.fullmatch(r"return(?:5|21|63)", key) for key in columns), (name, columns)
-        assert all(key not in columns for key in ("return1m_pct", "return3m_pct")), (name, columns)
-        if name != "registry_audit.csv":
-            assert all(f"return{window}_pct" in columns for window in ("5", "21", "63")), (name, columns)
-        assert not any(re.fullmatch(r"excess(?:5|21|63)", key) for key in columns), (name, columns)
+with (out / "themes.csv").open(encoding="utf-8-sig", newline="") as handle:
+    reader = csv.DictReader(handle)
+    theme_columns = reader.fieldnames or []
+    theme_rows = list(reader)
+required = {
+    "rank_current", "rank_t_minus_5", "rank_change_5", "type", "theme_id", "name", "anchor_etf", "state",
+    "theme_score", "current_strength", "medium_strength", "return21_pct", "excess21_pp", "return63_pct",
+    "excess63_pp", "theme_breadth21_pct", "breadth21_above", "breadth21_valid", "breadth21_change_5_pp",
+    "theme_breadth50_pct", "breadth50_above", "breadth50_valid", "breadth50_change_5_pp",
+    "configured_watchlist_count", "session_date", "generated_at",
+}
+assert required <= set(theme_columns)
+assert not set(theme_columns) & {"coverage_pct", "theme_score_status", "price_source_url", "mandate_review_status"}
+assert len(theme_rows) == len(themes)
+by_id = {row["id"]: row for row in themes}
+for row in theme_rows:
+    source = by_id[row["theme_id"]]
+    assert row["session_date"] == snapshot["session_date"]
+    if source["returns"]["21"].get("value") is not None:
+        assert math.isclose(float(row["return21_pct"]), 100 * source["returns"]["21"]["value"], abs_tol=1e-9)
 
-with (out / "registry_audit.csv").open(encoding="utf-8-sig", newline="") as handle:
-    registry_rows = list(csv.DictReader(handle))
-assert len(registry_rows) == candidate_count
-assert {row.get("mandate_review_status") for row in registry_rows} <= {"reviewed", "rejected", "incomplete"}
-assert all(row.get("mandate_review_status") in {"reviewed", "rejected"} for row in registry_rows)
-assert all(row.get("mandate_review_date") and row.get("mandate_review_source", "").startswith("https://") and row.get("mandate_review_rationale") for row in registry_rows)
-assert (out / "run_bundle.zip").is_file()
-print(f"Generated output passed: {len(snapshot['themes'])} ranked exposures; {len(diagnostics)} registry records; {candidate_count} candidate audit rows; session {snapshot['session_date']}.")
+with (out / "market.csv").open(encoding="utf-8-sig", newline="") as handle:
+    market_columns = csv.DictReader(handle).fieldnames or []
+assert {"return5_pct", "return21_pct", "return63_pct", "index_breadth21_pct", "index_breadth50_pct"} <= set(market_columns)
+assert not set(market_columns) & {"coverage_pct", "sec_filing_status", "aum_status", "spread_status"}
+
+with (out / "stock_diagnostics.csv").open(encoding="utf-8-sig", newline="") as handle:
+    stock_reader = csv.DictReader(handle)
+    stock_columns = stock_reader.fieldnames or []
+    stock_rows = list(stock_reader)
+assert len(stock_rows) == sum(len(row.get("selected", [])) for row in themes)
+assert {"relationship", "reason", "adv30_usd", "return21_pct", "excess21_pp"} <= set(stock_columns)
+assert not set(stock_columns) & {"filing_url", "accession_number", "membership_evidence_coverage", "agent_vote"}
+
+report = (out / "watchlist_migration.md").read_text(encoding="utf-8")
+assert "37" in report and "257" in report and "265" in report
+with zipfile.ZipFile(out / "run_bundle.zip") as bundle:
+    assert bundle.testzip() is None
+    names = set(bundle.namelist())
+    assert {"dashboard.html", "themes.csv", "market.csv", "latest_snapshot.json", "raw_inputs.json", "theme_watchlists.json", "active_anchors.json", "market_breadth_prices.csv.gz", "watchlist_prices.csv.gz", "iwm_breadth_prices.csv.gz"} <= names
+
+print(f"v7 output passed: {len(themes)} ranked exposures, {sum(expected for expected in (row.get('watchlist_member_count', 0) for row in themes))} configured memberships, session {snapshot['session_date']}.")

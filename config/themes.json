@@ -1,5 +1,5 @@
 {
-  "registry_version": "6.2",
+  "registry_version": "7.0",
   "reviewer": "Codex implementation review",
   "decision_date": "2026-10-22",
   "effective_date": "2026-10-22",
@@ -32,23 +32,27 @@
     "anchor_minimum_history_sessions": 64,
     "anchor_preferred_history_sessions": 126,
     "anchor_adv30_floor_usd": 10000000,
-    "anchor_minimum_aum_usd": 100000000,
-    "anchor_maximum_spread_pct": 0.25,
     "market_cap_floor_usd": 2000000000,
     "raw_close_floor_usd": 15,
     "adv30_floor_usd": 20000000,
     "minimum_breadth_sample": 8,
     "minimum_breadth_coverage": 0.8,
-    "maximum_holdings_age_days": 35,
     "minimum_percentile_peers": 10,
     "market_breadth_threshold": 50,
     "watchlist_capacity": 20,
     "watchlist_default_limit": 15,
-    "business_revenue_materiality_percent": 20,
-    "maximum_raw_inputs_bytes": 99000000,
+    "maximum_raw_inputs_bytes": 20000000,
     "maximum_dashboard_bytes": 20000000,
     "maximum_run_bundle_bytes": 95000000,
-    "anchor_adv30_floor_rationale": "The existing $10,000,000 ADV30 floor is retained for continuity with the v6.2 screening rule pending a documented volatility and execution-cost calibration. Current reports count candidates excluded by this rule alone."
+    "anchor_adv30_floor_rationale": "The existing $10,000,000 ADV30 floor is retained for continuity with the v6.2 screening rule pending a documented volatility and execution-cost calibration. Current reports count candidates excluded by this rule alone.",
+    "watchlist_stock_filters": {
+      "raw_close_floor_usd": 15,
+      "market_cap_floor_usd": 2000000000,
+      "market_cap_required_when_available": true,
+      "adv30_floor_usd": 20000000,
+      "minimum_history_sessions": 205,
+      "description": "Used only during explicit watchlist maintenance. Missing optional market-cap facts remain review notes; normal refresh does not request company classification or capitalization."
+    }
   },
   "themes": [
     {
@@ -1009,19 +1013,17 @@
       "included": [
         "ETF return and trend metrics"
       ],
-      "excluded": [
-        "Biotechnology-classified stocks, per the default stock-universe rule"
-      ],
+      "excluded": [],
       "anchor": "XBI",
       "parent_sector": "XLV",
-      "anchor_rationale": "XBI tracks the S&P Biotechnology Select Industry Index and provides a valid ETF-level comparison. The specification excludes companies classified as biotechnology from the stock universe, so holdings are not promoted into stock candidates; no empty stock universe is claimed without screening.",
+      "anchor_rationale": "XBI tracks the S&P Biotechnology Select Industry Index and remains the price-relative ETF anchor. Biotechnology companies may be included in its ordinary configured stock watchlist.",
       "anchor_url": "https://www.ssga.com/us/en/intermediary/etfs/spdr-sp-biotech-etf-xbi",
       "holdings_source": {
         "provider": "State Street SPDR",
         "method": "spdr_xlsx",
         "url": "https://www.ssga.com/us/en/intermediary/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xbi.xlsx"
       },
-      "representation_limit": "Stock selection is intentionally withheld until issuer-level industry screening is complete; the biotechnology exclusion applies to stocks, not the ETF's own returns.",
+      "representation_limit": "Theme stock membership is maintained in config/theme_watchlists.json and may include eligible biotechnology companies.",
       "unleveraged_equity_etf_review": true,
       "anchor_instrument_review": "Plain-vanilla long-only USD equity ETF; official fund mandate checked for inverse or leveraged objective.",
       "level": "Theme",
@@ -2250,7 +2252,7 @@
       }
     }
   ],
-  "methodology_version": "6.2",
+  "methodology_version": "7.0",
   "score_methodology": {
     "current_strength_weights": {
       "excess21_percentile": 1.0

@@ -1,0 +1,260 @@
+{
+  "version": 1,
+  "source_session": "2026-10-23",
+  "reviewed_date": "2026-10-24",
+  "anchors": {
+    "sector-communication-services": "XLC",
+    "sector-consumer-discretionary": "XLY",
+    "sector-consumer-staples": "XLP",
+    "sector-energy": "XLE",
+    "sector-financials": "XLF",
+    "sector-health-care": "XLV",
+    "sector-industrials": "XLI",
+    "sector-information-technology": "XLK",
+    "sector-materials": "XLB",
+    "sector-real-estate": "XLRE",
+    "sector-utilities": "XLU",
+    "theme-semiconductors": "SMH",
+    "theme-software": "IGV",
+    "theme-cloud-computing": "SKYY",
+    "theme-cybersecurity": "CIBR",
+    "theme-internet": "FDN",
+    "theme-artificial-intelligence": "AIQ",
+    "theme-robotics-automation": "BOTZ",
+    "theme-quantum-computing": "QTUM",
+    "theme-blockchain": "BLOK",
+    "theme-autonomous-electric-vehicles": "IDRV",
+    "theme-biotechnology": "XBI",
+    "theme-pharmaceuticals": "XPH",
+    "theme-medical-devices": "IHI",
+    "theme-healthcare-providers": "IHF",
+    "theme-genomics": "ARKG",
+    "theme-aerospace-defense": "XAR",
+    "theme-space": "UFO",
+    "theme-us-infrastructure": "PAVE",
+    "theme-transportation": "IYT",
+    "theme-airlines": "JETS",
+    "theme-agribusiness": "MOO",
+    "theme-oil-gas-exploration": "XOP",
+    "theme-oil-services": "OIH",
+    "theme-midstream": "AMLP",
+    "theme-natural-gas-equities": "FCG",
+    "theme-clean-energy": "ICLN",
+    "theme-solar": "TAN",
+    "theme-uranium-miners": "URNM",
+    "theme-nuclear-energy": "NLR",
+    "theme-lithium-batteries": "LIT",
+    "theme-copper-miners": "COPX",
+    "theme-rare-earths": "REMX",
+    "theme-gold-miners": "GDX",
+    "theme-silver-miners": "SIL",
+    "theme-metals-mining": "PICK",
+    "theme-regional-banks": "KRE",
+    "theme-insurance": "KIE",
+    "theme-capital-markets": "IAI",
+    "theme-homebuilders": "ITB",
+    "theme-retail": "XRT",
+    "theme-residential-real-estate": "REZ",
+    "theme-mortgage-reits": "REM"
+  },
+  "inactive_records": [
+    {
+      "theme_id": "theme-fintech",
+      "name": "Fintech",
+      "reason": "30-session average dollar volume $973,951 is below $10,000,000; 30-session average dollar volume $5,090,423 is below $10,000,000",
+      "candidates": [
+        {
+          "ticker": "FINX",
+          "status": "inactive",
+          "reason": "ADV30 below $10,000,000",
+          "adv30_usd": 973950.51583608
+        },
+        {
+          "ticker": "ARKF",
+          "status": "inactive",
+          "reason": "ADV30 below $10,000,000",
+          "adv30_usd": 5090423.308639526
+        }
+      ]
+    },
+    {
+      "theme_id": "theme-data-centers",
+      "name": "Data Centers & Digital Infrastructure",
+      "reason": "30-session average dollar volume $3,548,068 is below $10,000,000; ETF price history unavailable; Requires 64 valid price sessions; 0 available; Retrieved instrument is not verified as a USD ETF; ETF mandate review rejected: On 2026-10-24 the issuer product endpoint returned HTTP 404, exact-ticker ETF search returned no current listing, and both configured Yahoo chart hosts returned HTTP 404. No current issuer prospectus, listing, instrument type, or mandate could be verified, so VPN fails the evidence gate and is rejected.; 30-session average dollar volume unavailable; Price retrieval error: RuntimeError: Source request failed for https://query1.finance.yahoo.com/v8/finance/chart/VPN?period1=1729613947&period2=1792945147&interval=1d&events=div%2Csplits&includeAdjustedClose=true: HTTP Error 404: Not Found; Source request failed for https://query2.finance.yahoo.com/v8/finance/chart/VPN?period1=1729613947&period2=1792945147&interval=1d&events=div%2Csplits&includeAdjustedClose=true: HTTP Error 404: Not Found",
+      "candidates": [
+        {
+          "ticker": "SRVR",
+          "status": "inactive",
+          "reason": "ADV30 below $10,000,000",
+          "adv30_usd": 3548068.1341552734
+        },
+        {
+          "ticker": "VPN",
+          "status": "inactive",
+          "reason": "Instrument or currency eligibility could not be verified",
+          "adv30_usd": null
+        }
+      ]
+    },
+    {
+      "theme_id": "theme-video-games",
+      "name": "Video Games & Esports",
+      "reason": "30-session average dollar volume $55,239 is below $10,000,000; 30-session average dollar volume $364,752 is below $10,000,000",
+      "candidates": [
+        {
+          "ticker": "GAMR",
+          "status": "inactive",
+          "reason": "ADV30 below $10,000,000",
+          "adv30_usd": 55238.73629252116
+        },
+        {
+          "ticker": "HERO",
+          "status": "inactive",
+          "reason": "ADV30 below $10,000,000",
+          "adv30_usd": 364751.5787378947
+        }
+      ]
+    },
+    {
+      "theme_id": "theme-ecommerce",
+      "name": "E-Commerce",
+      "reason": "30-session average dollar volume $553,809 is below $10,000,000; 30-session average dollar volume $173,216 is below $10,000,000",
+      "candidates": [
+        {
+          "ticker": "IBUY",
+          "status": "inactive",
+          "reason": "ADV30 below $10,000,000",
+          "adv30_usd": 553809.4182078043
+        },
+        {
+          "ticker": "ONLN",
+          "status": "inactive",
+          "reason": "ADV30 below $10,000,000",
+          "adv30_usd": 173215.76628367105
+        }
+      ]
+    },
+    {
+      "theme_id": "theme-cannabis",
+      "name": "Cannabis",
+      "reason": "ETF mandate review rejected: The AdvisorShares summary prospectus says MSOS uses total-return swaps alongside cannabis-company stock for core exposure. Because the mandate relies on synthetic derivatives, it does not meet the plain long-only cash-equity rule.; 30-session average dollar volume $723,040 is below $10,000,000",
+      "candidates": [
+        {
+          "ticker": "MSOS",
+          "status": "inactive",
+          "reason": "Did not pass the existing anchor history, instrument, mandate, or liquidity screen",
+          "adv30_usd": 24336470.828855038
+        },
+        {
+          "ticker": "MJ",
+          "status": "inactive",
+          "reason": "ADV30 below $10,000,000",
+          "adv30_usd": 723039.6183077494
+        }
+      ]
+    },
+    {
+      "theme_id": "theme-shipping",
+      "name": "Shipping",
+      "reason": "30-session average dollar volume $7,630,343 is below $10,000,000",
+      "candidates": [
+        {
+          "ticker": "BOAT",
+          "status": "inactive",
+          "reason": "ADV30 below $10,000,000",
+          "adv30_usd": 7630342.860692342
+        }
+      ]
+    },
+    {
+      "theme_id": "theme-water",
+      "name": "Water",
+      "reason": "30-session average dollar volume $4,788,230 is below $10,000,000; 30-session average dollar volume $4,775,081 is below $10,000,000",
+      "candidates": [
+        {
+          "ticker": "PHO",
+          "status": "inactive",
+          "reason": "ADV30 below $10,000,000",
+          "adv30_usd": 4788230.112508138
+        },
+        {
+          "ticker": "FIW",
+          "status": "inactive",
+          "reason": "ADV30 below $10,000,000",
+          "adv30_usd": 4775080.879669189
+        }
+      ]
+    },
+    {
+      "theme_id": "theme-wind",
+      "name": "Wind Energy",
+      "reason": "30-session average dollar volume $1,515,397 is below $10,000,000",
+      "candidates": [
+        {
+          "ticker": "FAN",
+          "status": "inactive",
+          "reason": "ADV30 below $10,000,000",
+          "adv30_usd": 1515396.7555999756
+        }
+      ]
+    },
+    {
+      "theme_id": "theme-steel",
+      "name": "Steel Producers",
+      "reason": "30-session average dollar volume $1,219,761 is below $10,000,000",
+      "candidates": [
+        {
+          "ticker": "SLX",
+          "status": "inactive",
+          "reason": "ADV30 below $10,000,000",
+          "adv30_usd": 1219760.541381836
+        }
+      ]
+    },
+    {
+      "theme_id": "theme-timber-forestry",
+      "name": "Timber & Forestry",
+      "reason": "30-session average dollar volume $1,645,958 is below $10,000,000; 30-session average dollar volume $45,409 is below $10,000,000",
+      "candidates": [
+        {
+          "ticker": "WOOD",
+          "status": "inactive",
+          "reason": "ADV30 below $10,000,000",
+          "adv30_usd": 1645958.245824178
+        },
+        {
+          "ticker": "CUT",
+          "status": "inactive",
+          "reason": "ADV30 below $10,000,000",
+          "adv30_usd": 45408.966286977135
+        }
+      ]
+    },
+    {
+      "theme_id": "theme-leisure-entertainment",
+      "name": "Leisure & Entertainment",
+      "reason": "30-session average dollar volume $2,834,067 is below $10,000,000",
+      "candidates": [
+        {
+          "ticker": "PEJ",
+          "status": "inactive",
+          "reason": "ADV30 below $10,000,000",
+          "adv30_usd": 2834066.8221410117
+        }
+      ]
+    },
+    {
+      "theme_id": "theme-food-beverage",
+      "name": "Food & Beverage",
+      "reason": "30-session average dollar volume $1,145,441 is below $10,000,000",
+      "candidates": [
+        {
+          "ticker": "PBJ",
+          "status": "inactive",
+          "reason": "ADV30 below $10,000,000",
+          "adv30_usd": 1145441.479326884
+        }
+      ]
+    }
+  ]
+}

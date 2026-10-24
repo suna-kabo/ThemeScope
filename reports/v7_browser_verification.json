@@ -1,0 +1,117 @@
+{
+  "file_scheme_note": "Managed Chromium policy blocks file://; exact exported bytes served over loopback for verification",
+  "method": "Chromium DevTools Protocol Network.requestWillBeSent (Network panel backend)",
+  "runtime_environment": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "browser": "Chromium 154.0.8037.57",
+  "windows_chrome_verified": false,
+  "embedded_font_loaded": true,
+  "responsive_table_checks": [
+    {
+      "table": "themes",
+      "viewport_width": 1920,
+      "wrapper_client_width": 1610,
+      "wrapper_scroll_width": 1641,
+      "page_scroll_width": 1920,
+      "headers_aligned": true
+    },
+    {
+      "table": "themes",
+      "viewport_width": 1600,
+      "wrapper_client_width": 1298,
+      "wrapper_scroll_width": 1597,
+      "page_scroll_width": 1600,
+      "headers_aligned": true
+    },
+    {
+      "table": "themes",
+      "viewport_width": 1440,
+      "wrapper_client_width": 1138,
+      "wrapper_scroll_width": 1593,
+      "page_scroll_width": 1440,
+      "headers_aligned": true
+    },
+    {
+      "table": "themes",
+      "viewport_width": 1280,
+      "wrapper_client_width": 978,
+      "wrapper_scroll_width": 1593,
+      "page_scroll_width": 1280,
+      "headers_aligned": true
+    },
+    {
+      "table": "themes",
+      "viewport_width": 1024,
+      "wrapper_client_width": 773,
+      "wrapper_scroll_width": 1593,
+      "page_scroll_width": 1024,
+      "headers_aligned": true
+    },
+    {
+      "table": "themes",
+      "viewport_width": 390,
+      "wrapper_client_width": 358,
+      "wrapper_scroll_width": 1593,
+      "page_scroll_width": 390,
+      "headers_aligned": true
+    },
+    {
+      "table": "watchlist",
+      "viewport_width": 1920,
+      "wrapper_client_width": 1610,
+      "wrapper_scroll_width": 1610,
+      "page_scroll_width": 1920,
+      "headers_aligned": true
+    },
+    {
+      "table": "watchlist",
+      "viewport_width": 1600,
+      "wrapper_client_width": 1298,
+      "wrapper_scroll_width": 1298,
+      "page_scroll_width": 1600,
+      "headers_aligned": true
+    },
+    {
+      "table": "watchlist",
+      "viewport_width": 1440,
+      "wrapper_client_width": 1138,
+      "wrapper_scroll_width": 1248,
+      "page_scroll_width": 1440,
+      "headers_aligned": true
+    },
+    {
+      "table": "watchlist",
+      "viewport_width": 1280,
+      "wrapper_client_width": 978,
+      "wrapper_scroll_width": 1209,
+      "page_scroll_width": 1280,
+      "headers_aligned": true
+    },
+    {
+      "table": "watchlist",
+      "viewport_width": 1024,
+      "wrapper_client_width": 773,
+      "wrapper_scroll_width": 1202,
+      "page_scroll_width": 1024,
+      "headers_aligned": true
+    },
+    {
+      "table": "watchlist",
+      "viewport_width": 390,
+      "wrapper_client_width": 358,
+      "wrapper_scroll_width": 1202,
+      "page_scroll_width": 390,
+      "headers_aligned": true
+    }
+  ],
+  "open_and_reload_external_requests": [],
+  "requests": [
+    "dashboard.html (local loopback)",
+    "data:font/woff2 (embedded)",
+    "dashboard.html (local loopback)",
+    "data:font/woff2 (embedded)",
+    "dashboard.html (local loopback)",
+    "data:font/woff2 (embedded)"
+  ],
+  "javascript_errors": [],
+  "interaction_checks": "passed"
+}

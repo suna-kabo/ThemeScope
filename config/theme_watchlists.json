@@ -1,0 +1,1974 @@
+{
+  "version": 1,
+  "reviewed_date": "2026-10-24",
+  "source_note": "Migrated from the 23 October 2026 v6.2 saved run. The 11 sector lists reuse persisted v6.2 sector selections; five theme lists retain their existing configured selections. Review these memberships during explicit universe maintenance.",
+  "watchlists": [
+    {
+      "theme_id": "sector-communication-services",
+      "anchor": "XLC",
+      "reviewed_date": "2026-10-24",
+      "members": [
+        {
+          "ticker": "META",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Communication Services; retained from the existing sector watchlist.",
+          "company": "META PLATFORMS INC CLASS A",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "GOOG",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Communication Services; retained from the existing sector watchlist.",
+          "company": "ALPHABET INC CL A",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "OMC",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Communication Services; retained from the existing sector watchlist.",
+          "company": "OMNICOM GROUP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "T",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Communication Services; retained from the existing sector watchlist.",
+          "company": "AT+T INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "NFLX",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Communication Services; retained from the existing sector watchlist.",
+          "company": "NETFLIX INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "APP",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Communication Services; retained from the existing sector watchlist.",
+          "company": "APPLOVIN CORP CLASS A",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "NWS",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Communication Services; retained from the existing sector watchlist.",
+          "company": "NEWS CORP   CLASS A",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "TMUS",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Communication Services; retained from the existing sector watchlist.",
+          "company": "T MOBILE US INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "VZ",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Communication Services; retained from the existing sector watchlist.",
+          "company": "VERIZON COMMUNICATIONS INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "DIS",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Communication Services; retained from the existing sector watchlist.",
+          "company": "WALT DISNEY CO/THE",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "CMCSA",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Communication Services; retained from the existing sector watchlist.",
+          "company": "COMCAST CORP CLASS A",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "CHTR",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Communication Services; retained from the existing sector watchlist.",
+          "company": "CHARTER COMMUNICATIONS INC A",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "RDDT",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Communication Services; retained from the existing sector watchlist.",
+          "company": "REDDIT INC CL A",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "TTWO",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Communication Services; retained from the existing sector watchlist.",
+          "company": "TAKE TWO INTERACTIVE SOFTWRE",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "FOX",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Communication Services; retained from the existing sector watchlist.",
+          "company": "FOX CORP   CLASS A",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "ECHO",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Communication Services; retained from the existing sector watchlist.",
+          "company": "ECHOSTAR CORP A",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "LYV",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Communication Services; retained from the existing sector watchlist.",
+          "company": "LIVE NATION ENTERTAINMENT IN",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "TKO",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Communication Services; retained from the existing sector watchlist.",
+          "company": "TKO GROUP HOLDINGS INC",
+          "exchange": "NYSE"
+        }
+      ]
+    },
+    {
+      "theme_id": "sector-consumer-discretionary",
+      "anchor": "XLY",
+      "reviewed_date": "2026-10-24",
+      "members": [
+        {
+          "ticker": "TSLA",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Discretionary; retained from the existing sector watchlist.",
+          "company": "TESLA INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "AMZN",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Discretionary; retained from the existing sector watchlist.",
+          "company": "AMAZON.COM INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "HAS",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Discretionary; retained from the existing sector watchlist.",
+          "company": "HASBRO INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "MGM",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Discretionary; retained from the existing sector watchlist.",
+          "company": "MGM RESORTS INTERNATIONAL",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "HD",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Discretionary; retained from the existing sector watchlist.",
+          "company": "HOME DEPOT INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "MCD",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Discretionary; retained from the existing sector watchlist.",
+          "company": "MCDONALD S CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "CCL",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Discretionary; retained from the existing sector watchlist.",
+          "company": "CARNIVAL CORP LTD",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "CMG",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Discretionary; retained from the existing sector watchlist.",
+          "company": "CHIPOTLE MEXICAN GRILL INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "NKE",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Discretionary; retained from the existing sector watchlist.",
+          "company": "NIKE INC  CL B",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "BKNG",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Discretionary; retained from the existing sector watchlist.",
+          "company": "BOOKING HOLDINGS INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "RCL",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Discretionary; retained from the existing sector watchlist.",
+          "company": "ROYAL CARIBBEAN CRUISES LTD",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "CVNA",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Discretionary; retained from the existing sector watchlist.",
+          "company": "CARVANA CO",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "TJX",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Discretionary; retained from the existing sector watchlist.",
+          "company": "TJX COMPANIES INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "AZO",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Discretionary; retained from the existing sector watchlist.",
+          "company": "AUTOZONE INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "ULTA",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Discretionary; retained from the existing sector watchlist.",
+          "company": "ULTA BEAUTY INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "WYNN",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Discretionary; retained from the existing sector watchlist.",
+          "company": "WYNN RESORTS LTD",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "SBUX",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Discretionary; retained from the existing sector watchlist.",
+          "company": "STARBUCKS CORP",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "DASH",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Discretionary; retained from the existing sector watchlist.",
+          "company": "DOORDASH INC   A",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "ABNB",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Discretionary; retained from the existing sector watchlist.",
+          "company": "AIRBNB INC CLASS A",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "LVS",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Discretionary; retained from the existing sector watchlist.",
+          "company": "LAS VEGAS SANDS CORP",
+          "exchange": "NYSE"
+        }
+      ]
+    },
+    {
+      "theme_id": "sector-consumer-staples",
+      "anchor": "XLP",
+      "reviewed_date": "2026-10-24",
+      "members": [
+        {
+          "ticker": "WMT",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Staples; retained from the existing sector watchlist.",
+          "company": "WALMART INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "COST",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Staples; retained from the existing sector watchlist.",
+          "company": "COSTCO WHOLESALE CORP",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "STZ",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Staples; retained from the existing sector watchlist.",
+          "company": "CONSTELLATION BRANDS INC A",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "BG",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Staples; retained from the existing sector watchlist.",
+          "company": "BUNGE GLOBAL SA",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "KO",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Staples; retained from the existing sector watchlist.",
+          "company": "COCA COLA CO/THE",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "PG",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Staples; retained from the existing sector watchlist.",
+          "company": "PROCTER + GAMBLE CO/THE",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "CASY",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Staples; retained from the existing sector watchlist.",
+          "company": "CASEY S GENERAL STORES INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "TGT",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Staples; retained from the existing sector watchlist.",
+          "company": "TARGET CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "PEP",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Staples; retained from the existing sector watchlist.",
+          "company": "PEPSICO INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "PM",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Staples; retained from the existing sector watchlist.",
+          "company": "PHILIP MORRIS INTERNATIONAL",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "EL",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Staples; retained from the existing sector watchlist.",
+          "company": "ESTEE LAUDER COMPANIES CL A",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "ADM",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Staples; retained from the existing sector watchlist.",
+          "company": "ARCHER DANIELS MIDLAND CO",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "MO",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Staples; retained from the existing sector watchlist.",
+          "company": "ALTRIA GROUP INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "KR",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Staples; retained from the existing sector watchlist.",
+          "company": "KROGER CO",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "KMB",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Staples; retained from the existing sector watchlist.",
+          "company": "KIMBERLY CLARK CORP",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "GIS",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Staples; retained from the existing sector watchlist.",
+          "company": "GENERAL MILLS INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "MDLZ",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Staples; retained from the existing sector watchlist.",
+          "company": "MONDELEZ INTERNATIONAL INC A",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "CL",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Staples; retained from the existing sector watchlist.",
+          "company": "COLGATE PALMOLIVE CO",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "KDP",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Staples; retained from the existing sector watchlist.",
+          "company": "KEURIG DR PEPPER INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "HSY",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Consumer Staples; retained from the existing sector watchlist.",
+          "company": "HERSHEY CO/THE",
+          "exchange": "NYSE"
+        }
+      ]
+    },
+    {
+      "theme_id": "sector-energy",
+      "anchor": "XLE",
+      "reviewed_date": "2026-10-24",
+      "members": [
+        {
+          "ticker": "XOM",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Energy; retained from the existing sector watchlist.",
+          "company": "EXXONMOBIL HOLDINGS CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "CVX",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Energy; retained from the existing sector watchlist.",
+          "company": "CHEVRON CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "APA",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Energy; retained from the existing sector watchlist.",
+          "company": "APA CORP",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "BKR",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Energy; retained from the existing sector watchlist.",
+          "company": "BAKER HUGHES CO",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "VLO",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Energy; retained from the existing sector watchlist.",
+          "company": "VALERO ENERGY CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "MPC",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Energy; retained from the existing sector watchlist.",
+          "company": "MARATHON PETROLEUM CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "COP",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Energy; retained from the existing sector watchlist.",
+          "company": "CONOCOPHILLIPS",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "TPL",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Energy; retained from the existing sector watchlist.",
+          "company": "TEXAS PACIFIC LAND CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "PSX",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Energy; retained from the existing sector watchlist.",
+          "company": "PHILLIPS 66",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "SLB",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Energy; retained from the existing sector watchlist.",
+          "company": "SLB LTD",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "EOG",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Energy; retained from the existing sector watchlist.",
+          "company": "EOG RESOURCES INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "WMB",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Energy; retained from the existing sector watchlist.",
+          "company": "WILLIAMS COS INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "FANG",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Energy; retained from the existing sector watchlist.",
+          "company": "DIAMONDBACK ENERGY INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "OXY",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Energy; retained from the existing sector watchlist.",
+          "company": "OCCIDENTAL PETROLEUM CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "DVN",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Energy; retained from the existing sector watchlist.",
+          "company": "DEVON ENERGY CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "OKE",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Energy; retained from the existing sector watchlist.",
+          "company": "ONEOK INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "KMI",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Energy; retained from the existing sector watchlist.",
+          "company": "KINDER MORGAN INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "EQT",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Energy; retained from the existing sector watchlist.",
+          "company": "EQT CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "HAL",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Energy; retained from the existing sector watchlist.",
+          "company": "HALLIBURTON CO",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "EXE",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Energy; retained from the existing sector watchlist.",
+          "company": "EXPAND ENERGY CORP",
+          "exchange": "NASDAQ-GS"
+        }
+      ]
+    },
+    {
+      "theme_id": "sector-financials",
+      "anchor": "XLF",
+      "reviewed_date": "2026-10-24",
+      "members": [
+        {
+          "ticker": "JPM",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Financials; retained from the existing sector watchlist.",
+          "company": "JPMORGAN CHASE + CO",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "V",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Financials; retained from the existing sector watchlist.",
+          "company": "VISA INC CLASS A SHARES",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "FDS",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Financials; retained from the existing sector watchlist.",
+          "company": "FACTSET RESEARCH SYSTEMS INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "HOOD",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Financials; retained from the existing sector watchlist.",
+          "company": "ROBINHOOD MARKETS INC   A",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "BRK-B",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Financials; retained from the existing sector watchlist.",
+          "company": "BERKSHIRE HATHAWAY INC CL B",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "BAC",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Financials; retained from the existing sector watchlist.",
+          "company": "BANK OF AMERICA CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "BRO",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Financials; retained from the existing sector watchlist.",
+          "company": "BROWN + BROWN INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "COIN",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Financials; retained from the existing sector watchlist.",
+          "company": "COINBASE GLOBAL INC  CLASS A",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "GS",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Financials; retained from the existing sector watchlist.",
+          "company": "GOLDMAN SACHS GROUP INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "MA",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Financials; retained from the existing sector watchlist.",
+          "company": "MASTERCARD INC   A",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "AJG",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Financials; retained from the existing sector watchlist.",
+          "company": "ARTHUR J GALLAGHER + CO",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "IBKR",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Financials; retained from the existing sector watchlist.",
+          "company": "INTERACTIVE BROKERS GRO CL A",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "WFC",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Financials; retained from the existing sector watchlist.",
+          "company": "WELLS FARGO + CO",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "C",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Financials; retained from the existing sector watchlist.",
+          "company": "CITIGROUP INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "MRSH",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Financials; retained from the existing sector watchlist.",
+          "company": "MARSH + MCLENNAN COS",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "SCHW",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Financials; retained from the existing sector watchlist.",
+          "company": "SCHWAB (CHARLES) CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "MS",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Financials; retained from the existing sector watchlist.",
+          "company": "MORGAN STANLEY",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "AXP",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Financials; retained from the existing sector watchlist.",
+          "company": "AMERICAN EXPRESS CO",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "ERIE",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Financials; retained from the existing sector watchlist.",
+          "company": "ERIE INDEMNITY COMPANY CL A",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "IVZ",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Financials; retained from the existing sector watchlist.",
+          "company": "INVESCO LTD",
+          "exchange": "NYSE"
+        }
+      ]
+    },
+    {
+      "theme_id": "sector-health-care",
+      "anchor": "XLV",
+      "reviewed_date": "2026-10-24",
+      "members": [
+        {
+          "ticker": "UNH",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Health Care; retained from the existing sector watchlist.",
+          "company": "UNITEDHEALTH GROUP INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "TMO",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Health Care; retained from the existing sector watchlist.",
+          "company": "THERMO FISHER SCIENTIFIC INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "VEEV",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Health Care; retained from the existing sector watchlist.",
+          "company": "VEEVA SYSTEMS INC CLASS A",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "DXCM",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Health Care; retained from the existing sector watchlist.",
+          "company": "DEXCOM INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "DHR",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Health Care; retained from the existing sector watchlist.",
+          "company": "DANAHER CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "ISRG",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Health Care; retained from the existing sector watchlist.",
+          "company": "INTUITIVE SURGICAL INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "CI",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Health Care; retained from the existing sector watchlist.",
+          "company": "THE CIGNA GROUP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "SOLV",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Health Care; retained from the existing sector watchlist.",
+          "company": "SOLVENTUM CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "ILMN",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Health Care; retained from the existing sector watchlist.",
+          "company": "ILLUMINA INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "CVS",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Health Care; retained from the existing sector watchlist.",
+          "company": "CVS HEALTH CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "MCK",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Health Care; retained from the existing sector watchlist.",
+          "company": "MCKESSON CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "HSIC",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Health Care; retained from the existing sector watchlist.",
+          "company": "HENRY SCHEIN INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "BSX",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Health Care; retained from the existing sector watchlist.",
+          "company": "BOSTON SCIENTIFIC CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "SYK",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Health Care; retained from the existing sector watchlist.",
+          "company": "STRYKER CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "RMD",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Health Care; retained from the existing sector watchlist.",
+          "company": "RESMED INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "DGX",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Health Care; retained from the existing sector watchlist.",
+          "company": "QUEST DIAGNOSTICS INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "HUM",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Health Care; retained from the existing sector watchlist.",
+          "company": "HUMANA INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "HCA",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Health Care; retained from the existing sector watchlist.",
+          "company": "HCA HEALTHCARE INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "CNC",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Health Care; retained from the existing sector watchlist.",
+          "company": "CENTENE CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "EW",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Health Care; retained from the existing sector watchlist.",
+          "company": "EDWARDS LIFESCIENCES CORP",
+          "exchange": "NYSE"
+        }
+      ]
+    },
+    {
+      "theme_id": "sector-industrials",
+      "anchor": "XLI",
+      "reviewed_date": "2026-10-24",
+      "members": [
+        {
+          "ticker": "BE",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Industrials; retained from the existing sector watchlist.",
+          "company": "BLOOM ENERGY CORP  A",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "GEV",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Industrials; retained from the existing sector watchlist.",
+          "company": "GE VERNOVA INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "EFX",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Industrials; retained from the existing sector watchlist.",
+          "company": "EQUIFAX INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "FIX",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Industrials; retained from the existing sector watchlist.",
+          "company": "COMFORT SYSTEMS USA INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "CAT",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Industrials; retained from the existing sector watchlist.",
+          "company": "CATERPILLAR INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "BA",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Industrials; retained from the existing sector watchlist.",
+          "company": "BOEING CO/THE",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "ALLE",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Industrials; retained from the existing sector watchlist.",
+          "company": "ALLEGION PLC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "VRT",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Industrials; retained from the existing sector watchlist.",
+          "company": "VERTIV HOLDINGS CO A",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "GE",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Industrials; retained from the existing sector watchlist.",
+          "company": "GENERAL ELECTRIC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "UBER",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Industrials; retained from the existing sector watchlist.",
+          "company": "UBER TECHNOLOGIES INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "PAYX",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Industrials; retained from the existing sector watchlist.",
+          "company": "PAYCHEX INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "HWM",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Industrials; retained from the existing sector watchlist.",
+          "company": "HOWMET AEROSPACE INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "ETN",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Industrials; retained from the existing sector watchlist.",
+          "company": "EATON CORP PLC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "RTX",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Industrials; retained from the existing sector watchlist.",
+          "company": "RTX CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "VRSK",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Industrials; retained from the existing sector watchlist.",
+          "company": "VERISK ANALYTICS INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "PWR",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Industrials; retained from the existing sector watchlist.",
+          "company": "QUANTA SERVICES INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "DE",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Industrials; retained from the existing sector watchlist.",
+          "company": "DEERE + CO",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "UNP",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Industrials; retained from the existing sector watchlist.",
+          "company": "UNION PACIFIC CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "ADP",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Industrials; retained from the existing sector watchlist.",
+          "company": "AUTOMATIC DATA PROCESSING",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "EME",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Industrials; retained from the existing sector watchlist.",
+          "company": "EMCOR GROUP INC",
+          "exchange": "NYSE"
+        }
+      ]
+    },
+    {
+      "theme_id": "sector-information-technology",
+      "anchor": "XLK",
+      "reviewed_date": "2026-10-24",
+      "members": [
+        {
+          "ticker": "MU",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Information Technology; retained from the existing sector watchlist.",
+          "company": "MICRON TECHNOLOGY INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "NVDA",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Information Technology; retained from the existing sector watchlist.",
+          "company": "NVIDIA CORP",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "ACN",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Information Technology; retained from the existing sector watchlist.",
+          "company": "ACCENTURE PLC CL A",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "FLEX",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Information Technology; retained from the existing sector watchlist.",
+          "company": "FLEX LTD",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "SNDK",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Information Technology; retained from the existing sector watchlist.",
+          "company": "SANDISK CORP",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "AAPL",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Information Technology; retained from the existing sector watchlist.",
+          "company": "APPLE INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "PTC",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Information Technology; retained from the existing sector watchlist.",
+          "company": "PTC INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "INTC",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Information Technology; retained from the existing sector watchlist.",
+          "company": "INTEL CORP",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "AMD",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Information Technology; retained from the existing sector watchlist.",
+          "company": "ADVANCED MICRO DEVICES",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "MSFT",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Information Technology; retained from the existing sector watchlist.",
+          "company": "MICROSOFT CORP",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "IT",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Information Technology; retained from the existing sector watchlist.",
+          "company": "GARTNER INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "STX",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Information Technology; retained from the existing sector watchlist.",
+          "company": "SEAGATE TECHNOLOGY HOLDINGS",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "AVGO",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Information Technology; retained from the existing sector watchlist.",
+          "company": "BROADCOM INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "MRVL",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Information Technology; retained from the existing sector watchlist.",
+          "company": "MARVELL TECHNOLOGY INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "INTU",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Information Technology; retained from the existing sector watchlist.",
+          "company": "INTUIT INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "COHR",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Information Technology; retained from the existing sector watchlist.",
+          "company": "COHERENT CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "LITE",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Information Technology; retained from the existing sector watchlist.",
+          "company": "LUMENTUM HOLDINGS INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "PLTR",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Information Technology; retained from the existing sector watchlist.",
+          "company": "PALANTIR TECHNOLOGIES INC A",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "CTSH",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Information Technology; retained from the existing sector watchlist.",
+          "company": "COGNIZANT TECH SOLUTIONS A",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "LRCX",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Information Technology; retained from the existing sector watchlist.",
+          "company": "LAM RESEARCH CORP",
+          "exchange": "NASDAQ-GS"
+        }
+      ]
+    },
+    {
+      "theme_id": "sector-materials",
+      "anchor": "XLB",
+      "reviewed_date": "2026-10-24",
+      "members": [
+        {
+          "ticker": "LIN",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Materials; retained from the existing sector watchlist.",
+          "company": "LINDE PLC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "FCX",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Materials; retained from the existing sector watchlist.",
+          "company": "FREEPORT MCMORAN INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "BALL",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Materials; retained from the existing sector watchlist.",
+          "company": "BALL CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "MOS",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Materials; retained from the existing sector watchlist.",
+          "company": "MOSAIC CO/THE",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "NEM",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Materials; retained from the existing sector watchlist.",
+          "company": "NEWMONT CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "SHW",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Materials; retained from the existing sector watchlist.",
+          "company": "SHERWIN WILLIAMS CO/THE",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "DOW",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Materials; retained from the existing sector watchlist.",
+          "company": "DOW INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "ALB",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Materials; retained from the existing sector watchlist.",
+          "company": "ALBEMARLE CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "CRH",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Materials; retained from the existing sector watchlist.",
+          "company": "CRH PLC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "MLM",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Materials; retained from the existing sector watchlist.",
+          "company": "MARTIN MARIETTA MATERIALS",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "LYB",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Materials; retained from the existing sector watchlist.",
+          "company": "LYONDELLBASELL INDU CL A",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "SW",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Materials; retained from the existing sector watchlist.",
+          "company": "SMURFIT WESTROCK PLC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "ECL",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Materials; retained from the existing sector watchlist.",
+          "company": "ECOLAB INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "APD",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Materials; retained from the existing sector watchlist.",
+          "company": "AIR PRODUCTS + CHEMICALS INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "IFF",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Materials; retained from the existing sector watchlist.",
+          "company": "INTL FLAVORS + FRAGRANCES",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "IP",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Materials; retained from the existing sector watchlist.",
+          "company": "INTERNATIONAL PAPER CO",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "VMC",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Materials; retained from the existing sector watchlist.",
+          "company": "VULCAN MATERIALS CO",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "NUE",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Materials; retained from the existing sector watchlist.",
+          "company": "NUCOR CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "AMCR",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Materials; retained from the existing sector watchlist.",
+          "company": "AMCOR PLC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "CF",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Materials; retained from the existing sector watchlist.",
+          "company": "CF INDUSTRIES HOLDINGS INC",
+          "exchange": "NYSE"
+        }
+      ]
+    },
+    {
+      "theme_id": "sector-real-estate",
+      "anchor": "XLRE",
+      "reviewed_date": "2026-10-24",
+      "members": [
+        {
+          "ticker": "WELL",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Real Estate; retained from the existing sector watchlist.",
+          "company": "WELLTOWER INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "AMT",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Real Estate; retained from the existing sector watchlist.",
+          "company": "AMERICAN TOWER CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "CCI",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Real Estate; retained from the existing sector watchlist.",
+          "company": "CROWN CASTLE INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "ARE",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Real Estate; retained from the existing sector watchlist.",
+          "company": "ALEXANDRIA REAL ESTATE EQUIT",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "PLD",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Real Estate; retained from the existing sector watchlist.",
+          "company": "PROLOGIS INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "EQIX",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Real Estate; retained from the existing sector watchlist.",
+          "company": "EQUINIX INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "CSGP",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Real Estate; retained from the existing sector watchlist.",
+          "company": "COSTAR GROUP INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "CBRE",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Real Estate; retained from the existing sector watchlist.",
+          "company": "CBRE GROUP INC   A",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "O",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Real Estate; retained from the existing sector watchlist.",
+          "company": "REALTY INCOME CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "DLR",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Real Estate; retained from the existing sector watchlist.",
+          "company": "DIGITAL REALTY TRUST INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "HST",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Real Estate; retained from the existing sector watchlist.",
+          "company": "HOST HOTELS + RESORTS INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "DOC",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Real Estate; retained from the existing sector watchlist.",
+          "company": "HEALTHPEAK PROPERTIES INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "VMRK",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Real Estate; retained from the existing sector watchlist.",
+          "company": "VIVMARK RESIDENTIAL",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "VTR",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Real Estate; retained from the existing sector watchlist.",
+          "company": "VENTAS INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "SBAC",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Real Estate; retained from the existing sector watchlist.",
+          "company": "SBA COMMUNICATIONS CORP",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "IRM",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Real Estate; retained from the existing sector watchlist.",
+          "company": "IRON MOUNTAIN INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "PSA",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Real Estate; retained from the existing sector watchlist.",
+          "company": "PUBLIC STORAGE",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "SPG",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Real Estate; retained from the existing sector watchlist.",
+          "company": "SIMON PROPERTY GROUP INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "EXR",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Real Estate; retained from the existing sector watchlist.",
+          "company": "EXTRA SPACE STORAGE INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "WY",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Real Estate; retained from the existing sector watchlist.",
+          "company": "WEYERHAEUSER CO",
+          "exchange": "NYSE"
+        }
+      ]
+    },
+    {
+      "theme_id": "sector-utilities",
+      "anchor": "XLU",
+      "reviewed_date": "2026-10-24",
+      "members": [
+        {
+          "ticker": "CEG",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Utilities; retained from the existing sector watchlist.",
+          "company": "CONSTELLATION ENERGY",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "VST",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Utilities; retained from the existing sector watchlist.",
+          "company": "VISTRA CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "PNW",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Utilities; retained from the existing sector watchlist.",
+          "company": "PINNACLE WEST CAPITAL",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "NRG",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Utilities; retained from the existing sector watchlist.",
+          "company": "NRG ENERGY INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "NEE",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Utilities; retained from the existing sector watchlist.",
+          "company": "NEXTERA ENERGY INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "SO",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Utilities; retained from the existing sector watchlist.",
+          "company": "SOUTHERN CO/THE",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "ED",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Utilities; retained from the existing sector watchlist.",
+          "company": "CONSOLIDATED EDISON INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "AES",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Utilities; retained from the existing sector watchlist.",
+          "company": "AES CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "DUK",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Utilities; retained from the existing sector watchlist.",
+          "company": "DUKE ENERGY CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "AEP",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Utilities; retained from the existing sector watchlist.",
+          "company": "AMERICAN ELECTRIC POWER",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "XEL",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Utilities; retained from the existing sector watchlist.",
+          "company": "XCEL ENERGY INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "ES",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Utilities; retained from the existing sector watchlist.",
+          "company": "EVERSOURCE ENERGY",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "EXC",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Utilities; retained from the existing sector watchlist.",
+          "company": "EXELON CORP",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "ETR",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Utilities; retained from the existing sector watchlist.",
+          "company": "ENTERGY CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "CNP",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Utilities; retained from the existing sector watchlist.",
+          "company": "CENTERPOINT ENERGY INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "FE",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Utilities; retained from the existing sector watchlist.",
+          "company": "FIRSTENERGY CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "D",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Utilities; retained from the existing sector watchlist.",
+          "company": "DOMINION ENERGY INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "WEC",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Utilities; retained from the existing sector watchlist.",
+          "company": "WEC ENERGY GROUP INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "EIX",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Utilities; retained from the existing sector watchlist.",
+          "company": "EDISON INTERNATIONAL",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "SRE",
+          "relationship": "Core",
+          "reason": "Established listed company classified in Utilities; retained from the existing sector watchlist.",
+          "company": "SEMPRA",
+          "exchange": "NYSE"
+        }
+      ]
+    },
+    {
+      "theme_id": "theme-semiconductors",
+      "anchor": "SMH",
+      "reviewed_date": "2026-10-24",
+      "members": [
+        {
+          "ticker": "MU",
+          "relationship": "Core",
+          "reason": "Semiconductor memory and storage products.",
+          "company": "Micron Technology Inc",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "NVDA",
+          "relationship": "Core",
+          "reason": "Accelerated-computing and GPU platforms for data center and AI markets.",
+          "company": "Nvidia Corp",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "TXN",
+          "relationship": "Core",
+          "reason": "Designs and manufactures semiconductors.",
+          "company": "Texas Instruments Inc",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "INTC",
+          "relationship": "Core",
+          "reason": "Designs and manufactures semiconductor products.",
+          "company": "Intel Corp",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "AMD",
+          "relationship": "Core",
+          "reason": "Processor, graphics, and data-center accelerator products.",
+          "company": "Advanced Micro Devices Inc",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "AVGO",
+          "relationship": "Core",
+          "reason": "Semiconductor and semiconductor-based solutions are a principal reportable business.",
+          "company": "Broadcom Inc",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "ADI",
+          "relationship": "Core",
+          "reason": "Analog semiconductor products and technologies.",
+          "company": "Analog Devices Inc",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "LRCX",
+          "relationship": "Core",
+          "reason": "Wafer-fabrication equipment and services for semiconductor production.",
+          "company": "Lam Research Corp",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "MRVL",
+          "relationship": "Core",
+          "reason": "Data-infrastructure semiconductor solutions.",
+          "company": "Marvell Technology Inc",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "TSM",
+          "relationship": "Core",
+          "reason": "Semiconductor foundry manufacturing; the holding maps directly to the NYSE-listed ADS.",
+          "company": "Taiwan Semiconductor Manufacturing Co L",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "QCOM",
+          "relationship": "Core",
+          "reason": "QCT semiconductor business is a primary reportable business.",
+          "company": "Qualcomm Inc",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "KLAC",
+          "relationship": "Core",
+          "reason": "Semiconductor process-control and capital equipment.",
+          "company": "Kla Corp",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "AMAT",
+          "relationship": "Core",
+          "reason": "Materials-engineering equipment used in semiconductor manufacturing.",
+          "company": "Applied Materials Inc",
+          "exchange": "NASDAQ-GS"
+        }
+      ]
+    },
+    {
+      "theme_id": "theme-cloud-computing",
+      "anchor": "SKYY",
+      "reviewed_date": "2026-10-24",
+      "members": [
+        {
+          "ticker": "ORCL",
+          "relationship": "Core",
+          "reason": "Cloud applications, infrastructure and database services.",
+          "company": "Oracle Corporation",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "CRM",
+          "relationship": "Core",
+          "reason": "Cloud application and platform services delivered as SaaS.",
+          "company": "Salesforce, Inc.",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "TEAM",
+          "relationship": "Core",
+          "reason": "Atlassian Cloud Platform and cloud-delivered work applications.",
+          "company": "Atlassian Corporation (Class A)",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "DOCN",
+          "relationship": "Core",
+          "reason": "Cloud platform for developers and growing technology companies.",
+          "company": "DigitalOcean Holdings, Inc.",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "NOW",
+          "relationship": "Core",
+          "reason": "Cloud-based workflow platform and services.",
+          "company": "ServiceNow, Inc.",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "SNOW",
+          "relationship": "Core",
+          "reason": "Cloud data and AI platform.",
+          "company": "Snowflake Inc. (Class A)",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "DDOG",
+          "relationship": "Core",
+          "reason": "SaaS observability and security for cloud applications.",
+          "company": "Datadog, Inc. (Class A)",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "MDB",
+          "relationship": "Core",
+          "reason": "MongoDB Atlas managed multi-cloud database service.",
+          "company": "MongoDB, Inc.",
+          "exchange": "NASDAQ-GM"
+        },
+        {
+          "ticker": "NET",
+          "relationship": "Core",
+          "reason": "Connectivity Cloud services delivered over a global network.",
+          "company": "Cloudflare, Inc. (Class A)",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "NTNX",
+          "relationship": "Core",
+          "reason": "Nutanix Cloud Platform for hybrid and public-cloud operations.",
+          "company": "Nutanix, Inc. (Class A)",
+          "exchange": "NASDAQ-GS"
+        }
+      ]
+    },
+    {
+      "theme_id": "theme-cybersecurity",
+      "anchor": "CIBR",
+      "reviewed_date": "2026-10-24",
+      "members": [
+        {
+          "ticker": "CRWD",
+          "relationship": "Core",
+          "reason": "Cloud-delivered cybersecurity platform.",
+          "company": "CrowdStrike Holdings, Inc. (Class A)",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "PANW",
+          "relationship": "Core",
+          "reason": "Cybersecurity platforms and services for networks, clouds, endpoints and identity.",
+          "company": "Palo Alto Networks, Inc.",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "TENB",
+          "relationship": "Core",
+          "reason": "Cybersecurity products to identify and address security gaps.",
+          "company": "Tenable Holdings, Inc.",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "S",
+          "relationship": "Core",
+          "reason": "Endpoint cybersecurity platform.",
+          "company": "SentinelOne, Inc. (Class A)",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "OKTA",
+          "relationship": "Core",
+          "reason": "Identity and access platforms positioned as a core security layer.",
+          "company": "Okta, Inc.",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "FTNT",
+          "relationship": "Core",
+          "reason": "Cybersecurity products and network-security platforms.",
+          "company": "Fortinet, Inc.",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "ZS",
+          "relationship": "Core",
+          "reason": "Cybersecurity platform and protection services.",
+          "company": "Zscaler, Inc.",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "VRNS",
+          "relationship": "Core",
+          "reason": "Data Security Platform for enterprise data and identity environments.",
+          "company": "Varonis Systems, Inc.",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "RBRK",
+          "relationship": "Core",
+          "reason": "Data security and cyber-resilience products.",
+          "company": "Rubrik, Inc. (Class A)",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "QLYS",
+          "relationship": "Core",
+          "reason": "Cloud-based security, compliance and vulnerability products.",
+          "company": "Qualys, Inc.",
+          "exchange": "NASDAQ-GS"
+        }
+      ]
+    },
+    {
+      "theme_id": "theme-aerospace-defense",
+      "anchor": "XAR",
+      "reviewed_date": "2026-10-24",
+      "members": [
+        {
+          "ticker": "RTX",
+          "relationship": "Core",
+          "reason": "Aerospace and defense systems for commercial, military and government customers.",
+          "company": "RTX CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "LMT",
+          "relationship": "Core",
+          "reason": "Aerospace and defense technology across aircraft, missiles, mission systems and space.",
+          "company": "LOCKHEED MARTIN CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "NOC",
+          "relationship": "Core",
+          "reason": "Aerospace and defense technology and systems.",
+          "company": "NORTHROP GRUMMAN CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "GD",
+          "relationship": "Core",
+          "reason": "Aerospace and defense platforms.",
+          "company": "GENERAL DYNAMICS CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "TDG",
+          "relationship": "Core",
+          "reason": "Commercial aerospace component businesses.",
+          "company": "TRANSDIGM GROUP INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "LHX",
+          "relationship": "Core",
+          "reason": "Defense systems, national-security space and mission technology.",
+          "company": "L3HARRIS TECHNOLOGIES INC",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "HII",
+          "relationship": "Core",
+          "reason": "Naval shipbuilding, fleet sustainment and defense systems.",
+          "company": "HUNTINGTON INGALLS INDUSTRIE",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "WWD",
+          "relationship": "Core",
+          "reason": "Control solutions for aerospace and industrial markets.",
+          "company": "WOODWARD INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "HEI",
+          "relationship": "Core",
+          "reason": "Aircraft and jet-engine replacement parts; Flight Support is 70% of FY2025 sales.",
+          "company": "HEICO CORP",
+          "exchange": "NYSE"
+        },
+        {
+          "ticker": "TXT",
+          "relationship": "Core",
+          "reason": "Aerospace products and defense systems.",
+          "company": "TEXTRON INC",
+          "exchange": "NYSE"
+        }
+      ]
+    },
+    {
+      "theme_id": "theme-clean-energy",
+      "anchor": "ICLN",
+      "reviewed_date": "2026-10-24",
+      "members": [
+        {
+          "ticker": "FSLR",
+          "relationship": "Core",
+          "reason": "Photovoltaic solar technology and manufacturing.",
+          "company": "FIRST SOLAR",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "NXT",
+          "relationship": "Core",
+          "reason": "Solar and energy technology for utility-scale power.",
+          "company": "NEXTPOWER INC",
+          "exchange": "NASDAQ-GS"
+        },
+        {
+          "ticker": "ENPH",
+          "relationship": "Core",
+          "reason": "Products that manage solar generation and storage.",
+          "company": "ENPHASE ENERGY",
+          "exchange": "NASDAQ-GM"
+        },
+        {
+          "ticker": "ORA",
+          "relationship": "Core",
+          "reason": "Geothermal power generation and related clean-energy systems.",
+          "company": "ORMAT TECH INC",
+          "exchange": "NYSE"
+        }
+      ]
+    }
+  ]
+}

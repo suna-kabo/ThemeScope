@@ -1,30 +1,56 @@
 # ThemeScope
 
-ThemeScope is an on-demand, end-of-day US equity sector and theme dashboard. It presents SPY, QQQ and IWM market context, ranks eligible ETF exposures by price-relative strength, and offers optional sourced stock drilldowns. It does not produce entries, trade recommendations, sizing, allocations, orders, or predictive claims.
+ThemeScope is an end-of-day dashboard for US market context and ETF relative strength. It uses SPY, QQQ, IWM, market breadth, EMA context and VIX; ranks sector and theme anchor ETFs; and compares configured stock watchlists with their related ETF. It does not generate entries, trade recommendations, allocations or orders.
 
-## Generate a dashboard
+## Generate and rerender
 
-Use Python 3.10 or newer. The regular pipeline uses only the Python standard library.
-
-For an offline run from the versioned real-data fixture:
-
-```sh
-python3 scripts/generate_dashboard.py --import-run tests/fixtures/v1 --output-dir output
-```
-
-For a current source refresh, provide the configured network access and run:
+Run a normal market refresh with:
 
 ```sh
 python3 scripts/generate_dashboard.py --output-dir output
 ```
 
-The command prints `SUCCESS` only after validating and publishing a dated run. It stages output and preserves the last successful dashboard if a refresh fails. Open `output/dashboard.html` locally; it embeds its required page assets and data and makes no automatic external requests. The complete run ZIP retains source inputs, histories, audits, and diagnostics that are excluded from the smaller dashboard payload.
+The collector reuses the ignored `cache/` price and universe files, updates only missing price sessions where supported, and saves a dated dashboard. A same-session rerender uses the cache. Failed collection preserves the last successful publication.
 
-The default artifact limits are 99,000,000 bytes for `raw_inputs.json`, 20,000,000 bytes for `dashboard.html`, and 95,000,000 bytes for `run_bundle.zip`. They are configurable in `config/themes.json`. Oversized output fails before publication with the artifact size and next step. IWM price histories stay in the compressed sidecar.
+Rerender a saved bundle without network access with:
 
-## Development checks
+```sh
+python3 scripts/generate_dashboard.py --import-run output/run_bundle.zip --output-dir output
+```
 
-Run the required Python and JavaScript checks:
+The run bundle includes compact snapshots, user-facing CSVs, the approved watchlist and anchor configuration, and compressed price-history sidecars. The dashboard itself is self-contained and works offline.
+
+If migrating from an existing run, the local cache can be seeded once without network access:
+
+```sh
+python3 scripts/seed_price_cache.py --input output
+```
+
+## Maintain stock watchlists
+
+Approved many-to-many memberships are stored in `config/theme_watchlists.json`. Current data migrates 16 populated exposure lists (265 memberships, 257 unique stocks, 8 overlapping tickers). The other 37 active exposures stay explicitly unconfigured until their stock universe is reviewed. Lists may contain fewer than 15 stocks when that is the relevant liquid universe; the default display is 15 and capacity is 20.
+
+Import a TradingView scanner export to create a review proposal:
+
+```sh
+python3 scripts/maintain_watchlists.py --input tradingview.csv
+```
+
+This writes a JSON proposal and Markdown summary. It never overwrites the approved configuration. Include a theme or theme ID column to produce per-theme additions and removals; otherwise the proposal marks theme assignment for review. Missing market-cap or history fields remain review items.
+
+Stock price, average dollar volume, market-cap and history filters are configured under `settings.watchlist_stock_filters` in `config/themes.json`. Ordinary dashboard refresh does not conduct company research, retrieve SEC filings, request daily market caps, or reconstruct memberships from ETF holdings.
+
+## Methodology
+
+Current is the 21-session anchor ETF excess-return percentile versus SPY. Medium is the 63-session percentile. Theme Score remains `0.60 × Current + 0.40 × Medium`; four states compare those scores with the configured 50 threshold. Breadth, membership and market context never enter Theme Score, state or rank. Average ranks resolve exact ties.
+
+Theme breadth uses the fixed configured stock list. EMA breadth is above-EMA members divided by valid configured members, with at least 8 valid histories and 80% membership coverage. The table shows the percentage and above/valid count; missing lists or price completeness produce a short reason. Five-session breadth change evaluates the same current membership at both observations. SPY, QQQ and IWM index breadth stays separate; IWM holdings remain a practical Russell 2000 proxy.
+
+The currently eligible 53 ETF anchors are recorded in `config/active_anchors.json`; 12 previously inactive registry records remain inactive. Anchor price history, instrument and the `$10 million` ADV30 floor remain separate eligibility checks. Anchor rankings do not depend on stock availability.
+
+## Checks and files
+
+Run the repository checks with:
 
 ```sh
 python3 -m unittest discover -s tests -v
@@ -33,43 +59,16 @@ node --check static/dashboard.js
 node tests/test_dashboard.js
 ```
 
-The browser verification is optional for normal generation. Install its pinned development dependency and Chromium with:
+The browser check requires Playwright and Chromium. Generated runs belong in ignored `output/` or `dist/`; the persistent `cache/` is ignored by Git. See `reports/v7_migration_report.md` for the current migration counts and remaining scanner-input request.
 
-```sh
-python3 -m pip install -r requirements-dev.txt
-python3 -m playwright install chromium
-python3 scripts/generate_dashboard.py --import-run tests/fixtures/v1 --output-dir output
-python3 tests/validate_output.py output
-python3 tests/browser_check.py output/dashboard.html
-```
+Key files:
 
-CI runs the unit, syntax, export, generated-output, interaction, and offline-network checks. Browser checks need Chromium; generation does not need Playwright.
-
-## Ranking and eligibility
-
-The fixed score methodology is Current = 21-session ETF excess-return percentile versus SPY; Medium = 63-session ETF excess-return percentile; Theme Score = `0.60 × Current + 0.40 × Medium`. The four states compare Current and Medium with the configured 50 threshold. Breadth and stock availability do not affect score, state, or ETF eligibility. Themes remain ETF-only when no stock list qualifies, and invalid holdings breadth stays separate from price-based ranking.
-
-Equal valid scores receive descending average ranks in both the current run and the five-session-prior recalculation. Rank change is `rank_t_minus_5 - rank_current`. Unavailable scores sort last and have no numeric rank. Display order inside a tie remains stable by registry ID.
-
-The registry contains 65 exposures and 112 candidate ETFs. All candidates have a dated, candidate-specific issuer or filing review: 109 are compatible long-only equity exposures and three are explicitly rejected. MSOS uses total-return swaps for core exposure, URA permits physical-uranium trusts, and VPN has no verifiable current listing or issuer mandate. Rejected candidates remain in the audit but cannot be selected. Every selected anchor must also have a verified USD ETF instrument type, at least the configured minimum price history, and sufficient ADV30. Holdings adapters and breadth are not eligibility requirements.
-
-The $10 million ADV30 floor is retained. Each generated report counts candidates that otherwise pass but fail only that floor; low-liquidity ETFs are not activated to increase coverage. Each of the 65 registry records ends as a selected anchor or an inactive record with its current specific eligibility failure. Use the generated registry audit to distinguish candidates blocked by price history, instrument metadata, liquidity, or an explicit mandate rejection.
-
-## Exports and limitations
-
-All user-facing CSV returns are percentage values named `return5_pct`, `return21_pct`, and `return63_pct`. Excess returns and breadth changes are percentage points named `excess*_pp` and `breadth*_change_5_pp`. Internal calculations retain decimal returns. Blank CSV cells mean unavailable.
-
-ETF AUM and historical bid/ask spread sources are not configured. Yahoo adjusted prices are provider-defined. Holdings and index universes are current source snapshots, not historical point-in-time constituents. Nasdaq market-cap data lacks its own observation timestamp, so stock market-cap eligibility remains provisional. Sector stock drilldowns intersect the current S&P 500 sector classification with official sector ETF holdings; they do not represent every listed company in the sector.
-
-Generated runs belong in ignored `output/` or `dist/` directories. They are not committed with source. Versioned historical input samples belong under `tests/fixtures/<schema-version>/`; production commands never read fixtures implicitly.
-
-## Project files
-
-- `config/themes.json`: exposure registry, candidate-specific mandate review state, eligibility settings, and score configuration.
-- `config/sources.json`: price, holdings, universe, quote, and filing sources.
-- `src/themescope/v5.py`: collection, score/state, breadth, and historical-rank calculations.
-- `src/themescope/v6.py`: candidate eligibility, mandate audit, and registry selection.
-- `src/themescope/ranking.py`: shared deterministic average-rank calculation.
-- `scripts/generate_dashboard.py`: validation, exports, offline UI payload, size checks, staged publication, and rollback.
-- `static/`: self-contained dashboard template, styles, JavaScript, and font.
-- `tests/fixtures/`: versioned historical input fixtures.
+- `config/themes.json`: exposure records, ranking, eligibility and watchlist-maintenance settings.
+- `config/active_anchors.json`: the 53 active anchor choices and retained inactive-candidate notes.
+- `config/theme_watchlists.json`: approved stable theme membership.
+- `config/sources.json`: price and index-universe sources.
+- `src/themescope/collect_v7.py`: lean normal-refresh collector.
+- `src/themescope/price_cache.py`: persistent compressed history and universe cache.
+- `src/themescope/watchlists.py`: membership validation, stock metrics and watchlist breadth.
+- `scripts/maintain_watchlists.py`: review-only TradingView import.
+- `scripts/generate_dashboard.py`: calculations, exports, offline dashboard and staged publication.

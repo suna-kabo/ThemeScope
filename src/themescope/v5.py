@@ -708,13 +708,18 @@ def apply(snapshot, raw):
         raise ValueError('Configured score_methodology is required to calculate v6.1 scores')
     threshold = float(weights['state_threshold'])
     for theme in snapshot['themes']:
-        source = dict(raw.get('holdings', {}).get(theme['anchor'], {}))
-        configured_source = theme.get('holdings_source') or {}
-        source['_configured'] = bool(configured_source.get('provider') or configured_source.get('url') or theme['anchor'] in raw.get('holdings', {}))
-        source['_retrieval_error'] = raw.get('errors', {}).get('holdings', {}).get(theme['anchor'])
-        breadth = participation(mapped.get(theme['anchor'], {}), source, *common)
         earlier_session = _five_sessions_before(raw.get('session_calendar', []), date_)
-        earlier_breadth = participation(mapped.get(theme['anchor'], {}), source, all_charts, raw.get('session_calendar', []), earlier_session, snapshot['settings'], freshness_reference) if earlier_session else {}
+        if raw.get('v7_mode'):
+            source = {}
+            breadth = {'eligible_count': 0, **{str(period): metric(reason='Theme watchlist breadth is applied from stable configuration after ETF ranking', above_count=0, valid_count=0, eligible_count=0, coverage_pct=None, session_date=date_) for period in snapshot['settings'].get('ema_periods', (21, 50))}}
+            earlier_breadth = {}
+        else:
+            source = dict(raw.get('holdings', {}).get(theme['anchor'], {}))
+            configured_source = theme.get('holdings_source') or {}
+            source['_configured'] = bool(configured_source.get('provider') or configured_source.get('url') or theme['anchor'] in raw.get('holdings', {}))
+            source['_retrieval_error'] = raw.get('errors', {}).get('holdings', {}).get(theme['anchor'])
+            breadth = participation(mapped.get(theme['anchor'], {}), source, *common)
+            earlier_breadth = participation(mapped.get(theme['anchor'], {}), source, all_charts, raw.get('session_calendar', []), earlier_session, snapshot['settings'], freshness_reference) if earlier_session else {}
         theme['holdings_breadth'] = breadth
         theme['holdings_asof'] = source.get('as_of')
         theme['breadth_eligible_equity_count'] = breadth['eligible_count']
@@ -779,6 +784,15 @@ def apply(snapshot, raw):
         'Curated company-theme classifications use recorded Core/Related rationale and source; non-anchor members are allowed. Holdings are not a membership gate.',
         'Scores are fixed ranking conventions, not validated entry signals, predictions or portfolio allocations.'
     ]
+    if raw.get('v7_mode'):
+        snapshot['limitations'] = [
+            'Theme Score is based only on anchor-ETF price-relative returns versus SPY; configured stock breadth and index breadth do not alter score or state.',
+            'Theme breadth uses the stable configured stock list and applies the minimum valid-count and 80% completeness rules. It is not ETF-holdings breadth.',
+            'SPY uses the observed S&P 500 constituent list, QQQ uses Nasdaq-100 constituents, and IWM uses current IWM holdings as a practical Russell 2000 proxy.',
+            'Breadth change compares the same current configured membership at both observations; this is not point-in-time membership history.',
+            'Yahoo adjusted-close and split conventions are provider-defined. Current index universes and watchlists are not historical point-in-time constituents.',
+            'ThemeScope provides selection and context, not an entry signal, portfolio allocator, or order system.',
+        ]
     snapshot['score_methodology'] = {
         'current_strength_weights': current_weights,
         'medium_strength_weights': medium_weights,

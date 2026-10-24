@@ -363,10 +363,15 @@ def fetch_holdings(theme: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
-def fetch_yahoo_chart(symbol: str, years: int = 2) -> dict[str, Any]:
+def fetch_yahoo_chart(
+    symbol: str, years: int = 2, start_date: str | None = None,
+    end_date: str | None = None,
+) -> dict[str, Any]:
     now = datetime.now(timezone.utc)
-    start = int((now - timedelta(days=365 * years + 2)).timestamp())
-    end = int(now.timestamp()) + 86400
+    start_dt = datetime.strptime(start_date, "%Y-%m-%d").replace(tzinfo=timezone.utc) if start_date else now - timedelta(days=365 * years + 2)
+    end_dt = datetime.strptime(end_date, "%Y-%m-%d").replace(tzinfo=timezone.utc) + timedelta(days=1) if end_date else now + timedelta(days=1)
+    start = int(start_dt.timestamp())
+    end = int(end_dt.timestamp())
     failures = []
     for host in _YAHOO_CHART_HOSTS:
         if host in _YAHOO_BLOCKED_HOSTS:
