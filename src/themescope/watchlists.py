@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import json
 import math
+import re
 from pathlib import Path
 from typing import Any
 
@@ -157,8 +158,12 @@ def apply_watchlists(snapshot: dict[str, Any], raw: dict[str, Any], config: dict
         members = record.get("members", []) if record and record.get("anchor") == theme.get("anchor") else []
         # Keep the full configured list independent of the visible 15/20 row limit.
         theme["watchlist_reviewed_date"] = record.get("reviewed_date") if record else None
+        theme["reviewed_candidate_count"] = record.get("reviewed_candidate_count") if record else None
+        theme["watchlist_list_rationale"] = record.get("list_rationale") if record else None
         theme["configured_watchlist_count"] = len(members)
-        theme["watchlist_status"] = "configured" if record else "not_configured"
+        configured_status = record.get("status") if record else None
+        theme["watchlist_status"] = configured_status or ("configured" if record else "not_configured")
+        theme["watchlist_exception_reason"] = record.get("exception_reason") if record else None
         theme["watchlist_unavailable_reason"] = None if record else "Theme watchlist is not configured."
         theme["selected"] = []
         theme["_members"] = members
@@ -175,6 +180,13 @@ def apply_watchlists(snapshot: dict[str, Any], raw: dict[str, Any], config: dict
                 current["change_reason"] = "The five-session-prior observation is unavailable."
             current.update({"t_minus_5": prior.get("value"), "change_5_pp": change, "prior_session": prior_session, "prior": prior})
             breadth[str(period)] = current
+            theme[f"theme_breadth{period}_pct"] = current["value"]
+            theme[f"theme_breadth{period}_above"] = current["above_count"]
+            theme[f"theme_breadth{period}_valid"] = current["valid_count"]
+            theme[f"theme_breadth{period}_change_5_pp"] = change
+            theme[f"theme_breadth{period}_t_minus_5"] = prior.get("value")
+            # Transitional internal aliases are removed by the v7 compact
+            # snapshot and export projections.
             theme[f"etf_breadth{period}_pct"] = current["value"]
             theme[f"breadth_valid_ema{period}_count"] = current["valid_count"]
             theme[f"breadth{period}_change_5_pp"] = change
@@ -182,8 +194,14 @@ def apply_watchlists(snapshot: dict[str, Any], raw: dict[str, Any], config: dict
         theme["theme_watchlist_breadth"] = breadth
         theme["has_watchlist"] = bool(members)
         theme["watchlist_member_count"] = len(members)
-        theme["stock_scope"] = "Configured watchlist" if members else "ETF only"
-        theme["stock_drilldown_status"] = "available" if members else "not_configured"
+        theme["stock_scope"] = "Configured watchlist" if members else "Reviewed ETF-only" if configured_status == "reviewed_etf_only" else "ETF only"
+        if members:
+            theme["stock_drilldown_status"] = "available"
+        elif configured_status == "reviewed_etf_only":
+            theme["stock_drilldown_status"] = "reviewed_etf_only"
+            theme["watchlist_unavailable_reason"] = record.get("exception_reason")
+        else:
+            theme["stock_drilldown_status"] = "not_configured"
         for legacy_key in (
             "holdings_breadth", "holdings_asof", "breadth_eligible_equity_count",
             "has_curated_watchlist", "curated_watchlist_count", "stock_audit",
@@ -193,7 +211,14 @@ def apply_watchlists(snapshot: dict[str, Any], raw: dict[str, Any], config: dict
         theme["field_status"] = theme.setdefault("field_status", {})
         for period in (21, 50):
             metric = breadth[str(period)]
-            theme["field_status"][f"etf_breadth{period}_pct"] = metric
+            theme["field_status"][f"theme_breadth{period}_pct"] = metric
+            theme["field_status"][f"theme_breadth{period}_change_5_pp"] = {
+                "value": metric.get("change_5_pp"),
+                "status": "valid" if metric.get("change_5_pp") is not None else "unavailable",
+                "reason": metric.get("change_reason") or (None if metric.get("change_5_pp") is not None else "Current and five-session-prior theme-watchlist breadth must both be valid."),
+                "session_date": session,
+                "prior_session": metric.get("prior_session"),
+            }
             theme[f"breadth_status_{period}"] = metric["status"]
             theme[f"breadth_unavailable_reason_{period}"] = metric.get("reason")
         theme.pop("_members", None)
@@ -208,23 +233,35 @@ def propose_import(csv_path: Path, config: dict[str, Any], themes: list[dict[str
         rows = list(csv.DictReader(handle))
     if not rows:
         raise ValueError("TradingView CSV has no data rows")
-    fields = {str(key).strip().casefold(): key for key in rows[0]}
+    # TradingView uses a typographic multiplication sign in some exports and
+    # ASCII x in others; normalize the header while preserving the source key.
+    fields = {str(key).strip().casefold().replace("×", "x"): key for key in rows[0]}
     symbol_key = next((fields[key] for key in ("ticker", "symbol", "name") if key in fields), None)
     if symbol_key is None:
         raise ValueError("TradingView CSV needs a Ticker, Symbol, or Name column")
     price_key = next((fields[k] for k in ("price", "close") if k in fields), None)
-    adv_key = next((fields[k] for k in ("adv30", "average dollar volume", "avg dollar volume") if k in fields), None)
+    adv_key = next((fields[k] for k in ("adv30", "average dollar volume", "avg dollar volume", "price x average volume over 30 days", "price x average volume, 30 days", "price * average volume over 30 days", "30-day average dollar volume") if k in fields), None)
     volume_key = next((fields[k] for k in ("average volume", "avg volume", "volume") if k in fields), None)
     cap_key = next((fields[k] for k in ("market capitalization", "market cap", "market_cap_usd") if k in fields), None)
-    theme_key = next((fields[k] for k in ("theme_id", "theme", "category", "industry") if k in fields), None)
+    # Sector and Industry describe the business; neither is a theme assignment.
+    theme_key = next((fields[k] for k in ("theme_id", "theme") if k in fields), None)
+    industry_key, sector_key = fields.get("industry"), fields.get("sector")
+    description_key = next((fields[k] for k in ("description", "company", "company name") if k in fields), None)
+    exchange_key = fields.get("exchange")
     def number(row, key):
         if not key: return None
-        value = str(row.get(key, "")).replace(",", "").replace("$", "").strip()
-        try: return float(value)
-        except ValueError: return None
+        value = str(row.get(key, "")).replace(",", "").replace("$", "").strip().upper()
+        match = re.fullmatch(r"\s*(-?\d+(?:\.\d+)?)\s*([KMB])?\s*", value)
+        if not match:
+            return None
+        amount = float(match.group(1))
+        return amount * {None: 1, "K": 1_000, "M": 1_000_000, "B": 1_000_000_000}[match.group(2)]
     minimum_price = float(filters.get("raw_close_floor_usd", 15))
     minimum_adv = float(filters.get("adv30_floor_usd", 20_000_000))
     minimum_cap = float(filters.get("market_cap_floor_usd", 2_000_000_000))
+    strict = bool(filters.get("require_complete_maintenance_data"))
+    if strict and (price_key is None or adv_key is None or cap_key is None or exchange_key is None or description_key is None):
+        raise ValueError("Maintenance CSV must contain Symbol, Description, Price, Market capitalization, Price x average volume over 30 days, and Exchange columns")
     market_cap_cache = filters.get("market_cap_cache", {})
     existing = validate_watchlists(config, int(filters.get("watchlist_capacity", 20)))
     theme_lookup = {}
@@ -235,21 +272,31 @@ def propose_import(csv_path: Path, config: dict[str, Any], themes: list[dict[str
     proposals = []
     rejected = []
     accepted_by_theme: dict[str, set[str]] = {}
+    seen_tickers: set[str] = set()
     for row in rows:
         ticker = str(row.get(symbol_key) or "").strip().upper().split(":")[-1]
         if not ticker: continue
+        if ticker in seen_tickers:
+            raise ValueError(f"TradingView CSV contains duplicate ticker {ticker}")
+        seen_tickers.add(ticker)
         price, volume, cap = number(row, price_key), number(row, volume_key), number(row, cap_key)
         cap_source = "scanner CSV" if cap is not None else None
         if cap is None and isinstance(market_cap_cache.get(ticker), dict):
             cap = number({"value": market_cap_cache[ticker].get("market_cap_usd")}, "value")
             cap_source = "maintained local cache" if cap is not None else None
         adv = number(row, adv_key)
-        if adv is None and volume is not None and price is not None:
+        if adv is None and volume is not None and price is not None and not strict:
             adv = volume * price
         reasons = []
-        if price is not None and price < minimum_price: reasons.append(f"price below ${minimum_price:g}")
-        if adv is not None and adv < minimum_adv: reasons.append(f"ADV estimate below ${minimum_adv:,.0f}")
-        if cap is not None and cap < minimum_cap: reasons.append(f"market cap below ${minimum_cap:,.0f}")
+        if price is None and strict: reasons.append("price missing")
+        elif price is not None and price < minimum_price: reasons.append(f"price below ${minimum_price:g}")
+        if adv is None and strict: reasons.append("ADV30 missing")
+        elif adv is not None and adv < minimum_adv: reasons.append(f"ADV estimate below ${minimum_adv:,.0f}")
+        if cap is None and strict: reasons.append("market cap missing")
+        elif cap is not None and cap < minimum_cap: reasons.append(f"market cap below ${minimum_cap:,.0f}")
+        exchange = str(row.get(exchange_key) or "").strip() if exchange_key else ""
+        if strict and not exchange.upper().startswith(("NYSE", "NASDAQ")):
+            reasons.append("not listed on NYSE or Nasdaq")
         if reasons:
             rejected.append({"ticker": ticker, "reasons": reasons})
             continue
@@ -267,7 +314,30 @@ def propose_import(csv_path: Path, config: dict[str, Any], themes: list[dict[str
             "market_cap": "passed (" + str(cap_source) + ")" if cap is not None and cap >= minimum_cap else "not provided; review required" if cap is None else "failed (" + str(cap_source) + ")",
             "history_63_and_ema50": "not verified by scanner CSV; review required",
         }
-        proposals.append({"ticker": ticker, "company": row.get(fields.get("description", "")) or row.get(fields.get("company", "")) or ticker, "price": price, "adv30_estimate_usd": adv, "market_cap_usd": cap, "matched_theme": assigned.get("id") if assigned else None, "proposed_memberships": memberships, "filter_checks": checks, "review_required": True})
+        proposal = {
+            "ticker": ticker,
+            "company": row.get(description_key) if description_key else ticker,
+            "exchange": exchange,
+            "instrument_type": "operating_company" if strict else None,
+            "industry": row.get(industry_key) if industry_key else None,
+            "sector": row.get(sector_key) if sector_key else None,
+            "price": price,
+            "adv30_estimate_usd": adv,
+            "market_cap_usd": cap,
+            "maintenance": {
+                "date": filters.get("maintenance_date"),
+                "source_type": "tradingview_universe",
+                "price_usd": price,
+                "market_cap_usd": cap,
+                "adv30_usd": adv,
+                "adjusted_price_sessions": None,
+            },
+            "matched_theme": assigned.get("id") if assigned else None,
+            "proposed_memberships": memberships,
+            "filter_checks": checks,
+            "review_required": True,
+        }
+        proposals.append(proposal)
     diffs = []
     if theme_key:
         for theme_id, imported in accepted_by_theme.items():
@@ -286,3 +356,63 @@ def propose_import(csv_path: Path, config: dict[str, Any], themes: list[dict[str
         "existing_memberships": sum(len(item["members"]) for item in existing.values()),
         "auto_overwrite": False,
     }
+
+
+def build_reviewed_config(
+    proposal: dict[str, Any],
+    review: dict[str, Any],
+    themes: list[dict[str, Any]],
+    active_anchors: dict[str, str],
+) -> dict[str, Any]:
+    """Apply a completed human assignment map to candidate maintenance facts."""
+    candidate_by_ticker = {row["ticker"]: row for row in proposal.get("proposals", [])}
+    review_rows = review.get("themes", [])
+    review_by_id: dict[str, list[dict[str, Any]]] = {}
+    for row in review_rows:
+        review_by_id.setdefault(str(row.get("theme_id") or ""), []).append(row)
+    expected_ids = set(active_anchors)
+    if set(review_by_id) != expected_ids or any(len(rows) != 1 for rows in review_by_id.values()):
+        missing = sorted(expected_ids - set(review_by_id))
+        unknown = sorted(set(review_by_id) - expected_ids)
+        raise ValueError(f"Review map must contain each active theme exactly once; missing={missing}, unknown={unknown}")
+    theme_by_id = {row.get("id"): row for row in themes}
+    records = []
+    for theme_id in sorted(expected_ids):
+        entry = review_by_id[theme_id][0]
+        theme = theme_by_id.get(theme_id, {})
+        members = []
+        for assigned in entry.get("members", []):
+            ticker = str(assigned.get("ticker") or "").strip().upper()
+            candidate = candidate_by_ticker.get(ticker)
+            maintenance = dict(assigned.get("maintenance") or (candidate or {}).get("maintenance") or {})
+            if not ticker or not maintenance:
+                raise ValueError(f"{theme_id}: {ticker or '(blank)'} has no candidate and maintained eligibility facts")
+            maintenance.setdefault("date", review.get("reviewed_date"))
+            if maintenance.get("source_type") not in {"anchor_etf", "tradingview_universe", "outside_etf_addition"}:
+                raise ValueError(f"{theme_id}/{ticker}: candidate source must be anchor_etf, tradingview_universe, or outside_etf_addition")
+            members.append({
+                "ticker": ticker,
+                "company": assigned.get("company") or (candidate or {}).get("company"),
+                "exchange": assigned.get("exchange") or (candidate or {}).get("exchange"),
+                "instrument_type": assigned.get("instrument_type") or (candidate or {}).get("instrument_type"),
+                "relationship": assigned.get("relationship"),
+                "reason": assigned.get("reason"),
+                "reviewed_date": review.get("reviewed_date"),
+                "maintenance": maintenance,
+                **{
+                    key: assigned[key]
+                    for key in ("source_url", "reason_source_url")
+                    if assigned.get(key)
+                },
+            })
+        records.append({
+            "theme_id": theme_id,
+            "anchor": active_anchors[theme_id],
+            "status": entry.get("status"),
+            "reviewed_date": review.get("reviewed_date"),
+            "reviewed_candidate_count": entry.get("reviewed_candidate_count"),
+            "exception_reason": entry.get("exception_reason"),
+            "list_rationale": entry.get("list_rationale"),
+            "members": members,
+        })
+    return {"version": 2, "reviewed_date": review.get("reviewed_date"), "watchlists": records}

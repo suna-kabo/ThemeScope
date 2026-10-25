@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import copy
 import csv
 import gzip
 import io
@@ -26,10 +27,11 @@ sys.path.insert(0, str(ROOT))
 
 from src.themescope.collect_v7 import build_snapshot_v7 as build_snapshot  # noqa: E402
 from src.themescope.presentation import enrich, validate
-from src.themescope.v5 import apply as apply_v5, apply_historical_ranks
+from src.themescope.v5 import apply as apply_v5, apply_historical_ranks, map_iwm_universe, map_universe
 from src.themescope.v6 import apply_v6, prepare_registry_themes
 from src.themescope.metrics import return_metric, trend_metric
 from src.themescope.watchlists import apply_watchlists  # noqa: E402
+from src.themescope.release_audit import audit_release  # noqa: E402
 
 
 def _write_json(path: Path, data: Any) -> None:
@@ -44,6 +46,27 @@ def _write_bounded_json(path: Path, data: Any, maximum_bytes: int, artifact_name
         raise ValueError(f"{artifact_name} is {size:,} bytes; configured limit is {maximum_bytes:,}. Reduce retained inputs or raise the corresponding maximum_*_bytes setting deliberately.")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(encoded, encoding="utf-8")
+
+
+def _clean_v7_output(value: Any) -> Any:
+    """Strip retired v6 labels and subjective fields from compact v7 output."""
+    if isinstance(value, dict):
+        output = {}
+        for key, item in value.items():
+            key_text = str(key)
+            if key_text == "comparisons" or key_text.startswith("market_condition") or key_text.startswith("etf_breadth"):
+                continue
+            if key_text == "input_version" and str(item).startswith("themescope-v"):
+                continue
+            if key_text == "field_status" and isinstance(item, dict):
+                item = {name: detail for name, detail in item.items() if not str(name).startswith("market_condition") and not str(name).startswith("etf_breadth")}
+            output[key] = _clean_v7_output(item)
+        return output
+    if isinstance(value, list):
+        return [cleaned for item in value if (cleaned := _clean_v7_output(item)) is not None]
+    if isinstance(value, str) and "etf holdings breadth" in value.casefold():
+        return None
+    return value
 
 
 def _dashboard_snapshot(snapshot: dict[str, Any]) -> dict[str, Any]:
@@ -64,6 +87,9 @@ def _dashboard_snapshot(snapshot: dict[str, Any]) -> dict[str, Any]:
         "curated_subset_breadth_diagnostic", "sector_member_exclusions", "stock_audit",
         "sector_membership_basis",
         "breadth_source_status", "breadth_source_reasons", "anchor_eligibility_status", "anchor_eligibility_reasons",
+        "etf_breadth21_pct", "etf_breadth50_pct", "breadth21_t_minus_5", "breadth50_t_minus_5",
+        "breadth21_change_5_pp", "breadth50_change_5_pp",
+        "breadth_valid_ema21_count", "breadth_valid_ema50_count",
     }
     payload["themes"] = [
         {key: value for key, value in row.items() if key not in theme_internal}
@@ -83,7 +109,7 @@ def _dashboard_snapshot(snapshot: dict[str, Any]) -> dict[str, Any]:
             for metric in breadth.values():
                 if isinstance(metric, dict):
                     metric.pop("coverage_pct", None)
-    return payload
+    return _clean_v7_output(payload)
 
 
 def _ensure_v61_market_records(snapshot: dict[str, Any], raw: dict[str, Any], registry: dict[str, Any]) -> None:
@@ -286,13 +312,33 @@ def _v7_run_report(snapshot: dict[str, Any], raw: dict[str, Any]) -> str:
     by_id = {row.get('theme_id'): row for row in watchlists}
     theme_rows = snapshot.get('themes', [])
     active = len(theme_rows)
+    final_statuses = {'complete', 'reviewed_short', 'reviewed_etf_only'}
+    valid_records = [
+        row for row in theme_rows
+        if by_id.get(row.get('id'))
+        and by_id[row['id']].get('anchor') == row.get('anchor')
+        and by_id[row['id']].get('status') in final_statuses
+    ]
+    missing = [row for row in theme_rows if row not in valid_records]
     configured = [row for row in theme_rows if by_id.get(row.get('id')) and by_id[row['id']].get('anchor') == row.get('anchor')]
-    missing = [row for row in theme_rows if row not in configured]
     memberships = [member for row in configured for member in by_id[row['id']].get('members', [])]
     counts = {}
     for member in memberships:
         counts[member['ticker']] = counts.get(member['ticker'], 0) + 1
     overlaps = {ticker: count for ticker, count in counts.items() if count > 1}
+    diagnostics = snapshot.get('registry_diagnostics', [])
+    inactive_exposures = [row for row in diagnostics if row.get('status') != 'selected_anchor']
+    rejected_candidate_rows = sum(
+        candidate.get('status') != 'eligible'
+        for exposure in inactive_exposures
+        for candidate in exposure.get('candidates', [])
+    )
+    status_counts = {
+        status: sum(by_id[row['id']].get('status') == status for row in valid_records)
+        for status in ('complete', 'reviewed_short', 'reviewed_etf_only')
+    }
+    valid21 = sum(row.get('theme_breadth21_pct') is not None and row.get('theme_breadth21_valid') is not None for row in theme_rows)
+    valid50 = sum(row.get('theme_breadth50_pct') is not None and row.get('theme_breadth50_valid') is not None for row in theme_rows)
     cache = raw.get('price_cache_stats', {})
     requests = raw.get('collection_request_counts', {})
     cache_line = (
@@ -301,19 +347,19 @@ def _v7_run_report(snapshot: dict[str, Any], raw: dict[str, Any]) -> str:
         f"- Persistent cache: {cache.get('hits', 0):,} hits; {cache.get('incremental_updates', 0)} incremental updates; {cache.get('full_refreshes', 0)} full refreshes; {cache.get('failures', 0)} failures; {cache.get('stale_reuses', 0)} stale series reused."
     )
     lines = [
-        '# ThemeScope v7 run report', '',
+        '# ThemeScope v7.1 run report', '',
         f"Market session: {snapshot.get('session_date')}", '',
         f"Dashboard generated: {snapshot.get('dashboard_generated_at') or snapshot.get('generated_at')}", '',
         f"Workflow: {'offline import / rerender' if requests.get('price_history') == 0 and requests.get('universe') == 0 else 'normal cached market refresh'}",
         '', '## Ranking and state', '',
         'Current is the percentile rank of 21-session ETF excess return versus SPY. Medium is the 63-session percentile. Theme Score remains `0.60 × Current + 0.40 × Medium`, with the configured 50 state threshold. Theme and index breadth do not affect score, state, or rank.',
-        '', '## Watchlist migration', '',
-        f"- Active anchors: {active}; inactive registry records: {sum(item.get('status') != 'selected_anchor' for item in snapshot.get('registry_diagnostics', []))}.",
-        f"- Configured lists: {len(configured)}; active exposures awaiting stock-universe input: {len(missing)}.",
+        '', '## Watchlist configuration', '',
+        f"- Active exposures: {active}; inactive exposures: {len(inactive_exposures)}; rejected candidate ETF rows: {rejected_candidate_rows}.",
+        f"- Final reviewed lists: {len(valid_records)}/{active} (complete {status_counts['complete']}; reviewed short {status_counts['reviewed_short']}; reviewed ETF-only {status_counts['reviewed_etf_only']}); stored records {len(watchlists)}.",
         f"- Configured memberships: {len(memberships)}; unique stocks: {len(counts)}; overlapping stocks: {len(overlaps)} ({sum(n - 1 for n in overlaps.values())} additional memberships).",
-        '- Populated lists: ' + (', '.join(f"{row['name']} ({len(by_id[row['id']]['members'])})" for row in configured) or 'none') + '.',
-        '- Missing lists: ' + (', '.join(f"{row['name']} ({row['id']})" for row in missing) or 'none') + '.',
-        '- Missing lists remain explicitly unconfigured until the intended TradingView scanner CSV is supplied and the proposed membership changes are reviewed.',
+        f"- Themes with valid EMA21 breadth: {valid21}; with valid EMA50 breadth: {valid50}.",
+        '- Lists: ' + (', '.join(f"{row['name']} ({len(by_id[row['id']]['members'])}, {by_id[row['id']].get('status', 'not reviewed')})" for row in configured) or 'none') + '.',
+        '- Release audit: ' + ('PASS' if not missing else f"BLOCKED; {len(missing)} active exposure records are missing final review: " + ', '.join(f"{row['name']} ({row['id']})" for row in missing)) + '.',
         '', '## Cache and requests', '',
         cache_line,
         f"- Source requests by category: price histories {requests.get('price_history', 0)}; index universes {requests.get('universe', 0)}; filings {requests.get('filings', 0)}; company quotes {requests.get('quotes', 0)}; theme holdings {requests.get('theme_holdings', 0)}; AUM/spread {requests.get('aum_spread', 0)}.",
@@ -322,8 +368,8 @@ def _v7_run_report(snapshot: dict[str, Any], raw: dict[str, Any]) -> str:
         '- Theme breadth uses the fixed configured list and displays above/valid counts. Validity requires at least 8 observations and at least 80% of configured members. A missing ticker stays in the configured denominator.',
         '- Five-session breadth change uses the same current membership at both dates; it is not a historical point-in-time universe.',
         '- Index breadth remains separate: SPY uses observed S&P 500 constituents, QQQ uses Nasdaq-100, and IWM uses current holdings as a practical Russell 2000 proxy.',
-        '- The initial 16 lists are carried forward from the saved v6.2 run. The remaining 37 require scanner input for curation; no companies were invented to fill them.',
-        '- No SEC filing retrieval, company research, ETF holdings breadth, AUM, spread, or daily market-cap request is part of normal refresh.',
+        '- A release requires one reviewed configuration record for each active exposure; incomplete records block publishing and are not represented as awaiting a future CSV.',
+        '- Normal refresh reads the approved static membership and does not run classification research, full ETF holdings breadth, AUM, spreads, or daily market-cap requests.',
         '', '## Files', '',
         'The run bundle includes the dashboard, compact snapshot and CSVs, configuration, and compressed price sidecars. Run `python3 scripts/generate_dashboard.py --import-run output` to rerender without network access.',
     ]
@@ -332,8 +378,8 @@ def _v7_run_report(snapshot: dict[str, Any], raw: dict[str, Any]) -> str:
 
 def _watchlist_migration_report(snapshot: dict[str, Any], raw: dict[str, Any]) -> str:
     report = _v7_run_report(snapshot, raw)
-    section = report[report.index('## Watchlist migration'):report.index('## Cache and requests')]
-    return '# ThemeScope v7 watchlist migration\n\n' + section + '\nThe 16 existing lists were migrated from the saved 23 October 2026 run. Sector selections were persisted as stable configuration. Biotechnology is no longer excluded from future maintenance.\n'
+    section = report[report.index('## Watchlist configuration'):report.index('## Cache and requests')]
+    return '# ThemeScope v7.1 watchlist review\n\n' + section
 
 
 EXPORT_COLUMNS = [
@@ -381,18 +427,18 @@ def _theme_csv_row(record: dict[str, Any]) -> dict[str, Any]:
     for period in (21, 50):
         breadth = record.get('theme_watchlist_breadth', {}).get(str(period), {})
         row[f'theme_breadth{period}_pct'] = breadth.get('value')
-        row[f'breadth{period}_above'] = breadth.get('above_count')
-        row[f'breadth{period}_valid'] = breadth.get('valid_count')
-        row[f'breadth{period}_change_5_pp'] = breadth.get('change_5_pp')
+        row[f'theme_breadth{period}_above'] = breadth.get('above_count')
+        row[f'theme_breadth{period}_valid'] = breadth.get('valid_count')
+        row[f'theme_breadth{period}_change_5_pp'] = breadth.get('change_5_pp')
     return row
 
 
 THEME_EXPORT_COLUMNS = [
     'rank_current', 'rank_t_minus_5', 'rank_change_5', 'type', 'theme_id', 'name', 'anchor_etf',
     'state', 'theme_score', 'current_strength', 'medium_strength', 'return21_pct', 'excess21_pp',
-    'return63_pct', 'excess63_pp', 'theme_breadth21_pct', 'breadth21_above', 'breadth21_valid',
-    'breadth21_change_5_pp', 'theme_breadth50_pct', 'breadth50_above', 'breadth50_valid',
-    'breadth50_change_5_pp', 'configured_watchlist_count', 'session_date', 'generated_at',
+    'return63_pct', 'excess63_pp', 'theme_breadth21_pct', 'theme_breadth21_above', 'theme_breadth21_valid',
+    'theme_breadth21_change_5_pp', 'theme_breadth50_pct', 'theme_breadth50_above', 'theme_breadth50_valid',
+    'theme_breadth50_change_5_pp', 'configured_watchlist_count', 'session_date', 'generated_at',
 ]
 
 MARKET_EXPORT_COLUMNS = [
@@ -490,6 +536,71 @@ def _load_chart_sidecar(raw: dict[str, Any], content: bytes, key: str) -> None:
     raw.setdefault("v5", {}).setdefault("chart_sidecars_loaded", []).append(key)
 
 
+def _rehydrate_index_universes(raw: dict[str, Any]) -> None:
+    """Rebuild compact SPY/QQQ ticker maps from retained constituent rows."""
+    v5 = raw.setdefault('v5', {})
+    mapped = v5.setdefault('mapped_universes', {})
+    universes = v5.get('index_universes', {})
+    for symbol in ('SPY', 'QQQ'):
+        if mapped.get(symbol, {}).get('companies'):
+            continue
+        source = universes.get(symbol, {})
+        listings = {}
+        for row in source.get('rows', []):
+            ticker = str(row.get('ticker') or '').strip().upper()
+            country = str(row.get('country') or '').strip().casefold()
+            security_id = str(row.get('security_id') or '')
+            if not ticker or (country and country != 'united states' and not security_id.startswith('US')):
+                continue
+            normalized = ticker.replace('.', '-')
+            if re.fullmatch(r'[A-Z][A-Z0-9-]{0,14}', normalized):
+                # Compact imports can omit SEC CIKs. Retain the source's stable
+                # issuer id when available, otherwise keep each ticker distinct.
+                listings[ticker] = {'ticker': normalized, 'cik': row.get('company_id') or ticker}
+        mapped[symbol] = map_universe(source, {'listings': listings}, index=True)
+    if not mapped.get('IWM', {}).get('companies') and universes.get('IWM', {}).get('rows'):
+        mapped['IWM'] = map_iwm_universe(universes['IWM'], {})
+
+
+def _retain_imported_index_metrics(snapshot: dict[str, Any], imported_context: list[dict[str, Any]]) -> None:
+    """Keep saved current breadth while adding newly computable fixed-universe changes."""
+    imported = {row.get('ticker'): row for row in imported_context}
+    for market in snapshot.get('context', []):
+        previous = imported.get(market.get('ticker'))
+        if not previous or not isinstance(previous.get('index_breadth'), dict):
+            continue
+        old_breadth = previous['index_breadth']
+        new_field_status = market.setdefault('field_status', {})
+        market['index_breadth'] = copy.deepcopy(old_breadth)
+        for period in (21, 50):
+            key = str(period)
+            old_metric = old_breadth.get(key, {})
+            market[f'index_breadth{period}_pct'] = old_metric.get('value')
+            market[f'index_valid_ema{period}_count'] = old_metric.get('valid_count')
+            market[f'index_coverage{period}_pct'] = old_metric.get('coverage_pct')
+            new_field_status[f'index_breadth{period}_pct'] = copy.deepcopy(old_metric)
+            previous_value = previous.get(f'breadth{period}_t_minus_5')
+            previous_change = previous.get(f'breadth{period}_change_5_pp')
+            if previous_value is None:
+                calculated_prior = new_field_status.get(f'breadth{period}_t_minus_5', {})
+                current_value = old_breadth.get(key, {}).get('value')
+                prior_value = calculated_prior.get('value') if calculated_prior.get('status') == 'valid' else None
+                calculated_change = current_value - prior_value if isinstance(current_value, (int, float)) and isinstance(prior_value, (int, float)) else None
+                market[f'breadth{period}_t_minus_5'] = prior_value
+                market[f'breadth{period}_change_5_pp'] = calculated_change
+                new_field_status[f'breadth{period}_t_minus_5'] = calculated_prior
+                new_field_status[f'breadth{period}_change_5_pp'] = {
+                    'value': calculated_change,
+                    'status': 'valid' if calculated_change is not None else 'unavailable',
+                    'reason': None if calculated_change is not None else calculated_prior.get('reason') or 'Five-session-prior breadth is unavailable.',
+                    'session_date': snapshot.get('session_date'),
+                    'universe_method': 'fixed current constituent/proxy universe at both price dates',
+                }
+            else:
+                market[f'breadth{period}_t_minus_5'] = previous_value
+                market[f'breadth{period}_change_5_pp'] = previous_change
+
+
 def _write_chart_sidecar(path: Path, charts: dict[str, Any]) -> None:
     _write_iwm_sidecar(path, charts)
 
@@ -504,13 +615,16 @@ def _primary_snapshot(snapshot: dict[str, Any]) -> dict[str, Any]:
         'trend_status', 'ema21', 'ema50', 'ema21_slope_5', 'price_close', 'daily_change', 'ema21_distance',
         'ema50_distance', 'price_vs_ema21_pct', 'price_vs_ema50_pct', 'above_ema21', 'above_ema50',
         'price_status', 'price_reason', 'price_session_date', 'price_source_url', 'price_retrieved_at',
-        'relative_strength_series', 'etf_breadth21_pct', 'etf_breadth50_pct', 'breadth21_t_minus_5',
-        'breadth21_change_5_pp', 'breadth50_t_minus_5', 'breadth50_change_5_pp', 'current_strength_score',
+        'relative_strength_series', 'theme_breadth21_pct', 'theme_breadth21_above', 'theme_breadth21_valid',
+        'theme_breadth21_change_5_pp', 'theme_breadth21_t_minus_5', 'theme_breadth50_pct',
+        'theme_breadth50_above', 'theme_breadth50_valid', 'theme_breadth50_change_5_pp', 'theme_breadth50_t_minus_5',
+        'current_strength_score',
         'medium_strength_score', 'theme_score', 'theme_state', 'score_method', 'score_peer_count_21',
         'score_peer_count_63', 'score_unavailable_reason', 'global_rank', 'rank_current', 'rank_t_minus_5',
         'rank_change_5', 'historical_rank_peer_count', 'historical_rank_status', 'historical_rank_reason',
         'historical_rank_session', 'theme_watchlist_breadth', 'watchlist_reviewed_date', 'configured_watchlist_count',
-        'watchlist_status', 'watchlist_unavailable_reason', 'watchlist_version', 'has_watchlist',
+        'watchlist_status', 'watchlist_exception_reason', 'watchlist_list_rationale', 'reviewed_candidate_count',
+        'watchlist_unavailable_reason', 'watchlist_version', 'has_watchlist',
         'watchlist_member_count', 'stock_scope', 'stock_drilldown_status', 'session_date',
     }
     stock_fields = {
@@ -524,6 +638,10 @@ def _primary_snapshot(snapshot: dict[str, Any]) -> dict[str, Any]:
         compact = {key: value for key, value in row.items() if key in theme_fields}
         compact['returns'] = {key: {'value': item.get('value'), 'status': item.get('status')} for key, item in row.get('returns', {}).items()}
         compact['excess_returns'] = {key: {'value': item.get('value'), 'status': item.get('status')} for key, item in row.get('excess_returns', {}).items()}
+        compact['theme_watchlist_breadth'] = {
+            period: {key: metric.get(key) for key in ('value', 'status', 'reason', 'reason_code', 'above_count', 'valid_count', 'eligible_count', 'configured_count', 'session_date', 'ema_period', 't_minus_5', 'change_5_pp', 'prior_session', 'change_reason')}
+            for period, metric in row.get('theme_watchlist_breadth', {}).items()
+        }
         compact['selected'] = [{
             **{key: value for key, value in stock.items() if key in stock_fields and key not in ('returns', 'excess_returns')},
             'returns': {key: {'value': item.get('value'), 'status': item.get('status')} for key, item in stock.get('returns', {}).items()},
@@ -541,7 +659,7 @@ def _primary_snapshot(snapshot: dict[str, Any]) -> dict[str, Any]:
         context.pop('fields', None)
         context.pop('history', None)
     payload.pop('comparisons', None)
-    return payload
+    return _clean_v7_output(payload)
 
 
 def _compact_raw(raw: dict[str, Any], snapshot: dict[str, Any], sidecars: dict[str, int]) -> dict[str, Any]:
@@ -593,14 +711,21 @@ def _tradingview_text(rows: list[dict[str, Any]]) -> tuple[str, dict[str, int]]:
 
 
 def _stock_diagnostics(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
-    if snapshot.get('schema_version') == '7.0':
+    if snapshot.get('schema_version') == '7.1':
         output = []
         for exposure in snapshot.get('themes', []):
             for row in exposure.get('selected', []):
+                maintenance = row.get('maintenance') or {}
                 output.append({
                     'theme_id': exposure.get('id'), 'theme': exposure.get('name'), 'anchor': exposure.get('anchor'),
                     'ticker': row.get('ticker'), 'relationship': row.get('relationship'),
                     'reason': row.get('membership_rationale'), 'exchange': row.get('exchange'),
+                    'configuration_status': exposure.get('watchlist_status'),
+                    'maintenance_date': maintenance.get('date'), 'candidate_source': maintenance.get('source_type'),
+                    'maintenance_price_usd': maintenance.get('price_usd'),
+                    'maintenance_market_cap_usd': maintenance.get('market_cap_usd'),
+                    'maintenance_adv30_usd': maintenance.get('adv30_usd'),
+                    'adjusted_price_sessions': maintenance.get('adjusted_price_sessions'),
                     'price_status': row.get('price_status'), 'price_close': row.get('price_close'),
                     'adv30_usd': row.get('adv30_usd'), 'market_cap_usd': row.get('market_cap_usd'),
                     'return5_pct': (100 * value if (value := _number(row.get('returns', {}).get('5'))) is not None else None),
@@ -670,6 +795,56 @@ def _stock_diagnostics(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
                     'session_date': snapshot.get('session_date'),
                 })
     return output
+
+
+def _theme_watchlist_summary(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
+    rows = []
+    for theme in snapshot.get('themes', []):
+        rows.append({
+            'theme_id': theme.get('id'),
+            'name': theme.get('name'),
+            'anchor': theme.get('anchor'),
+            'status': theme.get('watchlist_status'),
+            'member_count': theme.get('configured_watchlist_count', 0),
+            'reviewed_candidate_count': theme.get('reviewed_candidate_count'),
+            'exception_reason': theme.get('watchlist_exception_reason'),
+            'theme_breadth21_pct': theme.get('theme_breadth21_pct'),
+            'theme_breadth21_above': theme.get('theme_breadth21_above'),
+            'theme_breadth21_valid': theme.get('theme_breadth21_valid'),
+            'theme_breadth21_change_5_pp': theme.get('theme_breadth21_change_5_pp'),
+            'theme_breadth50_pct': theme.get('theme_breadth50_pct'),
+            'theme_breadth50_above': theme.get('theme_breadth50_above'),
+            'theme_breadth50_valid': theme.get('theme_breadth50_valid'),
+            'theme_breadth50_change_5_pp': theme.get('theme_breadth50_change_5_pp'),
+        })
+    return rows
+
+
+def _membership_review_rows(config: dict[str, Any], themes: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Export the approved assignments and their review evidence, not runtime diagnostics."""
+    names = {row.get('id'): row.get('name') for row in themes}
+    rows = []
+    for watchlist in config.get('watchlists', []):
+        for member in watchlist.get('members', []):
+            maintenance = member.get('maintenance') if isinstance(member.get('maintenance'), dict) else {}
+            rows.append({
+                'theme_id': watchlist.get('theme_id'), 'theme': names.get(watchlist.get('theme_id')),
+                'anchor': watchlist.get('anchor'), 'status': watchlist.get('status'),
+                'reviewed_candidate_count': watchlist.get('reviewed_candidate_count'),
+                'exception_reason': watchlist.get('exception_reason'),
+                'list_rationale': watchlist.get('list_rationale'),
+                'ticker': member.get('ticker'), 'company': member.get('company'),
+                'exchange': member.get('exchange'), 'instrument_type': member.get('instrument_type'),
+                'relationship': member.get('relationship'), 'reason': member.get('reason'),
+                'maintenance_date': maintenance.get('date'), 'candidate_source': maintenance.get('source_type'),
+                'price_usd': maintenance.get('price_usd'), 'market_cap_usd': maintenance.get('market_cap_usd'),
+                'adv30_usd': maintenance.get('adv30_usd'),
+                'adjusted_price_sessions': maintenance.get('adjusted_price_sessions'),
+                'history_source': maintenance.get('adjusted_price_history_source'),
+                'history_as_of': maintenance.get('adjusted_price_history_as_of'),
+                'source_url': member.get('source_url'), 'reason_source_url': member.get('reason_source_url'),
+            })
+    return rows
 
 
 def _run_report(snapshot: dict[str, Any], raw: dict[str, Any], matrix: list[dict[str, Any]], tv15: dict[str, int], tv20: dict[str, int]) -> str:
@@ -796,7 +971,8 @@ def _run_report(snapshot: dict[str, Any], raw: dict[str, Any], matrix: list[dict
 
 
 RUN_OUTPUT_FILES = (
-    "market.csv", "themes.csv", "registry_audit.csv", "stock_diagnostics.csv",
+    "market.csv", "themes.csv", "registry_audit.csv", "stock_diagnostics.csv", "membership_review.csv",
+    "theme_watchlist_summary.csv", "release_audit.json",
     "dashboard.html",
     "latest_snapshot.json",
     "raw_inputs.json",
@@ -833,6 +1009,10 @@ def _write_run_bundle(output_dir: Path, maximum_bytes: int = 95_000_000) -> Path
 
 
 def _generate(snapshot, raw, output_dir):
+    release_audit = audit_release(ROOT, snapshot_data=snapshot)
+    if not release_audit.get('passed'):
+        failures = '; '.join(issue['message'] for issue in release_audit.get('issues', [])[:8])
+        raise ValueError(f"Release audit failed; no bundle generated. {failures}")
     matrix = make_source_matrix(snapshot, raw, ROOT)
     snapshot["source_matrix"] = matrix
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -854,7 +1034,8 @@ def _generate(snapshot, raw, output_dir):
     shutil.copyfile(ROOT / "static/Inter-LICENSE.txt", output_dir / "Inter-LICENSE.txt")
     shutil.copyfile(ROOT / 'config/theme_watchlists.json', output_dir / 'theme_watchlists.json')
     shutil.copyfile(ROOT / 'config/active_anchors.json', output_dir / 'active_anchors.json')
-    _write_json(output_dir / 'methodology_config.json', {'methodology_version': '7.0', 'settings': settings, 'score_methodology': snapshot.get('score_methodology', {}), 'active_anchor_source_session': json.loads((ROOT / 'config/active_anchors.json').read_text()).get('source_session')})
+    _write_json(output_dir / 'methodology_config.json', {'methodology_version': '7.1', 'settings': settings, 'score_methodology': snapshot.get('score_methodology', {}), 'active_anchor_source_session': json.loads((ROOT / 'config/active_anchors.json').read_text()).get('source_session')})
+    _write_json(output_dir / 'release_audit.json', release_audit)
     _write_csv(output_dir / "source_matrix.csv", matrix, list(matrix[0].keys()) if matrix else [])
 
     theme_records = sorted(snapshot.get('themes', []), key=lambda row: (
@@ -932,6 +1113,16 @@ def _generate(snapshot, raw, output_dir):
     stock_rows = _stock_diagnostics(snapshot)
     stock_columns = list(stock_rows[0]) if stock_rows else ['theme_id','theme','type','anchor','ticker','company','eligibility','eligibility_reasons','return5_pct','return21_pct','return63_pct','excess5_pp','excess21_pp','excess63_pp','session_date']
     _write_csv(output_dir / 'stock_diagnostics.csv', stock_rows, stock_columns)
+    membership_rows = _membership_review_rows(raw.get('watchlists') or {}, snapshot.get('themes', []))
+    membership_columns = list(membership_rows[0]) if membership_rows else [
+        'theme_id','theme','anchor','status','reviewed_candidate_count','exception_reason','list_rationale',
+        'ticker','company','exchange','instrument_type','relationship','reason','maintenance_date',
+        'candidate_source','price_usd','market_cap_usd','adv30_usd','adjusted_price_sessions',
+        'history_source','history_as_of','source_url','reason_source_url',
+    ]
+    _write_csv(output_dir / 'membership_review.csv', membership_rows, membership_columns)
+    theme_summary_rows = _theme_watchlist_summary(snapshot)
+    _write_csv(output_dir / 'theme_watchlist_summary.csv', theme_summary_rows, list(theme_summary_rows[0]) if theme_summary_rows else ['theme_id','name','anchor','status','member_count'])
     rows15 = _all_selected(snapshot, 15)
     rows20 = _all_selected(snapshot, 20)
     _write_csv(output_dir / "watchlist_15.csv", rows15, EXPORT_COLUMNS)
@@ -981,8 +1172,13 @@ def main(argv: list[str] | None = None) -> int:
     output = output.resolve()
     if output == ROOT or ROOT.is_relative_to(output):
         parser.error('Output must be a dedicated directory, not the project or its parent')
+    config_audit = audit_release(ROOT)
+    if not config_audit.get('passed'):
+        messages = '; '.join(issue['message'] for issue in config_audit.get('issues', [])[:8])
+        print(f"RELEASE BLOCKED before collection: watchlist configuration audit failed. {messages}", file=sys.stderr)
+        return 1
     output.parent.mkdir(parents=True, exist_ok=True)
-    snapshot, raw = {}, {}
+    snapshot, raw, imported_context = {}, {}, []
     attempted = datetime.now(timezone.utc).isoformat(timespec='seconds')
     try:
         if args.import_run:
@@ -1011,6 +1207,7 @@ def main(argv: list[str] | None = None) -> int:
                         _load_chart_sidecar(raw, path.read_bytes(), name)
             if not snapshot.get('generated_at') or not snapshot.get('session_date'):
                 raise ValueError('Imported run must retain its original generation time and session date')
+            imported_context = copy.deepcopy(snapshot.get('context', []))
             if args.as_of and args.as_of != snapshot.get('session_date'):
                 raise ValueError('This imported bundle contains one resolved date only; use a fresh collection to resolve --as-of.')
             snapshot['imported_at'] = attempted
@@ -1030,6 +1227,7 @@ def main(argv: list[str] | None = None) -> int:
         raw['watchlists'] = raw.get('watchlists') or json.loads((ROOT / 'config/theme_watchlists.json').read_text(encoding='utf-8'))
         raw['source_configuration'] = json.loads((ROOT / 'config/sources.json').read_text(encoding='utf-8'))
         raw['v7_mode'] = True
+        _rehydrate_index_universes(raw)
         required_symbols = set(active_config.get('anchors', {}).values())
         required_symbols.update(str(member.get('ticker', '')).upper() for record in raw['watchlists'].get('watchlists', []) for member in record.get('members', []))
         required_symbols.update(registry.get('context_symbols', ['SPY', 'QQQ', 'IWM']))
@@ -1057,6 +1255,8 @@ def main(argv: list[str] | None = None) -> int:
         ):
             apply_v5(snapshot, raw)
             _retain_iwm_breadth(snapshot, raw, ROOT)
+            if args.import_run:
+                _retain_imported_index_metrics(snapshot, imported_context)
         if raw.get('v7_mode'):
             snapshot['sources'] = {
                 'price_provider': 'Yahoo Finance chart API with persistent incremental cache',
@@ -1066,8 +1266,8 @@ def main(argv: list[str] | None = None) -> int:
         apply_v6(snapshot, raw, registry)
         apply_historical_ranks(snapshot, raw)
         apply_watchlists(snapshot, raw, raw['watchlists'])
-        snapshot['methodology_version'] = '7.0'
-        snapshot['schema_version'] = '7.0'
+        snapshot['methodology_version'] = '7.1'
+        snapshot['schema_version'] = '7.1'
         from src.themescope.cache import manifest_for_inputs
         raw['cache_manifest'] = manifest_for_inputs(raw, snapshot.get('collection_completed_at') or attempted)
         generated_dt = datetime.now(timezone.utc)

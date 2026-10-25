@@ -84,6 +84,9 @@ class WatchlistConfigTests(unittest.TestCase):
         self.assertEqual(theme['rank_current'], 2)
         self.assertEqual(theme['watchlist_unavailable_reason'], 'Theme watchlist is not configured.')
         self.assertEqual(theme['theme_watchlist_breadth']['21']['reason_code'], 'not_configured')
+        self.assertIsNone(theme['theme_breadth21_pct'])
+        self.assertEqual(theme['theme_breadth21_above'], 0)
+        self.assertEqual(theme['theme_breadth21_valid'], 0)
 
     def test_tradingview_csv_produces_review_diff_without_mutating_config(self):
         config = {'version': 1, 'watchlists': [{'theme_id': 'theme-one', 'anchor': 'ONE', 'members': [{'ticker': 'AAA', 'relationship': 'Core', 'reason': 'Existing'}]}]}
@@ -97,6 +100,27 @@ class WatchlistConfigTests(unittest.TestCase):
         self.assertEqual(proposal['theme_diffs'][0]['proposed_additions'], ['BBB'])
         self.assertEqual(proposal['theme_diffs'][0]['proposed_removals'], [])
         self.assertEqual(config, original)
+
+    def test_candidate_import_uses_sector_industry_as_evidence_not_theme_assignment(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'universe.csv'
+            path.write_text(
+                'Symbol,Description,Price,Market capitalization,Industry,Sector,"Price × average volume, 30 days",Exchange,Perf 1M,Perf 3M\n'
+                'NASDAQ:AAA,Alpha Systems,25,3B,Semiconductors,Information Technology,20M,NASDAQ-GS,999%,999%\n',
+                encoding='utf-8',
+            )
+            proposal = propose_import(path, {'watchlists': []}, [{'id': 'theme-semiconductors', 'name': 'Semiconductors', 'anchor': 'SMH'}], {
+                'require_complete_maintenance_data': True,
+                'maintenance_date': '2026-10-15',
+                'raw_close_floor_usd': 15,
+                'market_cap_floor_usd': 2_000_000_000,
+                'adv30_floor_usd': 20_000_000,
+            })
+        self.assertTrue(proposal['theme_assignment_required'])
+        self.assertIsNone(proposal['proposals'][0]['matched_theme'])
+        self.assertEqual(proposal['proposals'][0]['industry'], 'Semiconductors')
+        self.assertEqual(proposal['proposals'][0]['maintenance']['market_cap_usd'], 3_000_000_000)
+        self.assertEqual(proposal['proposals'][0]['maintenance']['adv30_usd'], 20_000_000)
 
 
 class PriceCacheTests(unittest.TestCase):

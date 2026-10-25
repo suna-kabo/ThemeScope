@@ -34,6 +34,16 @@ def _source_status(raw: dict[str, Any], snapshot: dict[str, Any]) -> dict[str, A
     configured_holdings_candidates = sum(bool(candidate.get("holdings_source_configured")) for candidate in registry_candidates)
     if raw.get("v7_mode"):
         universes = raw.get("v5", {}).get("index_universes", {})
+        active = {row.get("id"): row.get("anchor") for row in snapshot.get("themes", [])}
+        watchlists = raw.get("watchlists", {}).get("watchlists", [])
+        final_statuses = {"complete", "reviewed_short", "reviewed_etf_only"}
+        matched = [
+            row for row in watchlists
+            if row.get("theme_id") in active
+            and row.get("anchor") == active.get(row.get("theme_id"))
+            and row.get("status") in final_statuses
+        ]
+        matched_ids = {row.get("theme_id") for row in matched}
         return {
             "prices": {
                 "provider": "Yahoo Finance chart API",
@@ -47,8 +57,14 @@ def _source_status(raw: dict[str, Any], snapshot: dict[str, Any]) -> dict[str, A
                 "datasets": {key: {"as_of": item.get("effective_date") or item.get("observation_date") or item.get("as_of")} for key, item in universes.items()},
             },
             "theme_watchlists": {
-                "status": "configured" if raw.get("watchlists", {}).get("watchlists") else "unavailable",
-                "configured_lists": len(raw.get("watchlists", {}).get("watchlists", [])),
+                "status": "complete" if len(active) == 53 and matched_ids == set(active) and len(matched) == len(watchlists) else "incomplete",
+                "active_exposures": len(active),
+                "configured_lists": len(matched_ids),
+                "stored_records": len(watchlists),
+                "incomplete_lists": len(active) - len(matched_ids),
+                "complete_lists": sum(row.get("status") == "complete" for row in matched),
+                "reviewed_short_lists": sum(row.get("status") == "reviewed_short" for row in matched),
+                "reviewed_etf_only_lists": sum(row.get("status") == "reviewed_etf_only" for row in matched),
             },
             "volatility": {
                 "status": "available" if raw.get("charts", {}).get("^VIX") else "unavailable",
@@ -641,7 +657,7 @@ def apply_v6(snapshot: dict[str, Any], raw: dict[str, Any], registry: dict[str, 
     for row in snapshot.get("context", []):
         row["fields"] = _field_snapshot(row, snapshot.get("session_date"))
     for row in snapshot.get("themes", []):
-        row["score_method"] = row.get("score_method", "price_relative_strength_v6_1")
+        row["score_method"] = row.get("score_method", "price_rs_21_63_v1")
         row["score_peer_count_21"] = row.get("score_peer_count_21", row.get("ranking_peer_count21"))
         row["score_peer_count_63"] = row.get("score_peer_count_63", row.get("ranking_peer_count63"))
         row["score_unavailable_reason"] = row.get("score_unavailable_reason") or row.get("field_status", {}).get("theme_score", {}).get("reason")

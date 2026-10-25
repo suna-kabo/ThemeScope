@@ -84,7 +84,8 @@ with sync_playwright() as p:
         selected_count=len(exposure.get('selected') or [])
         assert exposure.get('watchlist_member_count')==selected_count
         assert exposure.get('has_watchlist') is (selected_count>0)
-        assert exposure.get('stock_scope')==('Configured watchlist' if selected_count else 'ETF only')
+        expected_scope = 'Configured watchlist' if selected_count else 'Reviewed ETF-only' if exposure.get('stock_drilldown_status')=='reviewed_etf_only' else 'ETF only'
+        assert exposure.get('stock_scope')==expected_scope
         metric=exposure.get('theme_watchlist_breadth',{}).get('21',{})
         if not selected_count:
             assert metric.get('reason_code')=='not_configured'
@@ -209,7 +210,8 @@ with sync_playwright() as p:
             page.click('#next-theme')
             assert page.locator('#active-name').inner_text()
         assert '20-stock capacity and 15-row default' not in page.inner_text('body')
-        assert page.locator('#watchlist-message').inner_text() in ('Theme watchlist not configured.', 'No configured stocks are available in this watchlist.', 'Stock drilldown unavailable this run because the configured company list could not be retrieved.', '')
+        message=page.locator('#watchlist-message').inner_text()
+        assert message in ('Theme watchlist not configured.', 'No configured stocks are available in this watchlist.', 'Stock drilldown unavailable this run because the configured company list could not be retrieved.', '') or message.startswith('Reviewed exception: ')
 
     page.click('.side-nav a[data-page="watchlist"]')
     selected_watchlist=next((row for row in snapshot_data.get('themes',[]) if row.get('selected')),None)
@@ -264,7 +266,7 @@ with sync_playwright() as p:
         page.click('a[href="run_bundle.zip"]')
     with zipfile.ZipFile(download.value.path()) as bundle:
         names=set(bundle.namelist())
-        assert {'dashboard.html','themes.csv','registry_audit.csv','latest_snapshot.json','raw_inputs.json','iwm_breadth_prices.csv.gz','market_breadth_prices.csv.gz','watchlist_prices.csv.gz','theme_watchlists.json','active_anchors.json','Inter-LICENSE.txt'} <= names
+        assert {'dashboard.html','themes.csv','registry_audit.csv','latest_snapshot.json','raw_inputs.json','iwm_breadth_prices.csv.gz','market_breadth_prices.csv.gz','watchlist_prices.csv.gz','theme_watchlists.json','active_anchors.json','Inter-LICENSE.txt','release_audit.json','membership_review.csv','theme_watchlist_summary.csv'} <= names
         assert 'sectors.csv' not in names and 'industries.csv' not in names
 
     page.set_viewport_size({'width':1600,'height':1000})

@@ -232,7 +232,7 @@ def build_snapshot_v7(root: Path, requested_asof: str | None = None) -> tuple[di
             "IWM holdings are used as a practical Russell 2000 proxy; this is not an official point-in-time Russell 2000 universe.",
             "Yahoo chart adjusted-close semantics and publication timing are vendor conventions.",
         ],
-        "methodology_version": "7.0",
+        "methodology_version": "7.1",
     }
     raw = {
         "charts": {symbol: chart for symbol, chart in charts.items() if symbol in {"SPY", "QQQ", "IWM", "^VIX", *anchors.values()}},

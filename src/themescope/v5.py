@@ -423,7 +423,10 @@ def participation(universe, source, charts, calendar, session, settings, run_dat
             age = (date.fromisoformat(retrieved_date) - date.fromisoformat(observation_date)).days
         else:
             effective = date.fromisoformat(effective_date)
-            metric_session = date.fromisoformat(session or run_date)
+            # Historical breadth uses the current constituent/proxy universe
+            # at both price dates. Check source freshness against that current
+            # session, not against the earlier price observation.
+            metric_session = date.fromisoformat(source.get('_freshness_reference_session') or session or run_date)
             age = (metric_session - effective).days
         if age < 0:
             freshness_reason = 'effective_future' if date_semantics == 'effective' else 'observation_future'
@@ -671,13 +674,16 @@ def apply(snapshot, raw):
             market[f'index_valid_ema{period}_count'] = item['valid_count']
             market[f'index_breadth{period}_pct'] = item['value']
             market[f'index_coverage{period}_pct'] = item['coverage_pct']
-            condition = market_condition(market.get('price_close'), trend.get(f'ema{period}'), item, period, float(snapshot['settings'].get('market_breadth_threshold', 50)))
-            market[f'market_condition{period}'] = condition['value'] or 'Unavailable'
             market[f'above_ema{period}'] = market['price_close'] > trend[f'ema{period}'] if market.get('price_close') is not None and trend.get(f'ema{period}') is not None else None
             market['field_status'][f'index_breadth{period}_pct'] = item
-            market['field_status'][f'market_condition{period}'] = condition
+            if not raw.get('v7_mode'):
+                condition = market_condition(market.get('price_close'), trend.get(f'ema{period}'), item, period, float(snapshot['settings'].get('market_breadth_threshold', 50)))
+                market[f'market_condition{period}'] = condition['value'] or 'Unavailable'
+                market['field_status'][f'market_condition{period}'] = condition
         earlier_session = _five_sessions_before(raw.get('session_calendar', []), date_)
-        earlier_breadth = participation(mapped.get(symbol, {}), source, all_charts, raw.get('session_calendar', []), earlier_session, snapshot['settings'], freshness_reference) if earlier_session else {}
+        prior_source = dict(source)
+        prior_source['_freshness_reference_session'] = date_
+        earlier_breadth = participation(mapped.get(symbol, {}), prior_source, all_charts, raw.get('session_calendar', []), earlier_session, snapshot['settings'], freshness_reference) if earlier_session else {}
         for period in snapshot['settings'].get('ema_periods', (21, 50)):
             prior = earlier_breadth.get(str(period), metric(reason='Five-session-prior market breadth is unavailable'))
             current = breadth[str(period)]
@@ -705,7 +711,7 @@ def apply(snapshot, raw):
     medium_weights = weights.get('medium_strength_weights', {})
     final_weights = weights.get('theme_score_weights', {})
     if current_weights != {'excess21_percentile': 1.0} or medium_weights != {'excess63_percentile': 1.0} or not final_weights or 'state_threshold' not in weights:
-        raise ValueError('Configured score_methodology is required to calculate v6.1 scores')
+        raise ValueError('Configured score_methodology is required to calculate price_rs_21_63_v1 scores')
     threshold = float(weights['state_threshold'])
     for theme in snapshot['themes']:
         earlier_session = _five_sessions_before(raw.get('session_calendar', []), date_)
@@ -730,7 +736,7 @@ def apply(snapshot, raw):
             theme[f'etf_breadth{period}_pct'] = item['value']
             theme[f'breadth_coverage{period}_pct'] = item['coverage_pct']
             theme['field_status'][f'etf_breadth{period}_pct'] = item
-            prior = earlier_breadth.get(str(period), metric(reason='Five-session-prior holdings breadth is unavailable'))
+            prior = earlier_breadth.get(str(period), metric(reason='Five-session-prior theme-watchlist breadth is unavailable'))
             change = breadth_change(item, prior, date_, earlier_session)
             theme[f'breadth{period}_t_minus_5'] = prior.get('value') if prior.get('status') == 'valid' else None
             theme[f'breadth{period}_change_5_pp'] = change.get('value')
@@ -746,7 +752,7 @@ def apply(snapshot, raw):
             theme[field] = item['value'] if item['status'] == 'valid' else None
             theme['field_status'][field] = item
         theme['theme_state'] = theme_state(current['value'], medium['value'], threshold)
-        theme['score_method'] = weights.get('score_method', 'price_relative_strength_v6_2')
+        theme['score_method'] = weights.get('score_method', 'price_rs_21_63_v1')
         theme['score_peer_count_21'] = p21[theme['id']].get('peer_count')
         theme['score_peer_count_63'] = p63[theme['id']].get('peer_count')
         theme['score_unavailable_reason'] = score.get('reason')
@@ -799,7 +805,7 @@ def apply(snapshot, raw):
         'theme_score_weights': final_weights,
         'minimum_peers': peer_minimum,
         'state_threshold': threshold,
-        'score_method': weights.get('score_method', 'price_relative_strength_v6_2'),
+        'score_method': weights.get('score_method', 'price_rs_21_63_v1'),
         'purpose': 'Consistent relative-strength ranking for manual review; not a prediction or entry signal',
     }
     snapshot['schema_version'] = '6.2'

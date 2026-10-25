@@ -6,12 +6,44 @@ import zipfile
 from pathlib import Path
 
 from scripts.generate_dashboard import (
-    EXPORT_COLUMNS, RUN_OUTPUT_FILES, _all_selected, _dashboard_snapshot,
-    _theme_csv_row, _write_bounded_json, _write_run_bundle, make_source_matrix,
+    EXPORT_COLUMNS, RUN_OUTPUT_FILES, _all_selected, _dashboard_snapshot, _membership_review_rows, _primary_snapshot,
+    _theme_csv_row, _v7_run_report, _write_bounded_json, _write_run_bundle, _rehydrate_index_universes,
+    _retain_imported_index_metrics, make_source_matrix,
 )
 
 
 class RunBundleTests(unittest.TestCase):
+    def test_run_report_counts_review_statuses_from_approved_configuration(self) -> None:
+        snapshot = {
+            "session_date": "2026-10-23",
+            "themes": [
+                {"id": "complete", "name": "Complete", "anchor": "AAA"},
+                {"id": "short", "name": "Short", "anchor": "BBB"},
+            ],
+        }
+        raw = {"watchlists": {"watchlists": [
+            {"theme_id": "complete", "anchor": "AAA", "status": "complete", "members": [{"ticker": "AAA1"}]},
+            {"theme_id": "short", "anchor": "BBB", "status": "reviewed_short", "members": [{"ticker": "BBB1"}]},
+        ]}}
+        report = _v7_run_report(snapshot, raw)
+        self.assertIn("Final reviewed lists: 2/2 (complete 1; reviewed short 1; reviewed ETF-only 0)", report)
+
+    def test_membership_review_export_preserves_approved_reasons_and_sources(self) -> None:
+        rows = _membership_review_rows({"watchlists": [{
+            "theme_id": "theme", "anchor": "ETF", "status": "complete", "reviewed_candidate_count": 18,
+            "members": [{
+                "ticker": "AAA", "company": "Alpha", "exchange": "NASDAQ", "instrument_type": "operating_company",
+                "relationship": "Core", "reason": "Builds the core hardware for this theme.",
+                "source_url": "https://example.com/holdings", "reason_source_url": "https://example.com/company",
+                "maintenance": {"date": "2026-10-15", "source_type": "anchor_etf", "adjusted_price_sessions": 250},
+            }],
+        }]}, [{"id": "theme", "name": "Theme"}])
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["reason"], "Builds the core hardware for this theme.")
+        self.assertEqual(rows[0]["reason_source_url"], "https://example.com/company")
+        self.assertEqual(rows[0]["source_url"], "https://example.com/holdings")
+        self.assertEqual(rows[0]["adjusted_price_sessions"], 250)
+
     def test_python_csv_exports_use_explicit_percent_and_percentage_point_units(self) -> None:
         metric = lambda value: {"status": "valid", "value": value}
         row = _theme_csv_row({
@@ -24,6 +56,14 @@ class RunBundleTests(unittest.TestCase):
         self.assertNotIn("return21", row)
         self.assertNotIn("return1m_pct", row)
         self.assertNotIn("excess21", row)
+        theme_row = _theme_csv_row({
+            "id": "theme", "name": "Theme", "level": "Theme",
+            "theme_watchlist_breadth": {"21": {"value": 66.7, "above_count": 10, "valid_count": 15, "change_5_pp": 4.0}},
+        })
+        self.assertEqual(theme_row["theme_breadth21_above"], 10)
+        self.assertEqual(theme_row["theme_breadth21_valid"], 15)
+        self.assertEqual(theme_row["theme_breadth21_change_5_pp"], 4.0)
+        self.assertIn("theme_breadth21_above", __import__("scripts.generate_dashboard", fromlist=["THEME_EXPORT_COLUMNS"]).THEME_EXPORT_COLUMNS)
 
         stock = {"ticker": "AAA", "returns": {"5": metric(0.1075), "21": metric(0.1075), "63": metric(0.2)}, "excess_returns": {"5": metric(0.0125), "21": metric(0.025), "63": metric(-0.01)}}
         exported = _all_selected({"themes": [{"name": "Theme", "id": "theme", "anchor": "ETF", "selected": [stock]}]}, 15)[0]
@@ -47,6 +87,30 @@ class RunBundleTests(unittest.TestCase):
         self.assertEqual(payload["themes"][0]["theme_watchlist_breadth"]["21"]["value"], 50)
         self.assertNotIn("coverage_pct", payload["themes"][0]["theme_watchlist_breadth"]["21"])
         self.assertNotIn("prior", payload["themes"][0]["theme_watchlist_breadth"]["21"])
+
+    def test_compact_snapshot_uses_only_canonical_theme_breadth_names(self) -> None:
+        snapshot = {
+            "themes": [{
+                "id": "theme", "name": "Theme", "anchor": "ETF", "selected": [],
+                "etf_breadth21_pct": 66.7, "breadth21_change_5_pp": 4.0,
+                "theme_breadth21_pct": 66.7, "theme_breadth21_above": 10, "theme_breadth21_valid": 15,
+                "theme_breadth21_change_5_pp": 4.0,
+                "theme_watchlist_breadth": {"21": {"value": 66.7, "coverage_pct": 100, "above_count": 10, "valid_count": 15}},
+            }],
+            "context": [{"ticker": "SPY", "market_condition21": "Internal strength, index below EMA21", "field_status": {"input_version": "themescope-v6.2"}}],
+            "comparisons": [{"id": "old-comparison"}],
+        }
+        primary = _primary_snapshot(snapshot)
+        row = primary["themes"][0]
+        self.assertEqual(row["theme_breadth21_pct"], 66.7)
+        self.assertEqual(row["theme_breadth21_above"], 10)
+        self.assertEqual(row["theme_breadth21_valid"], 15)
+        self.assertNotIn("etf_breadth21_pct", row)
+        self.assertNotIn("breadth21_change_5_pp", row)
+        self.assertNotIn("market_condition21", primary["context"][0])
+        self.assertNotIn("input_version", primary["context"][0].get("field_status", {}))
+        self.assertNotIn("comparisons", primary)
+        self.assertNotIn("coverage_pct", row["theme_watchlist_breadth"]["21"])
 
     def test_bounded_json_rejects_output_before_writing_oversized_file(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_dir:
@@ -94,6 +158,24 @@ class RunBundleTests(unittest.TestCase):
         self.assertEqual(len(iwm_holdings), 1)
         self.assertEqual(iwm_holdings[0]["provider"], "iShares")
         self.assertIn("practical Russell 2000 proxy", iwm_holdings[0]["method"])
+
+    def test_offline_rerender_rebuilds_compact_index_maps_and_fixed_universe_change(self) -> None:
+        raw = {"v5": {"index_universes": {
+            "SPY": {"rows": [{"ticker": "AAA", "company": "Alpha", "security_type": "EQUITY"}]},
+            "QQQ": {"rows": [{"ticker": "BBB", "company": "Beta", "security_type": "EQUITY"}]},
+            "IWM": {"rows": [{"ticker": "CCC", "company": "Gamma", "security_type": "Equity", "country": "United States"}]},
+        }}}
+        _rehydrate_index_universes(raw)
+        mapped = raw["v5"]["mapped_universes"]
+        self.assertEqual(mapped["SPY"]["companies"][0]["symbols"], ["AAA"])
+        self.assertEqual(mapped["QQQ"]["companies"][0]["symbols"], ["BBB"])
+        self.assertEqual(mapped["IWM"]["companies"][0]["symbols"], ["CCC"])
+
+        old = [{"ticker": "QQQ", "index_breadth": {"21": {"value": 50.0, "status": "valid", "valid_count": 100}}, "breadth21_t_minus_5": None}]
+        current = [{"ticker": "QQQ", "field_status": {"breadth21_t_minus_5": {"value": 45.0, "status": "valid"}}, "breadth21_t_minus_5": 45.0}]
+        _retain_imported_index_metrics({"context": current, "session_date": "2026-10-23"}, old)
+        self.assertEqual(current[0]["index_breadth"]["21"]["value"], 50.0)
+        self.assertEqual(current[0]["breadth21_change_5_pp"], 5.0)
 
 
 if __name__ == "__main__":

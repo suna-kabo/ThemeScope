@@ -72,6 +72,8 @@ assert.match(csvUnits, /10\.75/);
 assert.match(csvUnits, /1\.25/);
 const themeCsv = ui.themeRowsToCsv([{id:"u", name:"Unit", returns:{"21":{value:0.1075}}, excess_returns:{"21":{value:0.0125}}}], "2026-10-22", "generated");
 assert.match(themeCsv.split("\r\n")[0], /return21_pct/);
+assert.match(themeCsv.split("\r\n")[0], /theme_breadth21_above/);
+assert.doesNotMatch(themeCsv.split("\r\n")[0], /(?:^|,)breadth21_above(?:,|$)/);
 const themeCsvLines = themeCsv.split("\r\n");
 assert.equal(themeCsvLines[0].split(",").length, themeCsvLines[1].split(",").length);
 assert.equal(themeCsvLines[1].split(",")[4], '"u"');

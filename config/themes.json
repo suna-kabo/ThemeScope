@@ -1,5 +1,5 @@
 {
-  "registry_version": "7.0",
+  "registry_version": "7.1",
   "reviewer": "Codex implementation review",
   "decision_date": "2026-10-22",
   "effective_date": "2026-10-22",
@@ -2252,7 +2252,7 @@
       }
     }
   ],
-  "methodology_version": "7.0",
+  "methodology_version": "7.1",
   "score_methodology": {
     "current_strength_weights": {
       "excess21_percentile": 1.0
@@ -2265,7 +2265,7 @@
       "medium_strength": 0.4
     },
     "state_threshold": 50,
-    "score_method": "price_relative_strength_v6_2",
+    "score_method": "price_rs_21_63_v1",
     "purpose": "60% 21-session excess-return percentile plus 40% 63-session excess-return percentile; fixed browsing convention for manual review, not a prediction or entry signal."
   },
   "ui": {

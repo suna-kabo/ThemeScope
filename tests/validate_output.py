@@ -1,4 +1,4 @@
-"""Validate v7 deliverables and their calculation contracts."""
+"""Validate v7.1 deliverables and their calculation contracts."""
 import csv
 import json
 import math
@@ -21,7 +21,7 @@ anchors = json.loads((ROOT / "config/active_anchors.json").read_text(encoding="u
 watchlists = json.loads((ROOT / "config/theme_watchlists.json").read_text(encoding="utf-8"))
 html = (out / "dashboard.html").read_text(encoding="utf-8")
 assert snapshot.get("session_date")
-assert snapshot.get("schema_version") == "7.0"
+assert snapshot.get("schema_version") == "7.1"
 assert not {"holdings", "quotes", "sec_annual_checks", "evidence_freshness"} & set(raw)
 assert not {"holdings", "mapped_universes", "iwm_breadth_diagnostics"} & set(raw.get("v5", {}))
 assert not {"security_mapping", "stock_market_metadata", "etf_metadata"} & set(raw.get("source_configuration", {}))
@@ -74,8 +74,8 @@ with (out / "themes.csv").open(encoding="utf-8-sig", newline="") as handle:
 required = {
     "rank_current", "rank_t_minus_5", "rank_change_5", "type", "theme_id", "name", "anchor_etf", "state",
     "theme_score", "current_strength", "medium_strength", "return21_pct", "excess21_pp", "return63_pct",
-    "excess63_pp", "theme_breadth21_pct", "breadth21_above", "breadth21_valid", "breadth21_change_5_pp",
-    "theme_breadth50_pct", "breadth50_above", "breadth50_valid", "breadth50_change_5_pp",
+    "excess63_pp", "theme_breadth21_pct", "theme_breadth21_above", "theme_breadth21_valid", "theme_breadth21_change_5_pp",
+    "theme_breadth50_pct", "theme_breadth50_above", "theme_breadth50_valid", "theme_breadth50_change_5_pp",
     "configured_watchlist_count", "session_date", "generated_at",
 }
 assert required <= set(theme_columns)
@@ -102,10 +102,19 @@ assert {"relationship", "reason", "adv30_usd", "return21_pct", "excess21_pp"} <=
 assert not set(stock_columns) & {"filing_url", "accession_number", "membership_evidence_coverage", "agent_vote"}
 
 report = (out / "watchlist_migration.md").read_text(encoding="utf-8")
-assert "37" in report and "257" in report and "265" in report
+assert "Final reviewed lists: 53/53 (complete 44; reviewed short 9; reviewed ETF-only 0)" in report
+assert "Configured memberships: 772; unique stocks: 510; overlapping stocks: 175" in report
+with (out / "membership_review.csv").open(encoding="utf-8-sig", newline="") as handle:
+    membership_reader = csv.DictReader(handle)
+    membership_columns = membership_reader.fieldnames or []
+    membership_rows = list(membership_reader)
+assert len(membership_rows) == sum(row.get("watchlist_member_count", 0) for row in themes)
+assert {"theme_id", "status", "ticker", "relationship", "reason", "maintenance_date", "candidate_source", "reason_source_url"} <= set(membership_columns)
+assert all(row["reason"] and row["relationship"] in {"Core", "Related"} for row in membership_rows)
+assert len({row["ticker"] for row in membership_rows}) == 510
 with zipfile.ZipFile(out / "run_bundle.zip") as bundle:
     assert bundle.testzip() is None
     names = set(bundle.namelist())
-    assert {"dashboard.html", "themes.csv", "market.csv", "latest_snapshot.json", "raw_inputs.json", "theme_watchlists.json", "active_anchors.json", "market_breadth_prices.csv.gz", "watchlist_prices.csv.gz", "iwm_breadth_prices.csv.gz"} <= names
+    assert {"dashboard.html", "themes.csv", "market.csv", "latest_snapshot.json", "raw_inputs.json", "theme_watchlists.json", "active_anchors.json", "market_breadth_prices.csv.gz", "watchlist_prices.csv.gz", "iwm_breadth_prices.csv.gz", "release_audit.json", "membership_review.csv", "theme_watchlist_summary.csv"} <= names
 
-print(f"v7 output passed: {len(themes)} ranked exposures, {sum(expected for expected in (row.get('watchlist_member_count', 0) for row in themes))} configured memberships, session {snapshot['session_date']}.")
+print(f"v7.1 output passed: {len(themes)} ranked exposures, {len(membership_rows)} reviewed memberships, session {snapshot['session_date']}.")

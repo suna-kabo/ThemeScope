@@ -144,6 +144,30 @@ class V5CalculationTests(unittest.TestCase):
         self.assertEqual(stale_observation['reason_code'], 'stale')
         self.assertEqual(stale_observation['reason'], 'Holdings are older than the configured freshness limit.')
 
+    def test_current_constituent_universe_is_valid_for_five_session_prior_prices(self):
+        universe = {'companies': [{'company_id': str(i), 'symbols': [str(i)]} for i in range(10)]}
+        charts = {
+            str(i): {
+                'meta': {'instrumentType': 'EQUITY'},
+                'observations': [
+                    {'date': '2026-10-16', 'close': 101 if i < 6 else 99},
+                    {'date': '2026-10-23', 'close': 101 if i < 4 else 99},
+                ],
+            }
+            for i in range(10)
+        }
+        settings = {'ema_periods': [21], 'minimum_breadth_sample': 8, 'minimum_breadth_coverage': .8, 'maximum_holdings_age_days': 35}
+        current_source = {'_configured': True, 'date_semantics': 'effective', 'effective_date': '2026-10-23', 'as_of': '2026-10-23'}
+        with patch('src.themescope.v5.trend_metric', return_value={'ema21': 100}):
+            for symbol in ('QQQ', 'IWM'):
+                with self.subTest(symbol=symbol):
+                    prior_rejected = participation(universe, current_source, charts, ['2026-10-16', '2026-10-23'], '2026-10-16', settings, '2026-10-23')['21']
+                    fixed_source = {**current_source, '_freshness_reference_session': '2026-10-23'}
+                    prior_fixed = participation(universe, fixed_source, charts, ['2026-10-16', '2026-10-23'], '2026-10-16', settings, '2026-10-23')['21']
+                    self.assertEqual(prior_rejected['reason_code'], 'effective_future')
+                    self.assertEqual(prior_fixed['status'], 'valid')
+                    self.assertEqual(prior_fixed['effective_date'], '2026-10-23')
+
     def test_spy_breadth_uses_current_observed_constituents(self):
         universe = {'companies': [{'company_id': str(i), 'symbols': [str(i)]} for i in range(499)]}
         charts = {str(i): {'meta': {'instrumentType': 'EQUITY', 'symbol': str(i)}, 'observations': [{'date': '2026-10-23', 'close': 101 if i < 300 else 99}]} for i in range(499)}
