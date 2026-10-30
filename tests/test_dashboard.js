@@ -167,3 +167,8 @@ assert.equal(ui.scoreBandClass(74.999, configuredBands), "score-q3");
 assert.equal(ui.scoreBandClass(75, configuredBands), "score-q4");
 assert.equal(ui.scoreBandClass(100, configuredBands), "score-q4");
 assert.equal(ui.scoreBandClass(null, configuredBands), "score-na");
+assert.deepEqual(ui.resolvedScoreBands([]), configuredBands);
+assert.deepEqual(ui.resolvedScoreBands([{class:"score-q1",min:0,max:100}]), configuredBands);
+assert.equal(ui.breadthThresholdClass(50), "breadth-positive");
+assert.equal(ui.breadthThresholdClass(49.999), "breadth-negative");
+assert.equal(ui.breadthThresholdClass(null), "breadth-na");

@@ -63,6 +63,73 @@ def priority_sort_key(row):
     return (p.get('group',3), (score if p.get('side') == 'short' else -score) if number(score) else math.inf, row['id'])
 
 
+ACTION_SENTENCES = {
+    'Long bias': 'Prioritise long-side theme research. Review actual setups separately.',
+    'Selective long': 'Prioritise selective long-side theme research. Review actual setups separately.',
+    'Neutral': 'Keep directional research balanced. Review actual setups separately.',
+    'Selective short': 'Prioritise selective short-side theme research. Review actual setups separately.',
+    'Short bias': 'Prioritise short-side theme research. Review actual setups separately.',
+    'Unclassified': 'Required Market inputs are unavailable. No directional research priority is assigned.',
+}
+
+
+def canonical_decision(session, generated_hkt, contexts, themes, direction, combined):
+    """Build the single deterministic presentation decision used by every page."""
+    by_ticker = {row.get('ticker'): row for row in contexts}
+    spy, qqq, iwm = (by_ticker.get(symbol, {}) for symbol in ('SPY', 'QQQ', 'IWM'))
+    spy_price, qqq_price = spy.get('price_state'), qqq.get('price_state')
+    unavailable = []
+    for label, value in (('SPY Price State', spy_price), ('QQQ Price State', qqq_price)):
+        if value is None:
+            unavailable.append({'input': label, 'consequence': 'Market classification is Unclassified.'})
+    if spy_price != qqq_price and combined is None:
+        unavailable.append({'input': 'Combined Breadth State', 'consequence': 'The selective Market matrix cell cannot be resolved.'})
+    unanimous = spy_price == qqq_price and spy_price in ('Bullish', 'Bearish')
+    if unavailable:
+        explanation = ' '.join(f"{row['input']} is unavailable; {row['consequence']}" for row in unavailable)
+        rule_id = 'required-input-unavailable'
+    elif unanimous:
+        explanation = (f'SPY and QQQ are both {spy_price}. Under the approved Market matrix, unanimous {spy_price} '
+                       f'Price States produce {direction}. Combined Breadth is {combined}, which describes '
+                       f'{"divided participation" if combined == "Mixed" else "participation context"} but does not reverse unanimous price direction.')
+        rule_id = f'unanimous-{spy_price.lower()}'
+    else:
+        explanation = (f'SPY and QQQ do not have a unanimous Price State. Combined Breadth is {combined}. '
+                       f'The approved Market matrix produces {direction}.')
+        rule_id = f'selective-{str(combined).lower()}'
+    groups = {'primary': [], 'secondary': [], 'exception': [], 'observation': []}
+    for row in sorted(themes, key=priority_sort_key):
+        label = row.get('research_priority', {}).get('label', 'No directional priority')
+        key = 'primary' if label.startswith('Primary') else 'secondary' if label.startswith('Secondary') else 'exception' if label.startswith('Low-priority') else 'observation'
+        groups[key].append(row['id'])
+    directional = direction in ('Long bias', 'Selective long', 'Short bias', 'Selective short')
+    side = 'long' if direction in ('Long bias', 'Selective long') else 'short' if direction in ('Short bias', 'Selective short') else None
+    defs = {}
+    for key in groups:
+        labels = sorted({next((t['research_priority']['label'] for t in themes if t['id'] == theme_id), '') for theme_id in groups[key]})
+        states = [state for state in STATES if any(t['id'] in groups[key] and t.get('theme_state') == state for t in themes)]
+        defs[key] = {'labels': labels, 'theme_states': states, 'ema50_guard': (f'Anchor close must be strictly {"above" if side == "long" else "below"} EMA50.' if directional and key != 'observation' else None)}
+    guard_failures = [{'theme_id': row['id'], 'reason': row['research_priority'].get('reason')} for row in themes if row['research_priority'].get('label') == 'Observation only']
+    if spy.get('breadth_state') and qqq.get('breadth_state') and spy.get('breadth_state') != qqq.get('breadth_state'):
+        divergence = f"SPY Breadth is {spy['breadth_state']} while QQQ Breadth is {qqq['breadth_state']}. Participation is split across the two primary index universes. Price direction remains the Market-direction input under the approved matrix."
+    elif unanimous and combined not in (None, 'Mixed') and ((spy_price == 'Bullish') != (combined == 'Positive')):
+        divergence = f'Price direction is {spy_price} while Combined Breadth is {combined}. Price direction remains the Market-direction input under the approved matrix.'
+    else:
+        divergence = 'Price direction and Breadth are aligned.'
+    return {
+        'session_date': session, 'generated_at_hkt': generated_hkt, 'market_classification': direction,
+        'action_sentence': ACTION_SENTENCES[direction], 'matrix_rule_id': rule_id,
+        'matrix_inputs': {'spy_price_state': spy_price, 'qqq_price_state': qqq_price, 'combined_breadth_state': combined},
+        'reason': explanation, 'spy_price_state': spy_price, 'qqq_price_state': qqq_price,
+        'iwm_price_state': iwm.get('price_state'), 'spy_breadth_state': spy.get('breadth_state'),
+        'qqq_breadth_state': qqq.get('breadth_state'), 'combined_breadth_state': combined,
+        'russell_2000_breadth_state': iwm.get('breadth_state'), 'priority_groups': groups,
+        'priority_definitions': defs, 'guard_failures': guard_failures, 'divergence': divergence,
+        'priority_matrix': {market: dict(zip(STATES, labels)) for market, labels in PRIORITIES.items()},
+        'unavailable_inputs': unavailable,
+    }
+
+
 def breadth(symbols, charts, calendar, session, settings, minimum=0):
     """Shared current denominator and paired t/t-5 denominator for both EMAs."""
     symbols = list(dict.fromkeys(symbols))

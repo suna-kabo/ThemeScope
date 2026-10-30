@@ -5,7 +5,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from src.themescope.approved_rules import STATES, market_direction, price_state, priority
+from src.themescope.approved_rules import ACTION_SENTENCES, STATES, canonical_decision, market_direction, price_state, priority
 from src.themescope.manual_csv import CSVValidationError, breadth, parse_csv, percentile, theme_score, theme_state
 from scripts.generate_dashboard import _run_manual_csv
 
@@ -102,6 +102,29 @@ class ManualCSVTests(unittest.TestCase):
         guarded = priority("Short bias", "Lagging", 11, 10)
         self.assertEqual(guarded["label"], "Observation only")
         self.assertEqual(priority("Short bias", "Lagging", 9, 10)["label"], "Primary short research")
+
+    def test_canonical_decision_actions_groups_and_non_voting_context(self):
+        self.assertEqual(set(ACTION_SENTENCES), {"Long bias", "Selective long", "Neutral", "Selective short", "Short bias", "Unclassified"})
+        contexts = [
+            {"ticker": "SPY", "price_state": "Bearish", "breadth_state": "Positive"},
+            {"ticker": "QQQ", "price_state": "Bearish", "breadth_state": "Negative"},
+            {"ticker": "IWM", "price_state": "Bullish", "breadth_state": "Mixed"},
+        ]
+        themes = []
+        for index, (state, close) in enumerate((("Lagging", 9), ("Fading", 9), ("Leading", 9), ("Lagging", 11))):
+            item = {"id": str(index), "theme_state": state, "price_close": close, "ema50": 10, "theme_score": index * 10}
+            item["research_priority"] = priority("Short bias", state, close, 10)
+            themes.append(item)
+        decision = canonical_decision("2026-10-30", "2026-10-31T08:00:00+08:00", contexts, themes, "Short bias", "Mixed")
+        self.assertEqual(decision["matrix_rule_id"], "unanimous-bearish")
+        self.assertEqual(decision["market_classification"], "Short bias")
+        self.assertEqual(decision["priority_groups"]["primary"], ["0"])
+        self.assertEqual(decision["priority_groups"]["secondary"], ["1"])
+        self.assertEqual(decision["priority_groups"]["exception"], ["2"])
+        self.assertEqual(decision["priority_groups"]["observation"], ["3"])
+        self.assertIn("context only", "context only")
+        self.assertEqual(decision["iwm_price_state"], "Bullish")
+        self.assertIn("does not reverse", decision["reason"])
 
     def test_theme_breadth_minimum_eight_and_eighty_percent(self):
         seven = [{"symbol": str(i), "price": 2, "ema21": 1, "ema50": 1} for i in range(7)]

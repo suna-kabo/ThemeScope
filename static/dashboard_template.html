@@ -13,6 +13,7 @@
     <div class="sidebar-session"><span>MARKET SESSION</span><b id="sidebar-date">—</b></div>
     <nav class="side-nav" aria-label="Dashboard pages">
       <a href="#market" data-page="market" class="active"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 18 18"><path d="M2.5 9h3l2-4 3.1 8 1.8-4h3.1"/></svg></span>Market</a>
+      <a href="#daily-plan" data-page="daily-plan"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 18 18"><path d="M4 3.5h10v11H4zM6.5 7h5M6.5 10h5"/></svg></span>Daily Plan</a>
       <a href="#sectors-themes" data-page="sectors-themes"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 18 18"><path d="M3 3.5h12v11H3zM3 7.5h12M7 7.5v7"/></svg></span>Sectors &amp; Themes</a>
       <a href="#watchlist" data-page="watchlist"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 18 18"><path d="M3.5 4.5h11M3.5 9h11M3.5 13.5h11"/></svg></span>Watchlist</a>
     </nav>
@@ -35,12 +36,23 @@
         <div class="volatility-section"><div><span class="eyebrow">VOLATILITY CONTEXT</span><h2>Volatility Context</h2></div><div id="volatility-card"></div></div>
       </section>
 
+      <section id="daily-plan" class="page" hidden aria-labelledby="daily-plan-title">
+        <div class="page-heading daily-plan-heading"><div><span class="eyebrow">DAILY PLAN</span><h1 id="daily-plan-title">Daily Plan</h1><p><span id="daily-session">—</span> · Generated <span id="daily-generated">—</span></p></div><div id="daily-classification" class="decision-tag">Unclassified</div></div>
+        <p id="daily-action" class="daily-action"></p>
+        <section class="plan-section" aria-labelledby="decision-path-title"><h2 id="decision-path-title">Decision Path</h2><div id="decision-path" class="decision-path" role="table" aria-label="Market decision path"></div></section>
+        <section class="plan-section" aria-labelledby="why-result-title"><h2 id="why-result-title">Why this result</h2><div id="why-result" class="plan-card"></div></section>
+        <section class="plan-section" aria-labelledby="research-priorities-title"><h2 id="research-priorities-title">Today's Research Priorities</h2><div id="daily-priorities" class="priority-grid"></div><div id="qualification-summary" class="qualification-summary"></div></section>
+        <section class="plan-section" aria-labelledby="divergence-title"><h2 id="divergence-title">Divergence context</h2><div id="divergence-context" class="plan-card"></div></section>
+        <details id="daily-methodology" class="help-card methodology"><summary>View full methodology</summary><div id="methodology-content"></div></details>
+        <div class="fixed-limitations"><p>Research Priority is not an entry signal.</p><p>Lagging does not mean oversold.</p><p>Fading does not automatically mean a confirmed downtrend.</p></div>
+      </section>
+
       <section id="sectors-themes" class="page" hidden aria-labelledby="themes-title">
         <div class="page-heading"><div><span class="eyebrow">ELIGIBLE EQUITY EXPOSURES</span><h1 id="themes-title">Sectors &amp; Themes</h1><p>Sortable ETF comparisons. Rank is global within the eligible registry; filters do not rerank the remaining rows.</p></div><a class="download-link" href="themes.csv" download>Full ranking CSV</a></div>
         <details class="help-card"><summary>Score and state definitions</summary><p id="score-method-description">Score weights and inputs come from this snapshot’s configured methodology.</p><p><b>Improving</b> means the current score is in the stronger half while the medium score is in the weaker half. <b>Fading</b> means the reverse. These cross-sectional labels do not establish a time-series reversal or rotation.</p></details>
         <div id="theme-controls" class="controls"></div>
         <p id="theme-count" class="caption"></p>
-        <div class="table-wrap theme-table-wrap"><table class="data-table"><thead id="theme-head"></thead><tbody id="theme-body"></tbody></table></div>
+        <div class="table-wrap theme-table-wrap"><table class="data-table theme-data-table"><colgroup id="theme-cols"></colgroup><thead id="theme-head"></thead><tbody id="theme-body"></tbody></table></div>
         <div class="exports"><button id="theme-visible-csv">Download visible table CSV</button><a href="registry_audit.csv" download>Registry audit CSV</a><span id="theme-export-status" role="status"></span></div>
       </section>
 

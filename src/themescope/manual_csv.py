@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
-from .approved_rules import STATES, breadth_state, market_direction, price_state, priority
+from .approved_rules import STATES, breadth_state, canonical_decision, market_direction, price_state, priority
 from .ranking import average_ranks
 
 
@@ -355,6 +355,7 @@ def build_release(root: Path, paths: dict[str, Path], session: str) -> tuple[dic
         "runtime_seconds": None,
     }
     generated_hkt = datetime.fromisoformat(generated).astimezone(ZoneInfo("Asia/Hong_Kong"))
+    decision = canonical_decision(session, generated_hkt.isoformat(timespec="seconds"), contexts, themes, direction, combined)
     snapshot = {
         "schema_version": "manual-csv-1",
         "methodology_version": "manual-csv-1",
@@ -370,7 +371,9 @@ def build_release(root: Path, paths: dict[str, Path], session: str) -> tuple[dic
         "context": contexts,
         "volatility_context": [],
         "themes": themes,
-        "market_classification": {"direction": direction, "combined_breadth": combined, "inputs": {symbol: {"price": context_by_symbol[symbol]["price_state"], "breadth": context_by_symbol[symbol]["breadth_state"]} for symbol in ("SPY", "QQQ", "IWM")}, "reason": f"SPY {context_by_symbol['SPY']['price_state']}; QQQ {context_by_symbol['QQQ']['price_state']}; combined breadth {combined or 'Unavailable'}.", "action_summary": f"{direction}. Research priorities are derived from the four ETF momentum states and guarded by each anchor's EMA50 position."},
+        "market_classification": {"direction": direction, "combined_breadth": combined, "inputs": {symbol: {"price": context_by_symbol[symbol]["price_state"], "breadth": context_by_symbol[symbol]["breadth_state"]} for symbol in ("SPY", "QQQ", "IWM")}, "reason": decision["reason"], "action_summary": decision["action_sentence"], "decision": decision},
+        "decision": decision,
+        "ui_configuration": {"score_bands": [{"min": 0, "max": 25, "class": "score-q1"}, {"min": 25, "max": 50, "class": "score-q2"}, {"min": 50, "max": 75, "class": "score-q3"}, {"min": 75, "max": 100, "class": "score-q4"}]},
         "source_status": {"theme_watchlists": {"status": "complete"}},
         "data_complete": True,
         "publication_scope": "local_only",

@@ -109,12 +109,35 @@
     return typeof value === "number" && Number.isFinite(value);
   }
 
+  var DEFAULT_SCORE_BANDS = [
+    { min: 0, max: 25, class: "score-q1" },
+    { min: 25, max: 50, class: "score-q2" },
+    { min: 50, max: 75, class: "score-q3" },
+    { min: 75, max: 100, class: "score-q4" },
+  ];
+
+  function validScoreBands(bands) {
+    if (!Array.isArray(bands) || bands.length !== 4) return false;
+    var ordered = bands.slice().sort(function (a, b) { return a.min - b.min; });
+    return ordered[0].min === 0 && ordered[ordered.length - 1].max === 100 && ordered.every(function (band, index) {
+      return finiteNumber(band.min) && finiteNumber(band.max) && band.min < band.max && /^score-q[1-4]$/.test(band.class) && (index === 0 || ordered[index - 1].max === band.min);
+    });
+  }
+
+  function resolvedScoreBands(bands) {
+    return validScoreBands(bands) ? bands.slice().sort(function (a, b) { return a.min - b.min; }) : DEFAULT_SCORE_BANDS;
+  }
+
   function scoreBandClass(value, bands) {
     if (!finiteNumber(value)) return "score-na";
     var band = (bands || []).find(function (item) {
       return value >= item.min && (value < item.max || item.max === 100 && value <= 100);
     });
     return band ? band.class : "score-na";
+  }
+
+  function breadthThresholdClass(value) {
+    return !finiteNumber(value) ? "breadth-na" : value >= 50 ? "breadth-positive" : "breadth-negative";
   }
 
   function themeRowsToCsv(rows, session, generatedAt) {
@@ -295,7 +318,7 @@
     var missing =
       '<span title="Input unavailable; see diagnostic export">—</span>';
     var scoreConfig = data.score_methodology || {};
-    var scoreBands = data.ui_configuration?.score_bands || [];
+    var scoreBands = resolvedScoreBands(data.ui_configuration?.score_bands);
     var currentWeights = scoreConfig.current_strength_weights || {};
     var mediumWeights = scoreConfig.medium_strength_weights || {};
     var finalWeights = scoreConfig.theme_score_weights || {};
@@ -310,13 +333,12 @@
     var infoText = {
       priority: "Market direction and relative state determine a research group. Long labels require close above EMA50; short labels require close below EMA50. These are research priorities, not entry signals.",
       state: "Determined by whether Current and Medium are at least 50. Leading means both are in the stronger half; Improving means only Current is; Fading means only Medium is; Lagging means both are in the weaker half.",
-      theme_score: currentWeight + " Current plus " + mediumWeight + " Medium. It provides a consistent relative-performance ranking for manual review and is not a prediction or entry signal.",
+      theme_score: currentWeight + " Current plus " + mediumWeight + " Medium. The color represents a relative score band, not a Long or Short signal.",
       current_strength_score: "The ETF's TradingView 1-month Performance, converted to an ascending average-rank percentile among the same eligible ETF set used for Medium.",
       medium_strength_score: "The ETF's TradingView 3-month Performance, converted to an ascending average-rank percentile among the same eligible ETF set used for Current.",
       theme_breadth21_pct: "The percentage of configured theme-watchlist stocks trading above EMA21. It does not affect Theme Score or state.",
       theme_breadth50_pct: "The percentage of configured theme-watchlist stocks trading above EMA50. It does not affect Theme Score or state.",
-      rank_current: "The global rank of this ETF exposure by Theme Score among eligible exposures. Equal Theme Scores receive average ranks. Breadth and stock drilldown do not affect rank.",
-      facts: "Expanded facts for this exposure, including TradingView performance, EMA context, configured membership and breadth availability."
+      rank_current: "The global rank of this ETF exposure by Theme Score among eligible exposures. Equal Theme Scores receive average ranks. Breadth and stock drilldown do not affect rank."
     };
     var infoCounter = 0;
     var infoTooltip = document.createElement("div");
@@ -353,7 +375,7 @@
       }
       activeInfoButton = button;
       infoPinned = Boolean(pinned);
-      infoTooltip.textContent = button.dataset.tipText || button.title || "Methodology explanation unavailable.";
+      infoTooltip.textContent = button.dataset.tipText || "Methodology explanation unavailable.";
       infoTooltip.setAttribute("aria-hidden", "false");
       button.setAttribute("aria-describedby", infoTooltip.id);
       button.setAttribute("aria-expanded", "true");
@@ -371,10 +393,10 @@
       infoTooltip.setAttribute("aria-hidden", "true");
     }
     function infoControl(key) {
-      var labels = {rank_current:"Current rank",facts:"Facts and status",state:"State",theme_score:"Theme Score",current_strength_score:"Current",medium_strength_score:"Medium",excess21:"1M versus SPY",excess63:"3M versus SPY",theme_breadth21_pct:"Above EMA21",theme_breadth50_pct:"Above EMA50"};
+      var labels = {rank_current:"Current rank",state:"State",theme_score:"Theme Score",current_strength_score:"Current",medium_strength_score:"Medium",excess21:"1M versus SPY",excess63:"3M versus SPY",theme_breadth21_pct:"Above EMA21",theme_breadth50_pct:"Above EMA50"};
       var description = infoText[key] || "Methodology explanation unavailable.";
       var id = "themescope-info-" + key + "-" + (++infoCounter);
-      return '<span class="info-control"><button class="info-button" type="button" id="' + id + '" data-tip-text="' + esc(description) + '" title="' + esc(description) + '" aria-label="Explain ' + esc(labels[key] || key) + '" aria-expanded="false">i</button></span>';
+      return '<span class="info-control"><button class="info-button" type="button" id="' + id + '" data-tip-text="' + esc(description) + '" aria-label="Explain ' + esc(labels[key] || key) + '" aria-expanded="false">i</button></span>';
     }
     document.addEventListener("pointerover", function (event) {
       var button = event.target.closest?.(".info-button");
@@ -448,7 +470,9 @@
         const diagnostic = "Breadth unavailable · " + count + " · " + reason;
         return '<div class="indicator-box"><div class="indicator-label">' + title + '</div><div class="breadth-unavailable" title="' + esc(diagnostic) + '"><b>Breadth unavailable</b><small>' + esc(count) + '</small><small class="breadth-reason">' + esc(shortReason) + '</small></div></div>';
       }
-      return '<div class="indicator-box"><div class="indicator-label">' + title + '</div><div class="breadth-row"><b class="breadth-value">' + m.value.toFixed(1) + '%</b><span class="breadth-count">' + m.above_count.toLocaleString("en-US") + '/' + m.valid_count.toLocaleString("en-US") + '</span></div><div class="meter"><i style="width:' + Math.max(0, Math.min(100, m.value)) + '%"></i></div>' + staleLine + '</div>';
+      const thresholdClass = breadthThresholdClass(m.value);
+      const thresholdLabel = m.value.toFixed(1) + " percent, " + (m.value >= 50 ? "at or above" : "below") + " the 50 percent threshold";
+      return '<div class="indicator-box"><div class="indicator-label">' + title + '</div><div class="breadth-row"><b class="breadth-value ' + thresholdClass + '" aria-label="' + esc(thresholdLabel) + '">' + m.value.toFixed(1) + '%</b><span class="breadth-count">' + m.above_count.toLocaleString("en-US") + '/' + m.valid_count.toLocaleString("en-US") + '</span></div><div class="meter"><i class="' + thresholdClass + '" style="width:' + Math.max(0, Math.min(100, m.value)) + '%"></i></div>' + staleLine + '</div>';
     }
     function conditionCard(row, period) {
       const movingAverage = row["ema" + period];
@@ -546,7 +570,7 @@
         localStorage.setItem("themescope-mode", mode);
       } catch (e) {}
     };
-    var pageIds = ["market", "sectors-themes", "watchlist"];
+    var pageIds = ["market", "daily-plan", "sectors-themes", "watchlist"];
     var initialTheme = data.themes.find((t) => (t.selected || []).length) || data.themes[0];
     var state = {
       theme: initialTheme?.id, themeKey: "theme_score", themeDir: "desc",
@@ -568,6 +592,7 @@
       state.stockRowLimit = "20";
       state.themeSelectorSearch = firstView.theme_selector_search || "";
       state.themeNavigationOrder = firstView.theme_navigation_order || null;
+      state.dailyMethodologyOpen = Boolean(firstView.daily_methodology_open);
       state.page = firstView.page || state.page;
     }
     function captureView() {
@@ -580,6 +605,7 @@
       if ($("stock-sort")) state.stockKey = $("stock-sort").value;
       if ($("pool")) state.stockRowLimit = $("pool").value;
       if ($("watchlist-theme-search")) state.themeSelectorSearch = $("watchlist-theme-search").value;
+      if ($("daily-methodology")) state.dailyMethodologyOpen = $("daily-methodology").open;
       state.scroll_position = window.scrollY || 0;
       return {
         page: state.page, selected_theme_id: state.theme,
@@ -590,6 +616,7 @@
         stock_sort_direction: state.stockDir, stock_row_limit: state.stockRowLimit || "20",
         theme_selector_search: state.themeSelectorSearch || "",
         theme_navigation_order: state.themeNavigationOrder,
+        daily_methodology_open: Boolean(state.dailyMethodologyOpen),
         scroll_position: state.scroll_position
       };
     }
@@ -614,6 +641,7 @@
         try { history.pushState({ themescope: true, index: index, view: view }, "", "#" + id); } catch (e) {}
       }
       state.page = id;
+      closeInfoTooltip();
       document.querySelectorAll(".page").forEach(function (page) {
         page.hidden = page.id !== id;
       });
@@ -646,10 +674,12 @@
       state.stockEmaFilter = view.stock_ema_filter || "all"; state.stockKey = view.stock_sort_key || "return21";
       state.stockDir = view.stock_sort_direction || "desc"; state.stockRowLimit = "20";
       state.themeSelectorSearch = view.theme_selector_search || ""; state.themeNavigationOrder = view.theme_navigation_order || null;
+      state.dailyMethodologyOpen = Boolean(view.daily_methodology_open);
       state.scroll_position = view.scroll_position || 0;
       var fields = {"theme-search":"themeSearch","theme-type":"themeType","theme-state":"themeState","theme-sort":"themeKey","stock-search":"stockSearch","ema-filter":"stockEmaFilter","stock-sort":"stockKey","pool":"stockRowLimit","watchlist-theme-search":"themeSelectorSearch"};
       Object.keys(fields).forEach(function (id) { if ($(id) && state[fields[id]] !== undefined) $(id).value = state[fields[id]]; });
       render();
+      $("daily-methodology").open = state.dailyMethodologyOpen;
       showPage(state.page, { scroll: false });
       window.scrollTo(0, state.scroll_position || 0);
     });
@@ -668,7 +698,73 @@
       return;
     }
     showPage(location.hash.slice(1) || "market", false);
-    if ($("market-direction")) { var classification=data.market_classification || {}; $("market-direction").innerHTML="<h2>"+esc(classification.direction || "Unclassified")+"</h2><p>"+esc(classification.reason || "Required inputs unavailable.")+"</p><p>"+esc(classification.breadth_note || "Directional research context; evaluate setups separately.")+"</p>"; }
+    var decision = data.decision || data.market_classification?.decision || {};
+    var classification = data.market_classification || {};
+    function themeById(id) { return data.themes.find(function (row) { return row.id === id; }); }
+    function priorityDefinition(key) {
+      var definition = decision.priority_definitions?.[key] || {};
+      var states = (definition.theme_states || []).join(" / ");
+      return (states ? states + " · " : "") + (definition.labels || []).join(" / ") + (definition.ema50_guard ? " · " + definition.ema50_guard : "");
+    }
+    function dailyThemeLink(row) {
+      if (!row) return "";
+      var context = finite(row.price_close) && finite(row.ema50) ? (row.price_close > row.ema50 ? "Above EMA50" : row.price_close < row.ema50 ? "Below EMA50" : "At EMA50") : "EMA50 unavailable";
+      return '<li><a class="priority-theme-link" href="#watchlist" data-daily-theme="' + esc(row.id) + '"><b>' + esc(row.name) + '</b><span>' + esc(row.anchor) + '</span><small>' + esc(row.theme_state || "Unavailable") + ' · ' + context + '</small><span>' + score(row, "theme_score") + '</span></a></li>';
+    }
+    function renderMethodology() {
+      var prices = ["Bullish", "Mixed", "Bearish"], breadths = ["Positive", "Mixed", "Negative"];
+      var marketRows = [];
+      prices.forEach(function (spyState) { prices.forEach(function (qqqState) { breadths.forEach(function (breadthState) {
+        var output = spyState === qqqState && spyState === "Bullish" ? "Long bias" : spyState === qqqState && spyState === "Bearish" ? "Short bias" : {Positive:"Selective long",Mixed:"Neutral",Negative:"Selective short"}[breadthState];
+        var active = decision.spy_price_state === spyState && decision.qqq_price_state === qqqState && decision.combined_breadth_state === breadthState;
+        marketRows.push('<tr' + (active ? ' class="active-cell"' : '') + '><td>' + spyState + '</td><td>' + qqqState + '</td><td>' + breadthState + '</td><td>' + output + '</td></tr>');
+      }); }); });
+      var priorityRows = ["Long bias","Selective long","Neutral","Selective short","Short bias","Unclassified"].map(function (direction) {
+        var matrixRow = decision.priority_matrix?.[direction] || {};
+        var labels = ["Leading","Improving","Fading","Lagging"].map(function (themeState) { return matrixRow[themeState] || "Unavailable"; });
+        return '<tr' + (decision.market_classification === direction ? ' class="active-cell"' : '') + '><td>' + direction + '</td>' + labels.map(function (x) { return '<td>' + x + '</td>'; }).join("") + '</tr>';
+      }).join("");
+      $("methodology-content").innerHTML = '<h3>Market matrix</h3><table><thead><tr><th>SPY Price</th><th>QQQ Price</th><th>Combined Breadth</th><th>Result</th></tr></thead><tbody>' + marketRows.join("") + '</tbody></table><h3>Market × Theme State priorities</h3><table><thead><tr><th>Market</th><th>Leading</th><th>Improving</th><th>Fading</th><th>Lagging</th></tr></thead><tbody>' + priorityRows + '</tbody></table><p><b>EMA50 guard:</b> Long labels require the anchor close strictly above EMA50; short labels require it strictly below EMA50.</p><p><b>States:</b> Leading has Current and Medium at or above 50; Improving has only Current at or above 50; Fading has only Medium at or above 50; Lagging has both below 50.</p><p>Research Priority is not an entry signal.</p>';
+    }
+    function renderDailyPlan() {
+      $("daily-session").textContent = sessionDisplay(decision.session_date || data.session_date);
+      $("daily-generated").textContent = data.dashboard_generated_at_hkt_display || decision.generated_at_hkt || "Unavailable";
+      $("daily-classification").textContent = decision.market_classification || classification.direction || "Unclassified";
+      $("daily-action").textContent = decision.action_sentence || classification.action_summary || "Required inputs unavailable.";
+      var pathRows = [
+        ["SPY Price State", decision.spy_price_state, "Primary vote", "market"],
+        ["QQQ Price State", decision.qqq_price_state, "Primary vote", "market"],
+        ["Combined Breadth", decision.combined_breadth_state, "Selective-tilt input or context"],
+        ["IWM Price State", decision.iwm_price_state, "Context only, no vote"],
+        ["Russell 2000 Breadth", decision.russell_2000_breadth_state, "Context only, no vote"],
+        ["Final Market result", decision.market_classification, "Approved matrix output"],
+      ];
+      $("decision-path").innerHTML = '<div class="decision-row header" role="row"><span>Input</span><span>Current reading</span><span>Decision role</span></div>' + pathRows.map(function (row) { var reading = row[1] || "Unavailable"; return '<div class="decision-row" role="row"><span>' + (row[3] ? '<a href="#market" data-page-link="market">' + row[0] + '</a>' : row[0]) + '</span><span><span class="reading-tag">' + esc(reading) + '</span></span><span>' + row[2] + '</span></div>'; }).join("");
+      $("why-result").innerHTML = '<p>' + esc(decision.reason || classification.reason || "Required inputs unavailable.") + '</p>';
+      var labels = {primary:"Primary",secondary:"Secondary",exception:"Lower priority / exception",observation:"Observation only"};
+      $("daily-priorities").innerHTML = ["primary","secondary","exception","observation"].map(function (key) {
+        var ids = decision.priority_groups?.[key] || [], rows = ids.map(themeById).filter(Boolean);
+        return '<article class="priority-card"><h3>' + labels[key] + '</h3><p class="priority-rule">' + esc(priorityDefinition(key) || (key === "observation" ? "No directional label or EMA50 guard not met." : "No active rule.")) + '</p><b class="priority-count">' + rows.length + '</b>' + (rows.length ? '<ul class="priority-theme-list">' + rows.slice(0,5).map(dailyThemeLink).join("") + '</ul>' : '<p class="muted">None today</p>') + '</article>';
+      }).join("");
+      var failures = decision.guard_failures || [];
+      if (failures.length) {
+        var byState = {};
+        failures.forEach(function (failure) { var row=themeById(failure.theme_id); if (row) byState[row.theme_state]=(byState[row.theme_state]||0)+1; });
+        $("qualification-summary").innerHTML = Object.keys(byState).map(function (themeState) { var total=data.themes.filter(function (row) { return row.theme_state === themeState; }).length; return '<p>' + total + ' ' + esc(themeState) + ' themes · ' + (total-byState[themeState]) + ' retain a directional priority · ' + byState[themeState] + ' remain Observation only because the anchor does not pass the EMA50 guard.</p>'; }).join("");
+      } else $("qualification-summary").innerHTML = '<p>Theme State totals and priority totals reconcile without EMA50 guard failures.</p>';
+      $("divergence-context").innerHTML = '<p>' + esc(decision.divergence || "Price direction and Breadth are aligned.") + '</p>';
+      renderMethodology();
+    }
+    renderDailyPlan();
+    $("daily-methodology").open = Boolean(state.dailyMethodologyOpen);
+    $("daily-methodology").addEventListener("toggle", function () { state.dailyMethodologyOpen=this.open; replaceHistoryState(); });
+    document.querySelectorAll("[data-page-link]").forEach(function (link) { link.addEventListener("click", function (event) { event.preventDefault(); showPage(link.dataset.pageLink, {push:true}); }); });
+    $("daily-priorities").addEventListener("click", function (event) { var link=event.target.closest("[data-daily-theme]"); if (!link) return; event.preventDefault(); state.theme=link.dataset.dailyTheme; showPage("watchlist", {push:true}); render(); replaceHistoryState(); });
+    if ($("market-direction")) {
+      var primary = priorityDefinition("primary") || "None today", secondary = priorityDefinition("secondary") || "None today";
+      $("market-direction").innerHTML='<div class="market-action-card"><div><h2>' + esc(decision.market_classification || classification.direction || "Unclassified") + '</h2></div><div class="market-action-details"><p>SPY ' + esc(decision.spy_price_state || "Unavailable") + ' + QQQ ' + esc(decision.qqq_price_state || "Unavailable") + ' → ' + esc(decision.market_classification || "Unclassified") + '</p><p>Combined Breadth: ' + esc(decision.combined_breadth_state || "Unavailable") + '</p><p>Primary: ' + esc(primary) + '</p><p>Secondary: ' + esc(secondary) + '</p></div><button type="button" class="open-plan">Open Daily Plan</button></div>';
+      $("market-direction").querySelector(".open-plan").onclick=function(){showPage("daily-plan",{push:true});};
+    }
     const marketWarnings = (data.context || []).filter((row) => [21, 50].some((period) => row.index_breadth?.[String(period)]?.status !== "valid")).map((row) => row.ticker + " breadth unavailable");
     $("status").textContent = (data.run_kind === "offline_historical_diagnostic" ? "Historical diagnostic · live completeness unverified · " : "") + marketWarnings.join(" · ");
     $("cards").innerHTML = data.context.map((row) =>
@@ -816,7 +912,8 @@
               var label = c[1]
                 ? '<button data-sort="' + c[1] + '" title="Sort by ' + esc(fullLabel) + '; unavailable values stay last" aria-label="Sort by ' + esc(fullLabel) + '">' + c[0] + (state[p + "Key"] === c[1] ? arrowIcon(state[p + "Dir"]) : "") + '</button>'
                 : '<span title="' + esc(fullLabel) + '">' + c[0] + '</span>';
-              return '<th class="' + esc(c[5] || "") + '"><div class="th-content">' + label + (c[3] ? infoControl(c[3]) : '') + '</div></th>';
+              var sortState = c[1] ? (state[p + "Key"] === c[1] ? (state[p + "Dir"] === "asc" ? "ascending" : "descending") : "none") : null;
+              return '<th class="' + esc(c[5] || "") + '"' + (sortState ? ' aria-sort="' + sortState + '"' : '') + '><div class="th-content">' + label + (c[3] ? infoControl(c[3]) : '') + '</div></th>';
             },
           )
           .join("") +
@@ -864,9 +961,10 @@
         const count = finite(valid) && finite(metric?.eligible_count) ? valid + '/' + metric.eligible_count + ' valid members' : 'counts unavailable';
         const reason = metric?.reason || row["breadth_unavailable_reason_" + period] || "Theme breadth is unavailable";
         const detail = "Theme-watchlist breadth unavailable · " + count + " · " + reason;
-        return '<span class="breadth-unavailable-cell" title="' + esc(detail) + '" aria-label="' + esc(detail) + '">N/A<small>' + esc(count) + '</small><small>' + esc(breadthUnavailableShort(metric)) + '</small></span>';
+      return '<span class="breadth-unavailable-cell" aria-label="Theme Breadth unavailable">N/A</span>';
       }
-      return '<span title="Configured watchlist; reviewed ' + esc(row.watchlist_reviewed_date || "date unavailable") + '. Theme breadth does not affect score or state.">' + value.toFixed(1) + '% <small>(' + metric.above_count + '/' + metric.valid_count + ')</small></span>';
+      const thresholdClass = breadthThresholdClass(value);
+      return '<span class="' + thresholdClass + '" aria-label="' + value.toFixed(1) + ' percent, ' + (value >= 50 ? 'at or above' : 'below') + ' the 50 percent threshold">' + value.toFixed(1) + '%</span>';
     }
     function breadthSummary(row, period) {
       const metric = row.theme_watchlist_breadth?.[String(period)];
@@ -891,6 +989,10 @@
       render();
       replaceHistoryState();
     }
+    $("theme-body").addEventListener("click", function (event) {
+      var row = event.target.closest("tr[data-theme]");
+      if (row && !event.target.closest("a")) select(row.dataset.theme);
+    });
     var visible = [];
     var visibleThemes = [];
     function render() {
@@ -902,28 +1004,19 @@
       renderThemeSelector();
       const breadthUnavailable = visibleThemes.filter((row) => row.breadth_status_21 !== "valid" || row.breadth_status_50 !== "valid").length;
       $("theme-count").textContent = visibleThemes.length + " of " + all.length + " exposures" + (breadthUnavailable ? " · " + breadthUnavailable + " with breadth unavailable" : "");
-      head("theme", [
-        ["#", "rank_current", null, "rank_current", "Current rank", "col-rank"], ["Type", null, null, null, "Exposure type", "col-type"], ["Name", "name", null, null, "Sector or theme name", "col-name"], ["ETF", null, null, null, "Anchor ETF", "col-etf"], ["State", "theme_state", null, "state", "State", "col-state"],
+      const themeColumns = [
+        ["#", "rank_current", null, "rank_current", "Current rank", "col-rank"], ["Name", "name", null, null, "Sector or theme name with exposure type", "col-name"], ["ETF", null, null, null, "Anchor ETF", "col-etf"], ["State", "theme_state", null, "state", "State", "col-state"],
         ["Research priority", "priority", null, "priority", "Directional research priority with an absolute EMA50 guard; not an entry signal.", "col-priority"], ["Score", "theme_score", null, "theme_score", "Theme Score", "col-score"], ["Current", "current_strength_score", null, "current_strength_score", "1-month Performance percentile", "col-score"], ["Medium", "medium_strength_score", null, "medium_strength_score", "3-month Performance percentile", "col-score"],
         ["1W", "return5", null, null, "TradingView 1-week Performance; context only", "col-return"], ["1M", "return21", null, null, "TradingView 1-month Performance", "col-return"], ["3M", "return63", null, null, "TradingView 3-month Performance", "col-return"], ["EMA50", null, null, null, "Anchor price relative to EMA50", "col-ema"],
-        ["% > EMA21", "theme_breadth21_pct", null, "theme_breadth21_pct", "Configured theme members above EMA21. Does not affect Theme Score or state.", "col-breadth"], ["% > EMA50", "theme_breadth50_pct", null, "theme_breadth50_pct", "Configured theme members above EMA50. Does not affect Theme Score or state.", "col-breadth"], ["Facts", null, null, "facts", "Facts and status", "col-facts"],
-      ]);
+        ["% > EMA21", "theme_breadth21_pct", null, "theme_breadth21_pct", "Available when at least eight configured members and 80 percent coverage have valid Price, EMA21 and EMA50 values. Does not affect Theme Score or state.", "col-breadth"], ["% > EMA50", "theme_breadth50_pct", null, "theme_breadth50_pct", "Available when at least eight configured members and 80 percent coverage have valid Price, EMA21 and EMA50 values. Does not affect Theme Score or state.", "col-breadth"],
+      ];
+      $("theme-cols").innerHTML = themeColumns.map(function (column) { return '<col class="' + column[5] + '">'; }).join("");
+      head("theme", themeColumns);
       $("theme-body").innerHTML = visibleThemes.map(function (row) {
         const type = row.level === "Sector" ? "Sector" : "Theme";
-        const details = [
-          "ETF TradingView 1W/1M/3M Performance: " + pct(valueAt(row, "return5")) + " / " + pct(valueAt(row, "return21")) + " / " + pct(valueAt(row, "return63")),
-          "ETF close vs EMA21/50: " + ema(row, 21) + " / " + ema(row, 50),
-          "Theme watchlist reviewed: " + (row.watchlist_reviewed_date || "not configured"),
-          "Current rank " + (row.rank_current ?? row.global_rank),
-          "EMA21 theme breadth: " + (row.theme_watchlist_breadth?.["21"]?.reason || (row.theme_breadth21_pct ?? "unavailable")),
-          "EMA50 theme breadth: " + (row.theme_watchlist_breadth?.["50"]?.reason || (row.theme_breadth50_pct ?? "unavailable")),
-          "Theme watchlist: " + (["complete", "reviewed_short", "reviewed_etf_only", "configured"].includes(row.watchlist_status) ? row.configured_watchlist_count + " reviewed members · " + row.watchlist_status : "not configured"),
-          "Stock drilldown: " + (row.stock_drilldown_status || "unavailable") + " · " + (row.watchlist_member_count || 0) + " configured companies",
-        ].join("<br>");
         return '<tr data-theme="' + esc(row.id) + '" class="' + (row.id === state.theme ? "active" : "") + '">' +
           td("col-rank", row.display_rank ?? "—") +
-          td("col-type", type) +
-          td("col-name", '<button class="theme-select" title="' + esc(row.name) + '" aria-label="Open watchlist for ' + esc(row.name) + '">' + esc(row.name) + '</button>') +
+          td("col-name", '<div class="theme-name-cell"><span class="type-tag">' + type + '</span><button class="theme-select" aria-label="Open watchlist for ' + esc(row.name) + '">' + esc(row.name) + '</button></div>') +
           td("col-etf", row.chart_url ? '<a href="' + esc(row.chart_url) + '" target="_blank" rel="noopener noreferrer">' + esc(row.anchor) + '</a>' : esc(row.anchor)) +
           td("col-state", stateBadge(row.theme_state)) +
           td("col-priority", '<span title="'+esc(row.research_priority?.reason || "Required inputs unavailable")+'">'+esc(row.research_priority?.label || "No directional priority")+'</span>') +
@@ -935,14 +1028,8 @@
           td("col-return", pct(valueAt(row, "return63"))) +
           td("col-ema", ema(row, 50)) +
           td("col-breadth", themeBreadthCell(row, 21)) +
-          td("col-breadth", themeBreadthCell(row, 50)) +
-          td("col-facts", '<details><summary>Facts &amp; status</summary><div class="stock-details">' + details + '</div></details>') + '</tr>';
-      }).join("") || '<tr><td colspan="16">No eligible ETF exposures are available in this snapshot.</td></tr>';
-      $("theme-body").querySelectorAll("tr[data-theme]").forEach(function (tr) {
-        tr.addEventListener("click", function (event) {
-          if (!event.target.closest("a, details, summary")) select(tr.dataset.theme);
-        });
-      });
+          td("col-breadth", themeBreadthCell(row, 50)) + '</tr>';
+      }).join("") || '<tr><td colspan="14">No eligible ETF exposures are available in this snapshot.</td></tr>';
       var selected = data.themes.find((row) => row.id === state.theme) || data.themes[0];
       if (!selected) {
         $("active-name").textContent = "Watchlist";
@@ -1070,5 +1157,7 @@
     tradingViewExport: tradingViewExport,
     ranked: ranked,
     scoreBandClass: scoreBandClass,
+    resolvedScoreBands: resolvedScoreBands,
+    breadthThresholdClass: breadthThresholdClass,
   };
 });
