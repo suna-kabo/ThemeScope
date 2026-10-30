@@ -1,0 +1,176 @@
+"""Shared approved decision rules. No data access or execution advice."""
+from __future__ import annotations
+import math
+from .metrics import observation_map, trend_metric, return_metric
+from .ranking import average_ranks
+
+
+def number(x):
+    return not isinstance(x, bool) and isinstance(x, (int, float)) and math.isfinite(x)
+
+
+def price_state(close, ema21, ema50):
+    if not all(number(x) and x > 0 for x in (close, ema21, ema50)):
+        return None
+    if close > ema21 and close > ema50:
+        return 'Bullish'
+    if close < ema21 and close < ema50:
+        return 'Bearish'
+    return 'Mixed'
+
+
+def breadth_state(a, b, boundary=50):
+    if not all(number(x) and 0 <= x <= 100 for x in (a, b)):
+        return None
+    return 'Positive' if a >= boundary and b >= boundary else 'Negative' if a < boundary and b < boundary else 'Mixed'
+
+
+def market_direction(spy, qqq, breadth):
+    if spy not in ('Bullish','Mixed','Bearish') or qqq not in ('Bullish','Mixed','Bearish'):
+        return 'Unclassified'
+    if spy == qqq == 'Bullish':
+        return 'Long bias'
+    if spy == qqq == 'Bearish':
+        return 'Short bias'
+    return {'Positive':'Selective long','Negative':'Selective short','Mixed':'Neutral'}.get(breadth,'Unclassified')
+
+
+PRIORITIES = {
+    'Long bias': ('Primary long research','Secondary long research','Low-priority long research','Low-priority long research'),
+    'Selective long': ('Primary selective-long research','Secondary selective-long research','Low-priority long research','Low-priority long research'),
+    'Neutral': ('Monitor',)*4,
+    'Selective short': ('Low-priority weakness exception','Low-priority weakness exception','Primary short research','Secondary short research'),
+    'Short bias': ('Low-priority weakness exception','Low-priority weakness exception','Secondary short research','Primary short research'),
+    'Unclassified': ('No directional priority',)*4,
+}
+STATES = ('Leading','Improving','Fading','Lagging')
+
+
+def priority(direction, state, close, ema50):
+    if state not in STATES:
+        return {'label':'No directional priority','group':3,'side':None,'reason':'ETF score inputs unavailable.'}
+    label = PRIORITIES.get(direction, PRIORITIES['Unclassified'])[STATES.index(state)]
+    side = 'long' if direction in ('Long bias','Selective long') else 'short' if direction in ('Short bias','Selective short') else None
+    if side and (not number(close) or not number(ema50) or close <= 0 or ema50 <= 0 or (close <= ema50 if side == 'long' else close >= ema50)):
+        return {'label':'Observation only','group':3,'side':side,'reason':f'{side.title()} research label requires anchor close strictly {"above" if side == "long" else "below"} EMA50.'}
+    group = 0 if label.startswith('Primary') else 1 if label.startswith('Secondary') else 2
+    return {'label':label,'group':group,'side':side,'reason':f'{direction}; {state}'+(f'; anchor {"above" if side == "long" else "below"} EMA50.' if side else '.')}
+
+
+def priority_sort_key(row):
+    p = row.get('research_priority', {})
+    score = row.get('theme_score')
+    return (p.get('group',3), (score if p.get('side') == 'short' else -score) if number(score) else math.inf, row['id'])
+
+
+def breadth(symbols, charts, calendar, session, settings, minimum=0):
+    """Shared current denominator and paired t/t-5 denominator for both EMAs."""
+    symbols = list(dict.fromkeys(symbols))
+    prior = calendar[calendar.index(session)-5] if session in calendar and calendar.index(session) >= 5 else None
+    def observations(day):
+        valid = {}
+        for symbol in symbols:
+            chart = charts.get(symbol, {})
+            close = observation_map(chart).get(day, {}).get('close')
+            clean = {**chart, 'observations': [{**r, 'close':r.get('close') if number(r.get('close')) and r['close'] > 0 else None} for r in chart.get('observations',[])]}
+            trend = trend_metric(clean, calendar, day, settings) if day else {}
+            if all(number(x) and x > 0 for x in (close, trend.get('ema21'), trend.get('ema50'))):
+                valid[symbol] = {str(n): close > trend[f'ema{n}'] for n in (21,50)}
+        return valid
+    current, earlier = observations(session), observations(prior)
+    paired = set(current) & set(earlier)
+    floor = settings.get('minimum_breadth_coverage', .8)
+    def eligible(items):
+        return bool(symbols) and len(items) >= minimum and len(items)/len(symbols) >= floor
+    result = {}
+    for n in ('21','50'):
+        above = sum(v[n] for v in current.values())
+        value = 100*above/len(current) if eligible(current) else None
+        pair_now = 100*sum(current[s][n] for s in paired)/len(paired) if eligible(paired) else None
+        pair_old = 100*sum(earlier[s][n] for s in paired)/len(paired) if eligible(paired) else None
+        result[n] = {'value':value,'status':'valid' if value is not None else 'unavailable','above_count':above,'valid_count':len(current),'eligible_count':len(symbols),'configured_count':len(symbols),'coverage_pct':100*len(current)/len(symbols) if symbols else None,'reason':None if value is not None else 'Insufficient valid histories for both EMAs.','session_date':session,'prior_session':prior,'paired_valid_count':len(paired),'paired_current_pct':pair_now,'t_minus_5':pair_old,'change_5_pp':pair_now-pair_old if pair_now is not None else None,'change_method':'Same constituents at both dates'}
+    return result
+
+
+def score_values(values, minimum):
+    valid = {k:v for k,v in values.items() if number(v)}
+    if len(valid) < max(2, minimum):
+        return {k:None for k in values}
+    return {k:(100*(sum(v < x for x in valid.values()) + (sum(v == x for x in valid.values())-1)/2)/(len(valid)-1) if number(v) else None) for k,v in values.items()}
+
+
+def apply(snapshot, raw):
+    settings = snapshot['settings']
+    weights = snapshot.get('score_methodology',{}).get('theme_score_weights',{})
+    if weights != {'current_strength':.6,'medium_strength':.4}:
+        raise ValueError('Approved score weights must be 0.60/0.40')
+    charts = {**raw.get('charts',{}),**raw.get('v5',{}).get('charts',{}),**raw.get('v5',{}).get('iwm_breadth_charts',{})}
+    calendar, session = raw['session_calendar'], snapshot['session_date']
+    themes = snapshot['themes']
+    minimum = max(2, math.ceil(settings.get('ranking_minimum_coverage',.8)*settings.get('configured_active_anchor_count',len(themes))))
+    def cohort(day):
+        rows = {}
+        for theme in themes:
+            returns = [return_metric(charts.get(theme['anchor'],{}),calendar,day,n).get('value') for n in (21,63)]
+            if all(number(v) for v in returns): rows[theme['id']] = returns
+        return rows
+    current = cohort(session)
+    p21 = score_values({t['id']:current.get(t['id'],[None,None])[0] for t in themes},minimum)
+    p63 = score_values({t['id']:current.get(t['id'],[None,None])[1] for t in themes},minimum)
+    snapshot['ranking_cohort'] = {'eligible':sorted(current),'excluded':[{ 'id':t['id'],'reason':'Both exact adjusted-return endpoints required.'} for t in themes if t['id'] not in current],'minimum_peers':minimum}
+    for t in themes:
+        a,b = p21[t['id']],p63[t['id']]
+        t.update(current_strength_score=a,medium_strength_score=b,theme_score=.6*a+.4*b if a is not None else None,theme_state=STATES[(0 if a >= 50 else 2)+(0 if b >= 50 else 1)] if a is not None else None)
+    ranks = average_ranks({t['id']:t['theme_score'] for t in themes})
+    for t in themes:
+        t['global_rank'] = t['rank_current'] = ranks[t['id']]
+        # Until the exact same cohort has been established at both dates, omit comparison.
+        t['rank_t_minus_5'] = t['rank_change_5'] = None
+        t['rank_change_reason'] = 'Common historical comparison cohort not established.'
+        symbols = [m['ticker'] for m in t.get('selected',[])]
+        metrics = breadth(symbols,charts,calendar,session,settings,settings.get('minimum_breadth_sample',8))
+        t['theme_watchlist_breadth'] = metrics
+        for n,m in metrics.items():
+            for suffix,key in (('pct','value'),('above','above_count'),('valid','valid_count'),('change_5_pp','change_5_pp')):
+                t[f'theme_breadth{n}_{suffix}'] = m[key]
+    states = {}
+    for row in snapshot.get('context',[]):
+        ticker = row['ticker']
+        mapped = raw.get('v5',{}).get('mapped_universes',{}).get(ticker,{})
+        roster = raw.get('v5',{}).get('index_universes',{}).get(ticker,{})
+        if roster.get('members'):
+            symbols = [m['symbol'] for m in roster['members']]
+        elif roster.get('rows'):
+            symbols = []
+            for index, item in enumerate(roster['rows']):
+                kind = str(item.get('security_type') or 'EQUITY').casefold()
+                if kind != 'equity': continue
+                symbol = item.get('ticker')
+                symbols.append(str(symbol).replace('.','-') if symbol and symbol != '-' else f'unresolved-{index}')
+        else:
+            symbols = [s for c in mapped.get('companies',[]) for s in c.get('symbols',[])]
+        metrics = breadth(symbols,charts,calendar,session,settings)
+        row['index_breadth'] = metrics
+        for n,m in metrics.items():
+            row[f'breadth{n}_change_5_pp'] = m['change_5_pp']
+            row[f'breadth{n}_t_minus_5'] = m['t_minus_5']
+        states[ticker] = {'price':price_state(row.get('price_close'),row.get('ema21'),row.get('ema50')),'breadth':breadth_state(metrics['21']['value'],metrics['50']['value'])}
+        row['price_state'] = states[ticker]['price']
+        row['breadth_state'] = states[ticker]['breadth']
+    a,b = states.get('SPY',{}),states.get('QQQ',{})
+    combined = a.get('breadth') if a.get('breadth') == b.get('breadth') else 'Mixed'
+    if not a.get('breadth') or not b.get('breadth'): combined = None
+    direction = market_direction(a.get('price'),b.get('price'),combined)
+    snapshot['market_classification'] = {'direction':direction,'combined_breadth':combined,'inputs':states,'reason':f'SPY {a.get("price") or "unavailable"}; QQQ {b.get("price") or "unavailable"}; breadth {combined or "unavailable"}.','breadth_note':None if combined else 'Selective tilt unavailable'}
+    for t in themes:
+        t['research_priority'] = priority(direction,t.get('theme_state'),t.get('price_close'),t.get('ema50'))
+    snapshot['score_methodology'] = {'current_strength_weights':{'return21_percentile':1.0},'medium_strength_weights':{'return63_percentile':1.0},'theme_score_weights':weights,'state_threshold':50,'method':'Cross-sectional ETF momentum'}
+    for t in themes:
+        for key in ('current_strength_score','medium_strength_score','theme_score'):
+            t.setdefault('field_status',{})[key] = {'value':t[key],'status':'valid' if t[key] is not None else 'unavailable','reason':None if t[key] is not None else 'Shared 21/63 ETF peer cohort below minimum.'}
+        for n,m in t['theme_watchlist_breadth'].items():
+            t[f'breadth_status_{n}'] = m['status']
+            t[f'breadth_unavailable_reason_{n}'] = m['reason']
+            t['field_status'][f'theme_breadth{n}_pct'] = m
+    snapshot['historical_rank_method'] = 'Unavailable until a common comparison cohort is established.'
+    return snapshot

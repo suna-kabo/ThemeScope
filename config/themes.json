@@ -40,7 +40,7 @@
     "minimum_percentile_peers": 10,
     "market_breadth_threshold": 50,
     "watchlist_capacity": 20,
-    "watchlist_default_limit": 15,
+    "watchlist_default_limit": 20,
     "maximum_raw_inputs_bytes": 20000000,
     "maximum_dashboard_bytes": 20000000,
     "maximum_run_bundle_bytes": 95000000,
@@ -52,7 +52,8 @@
       "adv30_floor_usd": 20000000,
       "minimum_history_sessions": 205,
       "description": "Used only during explicit watchlist maintenance. Missing optional market-cap facts remain review notes; normal refresh does not request company classification or capitalization."
-    }
+    },
+    "ranking_minimum_coverage": 0.8
   },
   "themes": [
     {

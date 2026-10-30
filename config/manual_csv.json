@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "breadth_universe_sanity": {
+    "spy": {
+      "minimum_rows": 350,
+      "maximum_rows": 700
+    },
+    "qqq": {
+      "minimum_rows": 70,
+      "maximum_rows": 150
+    },
+    "iwm": {
+      "minimum_rows": 1000,
+      "maximum_rows": 3000
+    }
+  },
+  "breadth_minimum_coverage": 0.8,
+  "theme_breadth_minimum_valid": 8,
+  "theme_score_minimum_coverage": 0.8,
+  "watchlist_capacity": 20
+}

@@ -336,3 +336,5 @@ footer { margin-top: 25px; padding: 15px 0 25px; border-top: 1px solid var(--lin
   .download-link { align-self: start; }
   .watchlist-navigation select { min-width: 180px; max-width: 100%; }
 }
+
+.col-priority { min-width: 190px; white-space: normal; }

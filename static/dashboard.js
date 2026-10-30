@@ -55,6 +55,7 @@
   }
 
   function sortRows(rows, key, direction) {
+    if (key === "priority") return rows.slice().sort(function(a,b) { var x=a.research_priority || {}, y=b.research_priority || {}; return (x.group ?? 3)-(y.group ?? 3) || ((x.side === "short" ? a.theme_score-b.theme_score : b.theme_score-a.theme_score) || String(a.id).localeCompare(String(b.id))); });
     var sign = direction === "asc" ? 1 : -1;
     return rows.slice().sort(function (a, b) {
       var av = valueAt(a, key);
@@ -117,18 +118,19 @@
   }
 
   function themeRowsToCsv(rows, session, generatedAt) {
-    var columns = ["rank_current", "rank_t_minus_5", "rank_change_5", "type", "theme_id", "name", "anchor_etf", "state", "theme_score", "current_strength", "medium_strength", "return21_pct", "excess21_pp", "return63_pct", "excess63_pp", "theme_breadth21_pct", "theme_breadth21_above", "theme_breadth21_valid", "theme_breadth21_change_5_pp", "theme_breadth50_pct", "theme_breadth50_above", "theme_breadth50_valid", "theme_breadth50_change_5_pp", "configured_watchlist_count", "session_date", "generated_at"];
+    var columns = ["rank_current", "type", "theme_id", "name", "anchor_etf", "state", "research_priority", "theme_score", "current_strength", "medium_strength", "return5_pct", "return21_pct", "return63_pct", "theme_breadth21_pct", "theme_breadth21_above", "theme_breadth21_valid", "theme_breadth50_pct", "theme_breadth50_above", "theme_breadth50_valid", "configured_watchlist_count", "session_date", "generated_at"];
     var lines = [columns.map(csvEscape).join(",")];
     rows.forEach(function (row) {
       var b21 = row.theme_watchlist_breadth && row.theme_watchlist_breadth["21"] || {};
       var b50 = row.theme_watchlist_breadth && row.theme_watchlist_breadth["50"] || {};
-      var values = [row.rank_current ?? row.global_rank, row.rank_t_minus_5, row.rank_change_5,
-        row.level === "Sector" ? "Sector" : "Theme", row.id, row.name, row.anchor, row.theme_state,
+      var values = [row.rank_current ?? row.global_rank,
+        row.level === "Sector" ? "Sector" : "Theme", row.id, row.name, row.anchor, row.theme_state, row.research_priority?.label,
         row.theme_score, row.current_strength_score, row.medium_strength_score,
-        finiteNumber(valueAt(row, "return21")) ? valueAt(row, "return21") * 100 : null, finiteNumber(valueAt(row, "excess21")) ? valueAt(row, "excess21") * 100 : null,
-        finiteNumber(valueAt(row, "return63")) ? valueAt(row, "return63") * 100 : null, finiteNumber(valueAt(row, "excess63")) ? valueAt(row, "excess63") * 100 : null,
-        row.theme_breadth21_pct, row.theme_breadth21_above ?? b21.above_count, row.theme_breadth21_valid ?? b21.valid_count, row.theme_breadth21_change_5_pp,
-        row.theme_breadth50_pct, row.theme_breadth50_above ?? b50.above_count, row.theme_breadth50_valid ?? b50.valid_count, row.theme_breadth50_change_5_pp,
+        finiteNumber(valueAt(row, "return5")) ? valueAt(row, "return5") * 100 : null,
+        finiteNumber(valueAt(row, "return21")) ? valueAt(row, "return21") * 100 : null,
+        finiteNumber(valueAt(row, "return63")) ? valueAt(row, "return63") * 100 : null,
+        row.theme_breadth21_pct, row.theme_breadth21_above ?? b21.above_count, row.theme_breadth21_valid ?? b21.valid_count,
+        row.theme_breadth50_pct, row.theme_breadth50_above ?? b50.above_count, row.theme_breadth50_valid ?? b50.valid_count,
         row.configured_watchlist_count, session, generatedAt];
       lines.push(values.map(csvEscape).join(","));
     });
@@ -251,7 +253,7 @@
       symbols.push(key);
     });
     return {
-      text: symbols.join("\n") + (symbols.length ? "\n" : ""),
+      text: symbols.join(",") + (symbols.length ? "\n" : ""),
       count: symbols.length,
       omitted: omitted,
       duplicates: duplicates,
@@ -306,16 +308,15 @@
     $("score-method-description").textContent =
       "Theme Score = " + currentWeight + " Current + " + mediumWeight + " Medium.";
     var infoText = {
+      priority: "Market direction and relative state determine a research group. Long labels require close above EMA50; short labels require close below EMA50. These are research priorities, not entry signals.",
       state: "Determined by whether Current and Medium are at least 50. Leading means both are in the stronger half; Improving means only Current is; Fading means only Medium is; Lagging means both are in the weaker half.",
       theme_score: currentWeight + " Current plus " + mediumWeight + " Medium. It provides a consistent relative-performance ranking for manual review and is not a prediction or entry signal.",
-      current_strength_score: "The ETF's 21-session return minus SPY's 21-session return, converted to a percentile among all eligible sector/theme ETFs. A value of 50 is the middle of the current ranking universe.",
-      medium_strength_score: "The ETF's 63-session return minus SPY's 63-session return, converted to a percentile among all eligible sector/theme ETFs.",
-      excess21: "The ETF's 21-session percentage return minus SPY's 21-session percentage return, expressed in percentage points.",
-      excess63: "The ETF's 63-session percentage return minus SPY's 63-session percentage return, expressed in percentage points.",
+      current_strength_score: "The ETF's TradingView 1-month Performance, converted to an ascending average-rank percentile among the same eligible ETF set used for Medium.",
+      medium_strength_score: "The ETF's TradingView 3-month Performance, converted to an ascending average-rank percentile among the same eligible ETF set used for Current.",
       theme_breadth21_pct: "The percentage of configured theme-watchlist stocks trading above EMA21. It does not affect Theme Score or state.",
       theme_breadth50_pct: "The percentage of configured theme-watchlist stocks trading above EMA50. It does not affect Theme Score or state.",
       rank_current: "The global rank of this ETF exposure by Theme Score among eligible exposures. Equal Theme Scores receive average ranks. Breadth and stock drilldown do not affect rank.",
-      facts: "Expanded facts and status for this exposure, including returns, EMA context, breadth availability, and five-session rank history."
+      facts: "Expanded facts for this exposure, including TradingView performance, EMA context, configured membership and breadth availability."
     };
     var infoCounter = 0;
     var infoTooltip = document.createElement("div");
@@ -432,17 +433,11 @@
       if (metric.reason_code === "retrieval_failed") return "Unavailable this run";
       if (metric.reason_code === "price_coverage_low") return "Fewer than 80% valid";
       if (metric.reason_code === "too_few_valid_members") return "Fewer than 8 valid members";
-      if (metric.reason_code === "historical_observation_missing") return "5-session prior unavailable";
       return metric.reason || "Unavailable";
     }
     function marketBreadth(row, period) {
       const m = row.index_breadth?.[String(period)];
-      const title = (row.ticker === "IWM" ? "Holdings" : "Constituents") + " above EMA" + period;
-      const change = row["breadth" + period + "_change_5_pp"];
-      const fixedUniverseNote = "Five-session change uses the current constituent or proxy universe for both price observations; it is not point-in-time membership reconstruction.";
-      const changeLine = finite(change)
-        ? '<small class="breadth-change ' + (change > 0 ? "positive" : change < 0 ? "negative" : "") + '" title="' + fixedUniverseNote + '">5-session change ' + (change > 0 ? "+" : "") + change.toFixed(1) + ' pp</small>'
-        : '<small class="breadth-change" title="' + esc((row.field_status?.["breadth" + period + "_change_5_pp"]?.reason || "Both observations must pass the breadth validity rule") + " " + fixedUniverseNote) + '">5-session change unavailable</small>';
+      const title = (row.ticker === "IWM" ? "Russell 2000 constituents" : "Constituents") + " above EMA" + period;
       const staleLine = row.index_breadth_stale
         ? '<small class="breadth-stale" title="Price data are ' + esc(row.price_session_date || "current") + '; breadth is from an earlier observation.">Stale breadth · as of ' + esc(row.index_breadth_observation_date || "date unavailable") + '</small>'
         : '';
@@ -450,11 +445,10 @@
         const count = m && finite(m.valid_count) && finite(m.eligible_count) ? m.valid_count.toLocaleString("en-US") + "/" + m.eligible_count.toLocaleString("en-US") + " mapped" : "Counts unavailable";
         const reason = m?.reason || "Price history unavailable";
         const shortReason = breadthUnavailableShort(m);
-        const changeReason = row.field_status?.["breadth" + period + "_change_5_pp"]?.reason || "Both observations must pass the breadth validity rule";
-        const diagnostic = "Breadth unavailable · " + count + " · " + reason + " · 5-session change unavailable: " + changeReason;
-        return '<div class="indicator-box"><div class="indicator-label">' + title + '</div><div class="breadth-unavailable" title="' + esc(diagnostic) + '"><b>Breadth unavailable</b><small>' + esc(count) + '</small><small class="breadth-reason">' + esc(shortReason) + '</small><small class="breadth-change">5-session change unavailable</small></div></div>';
+        const diagnostic = "Breadth unavailable · " + count + " · " + reason;
+        return '<div class="indicator-box"><div class="indicator-label">' + title + '</div><div class="breadth-unavailable" title="' + esc(diagnostic) + '"><b>Breadth unavailable</b><small>' + esc(count) + '</small><small class="breadth-reason">' + esc(shortReason) + '</small></div></div>';
       }
-      return '<div class="indicator-box"><div class="indicator-label">' + title + '</div><div class="breadth-row"><b class="breadth-value">' + m.value.toFixed(1) + '%</b><span class="breadth-count">' + m.above_count.toLocaleString("en-US") + '/' + m.valid_count.toLocaleString("en-US") + '</span></div><div class="meter"><i style="width:' + Math.max(0, Math.min(100, m.value)) + '%"></i></div>' + changeLine + staleLine + '</div>';
+      return '<div class="indicator-box"><div class="indicator-label">' + title + '</div><div class="breadth-row"><b class="breadth-value">' + m.value.toFixed(1) + '%</b><span class="breadth-count">' + m.above_count.toLocaleString("en-US") + '/' + m.valid_count.toLocaleString("en-US") + '</span></div><div class="meter"><i style="width:' + Math.max(0, Math.min(100, m.value)) + '%"></i></div>' + staleLine + '</div>';
     }
     function conditionCard(row, period) {
       const movingAverage = row["ema" + period];
@@ -472,11 +466,11 @@
         : missing;
     }
     function conditions(row) {
-      const breadthTitle = row.ticker === "IWM" ? "IWM holdings breadth" : "Market breadth";
+      const breadthTitle = row.ticker === "IWM" ? "Russell 2000 Breadth" : row.ticker + " Breadth";
       const trendTitle = row.ticker === "IWM" ? "ETF trend" : "Index trend";
       return '<section class="market-section"><h3 class="market-section-title">' + breadthTitle + '</h3><div class="market-indicators">' + marketBreadth(row, 21) + marketBreadth(row, 50) + '</div></section>' +
         '<section class="market-section"><h3 class="market-section-title">' + trendTitle + '</h3><div class="condition-row">' + conditionCard(row, 21) + conditionCard(row, 50) + '</div></section>' +
-        '<p class="market-observation">' + (row.ticker === "IWM" ? "iShares holdings proxy · effective " : row.index_source?.date_semantics === "observation" ? "Current observed constituent list · observed " : "Constituent list · effective ") + esc(row.index_constituent_asof || "date unavailable") + (row.index_source?.date_semantics === "observation" ? " · not an official point-in-time universe" : "") + '</p>';
+        '<p class="market-observation">TradingView exported-universe snapshot for ' + esc(data.session_date || "session unavailable") + '.</p>';
     }
     function money(n, compact) {
       return finite(n)
@@ -556,7 +550,7 @@
     var initialTheme = data.themes.find((t) => (t.selected || []).length) || data.themes[0];
     var state = {
       theme: initialTheme?.id, themeKey: "theme_score", themeDir: "desc",
-      stockKey: "excess21", stockDir: "desc", themeType: "All", themeState: "All",
+      stockKey: "return21", stockDir: "desc", themeType: "All", themeState: "All",
       page: location.hash.slice(1) || "market", themeNavigationOrder: null
     };
     if (history.state?.themescope && history.state.view) {
@@ -571,7 +565,7 @@
       state.stockEmaFilter = firstView.stock_ema_filter || "all";
       state.stockKey = firstView.stock_sort_key || state.stockKey;
       state.stockDir = firstView.stock_sort_direction || state.stockDir;
-      state.stockRowLimit = firstView.stock_row_limit || String(data.settings?.watchlist_default_limit || 15);
+      state.stockRowLimit = "20";
       state.themeSelectorSearch = firstView.theme_selector_search || "";
       state.themeNavigationOrder = firstView.theme_navigation_order || null;
       state.page = firstView.page || state.page;
@@ -593,7 +587,7 @@
         theme_state_filter: state.themeState, theme_sort_key: state.themeKey,
         theme_sort_direction: state.themeDir, stock_search: state.stockSearch || "",
         stock_ema_filter: state.stockEmaFilter || "all", stock_sort_key: state.stockKey,
-        stock_sort_direction: state.stockDir, stock_row_limit: state.stockRowLimit || "15",
+        stock_sort_direction: state.stockDir, stock_row_limit: state.stockRowLimit || "20",
         theme_selector_search: state.themeSelectorSearch || "",
         theme_navigation_order: state.themeNavigationOrder,
         scroll_position: state.scroll_position
@@ -649,8 +643,8 @@
       state.themeSearch = view.theme_search || ""; state.themeType = view.theme_type_filter || "All";
       state.themeState = view.theme_state_filter || "All"; state.themeKey = view.theme_sort_key || "theme_score";
       state.themeDir = view.theme_sort_direction || "desc"; state.stockSearch = view.stock_search || "";
-      state.stockEmaFilter = view.stock_ema_filter || "all"; state.stockKey = view.stock_sort_key || "excess21";
-      state.stockDir = view.stock_sort_direction || "desc"; state.stockRowLimit = view.stock_row_limit || "15";
+      state.stockEmaFilter = view.stock_ema_filter || "all"; state.stockKey = view.stock_sort_key || "return21";
+      state.stockDir = view.stock_sort_direction || "desc"; state.stockRowLimit = "20";
       state.themeSelectorSearch = view.theme_selector_search || ""; state.themeNavigationOrder = view.theme_navigation_order || null;
       state.scroll_position = view.scroll_position || 0;
       var fields = {"theme-search":"themeSearch","theme-type":"themeType","theme-state":"themeState","theme-sort":"themeKey","stock-search":"stockSearch","ema-filter":"stockEmaFilter","stock-sort":"stockKey","pool":"stockRowLimit","watchlist-theme-search":"themeSelectorSearch"};
@@ -674,8 +668,9 @@
       return;
     }
     showPage(location.hash.slice(1) || "market", false);
+    if ($("market-direction")) { var classification=data.market_classification || {}; $("market-direction").innerHTML="<h2>"+esc(classification.direction || "Unclassified")+"</h2><p>"+esc(classification.reason || "Required inputs unavailable.")+"</p><p>"+esc(classification.breadth_note || "Directional research context; evaluate setups separately.")+"</p>"; }
     const marketWarnings = (data.context || []).filter((row) => [21, 50].some((period) => row.index_breadth?.[String(period)]?.status !== "valid")).map((row) => row.ticker + " breadth unavailable");
-    $("status").textContent = marketWarnings.join(" · ");
+    $("status").textContent = (data.run_kind === "offline_historical_diagnostic" ? "Historical diagnostic · live completeness unverified · " : "") + marketWarnings.join(" · ");
     $("cards").innerHTML = data.context.map((row) =>
       '<article class="market-card"><div class="market-card-head"><div><div class="market-ticker">' + esc(row.ticker) + '</div><div class="market-title-sub">' +
       (row.ticker === "SPY" ? "S&P 500" : row.ticker === "QQQ" ? "Nasdaq-100" : "Russell 2000 proxy") +
@@ -684,6 +679,7 @@
       [["5", "1W"], ["21", "1M"], ["63", "3M"]].map((window) => '<span><small>' + window[1] + '</small>' + pct(row.returns[window[0]]?.value) + '</span>').join("") +
       '</div></div>' + conditions(row) + '<p class="market-observation">Data ' + esc(row.price_session_date || data.session_date || "unavailable") + (row.price_retrieved_at_hkt_display ? ' · Retrieved ' + esc(row.price_retrieved_at_hkt_display) : "") + '</p></article>'
     ).join("");
+    document.querySelector(".volatility-section").hidden = !(data.volatility_context || []).length;
     $("volatility-card").innerHTML = (data.volatility_context || []).map(function (item) {
       const badge = item.source_status && item.source_status !== "available" ? '<span class="source-state source-missing">' + esc(item.source_status) + '</span>' : '';
       const percentile = finite(item.trailing_1y_percentile) ? 'Higher than ' + item.trailing_1y_percentile.toFixed(1) + '% of observations in the last ' + item.trailing_1y_observations + ' sessions.' : '1-year percentile unavailable.';
@@ -692,21 +688,20 @@
         '<div class="vix-grid"><div><div class="price">' + (finite(item.level) ? item.level.toFixed(2) : "Unavailable") + '</div><div class="market-title-sub">1-year percentile ' + (finite(item.trailing_1y_percentile) ? item.trailing_1y_percentile.toFixed(1) : "Unavailable") + '</div></div>' +
         '<div class="vix-spark">' + spark(item.history, "close", "VIX closes") + '</div><div class="market-returns">' + vixChange("Today", item.daily_change, item.vix_direction_1d, item.source_reason) + vixChange("1 week", item.return5, item.vix_direction_5d, item.source_reason) + vixChange("1 month", item.return21, item.vix_direction_21d, item.source_reason) + '</div></div>' +
         '<p class="vix-context">' + esc(percentile) + '<br>' + esc(summary) + '</p><p class="market-observation">Data ' + esc(item.observation_date || "unavailable") + (item.retrieved_at_hkt_display ? ' · Retrieved ' + esc(item.retrieved_at_hkt_display) : "") + (item.source_reason ? ' · ' + esc(item.source_reason) : "") + '</p></article>';
-    }).join("") || '<article class="market-card volatility-card"><div class="market-ticker">VIX</div><p class="warning">Volatility observation unavailable.</p></article>';
+    }).join("");
     var metrics = {
       rank_current: "Current rank",
-      rank_t_minus_5: "Rank 5 sessions ago",
-      rank_change_5: "5-session rank change",
+      priority: "Research priority",
+      theme_state: "State",
+      return21: "1-month Performance",
+      return63: "3-month Performance",
       theme_score: "Theme Score",
       current_strength_score: "Current",
       medium_strength_score: "Medium",
-      excess21: "1M vs SPY",
-      excess63: "3M vs SPY",
       theme_breadth21_pct: "EMA21 breadth",
       theme_breadth50_pct: "EMA50 breadth",
-      return5: "5-session return",
-      return21: "21-session return",
-      return63: "63-session return",
+      return5: "1-week Performance",
+      price_vs_ema50_pct: "EMA50 context",
       price_close: "Price",
       adv30_usd: "ADV$30",
       name: "Name",
@@ -725,9 +720,9 @@
     }
     function stockControls() {
       const capacity = Number(data.settings?.watchlist_capacity || 20);
-      const defaultCount = Number(data.settings?.watchlist_default_limit || Math.min(15, capacity));
+      const defaultCount = Number(data.settings?.watchlist_default_limit || capacity);
       return '<label>Search <input id="stock-search" placeholder="Ticker or company"></label>' +
-        '<label>Sort by <select id="stock-sort">' + options([["excess21","1M vs ETF"],["excess63","3M vs ETF"],["return5","5-session return"],["return21","21-session return"],["return63","63-session return"],["adv30_usd","ADV$30"],["price_close","Price"]]) +
+        '<label>Sort by <select id="stock-sort">' + options([["return5","1W Performance"],["return21","1M Performance"],["return63","3M Performance"],["adv30_usd","ADV$30"],["turnover_1d_usd","Turnover 1D"],["relative_volume_1d","Relative Volume"],["price_close","Price"]]) +
         '</select></label><button id="stock-direction" type="button"></button>' +
         '<label>EMA <select id="ema-filter"><option value="all">All</option><option value="above21">Above EMA21</option><option value="below21">At/below EMA21</option><option value="above50">Above EMA50</option><option value="below50">At/below EMA50</option></select></label>' +
         '<label>Rows <select id="pool">' + [defaultCount, capacity].filter((value, index, list) => list.indexOf(value) === index).map((value) => '<option value="' + value + '">' + value + ' stocks</option>').join("") + '</select></label>';
@@ -735,7 +730,7 @@
     $("theme-controls").innerHTML = '<label>Search <input id="theme-search" placeholder="Sector, theme or ETF"></label>' +
       '<label>Type <select id="theme-type"><option>All</option><option>Sector</option><option>Theme</option></select></label>' +
       '<label>State <select id="theme-state"><option>All</option><option>Leading</option><option>Improving</option><option>Fading</option><option>Lagging</option></select></label>' +
-      '<label>Sort by <select id="theme-sort">' + options(Object.entries(metrics).filter(([key]) => !["return5","return21","return63","price_close","adv30_usd","name"].includes(key))) + '</select></label>' +
+      '<label>Sort by <select id="theme-sort">' + options(Object.entries(metrics).filter(([key]) => !["price_close","adv30_usd","name"].includes(key))) + '</select></label>' +
       '<button id="theme-direction" type="button"></button>';
     $("stock-controls").innerHTML = stockControls();
     $("theme-search").value = state.themeSearch || "";
@@ -745,7 +740,7 @@
     $("stock-search").value = state.stockSearch || "";
     $("stock-sort").value = state.stockKey;
     $("ema-filter").value = state.stockEmaFilter || "all";
-    $("pool").value = state.stockRowLimit || String(data.settings?.watchlist_default_limit || 15);
+    $("pool").value = state.stockRowLimit || String(data.settings?.watchlist_default_limit || 20);
     $("watchlist-theme-search").value = state.themeSelectorSearch || "";
     function persistView() { replaceHistoryState(); }
     $("theme-sort").onchange = function () { state.themeKey = this.value; render(); persistView(); };
@@ -873,23 +868,13 @@
       }
       return '<span title="Configured watchlist; reviewed ' + esc(row.watchlist_reviewed_date || "date unavailable") + '. Theme breadth does not affect score or state.">' + value.toFixed(1) + '% <small>(' + metric.above_count + '/' + metric.valid_count + ')</small></span>';
     }
-    function themeBreadthChangeCell(row, period) {
-      const value = row["theme_breadth" + period + "_change_5_pp"];
-      const field = row.field_status?.["theme_breadth" + period + "_change_5_pp"];
-      return finite(value) ? '<span class="' + (value > 0 ? "positive" : value < 0 ? "negative" : "") + '">' + (value > 0 ? "+" : "") + value.toFixed(1) + ' pp</span>' : '<span title="' + esc(field?.reason || "Both current and prior breadth must be valid") + '">—</span>';
-    }
-    function rankChangeCell(row) {
-      const value = row.rank_change_5;
-      return finite(value) ? '<span class="' + (value > 0 ? "positive" : value < 0 ? "negative" : "") + '">' + (value > 0 ? "+" : "") + value.toFixed(value % 1 ? 1 : 0) + '</span>' : '<span title="' + esc(row.historical_rank_reason || "Historical ranking unavailable") + '">—</span>';
-    }
     function breadthSummary(row, period) {
       const metric = row.theme_watchlist_breadth?.[String(period)];
-      const change = row["theme_breadth" + period + "_change_5_pp"];
       if (!metric || metric.status !== "valid" || !finite(row["theme_breadth" + period + "_pct"])) {
         const count = metric && finite(metric.valid_count) && finite(metric.eligible_count) ? metric.valid_count + "/" + metric.eligible_count + " valid members" : "counts unavailable";
         return (metric?.reason || "Breadth unavailable") + " (" + count + ")";
       }
-      return row["theme_breadth" + period + "_pct"].toFixed(1) + "%" + (finite(change) ? " · " + (change > 0 ? "+" : "") + change.toFixed(1) + " pp over 5 sessions" : " · 5-session change unavailable");
+      return row["theme_breadth" + period + "_pct"].toFixed(1) + "% (" + metric.above_count + "/" + metric.valid_count + ")";
     }
     function stockDrilldownMessage(row) {
       var status = row.stock_drilldown_status;
@@ -919,23 +904,21 @@
       $("theme-count").textContent = visibleThemes.length + " of " + all.length + " exposures" + (breadthUnavailable ? " · " + breadthUnavailable + " with breadth unavailable" : "");
       head("theme", [
         ["#", "rank_current", null, "rank_current", "Current rank", "col-rank"], ["Type", null, null, null, "Exposure type", "col-type"], ["Name", "name", null, null, "Sector or theme name", "col-name"], ["ETF", null, null, null, "Anchor ETF", "col-etf"], ["State", "theme_state", null, "state", "State", "col-state"],
-        ["Score", "theme_score", null, "theme_score", "Theme Score", "col-score"], ["Now", "current_strength_score", null, "current_strength_score", "Current strength", "col-score"], ["Med", "medium_strength_score", null, "medium_strength_score", "Medium strength", "col-score"],
-        ["1M", "return21", null, null, "21-session return", "col-return"], ["1M−SPY", "excess21", null, "excess21", "21-session excess return vs SPY", "col-excess"], ["3M", "return63", null, null, "63-session return", "col-return"], ["3M−SPY", "excess63", null, "excess63", "63-session excess return vs SPY", "col-excess"],
-        ["% > EMA21", "theme_breadth21_pct", null, "theme_breadth21_pct", "Theme-watchlist members above EMA21. Does not affect Theme Score or state.", "col-breadth"], ["Δ5D", null, null, null, "EMA21 theme-watchlist breadth change over five completed sessions", "col-change col-change-ema21"], ["% > EMA50", "theme_breadth50_pct", null, "theme_breadth50_pct", "Theme-watchlist members above EMA50. Does not affect Theme Score or state.", "col-breadth"], ["Δ5D", null, null, null, "EMA50 theme-watchlist breadth change over five completed sessions", "col-change col-change-ema50"], ["Rk−5D", null, null, null, "Rank five sessions ago", "col-rank-history"], ["Δ", null, null, null, "Rank change over five sessions", "col-rank-change"], ["Facts", null, null, "facts", "Facts and status", "col-facts"],
+        ["Research priority", "priority", null, "priority", "Directional research priority with an absolute EMA50 guard; not an entry signal.", "col-priority"], ["Score", "theme_score", null, "theme_score", "Theme Score", "col-score"], ["Current", "current_strength_score", null, "current_strength_score", "1-month Performance percentile", "col-score"], ["Medium", "medium_strength_score", null, "medium_strength_score", "3-month Performance percentile", "col-score"],
+        ["1W", "return5", null, null, "TradingView 1-week Performance; context only", "col-return"], ["1M", "return21", null, null, "TradingView 1-month Performance", "col-return"], ["3M", "return63", null, null, "TradingView 3-month Performance", "col-return"], ["EMA50", null, null, null, "Anchor price relative to EMA50", "col-ema"],
+        ["% > EMA21", "theme_breadth21_pct", null, "theme_breadth21_pct", "Configured theme members above EMA21. Does not affect Theme Score or state.", "col-breadth"], ["% > EMA50", "theme_breadth50_pct", null, "theme_breadth50_pct", "Configured theme members above EMA50. Does not affect Theme Score or state.", "col-breadth"], ["Facts", null, null, "facts", "Facts and status", "col-facts"],
       ]);
       $("theme-body").innerHTML = visibleThemes.map(function (row) {
         const type = row.level === "Sector" ? "Sector" : "Theme";
         const details = [
-          "ETF 5/21/63-session returns: " + pct(valueAt(row, "return5")) + " / " + pct(valueAt(row, "return21")) + " / " + pct(valueAt(row, "return63")),
+          "ETF TradingView 1W/1M/3M Performance: " + pct(valueAt(row, "return5")) + " / " + pct(valueAt(row, "return21")) + " / " + pct(valueAt(row, "return63")),
           "ETF close vs EMA21/50: " + ema(row, 21) + " / " + ema(row, 50),
           "Theme watchlist reviewed: " + (row.watchlist_reviewed_date || "not configured"),
-          "Current rank " + (row.rank_current ?? row.global_rank) + "; rank five sessions ago " + (row.rank_t_minus_5 ?? "unavailable") + "; rank change " + (finite(row.rank_change_5) ? row.rank_change_5 : row.historical_rank_reason || "unavailable"),
-          "Historical rank peers: " + (row.historical_rank_peer_count ?? 0) + "; session " + (row.historical_rank_session || "unavailable"),
+          "Current rank " + (row.rank_current ?? row.global_rank),
           "EMA21 theme breadth: " + (row.theme_watchlist_breadth?.["21"]?.reason || (row.theme_breadth21_pct ?? "unavailable")),
           "EMA50 theme breadth: " + (row.theme_watchlist_breadth?.["50"]?.reason || (row.theme_breadth50_pct ?? "unavailable")),
           "Theme watchlist: " + (["complete", "reviewed_short", "reviewed_etf_only", "configured"].includes(row.watchlist_status) ? row.configured_watchlist_count + " reviewed members · " + row.watchlist_status : "not configured"),
           "Stock drilldown: " + (row.stock_drilldown_status || "unavailable") + " · " + (row.watchlist_member_count || 0) + " configured companies",
-          "EMA21 breadth five-session change: " + (finite(row.theme_breadth21_change_5_pp) ? row.theme_breadth21_change_5_pp + " pp" : row.field_status?.theme_breadth21_change_5_pp?.reason || "unavailable"),
         ].join("<br>");
         return '<tr data-theme="' + esc(row.id) + '" class="' + (row.id === state.theme ? "active" : "") + '">' +
           td("col-rank", row.display_rank ?? "—") +
@@ -943,21 +926,18 @@
           td("col-name", '<button class="theme-select" title="' + esc(row.name) + '" aria-label="Open watchlist for ' + esc(row.name) + '">' + esc(row.name) + '</button>') +
           td("col-etf", row.chart_url ? '<a href="' + esc(row.chart_url) + '" target="_blank" rel="noopener noreferrer">' + esc(row.anchor) + '</a>' : esc(row.anchor)) +
           td("col-state", stateBadge(row.theme_state)) +
+          td("col-priority", '<span title="'+esc(row.research_priority?.reason || "Required inputs unavailable")+'">'+esc(row.research_priority?.label || "No directional priority")+'</span>') +
           td("col-score", score(row, "theme_score")) +
           td("col-score", score(row, "current_strength_score")) +
           td("col-score", score(row, "medium_strength_score")) +
+          td("col-return", pct(valueAt(row, "return5"))) +
           td("col-return", pct(valueAt(row, "return21"))) +
-          td("col-excess", pct(valueAt(row, "excess21"), true)) +
           td("col-return", pct(valueAt(row, "return63"))) +
-          td("col-excess", pct(valueAt(row, "excess63"), true)) +
+          td("col-ema", ema(row, 50)) +
           td("col-breadth", themeBreadthCell(row, 21)) +
-          td("col-change col-change-ema21", themeBreadthChangeCell(row, 21)) +
           td("col-breadth", themeBreadthCell(row, 50)) +
-          td("col-change col-change-ema50", themeBreadthChangeCell(row, 50)) +
-          td("col-rank-history", row.rank_t_minus_5 ?? "—", ' title="' + esc(row.historical_rank_reason || "Recomputed using current eligible ETF peers") + '"') +
-          td("col-rank-change", rankChangeCell(row)) +
           td("col-facts", '<details><summary>Facts &amp; status</summary><div class="stock-details">' + details + '</div></details>') + '</tr>';
-      }).join("") || '<tr><td colspan="19">No eligible ETF exposures are available in this snapshot.</td></tr>';
+      }).join("") || '<tr><td colspan="16">No eligible ETF exposures are available in this snapshot.</td></tr>';
       $("theme-body").querySelectorAll("tr[data-theme]").forEach(function (tr) {
         tr.addEventListener("click", function (event) {
           if (!event.target.closest("a, details, summary")) select(tr.dataset.theme);
@@ -986,13 +966,11 @@
       $("active-name").textContent = selected.name
         ? selected.name + (selected.anchor ? " / " + selected.anchor : "")
         : "Watchlist";
-      const priorRank = finite(selected.rank_t_minus_5) ? selected.rank_t_minus_5.toFixed(selected.rank_t_minus_5 % 1 ? 1 : 0) : "unavailable";
-      const rankMove = finite(selected.rank_change_5) ? '<span class="' + (selected.rank_change_5 > 0 ? "positive" : selected.rank_change_5 < 0 ? "negative" : "") + '">' + (selected.rank_change_5 > 0 ? "+" : "") + selected.rank_change_5.toFixed(selected.rank_change_5 % 1 ? 1 : 0) + '</span>' : '<span title="' + esc(selected.historical_rank_reason || "Historical ranking unavailable") + '">unavailable</span>';
       $("active-summary").innerHTML = '<div class="summary-scores">' + stateBadge(selected.theme_state) + ' ' + score(selected, "theme_score") + ' ' + score(selected, "current_strength_score") + ' ' + score(selected, "medium_strength_score") + '</div>' +
-        '<div class="summary-returns"><span>1M return ' + pct(valueAt(selected, "return21")) + '</span><span>1M vs SPY ' + pct(valueAt(selected, "excess21"), true) + '</span><span>3M return ' + pct(valueAt(selected, "return63")) + '</span><span>3M vs SPY ' + pct(valueAt(selected, "excess63"), true) + '</span></div>' +
-        '<div class="summary-rank">Rank ' + (selected.rank_current ?? selected.global_rank ?? "unavailable") + ' · 5 sessions ago ' + priorRank + ' · change ' + rankMove + ' · ' + (selected.historical_rank_peer_count ?? 0) + ' peers</div>' +
+        '<div class="summary-returns"><span>1W Performance ' + pct(valueAt(selected, "return5")) + '</span><span>1M Performance ' + pct(valueAt(selected, "return21")) + '</span><span>3M Performance ' + pct(valueAt(selected, "return63")) + '</span></div>' +
+        '<div class="summary-rank">Rank ' + (selected.rank_current ?? selected.global_rank ?? "unavailable") + ' of ' + data.themes.length + '</div>' +
         '<div class="summary-breadth">Theme breadth — EMA21 ' + breadthSummary(selected, 21) + ' · EMA50 ' + breadthSummary(selected, 50) + '</div>' +
-        '<div class="rs-spark-row"><span>63-session ETF / SPY</span>' + spark(selected.relative_strength_series, "ratio", "ETF to SPY adjusted-close ratio") + '</div>';
+        '<div class="summary-returns"><span>Anchor EMA21 ' + ema(selected, 21) + '</span><span>Anchor EMA50 ' + ema(selected, 50) + '</span></div>';
       var pool = $("pool").value;
       var base = limitSelection(selected.selected || [], Number(pool));
       base = base.map((row) => Object.assign({}, row, { theme_id: selected.id, theme_name: selected.name, generated_at: data.dashboard_generated_at || data.generated_at }));
@@ -1012,7 +990,7 @@
         const capacity = Number(data.settings?.watchlist_capacity || 20);
         $("coverage").textContent = base.length + " of " + capacity + " stocks";
       }
-      head("stock", [["#", null, null, null, "Visible rank", "col-rank"],["Ticker / company", null, null, null, "Ticker and company name", "col-company"],["Price","price_close",null,null,"Latest close","col-price"],["5D %","return5",null,null,"Five-session return","col-return"],["1M %","return21",null,null,"21-session return","col-return"],["3M %","return63",null,null,"63-session return","col-return"],["1M−ETF","excess21",null,null,"21-session excess return vs anchor ETF, percentage points","col-excess"],["3M−ETF","excess63",null,null,"63-session excess return vs anchor ETF, percentage points","col-excess"],["EMA21",null,null,null,"Close relative to EMA21","col-ema"],["EMA50",null,null,null,"Close relative to EMA50","col-ema"],["Core / Related",null,null,null,"Membership relationship","col-membership"],["ADV$30","adv30_usd",null,null,"30-session average daily dollar volume","col-adv"],["Chart",null,null,null,"Open verified ticker chart","col-chart"]]);
+      head("stock", [["#", null, null, null, "Configured position", "col-rank"],["Ticker / company", null, null, null, "Ticker, company and exchange", "col-company"],["Price","price_close",null,null,"TradingView Price","col-price"],["1D %","daily_change",null,null,"TradingView one-day price change","col-return"],["1W %","return5",null,null,"TradingView 1-week Performance","col-return"],["1M %","return21",null,null,"TradingView 1-month Performance","col-return"],["3M %","return63",null,null,"TradingView 3-month Performance","col-return"],["EMA21",null,null,null,"Price relative to EMA21","col-ema"],["EMA50",null,null,null,"Price relative to EMA50","col-ema"],["ATR%14","atr14_pct",null,null,"TradingView daily ATR percent over 14 periods","col-return"],["ADV$30","adv30_usd",null,null,"Price times average volume over 30 days","col-adv"],["Turnover 1D","turnover_1d_usd",null,null,"Price times volume for this day","col-adv"],["Rel Vol","relative_volume_1d",null,null,"TradingView relative volume for this day","col-return"],["Core / Related",null,null,null,"Stored membership relationship and reason","col-membership"],["Sector / Industry",null,null,null,"TradingView business context","col-company"],["Earnings",null,null,null,"Upcoming earnings date when supplied","col-return"]]);
       $("stock-body").innerHTML = visible.map(function (row) {
         const exchange = String(row.exchange || "").toUpperCase();
         const prefix = exchange.startsWith("NASDAQ") ? "NASDAQ" : exchange.startsWith("NYSE") ? "NYSE" : null;
@@ -1020,19 +998,22 @@
         const rationale = row.membership_rationale || row.evidence_note || "Business relevance rationale recorded in the membership source.";
         return '<tr>' +
           td("col-rank", row.display_rank || "—") +
-          td("col-company", '<b>' + esc(row.ticker) + '</b><span class="company" title="' + esc(row.company) + '" aria-label="' + esc(row.company) + '">' + esc(row.company) + '</span><details><summary aria-label="Business rationale">Info</summary><div class="stock-details">' + esc(rationale) + '<br>' + esc(row.membership_source || row.evidence?.url || "") + '</div></details>') +
+          td("col-company", '<b>' + esc(row.ticker) + '</b><span class="company" title="' + esc(row.company) + '" aria-label="' + esc(row.company) + '">' + esc(row.company) + '</span><small>' + esc(row.exchange || "Exchange unavailable") + '</small><details><summary aria-label="Business rationale">Info</summary><div class="stock-details">' + esc(rationale) + '<br>' + esc(row.membership_source || "") + '</div></details>') +
           td("col-price", money(row.price_close)) +
+          td("col-return", pct(row.daily_change)) +
           td("col-return", pct(valueAt(row,"return5"))) +
           td("col-return", pct(valueAt(row,"return21"))) +
           td("col-return", pct(valueAt(row,"return63"))) +
-          td("col-excess", pct(valueAt(row,"excess21"), true)) +
-          td("col-excess", pct(valueAt(row,"excess63"), true)) +
           td("col-ema", ema(row,21)) +
           td("col-ema", ema(row,50)) +
-          td("col-membership", esc(row.membership_tag || "—")) +
+          td("col-return", finite(row.atr14_pct) ? row.atr14_pct.toFixed(2) + "%" : "—") +
           td("col-adv", money(row.adv30_usd,true)) +
-          td("col-chart", url ? '<a target="_blank" rel="noopener noreferrer" href="' + esc(url) + '">Open</a>' : missing) + '</tr>';
-      }).join("") || (hasCuratedList ? '<tr><td colspan="13">No stocks match these filters.</td></tr>' : "");
+          td("col-adv", money(row.turnover_1d_usd,true)) +
+          td("col-return", finite(row.relative_volume_1d) ? row.relative_volume_1d.toFixed(2) : "—") +
+          td("col-membership", '<span title="' + esc(rationale) + '">' + esc(row.membership_tag || "—") + '</span>') +
+          td("col-company", esc([row.sector, row.industry].filter(Boolean).join(" / ") || "—")) +
+          td("col-return", esc(row.earnings_date || "—")) + '</tr>';
+      }).join("") || (hasCuratedList ? '<tr><td colspan="16">No stocks match these filters.</td></tr>' : "");
     }
     function download(name, text, type) {
       var url = URL.createObjectURL(new Blob([text], { type: type })),

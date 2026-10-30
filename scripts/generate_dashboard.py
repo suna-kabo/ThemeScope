@@ -14,6 +14,7 @@ import re
 import sys
 import zipfile
 import tempfile
+import time
 import shutil
 import os
 from datetime import datetime, timezone
@@ -408,6 +409,7 @@ def _theme_csv_row(record: dict[str, Any]) -> dict[str, Any]:
         'name': record.get('name'),
         'anchor_etf': record.get('anchor'),
         'state': record.get('theme_state'),
+        'research_priority': record.get('research_priority', {}).get('label'),
         'theme_score': record.get('theme_score'),
         'current_strength': record.get('current_strength_score'),
         'medium_strength': record.get('medium_strength_score'),
@@ -435,7 +437,7 @@ def _theme_csv_row(record: dict[str, Any]) -> dict[str, Any]:
 
 THEME_EXPORT_COLUMNS = [
     'rank_current', 'rank_t_minus_5', 'rank_change_5', 'type', 'theme_id', 'name', 'anchor_etf',
-    'state', 'theme_score', 'current_strength', 'medium_strength', 'return21_pct', 'excess21_pp',
+    'state', 'research_priority', 'theme_score', 'current_strength', 'medium_strength', 'return21_pct', 'excess21_pp',
     'return63_pct', 'excess63_pp', 'theme_breadth21_pct', 'theme_breadth21_above', 'theme_breadth21_valid',
     'theme_breadth21_change_5_pp', 'theme_breadth50_pct', 'theme_breadth50_above', 'theme_breadth50_valid',
     'theme_breadth50_change_5_pp', 'configured_watchlist_count', 'session_date', 'generated_at',
@@ -707,7 +709,7 @@ def _tradingview_text(rows: list[dict[str, Any]]) -> tuple[str, dict[str, int]]:
             continue
         seen.add(symbol)
         symbols.append(symbol)
-    return ("\n".join(symbols) + ("\n" if symbols else ""), {"unique": len(symbols), "omitted": omitted, "duplicates": duplicates})
+    return (",".join(symbols) + ("\n" if symbols else ""), {"unique": len(symbols), "omitted": omitted, "duplicates": duplicates})
 
 
 def _stock_diagnostics(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
@@ -981,10 +983,9 @@ RUN_OUTPUT_FILES = (
     "watchlist_prices.csv.gz",
     "Inter-LICENSE.txt",
     "source_matrix.csv",
-    "watchlist_15.csv",
     "watchlist_20.csv",
-    "tradingview_15.txt",
     "tradingview_20.txt",
+    "individual_theme_exports.json", "individual_theme_txt.zip",
     "latest_run.md",
     "watchlist_migration.md",
     "theme_watchlists.json",
@@ -1013,6 +1014,10 @@ def _generate(snapshot, raw, output_dir):
     if not release_audit.get('passed'):
         failures = '; '.join(issue['message'] for issue in release_audit.get('issues', [])[:8])
         raise ValueError(f"Release audit failed; no bundle generated. {failures}")
+    if snapshot.get("methodology_version") == "approved-1":
+        from scripts.audit_approved import audit as approved_audit
+        approved_result = approved_audit(ROOT)
+        release_audit = {**release_audit, "approved_release": approved_result, "passed": approved_result["passed"] and snapshot.get("data_complete", False), "run_kind": snapshot.get("run_kind")}
     matrix = make_source_matrix(snapshot, raw, ROOT)
     snapshot["source_matrix"] = matrix
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -1123,17 +1128,25 @@ def _generate(snapshot, raw, output_dir):
     _write_csv(output_dir / 'membership_review.csv', membership_rows, membership_columns)
     theme_summary_rows = _theme_watchlist_summary(snapshot)
     _write_csv(output_dir / 'theme_watchlist_summary.csv', theme_summary_rows, list(theme_summary_rows[0]) if theme_summary_rows else ['theme_id','name','anchor','status','member_count'])
-    rows15 = _all_selected(snapshot, 15)
+    rows15 = _all_selected(snapshot, 20)
     rows20 = _all_selected(snapshot, 20)
-    _write_csv(output_dir / "watchlist_15.csv", rows15, EXPORT_COLUMNS)
+    individual = {}
+    for theme in snapshot.get("themes", []):
+        content, diagnostics = _tradingview_text(_all_selected({"themes": [theme]}, 20))
+        individual[theme["id"]] = {"symbols": content, "diagnostics": diagnostics}
+    _write_json(output_dir / "individual_theme_exports.json", individual)
+    with zipfile.ZipFile(output_dir / "individual_theme_txt.zip", "w", compression=zipfile.ZIP_DEFLATED) as theme_zip:
+        for theme_id, item in individual.items():
+            theme_zip.writestr(theme_id + ".txt", item["symbols"])
     _write_csv(output_dir / "watchlist_20.csv", rows20, EXPORT_COLUMNS)
     text15, stats15 = _tradingview_text(rows15)
     text20, stats20 = _tradingview_text(rows20)
-    (output_dir / "tradingview_15.txt").write_text(text15, encoding="utf-8")
     (output_dir / "tradingview_20.txt").write_text(text20, encoding="utf-8")
     report = _v7_run_report(snapshot, raw) if raw.get('v7_mode') else _run_report(snapshot, raw, matrix, stats15, stats20)
+    if snapshot.get("run_kind") == "offline_historical_diagnostic":
+        report = "# Historical offline diagnostic\n\nNot a live refresh or a data-complete approved release. Retained historical prices were recalculated under the approved rules. Target-20 membership review and source access/rights remain separate gates.\n\nSession: " + str(snapshot.get("session_date")) + "\n"
     (output_dir / "latest_run.md").write_text(report, encoding="utf-8")
-    migration = _watchlist_migration_report(snapshot, raw) if raw.get('v7_mode') else '# ThemeScope v7 watchlist migration\n\nThe current output was generated before the v7 migration.\n'
+    migration = report if snapshot.get('run_kind') == 'offline_historical_diagnostic' else _watchlist_migration_report(snapshot, raw) if raw.get('v7_mode') else '# ThemeScope v7 watchlist migration\n\nThe current output was generated before the v7 migration.\n'
     (output_dir / 'watchlist_migration.md').write_text(migration, encoding='utf-8')
 
     template = (ROOT / "static/dashboard_template.html").read_text(encoding="utf-8")
@@ -1145,21 +1158,206 @@ def _generate(snapshot, raw, output_dir):
     html = template.replace("{{STYLE}}", style.replace("{{FONT_DATA}}", font_data)).replace("{{SCRIPT}}", script).replace("{{SNAPSHOT_JSON}}", payload)
     if "{{STYLE}}" in html or "{{SCRIPT}}" in html or "{{SNAPSHOT_JSON}}" in html or "{{FONT_DATA}}" in html:
         raise RuntimeError("Dashboard template placeholder replacement failed")
+    if snapshot.get("run_kind") == "offline_historical_diagnostic":
+        html = html.replace('href="run_bundle.zip"', 'href="diagnostic_bundle.zip"').replace("Download complete run ZIP", "Download historical diagnostic ZIP")
     html_size = len(html.encode('utf-8'))
     max_dashboard_bytes = int(settings.get('maximum_dashboard_bytes', 20_000_000))
     if html_size > max_dashboard_bytes:
         raise ValueError(f"dashboard.html is {html_size:,} bytes; configured limit is {max_dashboard_bytes:,}. Remove UI-irrelevant data or raise settings.maximum_dashboard_bytes deliberately.")
     (output_dir / "dashboard.html").write_text(html, encoding="utf-8")
     bundle_path = _write_run_bundle(output_dir, int(settings.get('maximum_run_bundle_bytes', 95_000_000)))
+    if snapshot.get("run_kind") == "offline_historical_diagnostic":
+        renamed = output_dir / "diagnostic_bundle.zip"
+        os.replace(bundle_path, renamed)
+        bundle_path = renamed
 
     return bundle_path
 
 
+def load_approved_config():
+    path = ROOT / "config/approved_release.json"
+    return json.loads(path.read_text()) if path.exists() else {}
+
+
+def _manual_symbol(row: dict[str, Any]) -> str | None:
+    ticker = str(row.get("ticker") or row.get("symbol") or "").strip().upper()
+    exchange = str(row.get("exchange") or "").strip().upper()
+    if not ticker:
+        return None
+    prefix = "NASDAQ" if exchange.startswith("NASDAQ") else "NYSE" if exchange.startswith("NYSE") else exchange
+    return f"{prefix}:{ticker}" if prefix else ticker
+
+
+def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_dir: Path) -> None:
+    """Write the compact local-only manual CSV release without live-source artifacts."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+    audit = snapshot["manual_csv_audit"]
+    _write_json(output_dir / "latest_snapshot.json", snapshot)
+    _write_json(output_dir / "run_audit.json", audit)
+    _write_json(output_dir / "canonical_dashboard_data.json", {
+        "session_date": snapshot["session_date"],
+        "market_classification": snapshot["market_classification"],
+        "context": snapshot["context"],
+        "themes": snapshot["themes"],
+    })
+    market_rows = []
+    for row in snapshot["context"]:
+        metric21, metric50 = row["index_breadth"]["21"], row["index_breadth"]["50"]
+        market_rows.append({
+            "ticker": row["ticker"], "price": row["price_close"], "ema21": row["ema21"], "ema50": row["ema50"],
+            "price_state": row["price_state"], "breadth21_pct": metric21["value"], "breadth50_pct": metric50["value"],
+            "breadth_state": row["breadth_state"], "valid_rows": metric21["valid_count"], "denominator": metric21["eligible_count"],
+            "session_date": snapshot["session_date"],
+        })
+    _write_csv(output_dir / "market.csv", market_rows, list(market_rows[0]))
+    theme_rows = []
+    stock_rows = []
+    for row in sorted(snapshot["themes"], key=lambda item: (item.get("global_rank") is None, item.get("global_rank") or 10**9)):
+        theme_rows.append({
+            "rank": row.get("global_rank"), "type": row.get("level"), "theme_id": row["id"], "name": row["name"], "anchor": row["anchor"],
+            "state": row.get("theme_state"), "research_priority": row.get("research_priority", {}).get("label"), "theme_score": row.get("theme_score"),
+            "current": row.get("current_strength_score"), "medium": row.get("medium_strength_score"),
+            "performance_1w_pct": row.get("returns", {}).get("5", {}).get("value") * 100 if row.get("returns", {}).get("5", {}).get("value") is not None else None,
+            "performance_1m_pct": row.get("returns", {}).get("21", {}).get("value") * 100 if row.get("returns", {}).get("21", {}).get("value") is not None else None,
+            "performance_3m_pct": row.get("returns", {}).get("63", {}).get("value") * 100 if row.get("returns", {}).get("63", {}).get("value") is not None else None,
+            "price": row.get("price_close"), "ema21": row.get("ema21"), "ema50": row.get("ema50"),
+            "theme_breadth21_pct": row.get("theme_breadth21_pct"), "theme_breadth50_pct": row.get("theme_breadth50_pct"),
+            "configured_stock_count": row.get("configured_watchlist_count"), "session_date": snapshot["session_date"],
+        })
+        for stock in row.get("selected", []):
+            stock_rows.append({
+                "theme_id": row["id"], "theme": row["name"], "anchor": row["anchor"], "ticker": stock["ticker"], "company": stock.get("company"),
+                "exchange": stock.get("exchange"), "relationship": stock.get("membership_tag"), "membership_reason": stock.get("membership_rationale"),
+                "metric_status": stock.get("metric_status"), "price": stock.get("price_close"), "change_1d_pct": stock.get("daily_change") * 100 if stock.get("daily_change") is not None else None,
+                "performance_1w_pct": stock.get("returns", {}).get("5", {}).get("value") * 100 if stock.get("returns", {}).get("5", {}).get("value") is not None else None,
+                "performance_1m_pct": stock.get("returns", {}).get("21", {}).get("value") * 100 if stock.get("returns", {}).get("21", {}).get("value") is not None else None,
+                "performance_3m_pct": stock.get("returns", {}).get("63", {}).get("value") * 100 if stock.get("returns", {}).get("63", {}).get("value") is not None else None,
+                "ema21": stock.get("ema21"), "ema50": stock.get("ema50"), "atr14_pct": stock.get("atr14_pct"), "adv30_usd": stock.get("adv30_usd"),
+                "turnover_1d_usd": stock.get("turnover_1d_usd"), "relative_volume_1d": stock.get("relative_volume_1d"), "sector": stock.get("sector"),
+                "industry": stock.get("industry"), "upcoming_earnings_date": stock.get("earnings_date"), "session_date": snapshot["session_date"],
+            })
+    _write_csv(output_dir / "themes.csv", theme_rows, list(theme_rows[0]))
+    _write_csv(output_dir / "theme_stocks.csv", stock_rows, list(stock_rows[0]) if stock_rows else ["theme_id", "ticker", "metric_status"])
+
+    etf_lines = []
+    for row in snapshot["themes"]:
+        symbol = _manual_symbol({"ticker": row["anchor"], "exchange": row.get("exchange")})
+        if symbol:
+            etf_lines.append(symbol)
+    for row in snapshot["context"]:
+        symbol = _manual_symbol(row)
+        if symbol:
+            etf_lines.append(symbol)
+    (output_dir / "tradingview_sector_theme_etfs.txt").write_text(",".join(dict.fromkeys(etf_lines)) + "\n", encoding="utf-8")
+    grouped_lines = []
+    individual: dict[str, list[str]] = {}
+    for theme in snapshot["themes"]:
+        symbols = [symbol for stock in theme.get("selected", []) if (symbol := _manual_symbol(stock))]
+        individual[theme["id"]] = symbols
+        grouped_lines.extend(["###" + theme["name"], *symbols])
+    (output_dir / "tradingview_all_theme_stocks.txt").write_text(",".join(grouped_lines) + "\n", encoding="utf-8")
+    with zipfile.ZipFile(output_dir / "individual_theme_watchlists.zip", "w", compression=zipfile.ZIP_DEFLATED) as bundle:
+        for theme_id, symbols in individual.items():
+            bundle.writestr(theme_id + ".txt", ",".join(symbols) + ("\n" if symbols else ""))
+    _write_json(output_dir / "individual_theme_watchlists.json", individual)
+
+    template = (ROOT / "static/dashboard_template.html").read_text(encoding="utf-8")
+    style = (ROOT / "static/dashboard.css").read_text(encoding="utf-8")
+    script = (ROOT / "static/dashboard.js").read_text(encoding="utf-8")
+    payload = json.dumps(_dashboard_snapshot(snapshot), ensure_ascii=False, separators=(",", ":"), allow_nan=False).replace("</", "<\\/").replace("\u2028", "\\u2028").replace("\u2029", "\\u2029")
+    font_data = base64.b64encode((ROOT / "static/InterVariable.woff2").read_bytes()).decode("ascii")
+    html = template.replace("{{STYLE}}", style.replace("{{FONT_DATA}}", font_data)).replace("{{SCRIPT}}", script).replace("{{SNAPSHOT_JSON}}", payload)
+    if re.search(r"<(?:script|link|img)[^>]+(?:src|href)=[\"']https?://", html, re.I):
+        raise ValueError("Generated dashboard contains an automatic external resource request")
+    if "connect-src 'none'" not in html:
+        raise ValueError("Generated dashboard does not block automatic network connections")
+    (output_dir / "dashboard.html").write_text(html, encoding="utf-8")
+    shutil.copyfile(ROOT / "static/Inter-LICENSE.txt", output_dir / "Inter-LICENSE.txt")
+    _write_json(output_dir / "refresh_status.json", {"status": "success", "source": "tradingview-csv", "data_date": snapshot["session_date"], "data_complete": True})
+    audit["export_file_counts"] = {"theme_watchlists": len(individual), "canonical_json": 1, "csv": 3, "tradingview_text": 2, "watchlist_zip": 1}
+    audit["browser_validation"] = {"inline_assets": True, "csp_connect_none": True, "automatic_external_requests": 0}
+    audit["publication_pass"] = True
+    _write_json(output_dir / "run_audit.json", audit)
+
+
+def _run_manual_csv(args: argparse.Namespace, output: Path, launched_at: float) -> int:
+    from src.themescope.manual_csv import build_release
+    paths = {role: getattr(args, role + "_csv") for role in ("stock", "etf", "spy", "qqq", "iwm")}
+    attempted = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    try:
+        build_started = time.perf_counter()
+        snapshot, raw = build_release(ROOT, paths, args.as_of)
+        build_elapsed = time.perf_counter() - build_started
+        output.parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix=".themescope-manual-stage-", dir=output.parent) as temporary:
+            stage = Path(temporary) / "run"
+            _manual_csv_outputs(snapshot, raw, stage)
+            elapsed = time.perf_counter() - launched_at
+            snapshot["manual_csv_audit"]["runtime_seconds"] = elapsed
+            snapshot["manual_csv_audit"]["runtime_stages"] = {
+                "input_validation_and_calculation": build_elapsed,
+                "output_generation_and_validation": max(0.0, elapsed - build_elapsed),
+                "total_from_command_start_through_validation": elapsed,
+            }
+            _write_json(stage / "latest_snapshot.json", snapshot)
+            _write_json(stage / "run_audit.json", snapshot["manual_csv_audit"])
+            # Re-embed the final audit/runtime values before publication.
+            template = (ROOT / "static/dashboard_template.html").read_text(encoding="utf-8")
+            style = (ROOT / "static/dashboard.css").read_text(encoding="utf-8")
+            script = (ROOT / "static/dashboard.js").read_text(encoding="utf-8")
+            payload = json.dumps(_dashboard_snapshot(snapshot), ensure_ascii=False, separators=(",", ":"), allow_nan=False).replace("</", "<\\/").replace("\u2028", "\\u2028").replace("\u2029", "\\u2029")
+            font_data = base64.b64encode((ROOT / "static/InterVariable.woff2").read_bytes()).decode("ascii")
+            (stage / "dashboard.html").write_text(template.replace("{{STYLE}}", style.replace("{{FONT_DATA}}", font_data)).replace("{{SCRIPT}}", script).replace("{{SNAPSHOT_JSON}}", payload), encoding="utf-8")
+            bundle_files = [path for path in stage.iterdir() if path.name != "run_bundle.zip"]
+            with zipfile.ZipFile(stage / "run_bundle.zip", "w", compression=zipfile.ZIP_DEFLATED) as bundle:
+                for path in bundle_files:
+                    bundle.write(path, arcname=path.name)
+            output.mkdir(parents=True, exist_ok=True)
+            backup = Path(temporary) / "previous"
+            backup.mkdir()
+            changed = []
+            try:
+                for source in sorted(stage.iterdir(), key=lambda path: path.name == "dashboard.html"):
+                    target = output / source.name
+                    if target.exists():
+                        shutil.copy2(target, backup / source.name)
+                    os.replace(source, target)
+                    changed.append(source.name)
+            except BaseException:
+                for name in reversed(changed):
+                    previous = backup / name
+                    if previous.exists():
+                        os.replace(previous, output / name)
+                    else:
+                        (output / name).unlink(missing_ok=True)
+                raise
+        (output / "failed_attempt_audit.json").unlink(missing_ok=True)
+        print(f"SUCCESS: manual CSV session {snapshot['session_date']}; {len(snapshot['themes'])} anchors; {elapsed:.3f}s")
+        print(f"Open {output / 'dashboard.html'}\nAudit: {output / 'run_audit.json'}\nDownload bundle: {output / 'run_bundle.zip'}")
+        return 0
+    except Exception as exc:
+        output.mkdir(parents=True, exist_ok=True)
+        preserved_date = None
+        if (output / "latest_snapshot.json").is_file() and (output / "dashboard.html").is_file():
+            try:
+                preserved_date = json.loads((output / "latest_snapshot.json").read_text(encoding="utf-8")).get("session_date")
+            except (OSError, ValueError):
+                preserved_date = None
+        _write_json(output / "failed_attempt_audit.json", {"status": "failed", "source": "tradingview-csv", "attempted_at": attempted, "declared_us_session": args.as_of, "reason": f"{type(exc).__name__}: {exc}", "dashboard_preserved": bool(preserved_date), "preserved_data_date": preserved_date, "runtime_seconds": time.perf_counter() - launched_at})
+        print(f"MANUAL CSV GENERATION FAILED: {exc}\n" + (f"Existing dashboard preserved with session {preserved_date}." if preserved_date else "No successful dashboard exists in this output directory.") + f"\nDetails: {output / 'failed_attempt_audit.json'}", file=sys.stderr)
+        return 1
+
+
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Explicitly refresh the offline ThemeScope dashboard.")
+    launched_at = time.perf_counter()
+    entered_collection = False
+    parser = argparse.ArgumentParser(description="Collect live ThemeScope data after approved-source preflight, or import a dated run offline.")
     parser.add_argument('--output-dir', default='output')
+    parser.add_argument('--source', choices=('live', 'tradingview-csv'), default='live')
     parser.add_argument('--import-run', type=Path, help='Import a dated real run directory or run_bundle.zip; no network requests')
     parser.add_argument('--as-of', help='Resolve the latest verified completed common US session on or before YYYY-MM-DD')
+    for role in ('stock', 'etf', 'spy', 'qqq', 'iwm'):
+        parser.add_argument(f'--{role}-csv', type=Path, help=f'Explicit {role.upper()} CSV input for --source tradingview-csv')
     args = parser.parse_args(argv)
     if args.as_of:
         try:
@@ -1172,6 +1370,39 @@ def main(argv: list[str] | None = None) -> int:
     output = output.resolve()
     if output == ROOT or ROOT.is_relative_to(output):
         parser.error('Output must be a dedicated directory, not the project or its parent')
+    if args.source == 'tradingview-csv':
+        if args.import_run:
+            parser.error('--import-run cannot be combined with --source tradingview-csv')
+        if not args.as_of:
+            parser.error('--as-of is required for --source tradingview-csv')
+        missing_roles = [role for role in ('stock', 'etf', 'spy', 'qqq', 'iwm') if getattr(args, role + '_csv') is None]
+        if missing_roles:
+            parser.error('manual CSV mode requires: ' + ', '.join('--' + role + '-csv' for role in missing_roles))
+        return _run_manual_csv(args, output, launched_at)
+    approved_config = load_approved_config()
+    if approved_config.get("enabled") and args.import_run and (output/"dashboard.html").exists():
+        try:
+            previous = json.loads((output/"latest_snapshot.json").read_text())
+        except (OSError, ValueError):
+            previous = {}
+        if previous.get("run_kind") != "offline_historical_diagnostic":
+            output = output/"approved_diagnostic"
+    if approved_config.get("enabled") and not args.import_run:
+        from src.themescope.approved_data import preflight
+        from scripts.audit_approved import audit as audit_approved
+        gate = preflight(ROOT)
+        configuration_gate = audit_approved(ROOT)
+        gate["issues"].extend(configuration_gate["configuration_issues"])
+        gate["issues"].extend(configuration_gate.get("export_issues", []))
+        gate["passed"] = not gate["issues"]
+        output.mkdir(parents=True, exist_ok=True)
+        _write_json(output / "attempt_preflight.json", gate)
+        if not gate["passed"]:
+            from src.themescope.approved_data import record_attempt
+            record_attempt(ROOT / "cache/approved_attempts.jsonl", kind="live", entered_collection=False, target=args.as_of, data_complete=False, publication_pass=False, elapsed=time.perf_counter()-launched_at, detail=gate["issues"])
+            print("LIVE PREFLIGHT BLOCKED: " + "; ".join(gate["issues"]), file=sys.stderr)
+            return 1
+
     config_audit = audit_release(ROOT)
     if not config_audit.get('passed'):
         messages = '; '.join(issue['message'] for issue in config_audit.get('issues', [])[:8])
@@ -1217,15 +1448,21 @@ def main(argv: list[str] | None = None) -> int:
             raw['collection_request_counts'] = {'price_history': 0, 'universe': 0, 'filings': 0, 'quotes': 0, 'theme_holdings': 0, 'aum_spread': 0}
         else:
             print('Collecting required market, anchor, index and configured-watchlist prices. Please wait.', flush=True)
-            snapshot, raw = build_snapshot(ROOT, args.as_of)
+            if approved_config.get("enabled"):
+                from src.themescope.collect_approved import build_snapshot as collect_approved
+                entered_collection = True
+                snapshot, raw = collect_approved(ROOT, args.as_of)
+            else:
+                snapshot, raw = build_snapshot(ROOT, args.as_of)
         if args.as_of:
             snapshot['requested_asof'] = args.as_of
         registry = json.loads((ROOT / 'config/themes.json').read_text(encoding='utf-8'))
         active_config = json.loads((ROOT / 'config/active_anchors.json').read_text(encoding='utf-8'))
         registry = raw.get('v7_registry') or _restricted_registry(registry, active_config)
         raw['v7_registry'] = registry
-        raw['watchlists'] = raw.get('watchlists') or json.loads((ROOT / 'config/theme_watchlists.json').read_text(encoding='utf-8'))
-        raw['source_configuration'] = json.loads((ROOT / 'config/sources.json').read_text(encoding='utf-8'))
+        raw['watchlists'] = json.loads((ROOT / 'config/theme_watchlists.json').read_text(encoding='utf-8')) if approved_config.get('enabled') else raw.get('watchlists') or json.loads((ROOT / 'config/theme_watchlists.json').read_text(encoding='utf-8'))
+        if not approved_config.get('enabled'):
+            raw['source_configuration'] = json.loads((ROOT / 'config/sources.json').read_text(encoding='utf-8'))
         raw['v7_mode'] = True
         _rehydrate_index_universes(raw)
         required_symbols = set(active_config.get('anchors', {}).values())
@@ -1238,6 +1475,7 @@ def main(argv: list[str] | None = None) -> int:
         raw.setdefault('v5', {})['chart_errors'] = {key: value for key, value in raw.get('v5', {}).get('chart_errors', {}).items() if key in required_symbols}
         raw['v5']['iwm_breadth_errors'] = {key: value for key, value in raw.get('v5', {}).get('iwm_breadth_errors', {}).items() if key in required_symbols}
         snapshot['settings'] = dict(registry.get('settings', snapshot.get('settings', {})))
+        snapshot['settings']['configured_active_anchor_count'] = len(active_config.get('anchors', {}))
         _ensure_v61_market_records(snapshot, raw, registry)
         snapshot['score_methodology'] = registry.get('score_methodology', {})
         snapshot['ui_configuration'] = registry.get('ui', {})
@@ -1254,19 +1492,26 @@ def main(argv: list[str] | None = None) -> int:
             symbol in raw.get("charts", {}) for symbol in ("SPY", "QQQ")
         ):
             apply_v5(snapshot, raw)
-            _retain_iwm_breadth(snapshot, raw, ROOT)
-            if args.import_run:
+            if not approved_config.get("enabled"):
+                _retain_iwm_breadth(snapshot, raw, ROOT)
+            if args.import_run and not approved_config.get("enabled"):
                 _retain_imported_index_metrics(snapshot, imported_context)
         if raw.get('v7_mode'):
             snapshot['sources'] = {
-                'price_provider': 'Yahoo Finance chart API with persistent incremental cache',
+                'price_provider': 'Alpaca SIP (split EMA / split+dividend returns)' if approved_config.get('enabled') and not args.import_run else 'Retained historical source',
                 'index_universes': {key: value.get('url') for key, value in raw.get('v5', {}).get('index_universes', {}).items()},
                 'partial': bool(raw.get('errors', {}).get('charts') or raw.get('v5', {}).get('chart_errors') or raw.get('v5', {}).get('iwm_breadth_errors')),
             }
         apply_v6(snapshot, raw, registry)
         apply_historical_ranks(snapshot, raw)
         apply_watchlists(snapshot, raw, raw['watchlists'])
-        snapshot['methodology_version'] = '7.1'
+        if approved_config.get('enabled'):
+            from src.themescope.approved_rules import apply as apply_approved
+            apply_approved(snapshot, raw)
+            snapshot['run_kind'] = 'offline_historical_diagnostic' if args.import_run else 'live'
+            snapshot['data_complete'] = bool(snapshot.get('data_complete')) and not args.import_run
+            snapshot['publication_scope'] = 'local_only'
+        snapshot['methodology_version'] = 'approved-1' if approved_config.get('enabled') else '7.1'
         snapshot['schema_version'] = '7.1'
         from src.themescope.cache import manifest_for_inputs
         raw['cache_manifest'] = manifest_for_inputs(raw, snapshot.get('collection_completed_at') or attempted)
@@ -1277,11 +1522,17 @@ def main(argv: list[str] | None = None) -> int:
         snapshot['dashboard_generated_at_hkt_display'] = generated_hkt.strftime('%d %b %Y, %I:%M %p HKT').lstrip('0')
         snapshot['dashboard_display_timezone'] = 'Asia/Hong_Kong'
         validate(snapshot, raw)
+        if approved_config.get('enabled') and not args.import_run:
+            configured_anchors = json.loads((ROOT/'config/active_anchors.json').read_text())['anchors']
+            if {t['id']:t['anchor'] for t in snapshot['themes']} != configured_anchors:
+                raise ValueError('Active anchor cohort changed during refresh; activation/deactivation is prohibited.')
+            if not snapshot.get('data_complete'):
+                raise ValueError('Full manifest completeness required for live publication.')
         with tempfile.TemporaryDirectory(prefix='.themescope-stage-', dir=output.parent) as tmp:
             stage = Path(tmp) / 'run'
             stage.mkdir()
             _generate(snapshot, raw, stage)
-            _write_json(stage / 'refresh_status.json', {'status': 'success', 'attempted_at': attempted, 'data_date': snapshot['session_date'], 'imported': bool(args.import_run)})
+            _write_json(stage / 'refresh_status.json', {'status': 'offline_diagnostic' if snapshot.get('run_kind') == 'offline_historical_diagnostic' else 'success', 'data_complete': snapshot.get('data_complete', False), 'attempted_at': attempted, 'data_date': snapshot['session_date'], 'imported': bool(args.import_run)})
             # Commit only generated files; preserve unrelated files in a custom output directory.
             # Dashboard is published last, after every dependent download is ready.
             output.mkdir(parents=True, exist_ok=True)
@@ -1289,7 +1540,7 @@ def main(argv: list[str] | None = None) -> int:
             backup.mkdir()
             changed = []
             files = sorted(stage.iterdir(), key=lambda p: p.name == 'dashboard.html')
-            retired_files = ('sectors.csv', 'industries.csv')
+            retired_files = ('sectors.csv', 'industries.csv', 'watchlist_15.csv', 'tradingview_15.txt')
             try:
                 for source in files:
                     target = output / source.name
@@ -1312,10 +1563,23 @@ def main(argv: list[str] | None = None) -> int:
                 raise
             (output / 'failed_refresh.md').unlink(missing_ok=True)
             (output / 'rejected_dashboard.html').unlink(missing_ok=True)
-        print(f"SUCCESS: data date {snapshot['session_date']}; {len(snapshot['themes'])} eligible ETF anchors across {len(snapshot.get('registry_diagnostics', []))} registry records; {sum(len(t['selected']) for t in snapshot['themes'])} stock selections.")
-        print(f"Open {output / 'dashboard.html'}\nDownload bundle: {output / 'run_bundle.zip'}")
+        print(f"{'OFFLINE DIAGNOSTIC' if snapshot.get('run_kind') == 'offline_historical_diagnostic' else 'SUCCESS'}: data date {snapshot['session_date']}; {len(snapshot['themes'])} eligible ETF anchors across {len(snapshot.get('registry_diagnostics', []))} registry records; {sum(len(t['selected']) for t in snapshot['themes'])} stock selections.")
+        bundle_name = 'diagnostic_bundle.zip' if snapshot.get('run_kind') == 'offline_historical_diagnostic' else 'run_bundle.zip'
+        if approved_config.get('enabled'):
+            from src.themescope.approved_data import record_attempt
+            attempt_report = record_attempt(ROOT/'cache/approved_attempts.jsonl', kind='offline' if args.import_run else 'historical' if args.as_of else 'live', entered_collection=entered_collection, target=snapshot['session_date'], data_complete=bool(snapshot.get('data_complete')), publication_pass=not bool(args.import_run), elapsed=time.perf_counter()-launched_at)
+            _write_json(output/'latest_attempt.json', attempt_report)
+        print(f"Open {output / 'dashboard.html'}\nDownload bundle: {output / bundle_name}")
         return 0
+    except KeyboardInterrupt:
+        if approved_config.get('enabled'):
+            from src.themescope.approved_data import record_attempt
+            record_attempt(ROOT/'cache/approved_attempts.jsonl', kind='offline' if args.import_run else 'historical' if args.as_of else 'live', entered_collection=entered_collection, target=snapshot.get('session_date'), data_complete=False, publication_pass=False, elapsed=time.perf_counter()-launched_at, cancelled=True)
+        raise
     except Exception as exc:
+        if approved_config.get('enabled'):
+            from src.themescope.approved_data import record_attempt
+            record_attempt(ROOT/'cache/approved_attempts.jsonl', kind='offline' if args.import_run else 'historical' if args.as_of else 'live', entered_collection=entered_collection, target=snapshot.get('session_date'), data_complete=bool(snapshot.get('data_complete')), publication_pass=False, elapsed=time.perf_counter()-launched_at, detail=type(exc).__name__+': '+str(exc))
         output.mkdir(parents=True, exist_ok=True)
         preserved = False
         preserved_date = None

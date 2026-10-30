@@ -76,14 +76,14 @@ assert.match(themeCsv.split("\r\n")[0], /theme_breadth21_above/);
 assert.doesNotMatch(themeCsv.split("\r\n")[0], /(?:^|,)breadth21_above(?:,|$)/);
 const themeCsvLines = themeCsv.split("\r\n");
 assert.equal(themeCsvLines[0].split(",").length, themeCsvLines[1].split(",").length);
-assert.equal(themeCsvLines[1].split(",")[4], '"u"');
-assert.equal(themeCsvLines[1].split(",")[11], '"10.75"');
-assert.equal(themeCsvLines[1].split(",")[12], '"1.25"');
+assert.equal(themeCsvLines[1].split(",")[themeCsvLines[0].split(",").indexOf('"theme_id"')], '"u"');
+assert.equal(themeCsvLines[1].split(",")[themeCsvLines[0].split(",").indexOf('"return21_pct"')], '"10.75"');
+assert.doesNotMatch(themeCsvLines[0], /excess21_pp|rank_t_minus_5|breadth21_change_5_pp/);
 const tradingView = ui.tradingViewExport([rows[0], rows[1], rows[2], rows[3]]);
 assert.equal(tradingView.count, 2);
 assert.equal(tradingView.duplicates, 1);
 assert.equal(tradingView.omitted, 1);
-assert.match(tradingView.text, /^NASDAQ:AAA\nNYSE:BBB\n$/);
+assert.match(tradingView.text, /^NASDAQ:AAA,NYSE:BBB\n$/);
 console.log("Dashboard interaction and export helpers passed.");
 assert.deepEqual(
   ui.sortRows(rows, "adv30_usd", "asc").map((r) => r.adv30_usd),
@@ -133,17 +133,14 @@ const pool = Array.from({ length: 25 }, (_, i) => ({
   selection_slot: i + 1,
   adv30_usd: 25 - i,
 }));
-const compact = ui.limitSelection(pool, 15),
-  expanded = ui.limitSelection(pool, 20);
-assert.equal(compact.length, 15);
+const expanded = ui.limitSelection(pool, 20);
 assert.equal(expanded.length, 20);
-assert.deepEqual(compact, expanded.slice(0, 15));
 assert.deepEqual(
   ui
-    .sortRows(compact, "adv30_usd", "asc")
+    .sortRows(expanded, "adv30_usd", "asc")
     .map((r) => r.ticker)
     .sort(),
-  compact.map((r) => r.ticker).sort(),
+  expanded.map((r) => r.ticker).sort(),
 );
 assert.match(
   ui.rowsToCsv([
