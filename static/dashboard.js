@@ -1023,7 +1023,7 @@
           td("col-name", '<div class="theme-name-cell"><span class="type-tag">' + type + '</span><button class="theme-select" aria-label="Open watchlist for ' + esc(row.name) + '">' + esc(row.name) + '</button></div>') +
           td("col-etf", row.chart_url ? '<a href="' + esc(row.chart_url) + '" target="_blank" rel="noopener noreferrer">' + esc(row.anchor) + '</a>' : esc(row.anchor)) +
           td("col-state", stateBadge(row.theme_state)) +
-          td("col-priority", '<span title="'+esc(row.research_priority?.reason || "Required inputs unavailable")+'">'+(priorityCategory(row) === "primary" ? '<b class="primary-marker">Primary</b> ' : "") + esc(priorityCategory(row) === "primary" ? row.research_priority.side + " research" : row.research_priority?.label || "No directional priority")+'</span>') +
+          td("col-priority", '<span title="'+esc(row.research_priority?.reason || "Required inputs unavailable")+'">'+esc(row.research_priority?.label || "No directional priority")+'</span>') +
           td("col-score", score(row, "theme_score")) +
           td("col-score", score(row, "current_strength_score")) +
           td("col-score", score(row, "medium_strength_score")) +

@@ -447,7 +447,6 @@ button:disabled { opacity: .45; cursor: default; }
 .primary-row { --primary-color: var(--pos); background: color-mix(in srgb, var(--primary-color) 6%, var(--panel)); }
 .primary-short { --primary-color: var(--neg); }
 .primary-row td:first-child { box-shadow: inset 3px 0 var(--primary-color); }
-.primary-marker { color: var(--primary-color); font-size: 10px; padding: 1px 3px; border: 1px solid currentColor; border-radius: var(--tag-radius); }
 .primary-row:hover { background: color-mix(in srgb, var(--primary-color) 11%, var(--panel)); }
 .primary-row.active { background: color-mix(in srgb, var(--accent) 12%, var(--panel)); }
 tr:focus-within { outline: 2px solid var(--accent); outline-offset: -2px; }
@@ -478,3 +477,9 @@ tr:focus-within { outline: 2px solid var(--accent); outline-offset: -2px; }
 .stock-data-table .col-ticker .info-button { vertical-align: middle; }
 .stock-data-table th .info-button { width: 16px; height: 16px; flex-shrink: 0; }
 @media (max-width: 760px) { .decision-tag { font-size: 28px; } }
+
+/* Numeric alignment follows the same padding as adjacent Watchlist metrics. */
+.stock-data-table .col-relvol { text-align: right; --header-justify: flex-end; }
+#watchlist-theme-selector { font-family: inherit; font-weight: 500; }
+#watchlist-theme-selector optgroup { font-family: inherit; font-weight: 600; }
+#watchlist-theme-selector option { font-family: inherit; font-weight: 400; }

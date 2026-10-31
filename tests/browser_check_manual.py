@@ -86,6 +86,9 @@ def main() -> int:
             assert page.locator("#pool").count() == 0
             primary_count = sum(t["research_priority"]["category"] == "primary" for t in snapshot["themes"])
             assert page.locator("#theme-body .primary-row").count() == primary_count
+            assert page.locator(".primary-marker").count() == 0
+            for row in snapshot["themes"]:
+                assert page.locator('#theme-body tr[data-theme="' + row["id"] + '"] .col-priority').inner_text() == row["research_priority"]["label"]
             page.select_option("#theme-priority", "primary")
             assert page.locator("#theme-body tr[data-theme]").count() == primary_count
             page.select_option("#theme-priority", "All")
@@ -173,6 +176,11 @@ def main() -> int:
             assert page.locator("#stock-body tr").count() == len(selected["selected"])
             assert "Core / Related" not in headers and "Sector / Industry" not in headers
             assert page.locator("#stock-head th").count() == 14
+            assert page.locator("#stock-head .col-relvol .th-content").evaluate("e => getComputedStyle(e).justifyContent") == "flex-end"
+            assert page.locator("#stock-body .col-relvol").first.evaluate("e => getComputedStyle(e).textAlign") == "right"
+            assert page.locator("#watchlist-theme-selector").evaluate("e => getComputedStyle(e).fontWeight") == "500"
+            assert page.locator("#watchlist-theme-selector option").first.evaluate("e => getComputedStyle(e).fontWeight") == "400"
+            assert page.locator("#watchlist-theme-selector optgroup").first.evaluate("e => getComputedStyle(e).fontWeight") == "600"
             assert page.locator("#stock-body .company, #stock-body details").count() == 0
             for mode in ("dark", "light"):
                 if page.locator("html").get_attribute("data-mode") != mode: page.click("#mode")
