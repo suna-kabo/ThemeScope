@@ -360,6 +360,7 @@ def build_release(root: Path, paths: dict[str, Path], session: str) -> tuple[dic
     snapshot = {
         "schema_version": "manual-csv-1",
         "methodology_version": "manual-csv-1",
+        "ranking_configuration": {"minimum_coverage": manual_config["theme_score_minimum_coverage"], "state_boundary": 50},
         "run_kind": "manual_csv",
         "session_date": session,
         "generated_at": generated,

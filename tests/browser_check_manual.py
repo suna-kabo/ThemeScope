@@ -53,6 +53,8 @@ def main() -> int:
             assert page.locator(".volatility-section").is_hidden()
             assert page.locator("#market-direction h2").inner_text() == snapshot["market_classification"]["direction"]
             assert page.locator("#market-direction .open-plan").is_visible()
+            prices=page.locator(".market-card .market-price-row").evaluate_all("els=>els.map(e=>e.getBoundingClientRect().y)")
+            assert max(prices)-min(prices)<1
             page.click("#market-direction .open-plan")
             assert page.locator("#daily-plan").is_visible()
             assert page.locator("#decision-path .decision-row").count() == 7
@@ -75,12 +77,20 @@ def main() -> int:
             for label in ("Current", "Medium", "1W", "1M", "3M", "EMA50"):
                 assert label in headers
             assert "Δ5D" not in headers and "Rk−5D" not in headers and "Facts" not in headers and "Type" not in headers
-            assert page.locator("#theme-cols col").count() == 14
-            assert page.locator("#theme-head th").count() == 14
-            assert page.locator("#theme-body tr[data-theme]").first.locator("td").count() == 14
+            assert page.locator("#theme-cols col").count() == 15
+            assert page.locator("#theme-head th").count() == 15
+            assert page.locator("#theme-body tr[data-theme]").first.locator("td").count() == 15
             assert page.locator("#theme-body .type-tag").count() == len(snapshot["themes"])
             assert page.locator("#theme-body .breadth-unavailable-cell small").count() == 0
             assert page.locator("#theme-body .score-chip:not(.score-na)").count() > 0
+            assert page.locator("#pool").count() == 0
+            primary_count = sum(t["research_priority"]["category"] == "primary" for t in snapshot["themes"])
+            assert page.locator("#theme-body .primary-row").count() == primary_count
+            page.select_option("#theme-priority", "primary")
+            assert page.locator("#theme-body tr[data-theme]").count() == primary_count
+            page.select_option("#theme-priority", "All")
+            xs = page.locator("#theme-body .theme-select").evaluate_all("els => els.map(e => e.getBoundingClientRect().x)")
+            assert max(xs) - min(xs) < 1
             info = page.locator("#theme-head .info-button").first
             assert info.get_attribute("title") is None
             assert page.locator("#themescope-tooltip").count() == 1
@@ -117,10 +127,10 @@ def main() -> int:
                         assert page.evaluate("document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1")
                         head_boxes = page.locator("#theme-head th").evaluate_all("els => els.map(e => ({x:e.getBoundingClientRect().x,w:e.getBoundingClientRect().width}))")
                         row_boxes = page.locator("#theme-body tr[data-theme]").first.locator("td").evaluate_all("els => els.map(e => ({x:e.getBoundingClientRect().x,w:e.getBoundingClientRect().width}))")
-                        assert len(head_boxes) == len(row_boxes) == 14
+                        assert len(head_boxes) == len(row_boxes) == 15
                         assert all(abs(a["x"] - b["x"]) < .6 and abs(a["w"] - b["w"]) < .6 for a, b in zip(head_boxes, row_boxes))
                 for page_id in ("market", "daily-plan"):
-                    for width, height in ((1920, 1080), (1536, 864)):
+                    for width, height in ((1920, 1080), (1536, 864), (1366, 768), (390, 844)):
                         page.set_viewport_size({"width": width, "height": height})
                         page.click(f'.side-nav [data-page="{page_id}"]')
                         page.wait_for_timeout(30)
@@ -141,8 +151,40 @@ def main() -> int:
             page.set_viewport_size({"width": 1536, "height": 864})
             page.click('.side-nav [data-page="watchlist"]')
             headers = page.locator("#stock-head").inner_text()
-            for label in ("1D %", "1W %", "1M %", "3M %", "ATR%14", "ADV$30", "Turnover 1D", "Rel Vol", "Sector / Industry", "Earnings"):
+            for label in ("1D", "1W", "1M", "3M", "ATR%14", "Avg $Vol30", "Turnover 1D", "Rel Vol", "Earnings"):
                 assert label in headers
+            stock_info=page.locator("#stock-body .info-button").first
+            stock_info.focus()
+            assert page.locator("#themescope-tooltip").is_visible()
+            assert stock_info.get_attribute("title") is None
+            page.keyboard.press("Escape")
+            stock_info.tap()
+            assert page.locator("#themescope-tooltip").is_visible()
+            page.keyboard.press("Escape")
+            initial_theme=page.locator("#watchlist-theme-selector").input_value()
+            page.click("#next-theme")
+            assert page.locator("#watchlist-theme-selector").input_value() != initial_theme
+            page.click("#previous-theme")
+            assert page.locator("#watchlist-theme-selector").input_value() == initial_theme
+            geometry=page.locator("#app-back, #previous-theme, #next-theme, #stock-direction, #stock-sort, #stock-search").evaluate_all("els=>els.map(e=>({height:e.getBoundingClientRect().height,font:getComputedStyle(e).fontFamily}))")
+            assert all(abs(g["height"]-34)<1 for g in geometry)
+            assert len({g["font"] for g in geometry}) == 1
+            selected=next(t for t in snapshot["themes"] if t["id"]==initial_theme)
+            assert page.locator("#stock-body tr").count() == len(selected["selected"])
+            assert "Core / Related" not in headers and "Sector / Industry" not in headers
+            assert page.locator("#stock-head th").count() == 14
+            assert page.locator("#stock-body .company, #stock-body details").count() == 0
+            for mode in ("dark", "light"):
+                if page.locator("html").get_attribute("data-mode") != mode: page.click("#mode")
+                for width,height in ((1920,1080),(1536,864),(1366,768),(390,844)):
+                    page.set_viewport_size({"width":width,"height":height})
+                    page.screenshot(path=str(artifact_dir / f"watchlist-{mode}-{width}x{height}.png"),full_page=True)
+                    if width >= 1536:
+                        assert page.locator(".stock-table-wrap").evaluate("e => e.scrollWidth <= e.clientWidth + 1")
+                        hb=page.locator("#stock-head th").evaluate_all("els=>els.map(e=>e.getBoundingClientRect().x)")
+                        rb=page.locator("#stock-body tr").first.locator("td").evaluate_all("els=>els.map(e=>e.getBoundingClientRect().x)")
+                        assert len(hb)==len(rb)==14 and all(abs(a-b)<.6 for a,b in zip(hb,rb))
+                page.set_viewport_size({"width":1536,"height":864})
             # Download must preserve the configured order even after view sorting/filtering.
             with page.expect_download() as download_info:
                 page.click("#tv")
@@ -156,7 +198,7 @@ def main() -> int:
     finally:
         server.shutdown()
         server.server_close()
-    print(json.dumps({"javascript_errors": errors, "automatic_external_requests": 0, "tabs": 4, "themes": len(snapshot["themes"]), "screenshots": 16}))
+    print(json.dumps({"javascript_errors": errors, "automatic_external_requests": 0, "tabs": 4, "themes": len(snapshot["themes"]), "screenshots": 32}))
     return 0
 
 

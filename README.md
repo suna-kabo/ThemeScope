@@ -68,3 +68,7 @@ Key files:
 - `src/themescope/watchlists.py`: membership validation, stock metrics and watchlist breadth.
 - `scripts/maintain_watchlists.py`: one-time eligibility import, explicit theme assignment, and audited apply workflow.
 - `scripts/generate_dashboard.py`: calculations, exports, offline dashboard and staged publication.
+
+### Local daily rank history
+
+Successful manual imports save `local_history/YYYY-MM-DD.json` inside the output directory and include the current session record in the run ZIP. Reuse the same output directory for daily runs and preserve its `local_history` folder. Δ Rank compares canonical ranks only against the immediately preceding US trading session with matching methodology, ranking configuration and eligible anchors. First runs and missing or incompatible prior sessions show N/A. Same-session reruns replace that date only; failed imports preserve existing dashboard/history. Synthetic history tests use temporary directories.

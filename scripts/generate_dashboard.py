@@ -1209,6 +1209,7 @@ def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_di
     for row in sorted(snapshot["themes"], key=lambda item: (item.get("global_rank") is None, item.get("global_rank") or 10**9)):
         theme_rows.append({
             "rank": row.get("global_rank"), "type": row.get("level"), "theme_id": row["id"], "name": row["name"], "anchor": row["anchor"],
+            "rank_change_daily": row.get("rank_change_daily"), "rank_comparison_session": row.get("rank_comparison_session"),
             "state": row.get("theme_state"), "research_priority": row.get("research_priority", {}).get("label"), "theme_score": row.get("theme_score"),
             "current": row.get("current_strength_score"), "medium": row.get("medium_strength_score"),
             "performance_1w_pct": row.get("returns", {}).get("5", {}).get("value") * 100 if row.get("returns", {}).get("5", {}).get("value") is not None else None,
@@ -1273,11 +1274,13 @@ def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_di
 
 def _run_manual_csv(args: argparse.Namespace, output: Path, launched_at: float) -> int:
     from src.themescope.manual_csv import build_release
+    from src.themescope.local_history import apply as apply_history
     paths = {role: getattr(args, role + "_csv") for role in ("stock", "etf", "spy", "qqq", "iwm")}
     attempted = datetime.now(timezone.utc).isoformat(timespec="seconds")
     try:
         build_started = time.perf_counter()
         snapshot, raw = build_release(ROOT, paths, args.as_of)
+        history_record = apply_history(snapshot, output / "local_history", ROOT / "config/calendars/xnys_2020_2035_v1.json")
         build_elapsed = time.perf_counter() - build_started
         output.parent.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(prefix=".themescope-manual-stage-", dir=output.parent) as temporary:
@@ -1300,21 +1303,25 @@ def _run_manual_csv(args: argparse.Namespace, output: Path, launched_at: float) 
             payload = json.dumps(_dashboard_snapshot(snapshot), ensure_ascii=False, separators=(",", ":"), allow_nan=False).replace("</", "<\\/").replace("\u2028", "\\u2028").replace("\u2029", "\\u2029")
             font_data = base64.b64encode((ROOT / "static/InterVariable.woff2").read_bytes()).decode("ascii")
             (stage / "dashboard.html").write_text(template.replace("{{STYLE}}", style.replace("{{FONT_DATA}}", font_data)).replace("{{SCRIPT}}", script).replace("{{SNAPSHOT_JSON}}", payload), encoding="utf-8")
-            bundle_files = [path for path in stage.iterdir() if path.name != "run_bundle.zip"]
+            _write_json(stage / "local_history" / (snapshot["session_date"] + ".json"), history_record)
+            bundle_files = [path for path in stage.rglob("*") if path.is_file() and path.name != "run_bundle.zip"]
             with zipfile.ZipFile(stage / "run_bundle.zip", "w", compression=zipfile.ZIP_DEFLATED) as bundle:
                 for path in bundle_files:
-                    bundle.write(path, arcname=path.name)
+                    bundle.write(path, arcname=str(path.relative_to(stage)))
             output.mkdir(parents=True, exist_ok=True)
             backup = Path(temporary) / "previous"
             backup.mkdir()
             changed = []
             try:
-                for source in sorted(stage.iterdir(), key=lambda path: path.name == "dashboard.html"):
-                    target = output / source.name
+                for source in sorted((p for p in stage.rglob("*") if p.is_file()), key=lambda path: path.name == "dashboard.html"):
+                    relative = source.relative_to(stage)
+                    target = output / relative
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    (backup / relative).parent.mkdir(parents=True, exist_ok=True)
                     if target.exists():
-                        shutil.copy2(target, backup / source.name)
+                        shutil.copy2(target, backup / relative)
                     os.replace(source, target)
-                    changed.append(source.name)
+                    changed.append(relative)
             except BaseException:
                 for name in reversed(changed):
                     previous = backup / name

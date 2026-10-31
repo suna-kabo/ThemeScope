@@ -140,13 +140,26 @@
     return !finiteNumber(value) ? "breadth-na" : value >= 50 ? "breadth-positive" : "breadth-negative";
   }
 
+  var LABELS = {
+    adv30_usd: {label:"Avg $Vol30", definition:"TradingView Price × Average Volume30; not the mean of daily Close × Volume."},
+    turnover_1d_usd: {label:"Turnover 1D", definition:"TradingView Price × Volume for one day; not an independently verified sum of trades."},
+    atr14_pct: {label:"ATR%14", definition:"TradingView daily average true range percent over 14 periods; volatility context, not expected return."},
+    relative_volume_1d: {label:"Rel Vol", definition:"TradingView relative volume for one day; a multiple, not a percentage return."}
+  };
+  function directionClass(value) {
+    return {"Long bias":"direction-long", "Selective long":"direction-long direction-selective", "Neutral":"direction-neutral", "Selective short":"direction-short direction-selective", "Short bias":"direction-short", "Unclassified":"direction-unavailable"}[value] || "direction-unavailable";
+  }
+  function statusClass(value) {
+    return ["Bullish","Positive"].includes(value) ? "positive" : ["Bearish","Negative"].includes(value) ? "negative" : value === "Mixed" ? "warning" : "muted";
+  }
+  function priorityCategory(row) { return row.research_priority?.category || "observation"; }
   function themeRowsToCsv(rows, session, generatedAt) {
-    var columns = ["rank_current", "type", "theme_id", "name", "anchor_etf", "state", "research_priority", "theme_score", "current_strength", "medium_strength", "return5_pct", "return21_pct", "return63_pct", "theme_breadth21_pct", "theme_breadth21_above", "theme_breadth21_valid", "theme_breadth50_pct", "theme_breadth50_above", "theme_breadth50_valid", "configured_watchlist_count", "session_date", "generated_at"];
+    var columns = ["rank_current", "rank_change_daily", "type", "theme_id", "name", "anchor_etf", "state", "research_priority", "theme_score", "current_strength", "medium_strength", "return5_pct", "return21_pct", "return63_pct", "theme_breadth21_pct", "theme_breadth21_above", "theme_breadth21_valid", "theme_breadth50_pct", "theme_breadth50_above", "theme_breadth50_valid", "configured_watchlist_count", "session_date", "generated_at"];
     var lines = [columns.map(csvEscape).join(",")];
     rows.forEach(function (row) {
       var b21 = row.theme_watchlist_breadth && row.theme_watchlist_breadth["21"] || {};
       var b50 = row.theme_watchlist_breadth && row.theme_watchlist_breadth["50"] || {};
-      var values = [row.rank_current ?? row.global_rank,
+      var values = [row.rank_current ?? row.global_rank, row.rank_change_daily,
         row.level === "Sector" ? "Sector" : "Theme", row.id, row.name, row.anchor, row.theme_state, row.research_priority?.label,
         row.theme_score, row.current_strength_score, row.medium_strength_score,
         finiteNumber(valueAt(row, "return5")) ? valueAt(row, "return5") * 100 : null,
@@ -308,7 +321,7 @@
     data.themes = Array.isArray(data.themes) ? data.themes : [];
     data.volatility_context = Array.isArray(data.volatility_context) ? data.volatility_context : [];
     var missing =
-      '<span title="Input unavailable; see diagnostic export">—</span>';
+      '<span title="Input unavailable; see diagnostic export">N/A</span>';
     var scoreConfig = data.score_methodology || {};
     var scoreBands = resolvedScoreBands(data.ui_configuration?.score_bands);
     var finalWeights = scoreConfig.theme_score_weights || {};
@@ -328,6 +341,7 @@
       medium_strength_score: "The ETF's TradingView 3-month Performance, converted to an ascending average-rank percentile among the same eligible ETF set used for Current.",
       theme_breadth21_pct: "The percentage of configured theme-watchlist stocks trading above EMA21. It does not affect Theme Score or state.",
       theme_breadth50_pct: "The percentage of configured theme-watchlist stocks trading above EMA50. It does not affect Theme Score or state.",
+      rank_change_daily: "Previous-session canonical rank minus current rank. Compare only the immediately preceding US session with identical eligible universe, anchors and ranking configuration. Comparison session: " + (data.local_history?.comparison_session || "N/A") + ". " + (data.local_history?.status || "No comparable history."),
       rank_current: "The global rank of this ETF exposure by Theme Score among eligible exposures. Equal Theme Scores receive average ranks. Breadth and stock drilldown do not affect rank."
     };
     var infoCounter = 0;
@@ -382,9 +396,12 @@
       infoTooltip.classList.remove("is-visible");
       infoTooltip.setAttribute("aria-hidden", "true");
     }
+    function customInfo(description, label) {
+      return '<button type="button" class="info-button" data-tip-text="' + esc(description) + '" aria-label="' + esc(label) + '" aria-expanded="false">i</button>';
+    }
     function infoControl(key) {
       var labels = {rank_current:"Current rank",state:"State",theme_score:"Theme Score",current_strength_score:"Current",medium_strength_score:"Medium",excess21:"1M versus SPY",excess63:"3M versus SPY",theme_breadth21_pct:"Above EMA21",theme_breadth50_pct:"Above EMA50"};
-      var description = infoText[key] || "Methodology explanation unavailable.";
+      var description = infoText[key] || LABELS[key]?.definition || "Methodology explanation unavailable.";
       var id = "themescope-info-" + key + "-" + (++infoCounter);
       return '<span class="info-control"><button class="info-button" type="button" id="' + id + '" data-tip-text="' + esc(description) + '" aria-label="Explain ' + esc(labels[key] || key) + '" aria-expanded="false">i</button></span>';
     }
@@ -431,12 +448,12 @@
             "</span>"
         : '<span title="' +
             esc(reason || "Input unavailable; see diagnostic export") +
-            '">—</span>';
+            '">N/A</span>';
     }
     function score(row, key) {
       const value = row[key];
       const bandClass = scoreBandClass(value, scoreBands);
-      const label = finite(value) ? value.toFixed(1) : "—";
+      const label = finite(value) ? value.toFixed(1) : "N/A";
       return '<span class="score-chip ' + esc(bandClass) + '" aria-label="' + esc(finite(value) ? label + " score" : "Score unavailable") + '">' + label + '</span>';
     }
     function breadthUnavailableShort(metric) {
@@ -449,7 +466,7 @@
     }
     function marketBreadth(row, period) {
       const m = row.index_breadth?.[String(period)];
-      const title = (row.ticker === "IWM" ? "Russell 2000 constituents" : "Constituents") + " above EMA" + period;
+      const title = (row.ticker === "IWM" ? "Russell 2000 exported universe" : "Exported constituents") + " above EMA" + period;
       const staleLine = row.index_breadth_stale
         ? '<small class="breadth-stale" title="Price data are ' + esc(row.price_session_date || "current") + '; breadth is from an earlier observation.">Stale breadth · as of ' + esc(row.index_breadth_observation_date || "date unavailable") + '</small>'
         : '';
@@ -481,10 +498,9 @@
     }
     function conditions(row) {
       const breadthTitle = row.ticker === "IWM" ? "Russell 2000 Breadth" : row.ticker + " Breadth";
-      const trendTitle = row.ticker === "IWM" ? "ETF trend" : "Index trend";
+      const trendTitle = "ETF Price vs EMA";
       return '<section class="market-section"><h3 class="market-section-title">' + breadthTitle + '</h3><div class="market-indicators">' + marketBreadth(row, 21) + marketBreadth(row, 50) + '</div></section>' +
-        '<section class="market-section"><h3 class="market-section-title">' + trendTitle + '</h3><div class="condition-row">' + conditionCard(row, 21) + conditionCard(row, 50) + '</div></section>' +
-        '<p class="market-observation">TradingView exported-universe snapshot for ' + esc(data.session_date || "session unavailable") + '.</p>';
+        '<section class="market-section"><h3 class="market-section-title">' + trendTitle + '</h3><div class="condition-row">' + conditionCard(row, 21) + conditionCard(row, 50) + '</div></section>';
     }
     function money(n, compact) {
       return finite(n)
@@ -503,7 +519,7 @@
       return r.trend_status !== "valid"
         ? '<span title="' +
             esc(r.trend_reason || "Insufficient price history") +
-            '">—</span>'
+            '">N/A</span>'
         : '<span class="badge ' +
             (r.trend === "Uptrend"
               ? "positive"
@@ -564,7 +580,7 @@
     var initialTheme = data.themes.find((t) => (t.selected || []).length) || data.themes[0];
     var state = {
       theme: initialTheme?.id, themeKey: "theme_score", themeDir: "desc",
-      stockKey: "return21", stockDir: "desc", themeType: "All", themeState: "All",
+      stockKey: "return21", stockDir: "desc", themeType: "All", themeState: "All", themePriority: "All",
       page: location.hash.slice(1) || "market", themeNavigationOrder: null
     };
     if (history.state?.themescope && history.state.view) {
@@ -573,13 +589,13 @@
       state.themeSearch = firstView.theme_search || "";
       state.themeType = firstView.theme_type_filter || "All";
       state.themeState = firstView.theme_state_filter || "All";
+      state.themePriority = firstView.theme_priority_filter || "All";
       state.themeKey = firstView.theme_sort_key || state.themeKey;
       state.themeDir = firstView.theme_sort_direction || state.themeDir;
       state.stockSearch = firstView.stock_search || "";
       state.stockEmaFilter = firstView.stock_ema_filter || "all";
       state.stockKey = firstView.stock_sort_key || state.stockKey;
       state.stockDir = firstView.stock_sort_direction || state.stockDir;
-      state.stockRowLimit = "20";
       state.themeSelectorSearch = firstView.theme_selector_search || "";
       state.themeNavigationOrder = firstView.theme_navigation_order || null;
       state.dailyMethodologyOpen = Boolean(firstView.daily_methodology_open);
@@ -589,21 +605,20 @@
       if ($("theme-search")) state.themeSearch = $("theme-search").value;
       if ($("theme-type")) state.themeType = $("theme-type").value;
       if ($("theme-state")) state.themeState = $("theme-state").value;
-      if ($("theme-sort")) state.themeKey = $("theme-sort").value;
+      if ($("theme-sort")?.value) state.themeKey = $("theme-sort").value;
       if ($("stock-search")) state.stockSearch = $("stock-search").value;
       if ($("ema-filter")) state.stockEmaFilter = $("ema-filter").value;
       if ($("stock-sort")) state.stockKey = $("stock-sort").value;
-      if ($("pool")) state.stockRowLimit = $("pool").value;
       if ($("watchlist-theme-search")) state.themeSelectorSearch = $("watchlist-theme-search").value;
       if ($("daily-methodology")) state.dailyMethodologyOpen = $("daily-methodology").open;
       state.scroll_position = window.scrollY || 0;
       return {
         page: state.page, selected_theme_id: state.theme,
         theme_search: state.themeSearch || "", theme_type_filter: state.themeType,
-        theme_state_filter: state.themeState, theme_sort_key: state.themeKey,
+        theme_state_filter: state.themeState, theme_priority_filter: state.themePriority, theme_sort_key: state.themeKey,
         theme_sort_direction: state.themeDir, stock_search: state.stockSearch || "",
         stock_ema_filter: state.stockEmaFilter || "all", stock_sort_key: state.stockKey,
-        stock_sort_direction: state.stockDir, stock_row_limit: state.stockRowLimit || "20",
+        stock_sort_direction: state.stockDir,
         theme_selector_search: state.themeSelectorSearch || "",
         theme_navigation_order: state.themeNavigationOrder,
         daily_methodology_open: Boolean(state.dailyMethodologyOpen),
@@ -636,6 +651,7 @@
         page.hidden = page.id !== id;
       });
       document.querySelectorAll(".side-nav [data-page]").forEach(function (link) {
+        link.title = link.textContent.trim();
         var active = link.dataset.page === id;
         link.classList.toggle("active", active);
         if (active) link.setAttribute("aria-current", "page");
@@ -659,14 +675,15 @@
       state.page = view.page || "market";
       state.theme = view.selected_theme_id || state.theme;
       state.themeSearch = view.theme_search || ""; state.themeType = view.theme_type_filter || "All";
+      state.themePriority = view.theme_priority_filter || "All";
       state.themeState = view.theme_state_filter || "All"; state.themeKey = view.theme_sort_key || "theme_score";
       state.themeDir = view.theme_sort_direction || "desc"; state.stockSearch = view.stock_search || "";
+      state.stockDir = view.stock_sort_direction || "desc";
       state.stockEmaFilter = view.stock_ema_filter || "all"; state.stockKey = view.stock_sort_key || "return21";
-      state.stockDir = view.stock_sort_direction || "desc"; state.stockRowLimit = "20";
       state.themeSelectorSearch = view.theme_selector_search || ""; state.themeNavigationOrder = view.theme_navigation_order || null;
       state.dailyMethodologyOpen = Boolean(view.daily_methodology_open);
       state.scroll_position = view.scroll_position || 0;
-      var fields = {"theme-search":"themeSearch","theme-type":"themeType","theme-state":"themeState","theme-sort":"themeKey","stock-search":"stockSearch","ema-filter":"stockEmaFilter","stock-sort":"stockKey","pool":"stockRowLimit","watchlist-theme-search":"themeSelectorSearch"};
+      var fields = {"theme-search":"themeSearch","theme-type":"themeType","theme-state":"themeState","theme-priority":"themePriority","theme-sort":"themeKey","stock-search":"stockSearch","ema-filter":"stockEmaFilter","stock-sort":"stockKey","watchlist-theme-search":"themeSelectorSearch"};
       Object.keys(fields).forEach(function (id) { if ($(id) && state[fields[id]] !== undefined) $(id).value = state[fields[id]]; });
       render();
       $("daily-methodology").open = state.dailyMethodologyOpen;
@@ -702,23 +719,21 @@
       return '<li><a class="priority-theme-link" href="#watchlist" data-daily-theme="' + esc(row.id) + '"><b>' + esc(row.name) + '</b><span>' + esc(row.anchor) + '</span><small>' + esc(row.theme_state || "Unavailable") + ' · ' + context + '</small><span>' + score(row, "theme_score") + '</span></a></li>';
     }
     function renderMethodology() {
-      var prices = ["Bullish", "Mixed", "Bearish"], breadths = ["Positive", "Mixed", "Negative"];
-      var marketRows = [];
-      prices.forEach(function (spyState) { prices.forEach(function (qqqState) { breadths.forEach(function (breadthState) {
-        var output = spyState === qqqState && spyState === "Bullish" ? "Long bias" : spyState === qqqState && spyState === "Bearish" ? "Short bias" : {Positive:"Selective long",Mixed:"Neutral",Negative:"Selective short"}[breadthState];
-        var active = decision.spy_price_state === spyState && decision.qqq_price_state === qqqState && decision.combined_breadth_state === breadthState;
-        marketRows.push('<tr' + (active ? ' class="active-cell"' : '') + '><td>' + spyState + '</td><td>' + qqqState + '</td><td>' + breadthState + '</td><td>' + output + '</td></tr>');
-      }); }); });
+      var marketRows = (decision.market_matrix || []).map(function(cell) {
+        var active = decision.spy_price_state === cell.spy && decision.qqq_price_state === cell.qqq && decision.combined_breadth_state === cell.breadth;
+        return '<tr' + (active ? ' class="active-cell"' : '') + '><td class="' + statusClass(cell.spy) + '">' + esc(cell.spy) + '</td><td class="' + statusClass(cell.qqq) + '">' + esc(cell.qqq) + '</td><td class="' + statusClass(cell.breadth) + '">' + esc(cell.breadth) + '</td><td class="' + directionClass(cell.direction) + '">' + esc(cell.direction) + '</td></tr>';
+      });
       var priorityRows = ["Long bias","Selective long","Neutral","Selective short","Short bias","Unclassified"].map(function (direction) {
         var matrixRow = decision.priority_matrix?.[direction] || {};
         var labels = ["Leading","Improving","Fading","Lagging"].map(function (themeState) { return matrixRow[themeState] || "Unavailable"; });
-        return '<tr' + (decision.market_classification === direction ? ' class="active-cell"' : '') + '><td>' + direction + '</td>' + labels.map(function (x) { return '<td>' + x + '</td>'; }).join("") + '</tr>';
+        return '<tr' + (decision.market_classification === direction ? ' class="active-cell"' : '') + '><td class="' + directionClass(direction) + '">' + direction + '</td>' + labels.map(function (x) { return '<td>' + x + '</td>'; }).join("") + '</tr>';
       }).join("");
       $("methodology-content").innerHTML = '<h3>Market matrix</h3><table><thead><tr><th>SPY Price</th><th>QQQ Price</th><th>Combined Breadth</th><th>Result</th></tr></thead><tbody>' + marketRows.join("") + '</tbody></table><h3>Market × Theme State priorities</h3><table><thead><tr><th>Market</th><th>Leading</th><th>Improving</th><th>Fading</th><th>Lagging</th></tr></thead><tbody>' + priorityRows + '</tbody></table><p><b>EMA50 guard:</b> Long labels require the anchor close strictly above EMA50; short labels require it strictly below EMA50.</p><p><b>States:</b> Leading has Current and Medium at or above 50; Improving has only Current at or above 50; Fading has only Medium at or above 50; Lagging has both below 50.</p><p>Research Priority is not an entry signal.</p>';
     }
     function renderDailyPlan() {
       $("daily-session").textContent = sessionDisplay(decision.session_date || data.session_date);
       $("daily-generated").textContent = data.dashboard_generated_at_hkt_display || decision.generated_at_hkt || "Unavailable";
+      $("daily-classification").className = "decision-tag " + directionClass(decision.market_classification);
       $("daily-classification").textContent = decision.market_classification || classification.direction || "Unclassified";
       $("daily-action").textContent = decision.action_sentence || classification.action_summary || "Required inputs unavailable.";
       var pathRows = [
@@ -729,7 +744,7 @@
         ["Russell 2000 Breadth", decision.russell_2000_breadth_state, "Context only, no vote"],
         ["Final Market result", decision.market_classification, "Approved matrix output"],
       ];
-      $("decision-path").innerHTML = '<div class="decision-row header" role="row"><span>Input</span><span>Current reading</span><span>Decision role</span></div>' + pathRows.map(function (row) { var reading = row[1] || "Unavailable"; return '<div class="decision-row" role="row"><span>' + (row[3] ? '<a href="#market" data-page-link="market">' + row[0] + '</a>' : row[0]) + '</span><span><span class="reading-tag">' + esc(reading) + '</span></span><span>' + row[2] + '</span></div>'; }).join("");
+      $("decision-path").innerHTML = '<div class="decision-row header" role="row"><span>Input</span><span>Current reading</span><span>Decision role</span></div>' + pathRows.map(function (row) { var reading = row[1] || "Unavailable"; return '<div class="decision-row" role="row"><span>' + (row[3] ? '<a href="#market" data-page-link="market">' + row[0] + '</a>' : row[0]) + '</span><span><span class="reading-tag ' + (row[0] === "Final Market result" ? directionClass(reading) : statusClass(reading)) + '">' + esc(reading) + '</span></span><span>' + row[2] + '</span></div>'; }).join("");
       $("why-result").innerHTML = '<p>' + esc(decision.reason || classification.reason || "Required inputs unavailable.") + '</p>';
       var labels = {primary:"Primary",secondary:"Secondary",exception:"Lower priority / exception",observation:"Observation only"};
       $("daily-priorities").innerHTML = ["primary","secondary","exception","observation"].map(function (key) {
@@ -752,19 +767,14 @@
     $("daily-priorities").addEventListener("click", function (event) { var link=event.target.closest("[data-daily-theme]"); if (!link) return; event.preventDefault(); state.theme=link.dataset.dailyTheme; showPage("watchlist", {push:true}); render(); replaceHistoryState(); });
     if ($("market-direction")) {
       var primary = priorityDefinition("primary") || "None today", secondary = priorityDefinition("secondary") || "None today";
-      $("market-direction").innerHTML='<div class="market-action-card"><div><h2>' + esc(decision.market_classification || classification.direction || "Unclassified") + '</h2></div><div class="market-action-details"><p>SPY ' + esc(decision.spy_price_state || "Unavailable") + ' + QQQ ' + esc(decision.qqq_price_state || "Unavailable") + ' → ' + esc(decision.market_classification || "Unclassified") + '</p><p>Combined Breadth: ' + esc(decision.combined_breadth_state || "Unavailable") + '</p><p>Primary: ' + esc(primary) + '</p><p>Secondary: ' + esc(secondary) + '</p></div><button type="button" class="open-plan">Open Daily Plan</button></div>';
+      $("market-direction").innerHTML='<div class="market-action-card"><div><h2 class="' + directionClass(decision.market_classification) + '">' + esc(decision.market_classification || classification.direction || "Unclassified") + '</h2></div><div class="market-action-details"><p>SPY ' + esc(decision.spy_price_state || "Unavailable") + ' + QQQ ' + esc(decision.qqq_price_state || "Unavailable") + ' → ' + esc(decision.market_classification || "Unclassified") + '</p><p>Combined Breadth: ' + esc(decision.combined_breadth_state || "Unavailable") + '</p><p>Primary: ' + esc(primary) + '</p><p>Secondary: ' + esc(secondary) + '</p></div><button type="button" class="open-plan">Open Daily Plan</button></div>';
       $("market-direction").querySelector(".open-plan").onclick=function(){showPage("daily-plan",{push:true});};
     }
     const marketWarnings = (data.context || []).filter((row) => [21, 50].some((period) => row.index_breadth?.[String(period)]?.status !== "valid")).map((row) => row.ticker + " breadth unavailable");
     $("status").textContent = (data.run_kind === "offline_historical_diagnostic" ? "Historical diagnostic · live completeness unverified · " : "") + marketWarnings.join(" · ");
-    $("cards").innerHTML = data.context.map((row) =>
-      '<article class="market-card"><div class="market-card-head"><div><div class="market-ticker">' + esc(row.ticker) + '</div><div class="market-title-sub">' +
-      (row.ticker === "SPY" ? "S&P 500" : row.ticker === "QQQ" ? "Nasdaq-100" : "Russell 2000 proxy") +
-      '</div></div><div>' + spark(row.history, "close", "Retrieved market price") .replace('class="spark"', 'class="market-chart"') +
-      '</div></div><div class="market-price-row"><span class="price">' + money(row.price_close) + '</span><span class="market-daily" title="Latest regular-session change"><small>1D</small>' + pct(row.daily_change) + '</span><div class="market-returns">' +
-      [["5", "1W"], ["21", "1M"], ["63", "3M"]].map((window) => '<span><small>' + window[1] + '</small>' + pct(row.returns[window[0]]?.value) + '</span>').join("") +
-      '</div></div>' + conditions(row) + '<p class="market-observation">Data ' + esc(row.price_session_date || data.session_date || "unavailable") + (row.price_retrieved_at_hkt_display ? ' · Retrieved ' + esc(row.price_retrieved_at_hkt_display) : "") + '</p></article>'
-    ).join("");
+    $("cards").innerHTML = data.context.map(function(row) {
+      return '<article class="market-card"><header class="market-card-head"><div><div class="market-ticker">' + esc(row.ticker) + '</div><div class="market-title-sub">' + esc({SPY:"S&P 500 ETF",QQQ:"Nasdaq-100 ETF",IWM:"Russell 2000 ETF"}[row.ticker] || row.name) + '</div></div></header><div class="market-price-row"><span class="price">' + money(row.price_close) + '</span><span class="market-daily"><small>1D</small>' + pct(row.daily_change) + '</span></div><div class="market-returns">' + [["5","1W"],["21","1M"],["63","3M"]].map(function(w){return '<span><small>' + w[1] + '</small>' + pct(row.returns[w[0]]?.value) + '</span>';}).join("") + '</div>' + conditions(row) + '</article>';
+    }).join("");
     document.querySelector(".volatility-section").hidden = !(data.volatility_context || []).length;
     $("volatility-card").innerHTML = (data.volatility_context || []).map(function (item) {
       const badge = item.source_status && item.source_status !== "available" ? '<span class="source-state source-missing">' + esc(item.source_status) + '</span>' : '';
@@ -777,6 +787,7 @@
     }).join("");
     var metrics = {
       rank_current: "Current rank",
+      rank_change_daily: "Δ Rank",
       priority: "Research priority",
       theme_state: "State",
       return21: "1-month Performance",
@@ -789,7 +800,7 @@
       return5: "1-week Performance",
       price_vs_ema50_pct: "EMA50 context",
       price_close: "Price",
-      adv30_usd: "ADV$30",
+      adv30_usd: "Avg $Vol30",
       name: "Name",
     };
     function options(list) {
@@ -805,28 +816,27 @@
       button.setAttribute("aria-pressed", "true");
     }
     function stockControls() {
-      const capacity = Number(data.settings?.watchlist_capacity || 20);
-      const defaultCount = Number(data.settings?.watchlist_default_limit || capacity);
       return '<label>Search <input id="stock-search" placeholder="Ticker or company"></label>' +
-        '<label>Sort by <select id="stock-sort">' + options([["return5","1W Performance"],["return21","1M Performance"],["return63","3M Performance"],["adv30_usd","ADV$30"],["turnover_1d_usd","Turnover 1D"],["relative_volume_1d","Relative Volume"],["price_close","Price"]]) +
+        '<label>Sort by <select id="stock-sort">' + options([["return5","1W Performance"],["return21","1M Performance"],["return63","3M Performance"],["adv30_usd","Avg $Vol30"],["turnover_1d_usd","Turnover 1D"],["relative_volume_1d","Relative Volume"],["price_close","Price"]]) +
         '</select></label><button id="stock-direction" type="button"></button>' +
-        '<label>EMA <select id="ema-filter"><option value="all">All</option><option value="above21">Above EMA21</option><option value="below21">At/below EMA21</option><option value="above50">Above EMA50</option><option value="below50">At/below EMA50</option></select></label>' +
-        '<label>Rows <select id="pool">' + [defaultCount, capacity].filter((value, index, list) => list.indexOf(value) === index).map((value) => '<option value="' + value + '">' + value + ' stocks</option>').join("") + '</select></label>';
+        '<label>EMA <select id="ema-filter"><option value="all">All</option><option value="above21">Above EMA21</option><option value="below21">At/below EMA21</option><option value="above50">Above EMA50</option><option value="below50">At/below EMA50</option></select></label>';
     }
     $("theme-controls").innerHTML = '<label>Search <input id="theme-search" placeholder="Sector, theme or ETF"></label>' +
       '<label>Type <select id="theme-type"><option>All</option><option>Sector</option><option>Theme</option></select></label>' +
       '<label>State <select id="theme-state"><option>All</option><option>Leading</option><option>Improving</option><option>Fading</option><option>Lagging</option></select></label>' +
+      '<label>Research Priority <select id="theme-priority"><option value="All">All</option><option value="primary">Primary</option><option value="secondary">Secondary</option><option value="exception">Exceptions</option><option value="observation">Observation only</option></select></label>' +
       '<label>Sort by <select id="theme-sort">' + options(Object.entries(metrics).filter(([key]) => !["price_close","adv30_usd","name"].includes(key))) + '</select></label>' +
       '<button id="theme-direction" type="button"></button>';
     $("stock-controls").innerHTML = stockControls();
     $("theme-search").value = state.themeSearch || "";
     $("theme-type").value = state.themeType;
     $("theme-state").value = state.themeState;
+    $("theme-priority").value = state.themePriority;
+    $("theme-priority").onchange = function(){state.themePriority=this.value;render();persistView();};
     $("theme-sort").value = state.themeKey;
     $("stock-search").value = state.stockSearch || "";
     $("stock-sort").value = state.stockKey;
     $("ema-filter").value = state.stockEmaFilter || "all";
-    $("pool").value = state.stockRowLimit || String(data.settings?.watchlist_default_limit || 20);
     $("watchlist-theme-search").value = state.themeSelectorSearch || "";
     function persistView() { replaceHistoryState(); }
     $("theme-sort").onchange = function () { state.themeKey = this.value; render(); persistView(); };
@@ -838,7 +848,6 @@
     $("stock-direction").onclick = function () { state.stockDir = state.stockDir === "desc" ? "asc" : "desc"; render(); persistView(); };
     $("stock-search").addEventListener("input", function () { state.stockSearch = this.value; render(); persistView(); });
     $("ema-filter").onchange = function () { state.stockEmaFilter = this.value; render(); persistView(); };
-    $("pool").onchange = function () { state.stockRowLimit = this.value; render(); persistView(); };
     $("watchlist-theme-search").addEventListener("input", function () { state.themeSelectorSearch = this.value; renderThemeSelector(); persistView(); });
     function filtered(rows, p) {
       if (p === "theme") {
@@ -848,7 +857,7 @@
           const type = row.level === "Sector" ? "Sector" : "Theme";
           const matchesType = state.themeType === "All" || type === state.themeType;
           const matchesState = state.themeState === "All" || row.theme_state === state.themeState;
-          return matchesText && matchesType && matchesState;
+          return matchesText && matchesType && matchesState && (state.themePriority === "All" || priorityCategory(row) === state.themePriority);
         });
       }
       return filterRows(rows, { query: $("stock-search").value }).filter(function (row) {
@@ -941,7 +950,7 @@
         : value === "Fading"
           ? "Current score is in the weaker half while medium score is in the stronger half. This does not prove a reversal or rotation."
         : "Cross-sectional state from Current and Medium relative-strength percentiles.";
-      return '<span class="state-tag state-' + themeStateType(value) + '" aria-label="' + esc(value || "State unavailable") + ': ' + esc(help) + '">' + esc(value || "—") + "</span>";
+      return '<span class="state-tag state-' + themeStateType(value) + '" aria-label="' + esc(value || "State unavailable") + ': ' + esc(help) + '">' + esc(value || "N/A") + "</span>";
     }
     function themeBreadthCell(row, period) {
       const metric = row.theme_watchlist_breadth?.[String(period)];
@@ -959,6 +968,14 @@
         return (metric?.reason || "Breadth unavailable") + " (" + count + ")";
       }
       return row["theme_breadth" + period + "_pct"].toFixed(1) + "% (" + metric.above_count + "/" + metric.valid_count + ")";
+    }
+    function earnings(value) {
+      if (!value) return "N/A";
+      var date = new Date(value + "T00:00:00Z");
+      if (!Number.isFinite(date.valueOf())) return '<span aria-label="Earnings date ' + esc(value) + '">' + esc(value) + '</span>';
+      var crossYear = String(value).slice(0,4) !== String(data.session_date).slice(0,4);
+      var label = new Intl.DateTimeFormat("en-US", {month:"short",day:"numeric",timeZone:"UTC", ...(crossYear ? {year:"2-digit"} : {})}).format(date);
+      return '<time datetime="' + esc(value) + '" aria-label="Earnings date ' + esc(value) + '">' + esc(label) + '</time>';
     }
     function stockDrilldownMessage(row) {
       var status = row.stock_drilldown_status;
@@ -991,7 +1008,7 @@
       const breadthUnavailable = visibleThemes.filter((row) => row.breadth_status_21 !== "valid" || row.breadth_status_50 !== "valid").length;
       $("theme-count").textContent = visibleThemes.length + " of " + all.length + " exposures" + (breadthUnavailable ? " · " + breadthUnavailable + " with breadth unavailable" : "");
       const themeColumns = [
-        ["#", "rank_current", null, "rank_current", "Current rank", "col-rank"], ["Name", "name", null, null, "Sector or theme name with exposure type", "col-name"], ["ETF", null, null, null, "Anchor ETF", "col-etf"], ["State", "theme_state", null, "state", "State", "col-state"],
+        ["#", "rank_current", null, "rank_current", "Current rank", "col-rank"], ["Δ Rank", "rank_change_daily", null, "rank_change_daily", "Previous-session rank minus current-session rank", "col-rank-daily"], ["Name", "name", null, null, "Sector or theme name with exposure type", "col-name"], ["ETF", null, null, null, "Anchor ETF", "col-etf"], ["State", "theme_state", null, "state", "State", "col-state"],
         ["Research priority", "priority", null, "priority", "Directional research priority with an absolute EMA50 guard; not an entry signal.", "col-priority"], ["Score", "theme_score", null, "theme_score", "Theme Score", "col-score"], ["Current", "current_strength_score", null, "current_strength_score", "1-month Performance percentile", "col-score"], ["Medium", "medium_strength_score", null, "medium_strength_score", "3-month Performance percentile", "col-score"],
         ["1W", "return5", null, null, "TradingView 1-week Performance; context only", "col-return"], ["1M", "return21", null, null, "TradingView 1-month Performance", "col-return"], ["3M", "return63", null, null, "TradingView 3-month Performance", "col-return"], ["EMA50", null, null, null, "Anchor price relative to EMA50", "col-ema"],
         ["% > EMA21", "theme_breadth21_pct", null, "theme_breadth21_pct", "Available when at least eight configured members and 80 percent coverage have valid Price, EMA21 and EMA50 values. Does not affect Theme Score or state.", "col-breadth"], ["% > EMA50", "theme_breadth50_pct", null, "theme_breadth50_pct", "Available when at least eight configured members and 80 percent coverage have valid Price, EMA21 and EMA50 values. Does not affect Theme Score or state.", "col-breadth"],
@@ -1000,12 +1017,13 @@
       head("theme", themeColumns);
       $("theme-body").innerHTML = visibleThemes.map(function (row) {
         const type = row.level === "Sector" ? "Sector" : "Theme";
-        return '<tr data-theme="' + esc(row.id) + '" class="' + (row.id === state.theme ? "active" : "") + '">' +
-          td("col-rank", row.display_rank ?? "—") +
+        return '<tr data-theme="' + esc(row.id) + '" class="' + (row.id === state.theme ? "active " : "") + (priorityCategory(row) === "primary" ? "primary-row primary-" + row.research_priority.side : "") + '">' +
+          td("col-rank", row.display_rank ?? "N/A") +
+          td("col-rank-daily", finite(row.rank_change_daily) ? '<span class="' + (row.rank_change_daily > 0 ? "positive" : row.rank_change_daily < 0 ? "negative" : "muted") + '">' + (row.rank_change_daily > 0 ? "+" : "") + row.rank_change_daily + '</span>' : "N/A") +
           td("col-name", '<div class="theme-name-cell"><span class="type-tag">' + type + '</span><button class="theme-select" aria-label="Open watchlist for ' + esc(row.name) + '">' + esc(row.name) + '</button></div>') +
           td("col-etf", row.chart_url ? '<a href="' + esc(row.chart_url) + '" target="_blank" rel="noopener noreferrer">' + esc(row.anchor) + '</a>' : esc(row.anchor)) +
           td("col-state", stateBadge(row.theme_state)) +
-          td("col-priority", '<span title="'+esc(row.research_priority?.reason || "Required inputs unavailable")+'">'+esc(row.research_priority?.label || "No directional priority")+'</span>') +
+          td("col-priority", '<span title="'+esc(row.research_priority?.reason || "Required inputs unavailable")+'">'+(priorityCategory(row) === "primary" ? '<b class="primary-marker">Primary</b> ' : "") + esc(priorityCategory(row) === "primary" ? row.research_priority.side + " research" : row.research_priority?.label || "No directional priority")+'</span>') +
           td("col-score", score(row, "theme_score")) +
           td("col-score", score(row, "current_strength_score")) +
           td("col-score", score(row, "medium_strength_score")) +
@@ -1015,7 +1033,7 @@
           td("col-ema", ema(row, 50)) +
           td("col-breadth", themeBreadthCell(row, 21)) +
           td("col-breadth", themeBreadthCell(row, 50)) + '</tr>';
-      }).join("") || '<tr><td colspan="14">No eligible ETF exposures are available in this snapshot.</td></tr>';
+      }).join("") || '<tr><td colspan="15">No eligible ETF exposures are available in this snapshot.</td></tr>';
       var selected = data.themes.find((row) => row.id === state.theme) || data.themes[0];
       if (!selected) {
         $("active-name").textContent = "Watchlist";
@@ -1044,8 +1062,7 @@
         '<div class="summary-rank">Rank ' + (selected.rank_current ?? selected.global_rank ?? "unavailable") + ' of ' + data.themes.length + '</div>' +
         '<div class="summary-breadth">Theme breadth — EMA21 ' + breadthSummary(selected, 21) + ' · EMA50 ' + breadthSummary(selected, 50) + '</div>' +
         '<div class="summary-returns"><span>Anchor EMA21 ' + ema(selected, 21) + '</span><span>Anchor EMA50 ' + ema(selected, 50) + '</span></div>';
-      var pool = $("pool").value;
-      var base = limitSelection(selected.selected || [], Number(pool));
+      var base = (selected.selected || []).slice();
       base = base.map((row) => Object.assign({}, row, { theme_id: selected.id, theme_name: selected.name, generated_at: data.dashboard_generated_at || data.generated_at }));
       visible = filtered(sortRows(base, state.stockKey, state.stockDir).map((row) => Object.assign({}, row, { display_rank: row.selection_slot })), "stock");
       var hasCuratedList = base.length > 0;
@@ -1063,13 +1080,22 @@
         const capacity = Number(data.settings?.watchlist_capacity || 20);
         $("coverage").textContent = base.length + " of " + capacity + " stocks";
       }
-      head("stock", [["#", null, null, null, "Configured position", "col-rank"],["Ticker / company", null, null, null, "Ticker, company and exchange", "col-company"],["Price","price_close",null,null,"TradingView Price","col-price"],["1D %","daily_change",null,null,"TradingView one-day price change","col-return"],["1W %","return5",null,null,"TradingView 1-week Performance","col-return"],["1M %","return21",null,null,"TradingView 1-month Performance","col-return"],["3M %","return63",null,null,"TradingView 3-month Performance","col-return"],["EMA21",null,null,null,"Price relative to EMA21","col-ema"],["EMA50",null,null,null,"Price relative to EMA50","col-ema"],["ATR%14","atr14_pct",null,null,"TradingView daily ATR percent over 14 periods","col-return"],["ADV$30","adv30_usd",null,null,"Price times average volume over 30 days","col-adv"],["Turnover 1D","turnover_1d_usd",null,null,"Price times volume for this day","col-adv"],["Rel Vol","relative_volume_1d",null,null,"TradingView relative volume for this day","col-return"],["Core / Related",null,null,null,"Stored membership relationship and reason","col-membership"],["Sector / Industry",null,null,null,"TradingView business context","col-company"],["Earnings",null,null,null,"Upcoming earnings date when supplied","col-return"]]);
+      var stockColumns = [
+        ["#",null,null,null,"Configured position","col-rank"], ["Ticker",null,null,null,"Stock ticker; information includes company, exchange and membership rationale","col-ticker"],
+        ["Price","price_close",null,null,"Stock Price","col-price"], ["1D","daily_change",null,null,"TradingView one-day price change percent","col-return"],
+        ["1W","return5",null,null,"TradingView 1W Performance percent","col-return"], ["1M","return21",null,null,"TradingView 1M Performance percent","col-return"], ["3M","return63",null,null,"TradingView 3M Performance percent","col-return"],
+        ["EMA21",null,null,null,"Stock Price vs EMA21","col-ema"], ["EMA50",null,null,null,"Stock Price vs EMA50","col-ema"],
+        ["ATR%14","atr14_pct",null,"atr14_pct",LABELS.atr14_pct.definition,"col-return"], ["Avg $Vol30","adv30_usd",null,"adv30_usd",LABELS.adv30_usd.definition,"col-adv"],
+        ["Turnover 1D","turnover_1d_usd",null,"turnover_1d_usd",LABELS.turnover_1d_usd.definition,"col-adv"], ["Rel Vol","relative_volume_1d",null,"relative_volume_1d",LABELS.relative_volume_1d.definition,"col-relvol"], ["Earnings",null,null,null,"Upcoming earnings; full date in accessible label","col-earnings"]
+      ];
+      $("stock-cols").innerHTML = stockColumns.map(function(c){return '<col class="' + c[5] + '">';}).join("");
+      head("stock", stockColumns);
       $("stock-body").innerHTML = visible.map(function (row) {
         const url = row.chart_url || null;
         const rationale = row.membership_rationale || row.evidence_note || "Business relevance rationale recorded in the membership source.";
         return '<tr>' +
-          td("col-rank", row.display_rank || "—") +
-          td("col-company", (url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + esc(row.ticker) + '</a>' : '<b>' + esc(row.ticker) + '</b>') + '<span class="company" title="' + esc(row.company) + '" aria-label="' + esc(row.company) + '">' + esc(row.company) + '</span><small>' + esc(row.exchange || "Exchange unavailable") + '</small><details><summary aria-label="Business rationale">Info</summary><div class="stock-details">' + esc(rationale) + '<br>' + esc(row.membership_source || "") + '</div></details>') +
+          td("col-rank", row.display_rank || "N/A") +
+          td("col-ticker", (url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + esc(row.ticker) + '</a>' : '<b>' + esc(row.ticker) + '</b>') + ' ' + customInfo([row.company,row.exchange,rationale].filter(Boolean).join(" · "), "Information for " + row.ticker)) +
           td("col-price", money(row.price_close)) +
           td("col-return", pct(row.daily_change)) +
           td("col-return", pct(valueAt(row,"return5"))) +
@@ -1077,14 +1103,12 @@
           td("col-return", pct(valueAt(row,"return63"))) +
           td("col-ema", ema(row,21)) +
           td("col-ema", ema(row,50)) +
-          td("col-return", finite(row.atr14_pct) ? row.atr14_pct.toFixed(2) + "%" : "—") +
+          td("col-return", finite(row.atr14_pct) ? row.atr14_pct.toFixed(2) + "%" : "N/A") +
           td("col-adv", money(row.adv30_usd,true)) +
           td("col-adv", money(row.turnover_1d_usd,true)) +
-          td("col-return", finite(row.relative_volume_1d) ? row.relative_volume_1d.toFixed(2) : "—") +
-          td("col-membership", '<span title="' + esc(rationale) + '">' + esc(row.membership_tag || "—") + '</span>') +
-          td("col-company", esc([row.sector, row.industry].filter(Boolean).join(" / ") || "—")) +
-          td("col-return", esc(row.earnings_date || "—")) + '</tr>';
-      }).join("") || (hasCuratedList ? '<tr><td colspan="16">No stocks match these filters.</td></tr>' : "");
+          td("col-relvol", finite(row.relative_volume_1d) ? row.relative_volume_1d.toFixed(2) : "N/A") +
+          td("col-earnings", earnings(row.earnings_date)) + '</tr>';
+      }).join("") || (hasCuratedList ? '<tr><td colspan="14">No stocks match these filters.</td></tr>' : "");
     }
     function download(name, text, type) {
       var url = URL.createObjectURL(new Blob([text], { type: type })),
@@ -1145,5 +1169,6 @@
     scoreBandClass: scoreBandClass,
     resolvedScoreBands: resolvedScoreBands,
     breadthThresholdClass: breadthThresholdClass,
+    directionClass: directionClass, statusClass: statusClass, priorityCategory: priorityCategory, labels: LABELS,
   };
 });

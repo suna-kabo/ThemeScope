@@ -101,6 +101,7 @@ def canonical_decision(session, generated_hkt, contexts, themes, direction, comb
     for row in sorted(themes, key=priority_sort_key):
         label = row.get('research_priority', {}).get('label', 'No directional priority')
         key = 'primary' if label.startswith('Primary') else 'secondary' if label.startswith('Secondary') else 'exception' if label.startswith('Low-priority') else 'observation'
+        row['research_priority']['category'] = key
         groups[key].append(row['id'])
     directional = direction in ('Long bias', 'Selective long', 'Short bias', 'Selective short')
     side = 'long' if direction in ('Long bias', 'Selective long') else 'short' if direction in ('Short bias', 'Selective short') else None
@@ -129,6 +130,7 @@ def canonical_decision(session, generated_hkt, contexts, themes, direction, comb
         'qqq_breadth_state': qqq.get('breadth_state'), 'combined_breadth_state': combined,
         'russell_2000_breadth_state': iwm.get('breadth_state'), 'priority_groups': groups,
         'priority_definitions': defs, 'guard_failures': guard_failures, 'divergence': divergence,
+        'market_matrix': [{'spy':a, 'qqq':b, 'breadth':c, 'direction':market_direction(a,b,c)} for a in ('Bullish','Mixed','Bearish') for b in ('Bullish','Mixed','Bearish') for c in ('Positive','Mixed','Negative')],
         'priority_matrix': {market: dict(zip(STATES, labels)) for market, labels in PRIORITIES.items()},
         'unavailable_inputs': unavailable,
     }

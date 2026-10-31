@@ -173,3 +173,10 @@ assert.deepEqual(ui.resolvedScoreBands([{class:"score-q1",min:0,max:100}]), conf
 assert.equal(ui.breadthThresholdClass(50), "breadth-positive");
 assert.equal(ui.breadthThresholdClass(49.999), "breadth-negative");
 assert.equal(ui.breadthThresholdClass(null), "breadth-na");
+assert.equal(ui.priorityCategory({research_priority:{category:"observation",group:3}}),"observation");
+assert.equal(ui.priorityCategory({research_priority:{category:"primary",group:0,side:"long"}}),"primary");
+assert.match(ui.directionClass("Short bias"), /direction-short/);
+assert.match(ui.directionClass("Long bias"), /direction-long/);
+assert.equal(ui.statusClass("Mixed"),"warning");
+assert.equal(ui.labels.adv30_usd.label,"Avg $Vol30");
+assert.match(ui.labels.adv30_usd.definition,/Price × Average Volume30/);

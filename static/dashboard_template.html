@@ -37,7 +37,8 @@
       </section>
 
       <section id="daily-plan" class="page" hidden aria-labelledby="daily-plan-title">
-        <div class="page-heading daily-plan-heading"><div><span class="eyebrow">DAILY PLAN</span><h1 id="daily-plan-title">Daily Plan</h1><p><span id="daily-session">—</span> · Generated <span id="daily-generated">—</span></p></div><div id="daily-classification" class="decision-tag">Unclassified</div></div>
+        <div class="page-heading daily-plan-heading"><div><span class="eyebrow">DAILY PLAN</span><h1 id="daily-plan-title">Daily Plan</h1><p><span id="daily-session">—</span> · Generated <span id="daily-generated">—</span></p></div></div>
+        <div id="daily-classification" class="decision-tag">Unclassified</div>
         <p id="daily-action" class="daily-action"></p>
         <section class="plan-section" aria-labelledby="decision-path-title"><h2 id="decision-path-title">Decision Path</h2><div id="decision-path" class="decision-path" role="table" aria-label="Market decision path"></div></section>
         <section class="plan-section" aria-labelledby="why-result-title"><h2 id="why-result-title">Why this result</h2><div id="why-result" class="plan-card"></div></section>
@@ -66,7 +67,7 @@
         <div class="page-heading"><div><span class="eyebrow">SELECTED COMPANIES</span><h1 id="active-name">Watchlist</h1><p id="active-summary" class="watchlist-summary"></p></div></div>
         <p id="watchlist-message" class="watchlist-message" hidden></p>
         <div id="stock-controls" class="controls"></div><p id="coverage" class="caption"></p>
-        <div class="table-wrap stock-table-wrap" id="stock-table-wrap"><table class="data-table"><thead id="stock-head"></thead><tbody id="stock-body"></tbody></table></div>
+        <div class="table-wrap stock-table-wrap" id="stock-table-wrap"><table class="data-table stock-data-table"><colgroup id="stock-cols"></colgroup><thead id="stock-head"></thead><tbody id="stock-body"></tbody></table></div>
         <div class="exports" id="stock-exports"><button id="csv">Download visible CSV</button><button id="tv">Download TradingView list</button><a href="stock_diagnostics.csv" download>Stock eligibility audit</a><span id="export-status" role="status"></span></div>
       </section>
       <footer><a href="latest_run.md" download>Run report</a> · <a href="latest_snapshot.json" download>Snapshot JSON</a> · <a href="run_bundle.zip" download>Download complete run ZIP</a></footer>
