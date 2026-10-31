@@ -82,7 +82,7 @@ def canonical_decision(session, generated_hkt, contexts, themes, direction, comb
     for label, value in (('SPY Price State', spy_price), ('QQQ Price State', qqq_price)):
         if value is None:
             unavailable.append({'input': label, 'consequence': 'Market classification is Unclassified.'})
-    if spy_price != qqq_price and combined is None:
+    if not (spy_price == qqq_price and spy_price in ('Bullish', 'Bearish')) and combined is None:
         unavailable.append({'input': 'Combined Breadth State', 'consequence': 'The selective Market matrix cell cannot be resolved.'})
     unanimous = spy_price == qqq_price and spy_price in ('Bullish', 'Bearish')
     if unavailable:
@@ -107,13 +107,17 @@ def canonical_decision(session, generated_hkt, contexts, themes, direction, comb
     defs = {}
     for key in groups:
         labels = sorted({next((t['research_priority']['label'] for t in themes if t['id'] == theme_id), '') for theme_id in groups[key]})
-        states = [state for state in STATES if any(t['id'] in groups[key] and t.get('theme_state') == state for t in themes)]
+        states = [state for state, label in zip(STATES, PRIORITIES.get(direction, PRIORITIES['Unclassified'])) if ('primary' if label.startswith('Primary') else 'secondary' if label.startswith('Secondary') else 'exception' if label.startswith('Low-priority') else 'observation') == key] if key != 'observation' else [state for state in STATES if any(t['id'] in groups[key] and t.get('theme_state') == state for t in themes)]
         defs[key] = {'labels': labels, 'theme_states': states, 'ema50_guard': (f'Anchor close must be strictly {"above" if side == "long" else "below"} EMA50.' if directional and key != 'observation' else None)}
     guard_failures = [{'theme_id': row['id'], 'reason': row['research_priority'].get('reason')} for row in themes if row['research_priority'].get('label') == 'Observation only']
     if spy.get('breadth_state') and qqq.get('breadth_state') and spy.get('breadth_state') != qqq.get('breadth_state'):
         divergence = f"SPY Breadth is {spy['breadth_state']} while QQQ Breadth is {qqq['breadth_state']}. Participation is split across the two primary index universes. Price direction remains the Market-direction input under the approved matrix."
     elif unanimous and combined not in (None, 'Mixed') and ((spy_price == 'Bullish') != (combined == 'Positive')):
         divergence = f'Price direction is {spy_price} while Combined Breadth is {combined}. Price direction remains the Market-direction input under the approved matrix.'
+    elif iwm.get('price_state') and unanimous and iwm['price_state'] != spy_price:
+        divergence = f"SPY and QQQ are {spy_price} while IWM is {iwm['price_state']}. IWM and Russell 2000 Breadth are context only, with no vote or veto."
+    elif combined is None:
+        divergence = 'Combined Breadth is unavailable; alignment cannot be established.'
     else:
         divergence = 'Price direction and Breadth are aligned.'
     return {

@@ -256,18 +256,8 @@
     var omitted = 0;
     var duplicates = 0;
     rows.forEach(function (row) {
-      var exchange = String(row.exchange || "").toUpperCase();
-      var prefix =
-        exchange.indexOf("NASDAQ") === 0
-          ? "NASDAQ"
-          : exchange.indexOf("NYSE") === 0
-            ? "NYSE"
-            : "";
-      if (!prefix) {
-        omitted += 1;
-        return;
-      }
-      var key = prefix + ":" + row.ticker;
+      var key = row.tradingview_symbol;
+      if (!key) throw new Error("TradingView identifier unresolved: " + row.ticker);
       if (seen.has(key)) {
         duplicates += 1;
         return;
@@ -305,6 +295,8 @@
     });
   }
   function init(data) {
+    if (document.documentElement.dataset.themescopeInitialized) return;
+    document.documentElement.dataset.themescopeInitialized = "true";
     var $ = function (id) {
         return document.getElementById(id);
       },
@@ -319,8 +311,6 @@
       '<span title="Input unavailable; see diagnostic export">—</span>';
     var scoreConfig = data.score_methodology || {};
     var scoreBands = resolvedScoreBands(data.ui_configuration?.score_bands);
-    var currentWeights = scoreConfig.current_strength_weights || {};
-    var mediumWeights = scoreConfig.medium_strength_weights || {};
     var finalWeights = scoreConfig.theme_score_weights || {};
     var weightText = function (part, key) {
       var value = part[key];
@@ -957,10 +947,6 @@
       const metric = row.theme_watchlist_breadth?.[String(period)];
       const value = row["theme_breadth" + period + "_pct"];
       if (!metric || !finite(value) || metric.status !== "valid") {
-        const valid = row["theme_breadth" + period + "_valid"] ?? metric?.valid_count;
-        const count = finite(valid) && finite(metric?.eligible_count) ? valid + '/' + metric.eligible_count + ' valid members' : 'counts unavailable';
-        const reason = metric?.reason || row["breadth_unavailable_reason_" + period] || "Theme breadth is unavailable";
-        const detail = "Theme-watchlist breadth unavailable · " + count + " · " + reason;
       return '<span class="breadth-unavailable-cell" aria-label="Theme Breadth unavailable">N/A</span>';
       }
       const thresholdClass = breadthThresholdClass(value);
@@ -1079,13 +1065,11 @@
       }
       head("stock", [["#", null, null, null, "Configured position", "col-rank"],["Ticker / company", null, null, null, "Ticker, company and exchange", "col-company"],["Price","price_close",null,null,"TradingView Price","col-price"],["1D %","daily_change",null,null,"TradingView one-day price change","col-return"],["1W %","return5",null,null,"TradingView 1-week Performance","col-return"],["1M %","return21",null,null,"TradingView 1-month Performance","col-return"],["3M %","return63",null,null,"TradingView 3-month Performance","col-return"],["EMA21",null,null,null,"Price relative to EMA21","col-ema"],["EMA50",null,null,null,"Price relative to EMA50","col-ema"],["ATR%14","atr14_pct",null,null,"TradingView daily ATR percent over 14 periods","col-return"],["ADV$30","adv30_usd",null,null,"Price times average volume over 30 days","col-adv"],["Turnover 1D","turnover_1d_usd",null,null,"Price times volume for this day","col-adv"],["Rel Vol","relative_volume_1d",null,null,"TradingView relative volume for this day","col-return"],["Core / Related",null,null,null,"Stored membership relationship and reason","col-membership"],["Sector / Industry",null,null,null,"TradingView business context","col-company"],["Earnings",null,null,null,"Upcoming earnings date when supplied","col-return"]]);
       $("stock-body").innerHTML = visible.map(function (row) {
-        const exchange = String(row.exchange || "").toUpperCase();
-        const prefix = exchange.startsWith("NASDAQ") ? "NASDAQ" : exchange.startsWith("NYSE") ? "NYSE" : null;
-        const url = prefix ? "https://www.tradingview.com/chart/?symbol=" + encodeURIComponent(prefix + ":" + row.ticker) : null;
+        const url = row.chart_url || null;
         const rationale = row.membership_rationale || row.evidence_note || "Business relevance rationale recorded in the membership source.";
         return '<tr>' +
           td("col-rank", row.display_rank || "—") +
-          td("col-company", '<b>' + esc(row.ticker) + '</b><span class="company" title="' + esc(row.company) + '" aria-label="' + esc(row.company) + '">' + esc(row.company) + '</span><small>' + esc(row.exchange || "Exchange unavailable") + '</small><details><summary aria-label="Business rationale">Info</summary><div class="stock-details">' + esc(rationale) + '<br>' + esc(row.membership_source || "") + '</div></details>') +
+          td("col-company", (url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + esc(row.ticker) + '</a>' : '<b>' + esc(row.ticker) + '</b>') + '<span class="company" title="' + esc(row.company) + '" aria-label="' + esc(row.company) + '">' + esc(row.company) + '</span><small>' + esc(row.exchange || "Exchange unavailable") + '</small><details><summary aria-label="Business rationale">Info</summary><div class="stock-details">' + esc(rationale) + '<br>' + esc(row.membership_source || "") + '</div></details>') +
           td("col-price", money(row.price_close)) +
           td("col-return", pct(row.daily_change)) +
           td("col-return", pct(valueAt(row,"return5"))) +
@@ -1124,7 +1108,9 @@
         visible.length + " visible rows exported.";
     };
     $("tv").onclick = () => {
-      var result = tradingViewExport(visible);
+      var selected = data.themes.find(function (row) { return row.id === state.theme; });
+      var result = tradingViewExport([selected].concat(selected.selected || []));
+      result.text = "###" + selected.name.replace(/,/g, " ") + " (" + selected.anchor + ")," + result.text;
       download("themescope-" + state.theme + ".txt", result.text, "text/plain");
       $("export-status").textContent =
         result.count +

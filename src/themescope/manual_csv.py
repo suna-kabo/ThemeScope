@@ -290,10 +290,11 @@ def build_release(root: Path, paths: dict[str, Path], session: str) -> tuple[dic
         breadth_inputs = []
         for slot, member in enumerate(record.get("members", [])[:int(manual_config["watchlist_capacity"])], 1):
             daily = stock_rows.get(member["ticker"])
-            if daily:
-                breadth_inputs.append(daily)
+            breadth_inputs.append(daily or {"symbol": member["ticker"]})
             fields = _row_fields(daily) if daily else {"price_close": None, "ema21": None, "ema50": None, "above_ema21": None, "above_ema50": None, "returns": {key: {"value": None, "status": "unavailable"} for key in ("5", "21", "63")}, "adv30_usd": None}
             selected.append({**member, **fields, "ticker": member["ticker"], "company": member.get("company") or member["ticker"], "theme_id": theme_id, "theme_name": config_themes.get(theme_id, {}).get("name", theme_id), "anchor": anchor, "membership_tag": member.get("relationship"), "membership_rationale": member.get("reason"), "membership_source": "Configured theme watchlist", "selection_slot": slot, "selection_queue": member.get("relationship"), "session_date": session, "sector": daily.get("sector") if daily else None, "industry": daily.get("industry") if daily else None, "market_cap_usd": daily.get("market_cap") if daily else None, "turnover_1d_usd": daily.get("turnover_1d") if daily else None, "relative_volume_1d": daily.get("relative_volume_1d") if daily else None, "atr14_pct": daily.get("atr14_pct") if daily else None, "earnings_date": daily.get("earnings_date") if daily else None, "metric_status": "available" if daily else "unavailable"})
+        for stock in selected:
+            stock["excess_returns"] = {key: {"value": stock["returns"][key]["value"] - _returns(source)[key]["value"] if stock["returns"][key]["value"] is not None and _returns(source)[key]["value"] is not None else None} for key in ("5", "21", "63")}
         theme_breadth = breadth(breadth_inputs, minimum=int(manual_config["theme_breadth_minimum_valid"]), coverage_floor=float(manual_config["breadth_minimum_coverage"]))
         fields = _row_fields(source)
         name = config_themes.get(theme_id, {}).get("name", theme_id)
@@ -379,5 +380,7 @@ def build_release(root: Path, paths: dict[str, Path], session: str) -> tuple[dic
         "publication_scope": "local_only",
         "manual_csv_audit": audit,
     }
+    from .tradingview import attach, load_mapping
+    attach(snapshot, load_mapping(root))
     raw = {"source": "tradingview-csv", "input_audit": audits, "watchlists": watchlists, "network_requests": 0}
     return snapshot, raw

@@ -1179,18 +1179,12 @@ def load_approved_config():
     return json.loads(path.read_text()) if path.exists() else {}
 
 
-def _manual_symbol(row: dict[str, Any]) -> str | None:
-    ticker = str(row.get("ticker") or row.get("symbol") or "").strip().upper()
-    exchange = str(row.get("exchange") or "").strip().upper()
-    if not ticker:
-        return None
-    prefix = "NASDAQ" if exchange.startswith("NASDAQ") else "NYSE" if exchange.startswith("NYSE") else exchange
-    return f"{prefix}:{ticker}" if prefix else ticker
 
 
 def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_dir: Path) -> None:
     """Write the compact local-only manual CSV release without live-source artifacts."""
     output_dir.mkdir(parents=True, exist_ok=True)
+    from src.themescope.tradingview import heading, theme_symbols
     audit = snapshot["manual_csv_audit"]
     _write_json(output_dir / "latest_snapshot.json", snapshot)
     _write_json(output_dir / "run_audit.json", audit)
@@ -1239,31 +1233,25 @@ def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_di
     _write_csv(output_dir / "themes.csv", theme_rows, list(theme_rows[0]))
     _write_csv(output_dir / "theme_stocks.csv", stock_rows, list(stock_rows[0]) if stock_rows else ["theme_id", "ticker", "metric_status"])
 
-    etf_lines = []
-    for row in snapshot["themes"]:
-        symbol = _manual_symbol({"ticker": row["anchor"], "exchange": row.get("exchange")})
-        if symbol:
-            etf_lines.append(symbol)
-    for row in snapshot["context"]:
-        symbol = _manual_symbol(row)
-        if symbol:
-            etf_lines.append(symbol)
-    (output_dir / "tradingview_sector_theme_etfs.txt").write_text(",".join(dict.fromkeys(etf_lines)) + "\n", encoding="utf-8")
+    etf_lines = list(dict.fromkeys(row["tradingview_symbol"] for row in snapshot["themes"] + snapshot["context"]))
+    (output_dir / "tradingview_sector_theme_etfs.txt").write_text(",".join(etf_lines) + "\n", encoding="utf-8")
     grouped_lines = []
-    individual: dict[str, list[str]] = {}
-    for theme in snapshot["themes"]:
-        symbols = [symbol for stock in theme.get("selected", []) if (symbol := _manual_symbol(stock))]
-        individual[theme["id"]] = symbols
-        grouped_lines.extend(["###" + theme["name"], *symbols])
-    (output_dir / "tradingview_all_theme_stocks.txt").write_text(",".join(grouped_lines) + "\n", encoding="utf-8")
+    individual = {}
     with zipfile.ZipFile(output_dir / "individual_theme_watchlists.zip", "w", compression=zipfile.ZIP_DEFLATED) as bundle:
-        for theme_id, symbols in individual.items():
-            bundle.writestr(theme_id + ".txt", ",".join(symbols) + ("\n" if symbols else ""))
+        for theme in snapshot["themes"]:
+            symbols = theme_symbols(theme)
+            individual[theme["id"]] = symbols
+            tokens = [heading(theme), *symbols]
+            grouped_lines.extend(tokens)
+            bundle.writestr(theme["id"] + ".txt", ",".join(tokens) + "\n")
+    (output_dir / "tradingview_all_theme_stocks.txt").write_text(",".join(grouped_lines) + "\n", encoding="utf-8")
     _write_json(output_dir / "individual_theme_watchlists.json", individual)
+    audit["tradingview"] = {"identifier_evidence": "config/tradingview_symbols.json", "platform_import_tested": False, "grouped_duplicate_behavior_tested": False, "anchor_first": True, "unresolved": []}
 
     template = (ROOT / "static/dashboard_template.html").read_text(encoding="utf-8")
     style = (ROOT / "static/dashboard.css").read_text(encoding="utf-8")
     script = (ROOT / "static/dashboard.js").read_text(encoding="utf-8")
+    template = template.replace('href="registry_audit.csv"', 'href="run_audit.json"').replace("Registry audit CSV", "Run audit JSON").replace('href="stock_diagnostics.csv"', 'href="theme_stocks.csv"').replace("Stock eligibility audit", "Configured stock CSV")
     payload = json.dumps(_dashboard_snapshot(snapshot), ensure_ascii=False, separators=(",", ":"), allow_nan=False).replace("</", "<\\/").replace("\u2028", "\\u2028").replace("\u2029", "\\u2029")
     font_data = base64.b64encode((ROOT / "static/InterVariable.woff2").read_bytes()).decode("ascii")
     html = template.replace("{{STYLE}}", style.replace("{{FONT_DATA}}", font_data)).replace("{{SCRIPT}}", script).replace("{{SNAPSHOT_JSON}}", payload)
@@ -1274,8 +1262,11 @@ def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_di
     (output_dir / "dashboard.html").write_text(html, encoding="utf-8")
     shutil.copyfile(ROOT / "static/Inter-LICENSE.txt", output_dir / "Inter-LICENSE.txt")
     _write_json(output_dir / "refresh_status.json", {"status": "success", "source": "tradingview-csv", "data_date": snapshot["session_date"], "data_complete": True})
+    (output_dir / "latest_run.md").write_text(
+        "# Manual CSV run\n\nUS session: " + snapshot["session_date"] + "\n\nMarket: " + snapshot["decision"]["market_classification"] +
+        "\n\n" + snapshot["decision"]["reason"] + "\n\nDetailed metrics and input hashes: run_audit.json. TradingView platform import has not been performed.\n", encoding="utf-8")
     audit["export_file_counts"] = {"theme_watchlists": len(individual), "canonical_json": 1, "csv": 3, "tradingview_text": 2, "watchlist_zip": 1}
-    audit["browser_validation"] = {"inline_assets": True, "csp_connect_none": True, "automatic_external_requests": 0}
+    audit["browser_validation"] = {"inline_assets": True, "csp_connect_none": True, "automatic_external_requests": "not measured by generator; see browser audit"}
     audit["publication_pass"] = True
     _write_json(output_dir / "run_audit.json", audit)
 
@@ -1305,6 +1296,7 @@ def _run_manual_csv(args: argparse.Namespace, output: Path, launched_at: float) 
             template = (ROOT / "static/dashboard_template.html").read_text(encoding="utf-8")
             style = (ROOT / "static/dashboard.css").read_text(encoding="utf-8")
             script = (ROOT / "static/dashboard.js").read_text(encoding="utf-8")
+            template = template.replace('href="registry_audit.csv"', 'href="run_audit.json"').replace("Registry audit CSV", "Run audit JSON").replace('href="stock_diagnostics.csv"', 'href="theme_stocks.csv"').replace("Stock eligibility audit", "Configured stock CSV")
             payload = json.dumps(_dashboard_snapshot(snapshot), ensure_ascii=False, separators=(",", ":"), allow_nan=False).replace("</", "<\\/").replace("\u2028", "\\u2028").replace("\u2029", "\\u2029")
             font_data = base64.b64encode((ROOT / "static/InterVariable.woff2").read_bytes()).decode("ascii")
             (stage / "dashboard.html").write_text(template.replace("{{STYLE}}", style.replace("{{FONT_DATA}}", font_data)).replace("{{SCRIPT}}", script).replace("{{SNAPSHOT_JSON}}", payload), encoding="utf-8")

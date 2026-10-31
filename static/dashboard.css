@@ -440,3 +440,17 @@ footer { margin-top: 25px; padding: 15px 0 25px; border-top: 1px solid var(--lin
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
 }
+/* Essential table data remains readable at native zoom. */
+.theme-data-table { font-size: 12px; }
+.theme-table-wrap .state-tag { font-size: 11px; }
+.theme-table-wrap .score-chip { font-size: 12px; }
+.type-tag { font-size: 10px; }
+@media (max-width: 1199px) {
+  .theme-data-table .col-rank { position: sticky; left: 0; z-index: 2; background: var(--panel); }
+  .theme-data-table .col-name { position: sticky; left: 34px; z-index: 2; background: var(--panel); }
+  .theme-data-table th.col-rank, .theme-data-table th.col-name { z-index: 3; background: var(--panel-raised); }
+}
+html[data-mode="light"] .state-leading { color: #24633f; }
+html[data-mode="light"] .state-improving { color: #285b94; }
+html[data-mode="light"] .state-fading { color: #775100; }
+html[data-mode="light"] .state-lagging { color: #96333f; }

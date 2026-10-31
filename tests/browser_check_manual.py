@@ -143,6 +143,15 @@ def main() -> int:
             headers = page.locator("#stock-head").inner_text()
             for label in ("1D %", "1W %", "1M %", "3M %", "ATR%14", "ADV$30", "Turnover 1D", "Rel Vol", "Sector / Industry", "Earnings"):
                 assert label in headers
+            # Download must preserve the configured order even after view sorting/filtering.
+            with page.expect_download() as download_info:
+                page.click("#tv")
+            downloaded = download_info.value
+            tokens = Path(downloaded.path()).read_text().strip().split(",")
+            current = next(t for t in snapshot["themes"] if t["id"] == page.locator("#watchlist-theme-selector").input_value())
+            assert tokens[1:] == [current["tradingview_symbol"]] + [r["tradingview_symbol"] for r in current["selected"]]
+            assert not errors, errors
+            assert not [request for request in requests if urlparse(request).hostname not in {"127.0.0.1", None}]
             browser.close()
     finally:
         server.shutdown()

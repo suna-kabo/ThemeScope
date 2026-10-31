@@ -12,7 +12,7 @@ const rows = [
     adv30_usd: 10,
     returns: { 21: { value: 0.1 } },
     excess_returns: { 21: { value: 0.02 } },
-    exchange: "Nasdaq Global Select Market",
+    exchange: "Nasdaq Global Select Market", tradingview_symbol: "NASDAQ:AAA",
     theme_id: "semiconductors",
     theme_name: "Semiconductors",
   },
@@ -25,7 +25,7 @@ const rows = [
     adv30_usd: null,
     returns: { 21: { value: null } },
     excess_returns: { 21: { value: null } },
-    exchange: "NYSE",
+    exchange: "NYSE", tradingview_symbol: "NYSE:BBB",
     theme_id: "cybersecurity",
     theme_name: "Cybersecurity",
   },
@@ -36,7 +36,7 @@ const rows = [
     relative_state: "Outperforming",
     trend: "Uptrend",
     adv30_usd: 4,
-    exchange: "NASDAQ",
+    exchange: "NASDAQ", tradingview_symbol: "NASDAQ:AAA",
     theme_id: "cybersecurity",
     theme_name: "Cybersecurity",
   },
@@ -79,10 +79,11 @@ assert.equal(themeCsvLines[0].split(",").length, themeCsvLines[1].split(",").len
 assert.equal(themeCsvLines[1].split(",")[themeCsvLines[0].split(",").indexOf('"theme_id"')], '"u"');
 assert.equal(themeCsvLines[1].split(",")[themeCsvLines[0].split(",").indexOf('"return21_pct"')], '"10.75"');
 assert.doesNotMatch(themeCsvLines[0], /excess21_pp|rank_t_minus_5|breadth21_change_5_pp/);
-const tradingView = ui.tradingViewExport([rows[0], rows[1], rows[2], rows[3]]);
+const tradingView = ui.tradingViewExport([rows[0], rows[1], rows[2]]);
 assert.equal(tradingView.count, 2);
 assert.equal(tradingView.duplicates, 1);
-assert.equal(tradingView.omitted, 1);
+assert.equal(tradingView.omitted, 0);
+assert.throws(() => ui.tradingViewExport([rows[3]]), /unresolved/);
 assert.match(tradingView.text, /^NASDAQ:AAA,NYSE:BBB\n$/);
 console.log("Dashboard interaction and export helpers passed.");
 assert.deepEqual(
