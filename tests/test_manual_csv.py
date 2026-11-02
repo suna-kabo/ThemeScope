@@ -35,6 +35,14 @@ class ManualCSVTests(unittest.TestCase):
         self.assertIsNone(rows[0]["earnings_date"])
         self.assertIn("Unused column", audit["columns"])
 
+    def test_missing_invalid_market_cap_retains_stock(self):
+        for value in ("", "NaN", "-1"):
+            with self.subTest(value=value):
+                rows, audit = parse_csv(self._csv(HEADER + ROW.replace("3000000000", value)), "stock")
+                self.assertEqual(rows[0]["symbol"], "AAA")
+                self.assertIsNone(rows[0]["market_cap"])
+                if value: self.assertTrue(audit["numeric_warnings"])
+
     def test_duplicate_display_column_uses_first_and_records_ignored(self):
         header = HEADER.rstrip().replace("Unused column", '"Price change %, 1 day"') + "\n"
         rows, audit = parse_csv(self._csv(header + ROW.replace("ignored", "99")), "stock")

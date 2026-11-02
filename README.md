@@ -72,3 +72,11 @@ Key files:
 ### Local daily rank history
 
 Successful manual imports save `local_history/YYYY-MM-DD.json` inside the output directory and include the current session record in the run ZIP. Reuse the same output directory for daily runs and preserve its `local_history` folder. Δ Rank compares canonical ranks only against the immediately preceding US trading session with matching methodology, ranking configuration and eligible anchors. First runs and missing or incompatible prior sessions show N/A. Same-session reruns replace that date only; failed imports preserve existing dashboard/history. Synthetic history tests use temporary directories.
+
+### Daily scanning files and views
+
+The five versioned groups in `config/watchlist_exports.json` provide stable thematic chart navigation. Use `tradingview_configured_stocks.txt` (stocks only, deduplicated) to collect the daily Stock CSV for every fixed member without screener filters. Candidate screening CSV remains an optional maintenance input; daily generation still requires only the existing five CSV roles. Missing daily rows remain configured and are reported.
+
+Daily Plan contains the deduplicated Daily Primary Candidates view, a complete **Export all Primary stocks** action, and expected earnings within the session date through seven calendar days later. Per-stock anchor selectors retain separate comparisons for overlapping Primary themes. Watchlist offers Performance and Relative Strength views; matching TradingView stock-minus-selected-ETF differences are percentage points. These are browsing tools, not stock entry qualification.
+
+All thematic files count repeated symbols and anchors against the configured 1,000-instrument limit and split only at theme boundaries; stock-only lists split deterministically. Optional individual-theme files preserve complete overlapping memberships. Grouped-section acceptance and duplicate handling have not been tested in a TradingView account.

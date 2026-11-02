@@ -462,7 +462,7 @@ tr:focus-within { outline: 2px solid var(--accent); outline-offset: -2px; }
 .market-price-row { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; padding: 0; border: 0; }
 .market-daily { text-align: right; }
 .market-returns { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); margin: 16px 0 0; gap: 8px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
-.stock-data-table { width: 100%; min-width: 1160px; table-layout: fixed; font-size: 12px; }
+.stock-data-table { width: 100%; min-width: var(--stock-table-min-width); table-layout: fixed; font-size: 12px; }
 .stock-data-table col.col-rank { width: 32px; }
 .stock-data-table col.col-ticker { width: 94px; }
 .stock-data-table col.col-price { width: 76px; }
@@ -483,3 +483,51 @@ tr:focus-within { outline: 2px solid var(--accent); outline-offset: -2px; }
 #watchlist-theme-selector { font-family: inherit; font-weight: 500; }
 #watchlist-theme-selector optgroup { font-family: inherit; font-weight: 600; }
 #watchlist-theme-selector option { font-family: inherit; font-weight: 400; }
+/* Focused scanning surfaces share existing geometry, font and color semantics. */
+.section-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-3); }
+.section-heading h2 { margin-bottom: var(--space-2); }
+.section-heading p { margin: 0; }
+.export-navigation #grouped-export-links { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-4); }
+.stock-data-table col.col-cap { width: var(--stock-cap-width); }
+.stock-data-table .col-cap, .stock-data-table .col-rs-return, .stock-data-table .col-rs-diff { text-align: right; --header-justify: flex-end; }
+.stock-data-table .col-anchor { text-align: center; --header-justify: center; }
+.stock-data-table col.col-anchor { width: 64px; }
+.stock-data-table col.col-rs-return { width: var(--rs-return-width); }
+.stock-data-table col.col-rs-diff { width: var(--rs-difference-width); }
+.relative-view .stock-data-table { min-width: var(--rs-table-min-width); }
+.candidate-data-table { width: 100%; min-width: var(--candidate-table-min-width); table-layout: fixed; font-size: 12px; }
+.candidate-data-table th, .candidate-data-table td { height: 42px; padding: var(--space-2); vertical-align: middle; }
+.candidate-data-table th:first-child, .candidate-data-table td:first-child, .candidate-data-table th:nth-child(3), .candidate-data-table td:nth-child(3) { text-align: left; }
+.candidate-themes { white-space: normal; line-height: 1.5; }
+.candidate-themes a { display: inline; }
+.candidate-data-table select { width: 100%; min-width: 0; font-weight: 500; }
+.candidate-data-table option { font-weight: 400; }
+#expected-earnings-content { margin-top: var(--space-4); }
+#expected-earnings-content li { margin-bottom: var(--space-2); }
+@media (max-width: 760px) { .section-heading { align-items: flex-start; flex-direction: column; } }
+.candidate-data-table col.col-ticker, .candidate-data-table col.col-cap { width: var(--candidate-metric-width); }
+.candidate-data-table col.col-contexts { width: var(--candidate-theme-width); }
+.candidate-data-table col.col-performance { width: var(--candidate-return-width); }
+.candidate-data-table col.col-earnings { width: var(--candidate-date-width); }
+.candidate-data-table col.col-context-anchor { width: var(--candidate-anchor-width); }
+.candidate-data-table col.col-diff { width: var(--candidate-difference-width); }
+.candidate-table-wrap { max-height: var(--primary-table-height); overflow: auto; }
+@media (max-width: 760px) { .candidate-table-wrap { max-height: 480px; } }
+#expected-earnings-content { max-height: var(--expected-earnings-height); overflow: auto; }
+
+:root {
+  --stock-cap-width: 94px;
+  --rs-return-width: 94px;
+  --rs-difference-width: 138px;
+  --candidate-metric-width: 100px;
+  --candidate-theme-width: 250px;
+  --candidate-return-width: 90px;
+  --candidate-date-width: 110px;
+  --candidate-anchor-width: 130px;
+  --candidate-difference-width: 120px;
+  --primary-table-height: 560px;
+  --expected-earnings-height: 360px;
+  --stock-table-min-width: 1230px;
+  --rs-table-min-width: 1160px;
+  --candidate-table-min-width: 1120px;
+}

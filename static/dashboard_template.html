@@ -44,6 +44,12 @@
         <section class="plan-section" aria-labelledby="why-result-title"><h2 id="why-result-title">Why this result</h2><div id="why-result" class="plan-card"></div></section>
         <section class="plan-section" aria-labelledby="research-priorities-title"><h2 id="research-priorities-title">Today's Research Priorities</h2><div id="daily-priorities" class="priority-grid"></div><div id="qualification-summary" class="qualification-summary"></div></section>
         <section class="plan-section" aria-labelledby="divergence-title"><h2 id="divergence-title">Divergence context</h2><div id="divergence-context" class="plan-card"></div></section>
+        <section class="plan-section" aria-labelledby="primary-candidates-title">
+          <div class="section-heading"><div><h2 id="primary-candidates-title">Daily Primary Candidates</h2><p class="caption">Configured members of final Primary themes. Review actual setups separately.</p></div><button id="primary-export" type="button">Export all Primary stocks</button></div>
+          <div id="primary-controls" class="controls"></div><p id="primary-count" class="caption" role="status"></p>
+          <div class="table-wrap candidate-table-wrap"><table class="data-table candidate-data-table"><colgroup id="primary-cols"></colgroup><thead id="primary-head"></thead><tbody id="primary-body"></tbody></table></div>
+        </section>
+        <details id="expected-earnings" class="help-card"><summary>Expected earnings within the next 7 calendar days</summary><div id="expected-earnings-content"></div></details>
         <details id="daily-methodology" class="help-card methodology"><summary>View full methodology</summary><div id="methodology-content"></div></details>
         <div class="fixed-limitations"><p>Research Priority is not an entry signal.</p><p>Lagging does not mean oversold.</p><p>Fading does not automatically mean a confirmed downtrend.</p></div>
       </section>
@@ -51,6 +57,7 @@
       <section id="sectors-themes" class="page" hidden aria-labelledby="themes-title">
         <div class="page-heading"><div><span class="eyebrow">ELIGIBLE EQUITY EXPOSURES</span><h1 id="themes-title">Sectors &amp; Themes</h1><p>Sortable ETF comparisons. Rank is global within the eligible registry; filters do not rerank the remaining rows.</p></div><a class="download-link" href="themes.csv" download>Full ranking CSV</a></div>
         <details class="help-card"><summary>Score and state definitions</summary><p id="score-method-description">Score weights and inputs come from this snapshot’s configured methodology.</p><p><b>Improving</b> means the current score is in the stronger half while the medium score is in the weaker half. <b>Fading</b> means the reverse. These cross-sectional labels do not establish a time-series reversal or rotation.</p></details>
+        <details class="help-card export-navigation"><summary>TradingView watchlists and daily data</summary><div id="grouped-export-links"></div><p class="caption">Configured-stock TXT → TradingView daily Stock CSV for all fixed members. Candidate screening CSV is optional maintenance input. Grouped TXT files support chart navigation; Daily Primary TXT supports focused stock scanning. Section and duplicate behavior still require platform import verification.</p></details>
         <div id="theme-controls" class="controls"></div>
         <p id="theme-count" class="caption"></p>
         <div class="table-wrap theme-table-wrap"><table class="data-table theme-data-table"><colgroup id="theme-cols"></colgroup><thead id="theme-head"></thead><tbody id="theme-body"></tbody></table></div>

@@ -1185,6 +1185,15 @@ def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_di
     """Write the compact local-only manual CSV release without live-source artifacts."""
     output_dir.mkdir(parents=True, exist_ok=True)
     from src.themescope.tradingview import heading, theme_symbols
+    from src.themescope.daily_lists import build as build_daily_lists
+    export_files = build_daily_lists(snapshot, snapshot["export_configuration"])
+    for name, content in export_files.items():
+        (output_dir / name).write_text(content, encoding="utf-8")
+    primary_files = [item["file"] for item in snapshot["export_manifest"] if item["role"] == "daily_primary_scan"]
+    if len(primary_files) > 1:
+        with zipfile.ZipFile(output_dir / ("tradingview_primary_stocks_" + snapshot["session_date"] + ".zip"), "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            for name in primary_files:
+                archive.writestr(name, export_files[name])
     audit = snapshot["manual_csv_audit"]
     _write_json(output_dir / "latest_snapshot.json", snapshot)
     _write_json(output_dir / "run_audit.json", audit)
@@ -1193,6 +1202,8 @@ def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_di
         "market_classification": snapshot["market_classification"],
         "context": snapshot["context"],
         "themes": snapshot["themes"],
+        "daily_primary": snapshot["daily_primary"],
+        "export_manifest": snapshot["export_manifest"],
     })
     market_rows = []
     for row in snapshot["context"]:
@@ -1223,6 +1234,7 @@ def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_di
             stock_rows.append({
                 "theme_id": row["id"], "theme": row["name"], "anchor": row["anchor"], "ticker": stock["ticker"], "company": stock.get("company"),
                 "exchange": stock.get("exchange"), "relationship": stock.get("membership_tag"), "membership_reason": stock.get("membership_rationale"),
+                "market_cap_usd": stock.get("market_cap_usd"), "excess_1m_pp": stock.get("excess21_pp"), "excess_3m_pp": stock.get("excess63_pp"),
                 "metric_status": stock.get("metric_status"), "price": stock.get("price_close"), "change_1d_pct": stock.get("daily_change") * 100 if stock.get("daily_change") is not None else None,
                 "performance_1w_pct": stock.get("returns", {}).get("5", {}).get("value") * 100 if stock.get("returns", {}).get("5", {}).get("value") is not None else None,
                 "performance_1m_pct": stock.get("returns", {}).get("21", {}).get("value") * 100 if stock.get("returns", {}).get("21", {}).get("value") is not None else None,
@@ -1236,16 +1248,13 @@ def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_di
 
     etf_lines = list(dict.fromkeys(row["tradingview_symbol"] for row in snapshot["themes"] + snapshot["context"]))
     (output_dir / "tradingview_sector_theme_etfs.txt").write_text(",".join(etf_lines) + "\n", encoding="utf-8")
-    grouped_lines = []
     individual = {}
     with zipfile.ZipFile(output_dir / "individual_theme_watchlists.zip", "w", compression=zipfile.ZIP_DEFLATED) as bundle:
         for theme in snapshot["themes"]:
             symbols = theme_symbols(theme)
             individual[theme["id"]] = symbols
             tokens = [heading(theme), *symbols]
-            grouped_lines.extend(tokens)
             bundle.writestr(theme["id"] + ".txt", ",".join(tokens) + "\n")
-    (output_dir / "tradingview_all_theme_stocks.txt").write_text(",".join(grouped_lines) + "\n", encoding="utf-8")
     _write_json(output_dir / "individual_theme_watchlists.json", individual)
     audit["tradingview"] = {"identifier_evidence": "config/tradingview_symbols.json", "platform_import_tested": False, "grouped_duplicate_behavior_tested": False, "anchor_first": True, "unresolved": []}
 
@@ -1266,7 +1275,7 @@ def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_di
     (output_dir / "latest_run.md").write_text(
         "# Manual CSV run\n\nUS session: " + snapshot["session_date"] + "\n\nMarket: " + snapshot["decision"]["market_classification"] +
         "\n\n" + snapshot["decision"]["reason"] + "\n\nDetailed metrics and input hashes: run_audit.json. TradingView platform import has not been performed.\n", encoding="utf-8")
-    audit["export_file_counts"] = {"theme_watchlists": len(individual), "canonical_json": 1, "csv": 3, "tradingview_text": 2, "watchlist_zip": 1}
+    audit["export_file_counts"] = {"theme_watchlists": len(individual), "canonical_json": 1, "csv": 3, "tradingview_text": len(snapshot["export_manifest"]) + 1, "watchlist_zip": 1}
     audit["browser_validation"] = {"inline_assets": True, "csp_connect_none": True, "automatic_external_requests": "not measured by generator; see browser audit"}
     audit["publication_pass"] = True
     _write_json(output_dir / "run_audit.json", audit)
@@ -1282,6 +1291,16 @@ def _run_manual_csv(args: argparse.Namespace, output: Path, launched_at: float) 
         snapshot, raw = build_release(ROOT, paths, args.as_of)
         history_record = apply_history(snapshot, output / "local_history", ROOT / "config/calendars/xnys_2020_2035_v1.json")
         build_elapsed = time.perf_counter() - build_started
+        previous_exports = {"tradingview_all_theme_stocks.txt"}
+        previous_path = output / "latest_snapshot.json"
+        if previous_path.exists():
+            try:
+                previous_snapshot = json.loads(previous_path.read_text())
+                previous_exports.update(item["file"] for item in previous_snapshot.get("export_manifest", []))
+                previous_exports.update(previous_snapshot.get("export_archives", []))
+            except (ValueError, KeyError, TypeError, AttributeError):
+                pass  # Unknown artifacts are preserved, never guessed for deletion.
+        obsolete_exports = {name for name in previous_exports if isinstance(name,str) and Path(name).name == name and name.startswith("tradingview_") and name.endswith((".txt", ".zip"))} - ({item["file"] for item in snapshot["export_manifest"]} | set(snapshot["export_archives"]))
         output.parent.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(prefix=".themescope-manual-stage-", dir=output.parent) as temporary:
             stage = Path(temporary) / "run"
@@ -1322,6 +1341,12 @@ def _run_manual_csv(args: argparse.Namespace, output: Path, launched_at: float) 
                         shutil.copy2(target, backup / relative)
                     os.replace(source, target)
                     changed.append(relative)
+                for name in sorted(obsolete_exports):
+                    target = output / name
+                    if target.exists():
+                        shutil.copy2(target, backup / name)
+                        target.unlink()
+                        changed.append(Path(name))
             except BaseException:
                 for name in reversed(changed):
                     previous = backup / name

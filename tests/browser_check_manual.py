@@ -175,7 +175,7 @@ def main() -> int:
             selected=next(t for t in snapshot["themes"] if t["id"]==initial_theme)
             assert page.locator("#stock-body tr").count() == len(selected["selected"])
             assert "Core / Related" not in headers and "Sector / Industry" not in headers
-            assert page.locator("#stock-head th").count() == 14
+            assert page.locator("#stock-head th").count() == 15
             assert page.locator("#stock-head .col-relvol .th-content").evaluate("e => getComputedStyle(e).justifyContent") == "flex-end"
             assert page.locator("#stock-body .col-relvol").first.evaluate("e => getComputedStyle(e).textAlign") == "right"
             assert page.locator("#watchlist-theme-selector").evaluate("e => getComputedStyle(e).fontWeight") == "500"
@@ -191,7 +191,7 @@ def main() -> int:
                         assert page.locator(".stock-table-wrap").evaluate("e => e.scrollWidth <= e.clientWidth + 1")
                         hb=page.locator("#stock-head th").evaluate_all("els=>els.map(e=>e.getBoundingClientRect().x)")
                         rb=page.locator("#stock-body tr").first.locator("td").evaluate_all("els=>els.map(e=>e.getBoundingClientRect().x)")
-                        assert len(hb)==len(rb)==14 and all(abs(a-b)<.6 for a,b in zip(hb,rb))
+                        assert len(hb)==len(rb)==15 and all(abs(a-b)<.6 for a,b in zip(hb,rb))
                 page.set_viewport_size({"width":1536,"height":864})
             # Download must preserve the configured order even after view sorting/filtering.
             with page.expect_download() as download_info:

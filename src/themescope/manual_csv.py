@@ -118,6 +118,7 @@ def parse_csv(path: Path, role: str) -> tuple[list[dict[str, Any]], dict[str, An
         raise CSVValidationError(f"{role}: missing required columns: {', '.join(missing)}")
     rows: list[dict[str, Any]] = []
     symbols: set[str] = set()
+    numeric_warnings = []
     for line_number, cells in enumerate(table[1:], 2):
         if not any(str(cell).strip() for cell in cells):
             continue
@@ -140,8 +141,15 @@ def parse_csv(path: Path, role: str) -> tuple[list[dict[str, Any]], dict[str, An
                     # Breadth universes deliberately retain rows with blank
                     # Price/EMA cells in the denominator; those rows are
                     # excluded from the shared valid set during calculation.
-                    row[key] = _number(raw, required=key in REQUIRED[role] and role in {"stock", "etf"}, positive=key in POSITIVE)
+                    row[key] = _number(raw, required=key in REQUIRED[role] and role in {"stock", "etf"} and key != "market_cap", positive=key in POSITIVE)
+                    if key == "market_cap" and row[key] is not None and row[key] <= 0:
+                        row[key] = None
+                        numeric_warnings.append({"symbol":symbol,"line":line_number,"field":key,"reason":"Non-positive market capitalization; displayed as N/A."})
                 except CSVValidationError as exc:
+                    if key == "market_cap":
+                        row[key] = None
+                        numeric_warnings.append({"symbol":symbol,"line":line_number,"field":key,"reason":"Invalid market capitalization; displayed as N/A."})
+                        continue
                     raise CSVValidationError(f"{role}: line {line_number}, {key}: {exc}") from exc
             else:
                 if key in REQUIRED[role] and not raw:
@@ -157,6 +165,7 @@ def parse_csv(path: Path, role: str) -> tuple[list[dict[str, Any]], dict[str, An
         "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
         "row_count": len(rows),
         "unique_symbol_count": len(symbols),
+        "numeric_warnings": numeric_warnings,
         "columns": headers,
         "canonical_columns": sorted(mapping),
         "ignored_duplicate_columns": ignored_duplicates,
@@ -383,5 +392,7 @@ def build_release(root: Path, paths: dict[str, Path], session: str) -> tuple[dic
     }
     from .tradingview import attach, load_mapping
     attach(snapshot, load_mapping(root))
+    from .daily_lists import build as build_daily_lists
+    build_daily_lists(snapshot, json.loads((root / "config/watchlist_exports.json").read_text()))
     raw = {"source": "tradingview-csv", "input_audit": audits, "watchlists": watchlists, "network_requests": 0}
     return snapshot, raw
