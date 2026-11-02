@@ -77,9 +77,9 @@ def main() -> int:
             for label in ("Current", "Medium", "1W", "1M", "3M", "EMA50"):
                 assert label in headers
             assert "Δ5D" not in headers and "Rk−5D" not in headers and "Facts" not in headers and "Type" not in headers
-            assert page.locator("#theme-cols col").count() == 15
-            assert page.locator("#theme-head th").count() == 15
-            assert page.locator("#theme-body tr[data-theme]").first.locator("td").count() == 15
+            assert page.locator("#theme-cols col").count() == 16
+            assert page.locator("#theme-head th").count() == 16
+            assert page.locator("#theme-body tr[data-theme]").first.locator("td").count() == 16
             assert page.locator("#theme-body .type-tag").count() == len(snapshot["themes"])
             assert page.locator("#theme-body .breadth-unavailable-cell small").count() == 0
             assert page.locator("#theme-body .score-chip:not(.score-na)").count() > 0
@@ -130,7 +130,7 @@ def main() -> int:
                         assert page.evaluate("document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1")
                         head_boxes = page.locator("#theme-head th").evaluate_all("els => els.map(e => ({x:e.getBoundingClientRect().x,w:e.getBoundingClientRect().width}))")
                         row_boxes = page.locator("#theme-body tr[data-theme]").first.locator("td").evaluate_all("els => els.map(e => ({x:e.getBoundingClientRect().x,w:e.getBoundingClientRect().width}))")
-                        assert len(head_boxes) == len(row_boxes) == 15
+                        assert len(head_boxes) == len(row_boxes) == 16
                         assert all(abs(a["x"] - b["x"]) < .6 and abs(a["w"] - b["w"]) < .6 for a, b in zip(head_boxes, row_boxes))
                 for page_id in ("market", "daily-plan"):
                     for width, height in ((1920, 1080), (1536, 864), (1366, 768), (390, 844)):
@@ -200,7 +200,7 @@ def main() -> int:
             downloaded = download_info.value
             tokens = Path(downloaded.path()).read_text().strip().split(",")
             current = next(t for t in snapshot["themes"] if t["id"] == page.locator("#watchlist-theme-selector").input_value())
-            assert tokens[1:] == [current["tradingview_symbol"]] + [r["tradingview_symbol"] for r in current["selected"]]
+            assert tokens == [current["tradingview_symbol"]] + [r["tradingview_symbol"] for r in current["selected"]]
             assert not errors, errors
             assert not [request for request in requests if urlparse(request).hostname not in {"127.0.0.1", None}]
             browser.close()

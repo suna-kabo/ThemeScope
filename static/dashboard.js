@@ -163,14 +163,46 @@
     return "$" + (value/unit[0]).toLocaleString("en-US",{maximumFractionDigits:1}) + unit[1];
   }
   function rsMatches(row, filter) { return !filter || filter === "All" || row.rs_state === filter; }
+  function emaMatches(row, filter) {
+    if (!filter || filter === "all") return true;
+    var period=filter.endsWith("21")?21:50;
+    if (!finiteNumber(row.price_close) || !finiteNumber(row["ema"+period])) return false;
+    return filter.startsWith("above")?row.price_close>row["ema"+period]:row.price_close<=row["ema"+period];
+  }
+  function buildNavigationIndex(themes) {
+    var index=[];
+    (themes || []).forEach(function(theme){
+      var context={themeId:theme.id,themeName:theme.name,anchor:theme.anchor};
+      index.push(Object.assign({kind:"theme",key:"theme:"+theme.id,ticker:theme.anchor,symbol:theme.tradingview_symbol},context));
+      var seen=new Set();
+      (theme.selected || []).forEach(function(stock){
+        if(!stock.tradingview_symbol || seen.has(stock.tradingview_symbol))return;
+        seen.add(stock.tradingview_symbol);
+        index.push(Object.assign({kind:"stock",key:"stock:"+theme.id+":"+stock.tradingview_symbol,ticker:stock.ticker,symbol:stock.tradingview_symbol,company:stock.company || ""},context));
+      });
+    });
+    return index;
+  }
+  function searchNavigation(index, query) {
+    var q=String(query || "").trim().toLowerCase();
+    if(!q)return [];
+    return index.map(function(row){
+      var tickers=[row.ticker].map(function(s){return String(s || "").toLowerCase();});
+      var rank=tickers.some(function(s){return s===q;})?0:tickers.some(function(s){return s.startsWith(q);})?1:tickers.some(function(s){return s.includes(q);})?2:
+        [row.company,row.themeName,row.symbol].some(function(s){return String(s || "").toLowerCase().includes(q);})?3:null;
+      return Object.assign({matchRank:rank},row);
+    }).filter(function(row){return row.matchRank!==null;}).sort(function(a,b){
+      return a.matchRank-b.matchRank || (a.ticker || "").localeCompare(b.ticker || "","en") || a.themeName.localeCompare(b.themeName,"en") || a.key.localeCompare(b.key,"en");
+    });
+  }
   function themeRowsToCsv(rows, session, generatedAt) {
-    var columns = ["rank_current", "rank_change_daily", "type", "theme_id", "name", "anchor_etf", "state", "research_priority", "theme_score", "current_strength", "medium_strength", "return5_pct", "return21_pct", "return63_pct", "theme_breadth21_pct", "theme_breadth21_above", "theme_breadth21_valid", "theme_breadth50_pct", "theme_breadth50_above", "theme_breadth50_valid", "configured_watchlist_count", "session_date", "generated_at"];
+    var columns = ["rank_current", "rank_change_daily", "type", "theme_id", "name", "anchor_etf", "change_1d_pct", "state", "research_priority", "theme_score", "current_strength", "medium_strength", "return5_pct", "return21_pct", "return63_pct", "theme_breadth21_pct", "theme_breadth21_above", "theme_breadth21_valid", "theme_breadth50_pct", "theme_breadth50_above", "theme_breadth50_valid", "configured_watchlist_count", "session_date", "generated_at"];
     var lines = [columns.map(csvEscape).join(",")];
     rows.forEach(function (row) {
       var b21 = row.theme_watchlist_breadth && row.theme_watchlist_breadth["21"] || {};
       var b50 = row.theme_watchlist_breadth && row.theme_watchlist_breadth["50"] || {};
       var values = [row.rank_current ?? row.global_rank, row.rank_change_daily,
-        row.level === "Sector" ? "Sector" : "Theme", row.id, row.name, row.anchor, row.theme_state, row.research_priority?.label,
+        row.level === "Sector" ? "Sector" : "Theme", row.id, row.name, row.anchor, finiteNumber(row.daily_change)?row.daily_change*100:null, row.theme_state, row.research_priority?.label,
         row.theme_score, row.current_strength_score, row.medium_strength_score,
         finiteNumber(valueAt(row, "return5")) ? valueAt(row, "return5") * 100 : null,
         finiteNumber(valueAt(row, "return21")) ? valueAt(row, "return21") * 100 : null,
@@ -351,6 +383,7 @@
     var mediumWeight = weightText(finalWeights, "medium_strength");
 
     var infoText = {
+      daily_change: "TradingView one-day price change percentage for the anchor ETF.",
       priority: "Market direction and relative state determine a research group. Long labels require close above EMA50; short labels require close below EMA50. These are research priorities, not entry signals.",
       state: "Determined by whether Current and Medium are at least 50. Leading means both are in the stronger half; Improving means only Current is; Fading means only Medium is; Lagging means both are in the weaker half.",
       theme_score: currentWeight + " Current plus " + mediumWeight + " Medium. The color represents a relative score band, not a Long or Short signal.",
@@ -601,7 +634,7 @@
       stockView: "relative", rsFilter: "All", stockSorts: {}, priorityExpanded: {}, priorityOrders: {},
       page: location.hash.slice(1) || "market", themeNavigationOrder: null
     };
-    if (history.state?.themescope && history.state.view?.ui_schema === 2 && history.state.view.session_date === data.session_date) {
+    if (history.state?.themescope && history.state.view?.ui_schema === 3 && history.state.view.session_date === data.session_date) {
       var firstView = history.state.view;
       state.theme = firstView.selected_theme_id || state.theme;
       state.themeSearch = firstView.theme_search || "";
@@ -614,7 +647,7 @@
       state.stockEmaFilter = firstView.stock_ema_filter || "all";
       state.stockKey = firstView.stock_sort_key || state.stockKey;
       state.stockDir = firstView.stock_sort_direction || state.stockDir;
-      state.themeSelectorSearch = firstView.theme_selector_search || "";
+      state.navigationQuery = firstView.navigation_query || "";
       state.themeNavigationOrder = firstView.theme_navigation_order || null;
       state.dailyMethodologyOpen = Boolean(firstView.daily_methodology_open);
       state.page = firstView.page || state.page;
@@ -625,18 +658,22 @@
       state.priorityExpanded=view.priority_expanded || {}; state.priorityOrders=view.priority_orders || {};
     }
     var routeCache={};
-    var storageKey="themescope-terminal-v2:"+data.session_date;
-    try {var stored=JSON.parse(sessionStorage.getItem(storageKey));if(stored && stored.schema===2 && stored.session===data.session_date && stored.routes && typeof stored.routes==='object' && !Array.isArray(stored.routes))routeCache=stored.routes;}catch(error){}
+    var storageKey="themescope-terminal-v3:"+data.session_date;
+    try {var stored=JSON.parse(sessionStorage.getItem(storageKey));if(stored && stored.schema===3 && stored.session===data.session_date && stored.routes && typeof stored.routes==='object' && !Array.isArray(stored.routes))routeCache=stored.routes;}catch(error){}
     var displayedKey=null;
     try {history.scrollRestoration="manual";}catch(error){}
     function routeKey(){return state.page==='watchlist'?'watchlist:'+state.theme+':'+state.stockView:state.page;}
+    function readRoute(){
+      return {y:window.scrollY,tables:Array.from(document.querySelectorAll('#'+state.page+' .table-wrap')).map(function(e,i){return {index:i,x:e.scrollLeft,y:e.scrollTop};}),search:$("stock-search")?.value || "",ema:$("ema-filter")?.value || "all",rsFilter:state.rsFilter,key:state.stockKey,dir:state.stockDir};
+    }
     function saveRoute(){
       if(!displayedKey)return;
-      routeCache[displayedKey]={y:window.scrollY,tables:Array.from(document.querySelectorAll('#'+state.page+' .table-wrap')).map(function(e,i){return {index:i,x:e.scrollLeft,y:e.scrollTop};}),search:$("stock-search")?.value || "",ema:$("ema-filter")?.value || "all",rsFilter:state.rsFilter,key:state.stockKey,dir:state.stockDir};
-      try{sessionStorage.setItem(storageKey,JSON.stringify({schema:2,session:data.session_date,routes:routeCache}));}catch(error){}
+      routeCache[displayedKey]=readRoute();
+      try{sessionStorage.setItem(storageKey,JSON.stringify({schema:3,session:data.session_date,routes:routeCache}));}catch(error){}
     }
-    function restoreRoute(){
-      displayedKey=routeKey();var saved=routeCache[displayedKey];
+    function restoreRoute(override, options){
+      displayedKey=routeKey();var saved=override || routeCache[displayedKey];
+      if(override)routeCache[displayedKey]=override;
       if(state.page==='watchlist'){
         var sort=state.stockSorts[state.stockView] || {key:state.stockView==='relative'?"excess21_pp":"return21",dir:"desc"};
         state.stockSearch=typeof saved?.search==='string'?saved.search:"";state.stockEmaFilter=typeof saved?.ema==='string'?saved.ema:"all";
@@ -644,6 +681,7 @@
         state.rsFilter=typeof saved?.rsFilter==='string'?saved.rsFilter:"All";
         $("stock-search").value=state.stockSearch;$("ema-filter").value=state.stockEmaFilter;$("rs-filter").value=state.rsFilter;render();
       }
+      if(options?.skipScroll)return;
       document.querySelectorAll('#'+state.page+' .table-wrap').forEach(function(e,i){var t=Array.isArray(saved?.tables)?saved.tables.find(function(t){return t && t.index===i;}):null;e.scrollLeft=Number.isFinite(t?.x)?Math.max(0,t.x):0;e.scrollTop=Number.isFinite(t?.y)?Math.max(0,t.y):0;});
       var y=Number.isFinite(saved?.y)?saved.y:0;window.scrollTo(0,Math.max(0,Math.min(y,document.documentElement.scrollHeight-window.innerHeight)));
     }
@@ -655,12 +693,12 @@
       if ($("stock-search")) state.stockSearch = $("stock-search").value;
       if ($("ema-filter")) state.stockEmaFilter = $("ema-filter").value;
       if ($("stock-sort")?.value) state.stockKey = $("stock-sort").value;
-      if ($("watchlist-theme-search")) state.themeSelectorSearch = $("watchlist-theme-search").value;
+      if ($("watchlist-theme-search")) state.navigationQuery = $("watchlist-theme-search").value;
       if ($("daily-methodology")) state.dailyMethodologyOpen = $("daily-methodology").open;
       state.stockSorts[state.stockView]={key:state.stockKey,dir:state.stockDir};
       state.scroll_position = window.scrollY || 0;
       return {
-        ui_schema:2,session_date:data.session_date,stock_view:state.stockView,rs_filter:state.rsFilter,stock_sorts:state.stockSorts,
+        ui_schema:3,session_date:data.session_date,route_state:readRoute(),stock_view:state.stockView,rs_filter:state.rsFilter,stock_sorts:state.stockSorts,
         priority_expanded:state.priorityExpanded,priority_orders:state.priorityOrders,
         page: state.page, selected_theme_id: state.theme,
         theme_search: state.themeSearch || "", theme_type_filter: state.themeType,
@@ -668,7 +706,7 @@
         theme_sort_direction: state.themeDir, stock_search: state.stockSearch || "",
         stock_ema_filter: state.stockEmaFilter || "all", stock_sort_key: state.stockKey,
         stock_sort_direction: state.stockDir,
-        theme_selector_search: state.themeSelectorSearch || "",
+        navigation_query: state.navigationQuery || "",
         theme_navigation_order: state.themeNavigationOrder,
         daily_methodology_open: Boolean(state.dailyMethodologyOpen),
         scroll_position: state.scroll_position
@@ -698,7 +736,7 @@
         try { history.pushState({ themescope: true, index: index, view: view }, "", "#" + id); } catch (e) {}
       }
       state.page = id;
-      closeInfoTooltip();
+      closeInfoTooltip();closeNavigation();$("navigation-status").textContent="";
       document.querySelectorAll(".page").forEach(function (page) {
         page.hidden = page.id !== id;
       });
@@ -710,7 +748,8 @@
         else link.removeAttribute("aria-current");
       });
       updateBackControl();
-      if(navigation.scroll !== false)restoreRoute();
+      if(navigation.scroll !== false)restoreRoute(null,{skipScroll:Boolean(navigation.stockTarget)});
+      if(navigation.push)replaceHistoryState();
     }
     document.querySelectorAll(".side-nav [data-page]").forEach(function (link) {
       link.addEventListener("click", function (event) {
@@ -723,7 +762,7 @@
     });
     window.addEventListener("popstate", function (event) {
       saveRoute();
-      var view = event.state?.themescope && event.state.view?.ui_schema===2 && event.state.view.session_date===data.session_date ? event.state.view : null;
+      var view = event.state?.themescope && event.state.view?.ui_schema===3 && event.state.view.session_date===data.session_date ? event.state.view : null;
       if (!view) { updateBackControl(); return; }
       restoreNewView(view);
       state.page = view.page || "market";
@@ -734,16 +773,16 @@
       state.themeDir = view.theme_sort_direction || "desc"; state.stockSearch = view.stock_search || "";
       state.stockDir = view.stock_sort_direction || "desc";
       state.stockEmaFilter = view.stock_ema_filter || "all"; state.stockKey = view.stock_sort_key || "return21";
-      state.themeSelectorSearch = view.theme_selector_search || ""; state.themeNavigationOrder = view.theme_navigation_order || null;
+      state.navigationQuery = view.navigation_query || ""; state.themeNavigationOrder = view.theme_navigation_order || null;
       state.dailyMethodologyOpen = Boolean(view.daily_methodology_open);
       state.scroll_position = view.scroll_position || 0;
-      var fields = {"theme-search":"themeSearch","theme-type":"themeType","theme-state":"themeState","theme-priority":"themePriority","theme-sort":"themeKey","stock-search":"stockSearch","ema-filter":"stockEmaFilter","stock-sort":"stockKey","watchlist-theme-search":"themeSelectorSearch"};
+      var fields = {"theme-search":"themeSearch","theme-type":"themeType","theme-state":"themeState","theme-priority":"themePriority","theme-sort":"themeKey","stock-search":"stockSearch","ema-filter":"stockEmaFilter","stock-sort":"stockKey","watchlist-theme-search":"navigationQuery"};
       Object.keys(fields).forEach(function (id) { if ($(id) && state[fields[id]] !== undefined) $(id).value = state[fields[id]]; });
       $("stock-view").value=state.stockView; $("rs-filter").value=state.rsFilter;
       render(); renderDailyPlan();
       $("daily-methodology").open = state.dailyMethodologyOpen;
       showPage(state.page, { scroll: false });
-      restoreRoute();
+      restoreRoute(view.route_state);
     });
     function sessionDisplay(value) {
       if (!value) return "Unavailable";
@@ -847,6 +886,7 @@
         '<p class="vix-context">' + esc(percentile) + '<br>' + esc(summary) + '</p><p class="market-observation">Data ' + esc(item.observation_date || "unavailable") + (item.retrieved_at_hkt_display ? ' · Retrieved ' + esc(item.retrieved_at_hkt_display) : "") + (item.source_reason ? ' · ' + esc(item.source_reason) : "") + '</p></article>';
     }).join("");
     var metrics = {
+      daily_change: "1D %",
       rank_current: "Current rank",
       rank_change_daily: "Δ Rank",
       priority: "Research priority",
@@ -905,7 +945,7 @@
     $("rs-filter").onchange=function(){state.rsFilter=this.value;render();persistView();};
     $("stock-sort").value = state.stockKey;
     $("ema-filter").value = state.stockEmaFilter || "all";
-    $("watchlist-theme-search").value = state.themeSelectorSearch || "";
+    $("watchlist-theme-search").value = state.navigationQuery || "";
     function persistView() { replaceHistoryState(); }
     $("theme-sort").onchange = function () { state.themeKey = this.value; render(); persistView(); };
     $("theme-direction").onclick = function () { state.themeDir = state.themeDir === "desc" ? "asc" : "desc"; render(); persistView(); };
@@ -916,7 +956,94 @@
     $("stock-direction").onclick = function () { state.stockDir = state.stockDir === "desc" ? "asc" : "desc"; render(); persistView(); };
     $("stock-search").addEventListener("input", function () { state.stockSearch = this.value; render(); persistView(); });
     $("ema-filter").onchange = function () { state.stockEmaFilter = this.value; render(); persistView(); };
-    $("watchlist-theme-search").addEventListener("input", function () { state.themeSelectorSearch = this.value; renderThemeSelector(); persistView(); });
+
+    var navigationInput=$("watchlist-theme-search"), navigationPopup=$("navigation-popup");
+    var navigationIndex=buildNavigationIndex(data.themes), navigationMatches=[], navigationShown=[];
+    var navigationLimits={stock:12,theme:12}, navigationActive=-1, targetTimer, navigationSuppressFocus=false;
+    function closeNavigation(){
+      if(!navigationInput)return;
+      navigationPopup.hidden=true;navigationInput.setAttribute('aria-expanded','false');
+      navigationInput.removeAttribute('aria-activedescendant');navigationActive=-1;
+    }
+    function positionNavigation(){
+      if(!navigationInput || navigationPopup.hidden)return;
+      var rect=navigationInput.getBoundingClientRect(),below=window.innerHeight-rect.bottom-16,above=rect.top-16;
+      var upward=below<180 && above>below;
+      navigationPopup.style.top=upward?'auto':'calc(100% + 6px)';
+      navigationPopup.style.bottom=upward?'calc(100% + 6px)':'auto';
+      navigationPopup.style.maxHeight=Math.max(80,Math.min(420,upward?above:below))+'px';
+    }
+    function revealNavigationInput(){
+      var rect=navigationInput.getBoundingClientRect(),edge=document.querySelector('.topbar').getBoundingClientRect().bottom+8;
+      if(rect.top<edge)window.scrollBy(0,rect.top-edge);
+      else if(rect.bottom>window.innerHeight-12)window.scrollBy(0,rect.bottom-window.innerHeight+12);
+    }
+    function setNavigationActive(index){
+      navigationActive=index;
+      $("navigation-results").querySelectorAll('[role="option"]').forEach(function(option,i){option.setAttribute('aria-selected',String(i===index));});
+      var option=$("navigation-option-"+index);
+      if(option){navigationInput.setAttribute('aria-activedescendant',option.id);option.scrollIntoView({block:'nearest'});}
+      else navigationInput.removeAttribute('aria-activedescendant');
+    }
+    function renderNavigation(){
+      navigationMatches=searchNavigation(navigationIndex,navigationInput.value);navigationShown=[];
+      if(!navigationInput.value.trim()){closeNavigation();return;}
+      revealNavigationInput();
+      var more=[];
+      $("navigation-results").innerHTML=['stock','theme'].map(function(kind){
+        var matches=navigationMatches.filter(function(r){return r.kind===kind;}),rows=matches.slice(0,navigationLimits[kind]);
+        if(!matches.length)return '';
+        var label=kind==='stock'?'Stocks':'Sectors & Themes';
+        if(matches.length>rows.length)more.push('<button type="button" data-navigation-more="'+kind+'">Show more '+(kind==='stock'?'stocks':'themes')+' ('+(matches.length-rows.length)+' remaining)</button>');
+        return '<div role="group" aria-labelledby="navigation-group-'+kind+'"><div class="navigation-group-title" id="navigation-group-'+kind+'">'+label+' · '+rows.length+' of '+matches.length+'</div>'+rows.map(function(row){
+          var index=navigationShown.length;navigationShown.push(row);
+          return '<div role="option" aria-selected="false" id="navigation-option-'+index+'" data-navigation-kind="'+row.kind+'" data-theme-id="'+esc(row.themeId)+'" data-symbol="'+esc(row.symbol)+'" data-navigation-index="'+index+'"><b>'+esc(row.ticker)+'</b><span>'+esc(row.kind==='stock'?row.themeName+' · '+row.anchor:row.themeName)+'</span></div>';
+        }).join('')+'</div>';
+      }).join('');
+      $("navigation-more").innerHTML=more.join('');
+      $("navigation-result-count").textContent=navigationMatches.length?navigationShown.length+' of '+navigationMatches.length+' matching results':'No matching stocks or themes.';
+      navigationPopup.hidden=false;navigationInput.setAttribute('aria-expanded','true');
+      navigationInput.removeAttribute('aria-activedescendant');navigationActive=-1;positionNavigation();
+    }
+    function chooseNavigation(result){
+      if(!result)return;
+      closeNavigation();
+      if(result.kind==='theme'){
+        showPage('watchlist',{push:true,theme:result.themeId});render();replaceHistoryState();navigationSuppressFocus=true;navigationInput.focus({preventScroll:true});navigationSuppressFocus=false;return;
+      }
+      showPage('watchlist',{push:true,theme:result.themeId,stockTarget:true});
+      var theme=themeById(result.themeId),stock=theme.selected.find(function(r){return r.tradingview_symbol===result.symbol;}),adjusted=[];
+      if(!filterRows([stock],{query:$("stock-search").value}).length){$("stock-search").value='';state.stockSearch='';adjusted.push('within-list search');}
+      if(!emaMatches(stock,$("ema-filter").value)){$("ema-filter").value='all';state.stockEmaFilter='all';adjusted.push('EMA');}
+      if(state.stockView==='relative' && !rsMatches(stock,state.rsFilter)){state.rsFilter='All';$("rs-filter").value='All';adjusted.push('RS');}
+      render();
+      $("navigation-status").textContent=adjusted.length?'Filters adjusted to reveal '+stock.ticker+': '+adjusted.join(', ')+'.':'';
+      var row=Array.from($("stock-body").rows).find(function(r){return r.dataset.stockSymbol===result.symbol;});
+      if(row){
+        $("stock-table-wrap").scrollLeft=0;
+        row.classList.add('navigation-target');row.focus({preventScroll:true});row.scrollIntoView({block:'center',inline:'nearest',behavior:'auto'});
+        clearTimeout(targetTimer);targetTimer=setTimeout(function(){row.classList.remove('navigation-target');},1600);
+      }
+      saveRoute();replaceHistoryState();
+    }
+    navigationInput.addEventListener('input',function(){state.navigationQuery=this.value;navigationLimits={stock:12,theme:12};renderNavigation();persistView();});
+    navigationInput.addEventListener('focus',function(){if(!navigationSuppressFocus){revealNavigationInput();if(this.value.trim())renderNavigation();}});
+    navigationInput.addEventListener('keydown',function(event){
+      if(event.key==='Escape'){event.preventDefault();closeNavigation();return;}
+      if(event.key==='ArrowDown' || event.key==='ArrowUp'){
+        event.preventDefault();if(navigationPopup.hidden)renderNavigation();
+        if(navigationShown.length)setNavigationActive(event.key==='ArrowDown'?(navigationActive+1)%navigationShown.length:(navigationActive<0?navigationShown.length-1:(navigationActive-1+navigationShown.length)%navigationShown.length));
+      }else if(event.key==='Enter' && !navigationPopup.hidden){event.preventDefault();chooseNavigation(navigationShown[Math.max(0,navigationActive)]);}
+    });
+    $("navigation-results").addEventListener('click',function(event){var option=event.target.closest('[data-navigation-index]');if(option)chooseNavigation(navigationShown[Number(option.dataset.navigationIndex)]);});
+    $("navigation-more").addEventListener('click',function(event){var button=event.target.closest('[data-navigation-more]');if(button){navigationLimits[button.dataset.navigationMore]+=12;renderNavigation();navigationInput.focus({preventScroll:true});}});
+    document.addEventListener('click',function(event){if(!event.composedPath().includes(document.querySelector('.navigation-search')))closeNavigation();});
+    document.addEventListener('focusin',function(event){if(!event.target.closest('.navigation-search'))closeNavigation();});
+    document.querySelector('.navigation-search').addEventListener('keydown',function(event){
+      if(event.key==='Escape' && event.target!==navigationInput){event.preventDefault();closeNavigation();navigationSuppressFocus=true;navigationInput.focus({preventScroll:true});navigationSuppressFocus=false;}
+    });
+    window.addEventListener('resize',positionNavigation);
+
     function filtered(rows, p) {
       if (p === "theme") {
         const query = $("theme-search").value.trim().toLowerCase();
@@ -928,19 +1055,12 @@
           return matchesText && matchesType && matchesState && (state.themePriority === "All" || priorityCategory(row) === state.themePriority);
         });
       }
-      return filterRows(rows, { query: $("stock-search").value }).filter(function(row){return state.stockView !== "relative" || rsMatches(row,state.rsFilter);}).filter(function (row) {
-        const filter = $("ema-filter").value;
-        if (filter === "all") return true;
-        const period = filter.endsWith("21") ? 21 : 50;
-        if (!finite(row.price_close) || !finite(row["ema" + period])) return false;
-        return filter.startsWith("above") ? row.price_close > row["ema" + period] : row.price_close <= row["ema" + period];
-      });
+      return filterRows(rows, { query: $("stock-search").value }).filter(function(row){return state.stockView !== "relative" || rsMatches(row,state.rsFilter);}).filter(function(row){return emaMatches(row,$("ema-filter").value);});
     }
+
     function renderThemeSelector() {
-      var query = ($("watchlist-theme-search").value || "").trim().toLowerCase();
-      var match = function (row) { return !query || [row.name, row.anchor, row.id].some(function (v) { return String(v || "").toLowerCase().includes(query); }) || row.id === state.theme; };
-      var sectorOptions = (data.themes || []).filter((row) => row.level === "Sector" && match(row)).map((row) => '<option value="' + esc(row.id) + '">' + esc(row.name) + ' · ' + esc(row.anchor) + '</option>').join("");
-      var themeOptions = (data.themes || []).filter((row) => row.level !== "Sector" && match(row)).map((row) => '<option value="' + esc(row.id) + '">' + esc(row.name) + ' · ' + esc(row.anchor) + '</option>').join("");
+      var sectorOptions = (data.themes || []).filter((row) => row.level === "Sector").map((row) => '<option value="' + esc(row.id) + '">' + esc(row.name) + ' · ' + esc(row.anchor) + '</option>').join("");
+      var themeOptions = (data.themes || []).filter((row) => row.level !== "Sector").map((row) => '<option value="' + esc(row.id) + '">' + esc(row.name) + ' · ' + esc(row.anchor) + '</option>').join("");
       $("watchlist-theme-selector").innerHTML = '<optgroup label="Sectors">' + (sectorOptions || '<option disabled>No matching sectors</option>') + '</optgroup><optgroup label="Themes">' + (themeOptions || '<option disabled>No matching themes</option>') + '</optgroup>';
       if ((data.themes || []).some((row) => row.id === state.theme)) $("watchlist-theme-selector").value = state.theme;
     }
@@ -1068,7 +1188,11 @@
     }
     $("expected-earnings-content").addEventListener('click',function(event){var link=event.target.closest('[data-earnings-theme]');if(link){event.preventDefault();select(link.dataset.earningsTheme);}});
     renderEarnings();
-    if($("grouped-export-links"))$("grouped-export-links").innerHTML=(data.export_manifest || []).filter(function(f){return ['thematic_navigation','configured_stock_daily_data'].includes(f.role);}).map(function(f){return '<a class="download-link" download href="'+esc(f.file)+'">'+esc(f.group || 'Configured stocks — daily data')+' · '+f.instrument_count+' instruments</a>';}).join(' ');
+    var researchFiles=(data.export_manifest || []).filter(function(f){return f.role==='individual_research';});
+    $("all-individual-watchlists").hidden=!researchFiles.length;
+    $("individual-export-count").textContent=researchFiles.length+' individual files · anchor first, then configured stocks. Update only when memberships or identifiers change.';
+    $("daily-data-export-links").innerHTML=(data.export_manifest || []).filter(function(f){return f.role==='configured_stock_daily_data';}).map(function(f){return '<a class="download-link" download href="'+esc(f.file)+'">Daily Data Stocks — export CSV only · '+f.instrument_count+' stocks</a>';}).join(' ');
+    $("grouped-export-links").innerHTML=(data.export_manifest || []).filter(function(f){return f.role==='optional_broad_scan';}).map(function(f){return '<a class="download-link" download href="'+esc(f.file)+'">'+esc(f.group)+' · '+f.instrument_count+' unique instruments</a>';}).join(' ');
     var visible = [];
     var visibleThemes = [];
     function render() {
@@ -1084,7 +1208,7 @@
       const breadthUnavailable = visibleThemes.filter((row) => row.breadth_status_21 !== "valid" || row.breadth_status_50 !== "valid").length;
       $("theme-count").textContent = visibleThemes.length + " of " + all.length + " exposures" + (breadthUnavailable ? " · " + breadthUnavailable + " with breadth unavailable" : "");
       const themeColumns = [
-        ["#", "rank_current", null, "rank_current", "Current rank", "col-rank"], ["Δ Rank", "rank_change_daily", null, "rank_change_daily", "Previous-session rank minus current-session rank", "col-rank-daily"], ["Name", "name", null, null, "Sector or theme name with exposure type", "col-name"], ["ETF", null, null, null, "Anchor ETF", "col-etf"], ["State", "theme_state", null, "state", "State", "col-state"],
+        ["#", "rank_current", null, "rank_current", "Current rank", "col-rank"], ["Δ Rank", "rank_change_daily", null, "rank_change_daily", "Previous-session rank minus current-session rank", "col-rank-daily"], ["Name", "name", null, null, "Sector or theme name with exposure type", "col-name"], ["ETF", null, null, null, "Anchor ETF", "col-etf"], ["1D %", "daily_change", null, "daily_change", "TradingView one-day price change percentage for the anchor ETF.", "col-day-change"], ["State", "theme_state", null, "state", "State", "col-state"],
         ["Research priority", "priority", null, "priority", "Directional research priority with an absolute EMA50 guard; not an entry signal.", "col-priority"], ["Score", "theme_score", null, "theme_score", "Theme Score", "col-score"], ["Current", "current_strength_score", null, "current_strength_score", "1-month Performance percentile", "col-score"], ["Medium", "medium_strength_score", null, "medium_strength_score", "3-month Performance percentile", "col-score"],
         ["1W", "return5", null, null, "TradingView 1-week Performance; context only", "col-return"], ["1M", "return21", null, null, "TradingView 1-month Performance", "col-return"], ["3M", "return63", null, null, "TradingView 3-month Performance", "col-return"], ["EMA50", null, null, null, "Anchor price relative to EMA50", "col-ema"],
         ["% > EMA21", "theme_breadth21_pct", null, "theme_breadth21_pct", "Available when at least eight configured members and 80 percent coverage have valid Price, EMA21 and EMA50 values. Does not affect Theme Score or state.", "col-breadth"], ["% > EMA50", "theme_breadth50_pct", null, "theme_breadth50_pct", "Available when at least eight configured members and 80 percent coverage have valid Price, EMA21 and EMA50 values. Does not affect Theme Score or state.", "col-breadth"],
@@ -1098,6 +1222,7 @@
           td("col-rank-daily", finite(row.rank_change_daily) ? '<span class="' + (row.rank_change_daily > 0 ? "positive" : row.rank_change_daily < 0 ? "negative" : "muted") + '">' + (row.rank_change_daily > 0 ? "+" : "") + row.rank_change_daily + '</span>' : "N/A") +
           td("col-name", '<div class="theme-name-cell"><span class="type-tag">' + type + '</span><button class="theme-select" aria-label="Open watchlist for ' + esc(row.name) + '">' + esc(row.name) + '</button></div>') +
           td("col-etf", row.chart_url ? '<a href="' + esc(row.chart_url) + '" target="_blank" rel="noopener noreferrer">' + esc(row.anchor) + '</a>' : esc(row.anchor)) +
+          td("col-day-change", pct(row.daily_change)) +
           td("col-state", stateBadge(row.theme_state)) +
           td("col-priority", '<span title="'+esc(row.research_priority?.reason || "Required inputs unavailable")+'">'+esc(row.research_priority?.label || "No directional priority")+'</span>') +
           td("col-score", score(row, "theme_score")) +
@@ -1109,7 +1234,7 @@
           td("col-ema", ema(row, 50)) +
           td("col-breadth", themeBreadthCell(row, 21)) +
           td("col-breadth", themeBreadthCell(row, 50)) + '</tr>';
-      }).join("") || '<tr><td colspan="15">No eligible ETF exposures are available in this snapshot.</td></tr>';
+      }).join("") || '<tr><td colspan="16">No eligible ETF exposures are available in this snapshot.</td></tr>';
       var selected = data.themes.find((row) => row.id === state.theme) || data.themes[0];
       if (!selected) {
         $("active-name").textContent = "Watchlist";
@@ -1121,11 +1246,13 @@
         $("coverage").textContent = "";
         $("stock-table-wrap").hidden = true;
         $("csv").disabled = true;
-        $("tv").disabled = true;
+        $("tv").hidden = true;
         return;
       }
       $("csv").disabled = false;
-      $("tv").disabled = false;
+      var individualExport=(data.export_manifest || []).find(function(item){return item.role==='individual_research' && item.theme_id===selected.id;});
+      $("tv").hidden=!individualExport;
+      if(individualExport){$("tv").href=individualExport.file;$("tv").download=individualExport.file.split('/').pop();}
       $("stock-exports").hidden = false;
       $("stock-controls").hidden = false;
       $("stock-table-wrap").hidden = false;
@@ -1151,7 +1278,7 @@
         $("coverage").textContent = "";
         visible = [];
         $("csv").disabled = true;
-        $("tv").disabled = true;
+
       } else {
         $("coverage").textContent = visible.length + " of " + base.length + " configured stocks";
       }
@@ -1176,11 +1303,11 @@
       $("stock-body").innerHTML = visible.map(function (row) {
         const url = row.chart_url || null;
         const rationale = row.membership_rationale || row.evidence_note || "Business relevance rationale recorded in the membership source.";
-        if(state.stockView === "relative")return '<tr>'+td("col-rank",row.selection_slot ?? "N/A")+td("col-ticker",tickerCell(row))+td("col-anchor",esc(selected.anchor))+
+        if(state.stockView === "relative")return '<tr tabindex="-1" data-stock-symbol="'+esc(row.tradingview_symbol)+'">'+td("col-rank",row.selection_slot ?? "N/A")+td("col-ticker",tickerCell(row))+td("col-anchor",esc(selected.anchor))+
           td("col-rs-return",pct(valueAt(row,"return21")))+td("col-rs-return",pct(row.anchor_performance_1m))+td("col-rs-diff",pp(row.excess21_pp))+
           td("col-rs-return",pct(valueAt(row,"return63")))+td("col-rs-return",pct(row.anchor_performance_3m))+td("col-rs-diff",pp(row.excess63_pp))+
           td("col-ema",ema(row,21))+td("col-ema",ema(row,50))+td("col-earnings",earnings(row.earnings_date))+'</tr>';
-        return '<tr>' +
+        return '<tr tabindex="-1" data-stock-symbol="'+esc(row.tradingview_symbol)+'">' +
           td("col-rank", row.display_rank || "N/A") +
           td("col-ticker", (url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + esc(row.ticker) + '</a>' : '<b>' + esc(row.ticker) + '</b>') + ' ' + customInfo([row.company,row.exchange,rationale].filter(Boolean).join(" · "), "Information for " + row.ticker)) +
           td("col-price", money(row.price_close)) +
@@ -1219,20 +1346,10 @@
       $("export-status").textContent =
         visible.length + " visible rows exported.";
     };
-    $("tv").onclick = () => {
-      var selected = data.themes.find(function (row) { return row.id === state.theme; });
-      var result = tradingViewExport([selected].concat(selected.selected || []));
-      result.text = "###" + selected.name.replace(/,/g, " ") + " (" + selected.anchor + ")," + result.text;
-      download("themescope-" + state.theme + ".txt", result.text, "text/plain");
-      $("export-status").textContent =
-        result.count +
-        " symbols exported; " +
-        result.omitted +
-        " without verified exchange omitted.";
-    };
+
     render();
     showPage(state.page, { scroll: false });
-    restoreRoute();
+    restoreRoute(firstView?.route_state);
     if (!history.state?.themescope) {
       try { history.replaceState({ themescope: true, index: 0, view: captureView() }, "", "#" + state.page); } catch (e) {}
     } else {
@@ -1254,6 +1371,7 @@
     rowsToCsv: rowsToCsv,
     themeRowsToCsv: themeRowsToCsv,
     tradingViewExport: tradingViewExport,
+    buildNavigationIndex:buildNavigationIndex, searchNavigation:searchNavigation, emaMatches:emaMatches,
     ranked: ranked,
     scoreBandClass: scoreBandClass,
     resolvedScoreBands: resolvedScoreBands,

@@ -1184,10 +1184,10 @@ def load_approved_config():
 def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_dir: Path) -> None:
     """Write the compact local-only manual CSV release without live-source artifacts."""
     output_dir.mkdir(parents=True, exist_ok=True)
-    from src.themescope.tradingview import heading, theme_symbols
     from src.themescope.daily_lists import build as build_daily_lists
     export_files = build_daily_lists(snapshot, snapshot["export_configuration"])
     for name, content in export_files.items():
+        (output_dir / name).parent.mkdir(parents=True, exist_ok=True)
         (output_dir / name).write_text(content, encoding="utf-8")
     audit = snapshot["manual_csv_audit"]
     _write_json(output_dir / "latest_snapshot.json", snapshot)
@@ -1215,6 +1215,7 @@ def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_di
     for row in sorted(snapshot["themes"], key=lambda item: (item.get("global_rank") is None, item.get("global_rank") or 10**9)):
         theme_rows.append({
             "rank": row.get("global_rank"), "type": row.get("level"), "theme_id": row["id"], "name": row["name"], "anchor": row["anchor"],
+            "change_1d_pct": row["daily_change"] * 100 if row.get("daily_change") is not None else None,
             "rank_change_daily": row.get("rank_change_daily"), "rank_comparison_session": row.get("rank_comparison_session"),
             "state": row.get("theme_state"), "research_priority": row.get("research_priority", {}).get("label"), "theme_score": row.get("theme_score"),
             "current": row.get("current_strength_score"), "medium": row.get("medium_strength_score"),
@@ -1245,13 +1246,15 @@ def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_di
     (output_dir / "tradingview_sector_theme_etfs.txt").write_text(",".join(etf_lines) + "\n", encoding="utf-8")
     individual = {}
     with zipfile.ZipFile(output_dir / "individual_theme_watchlists.zip", "w", compression=zipfile.ZIP_DEFLATED) as bundle:
-        for theme in snapshot["themes"]:
-            symbols = theme_symbols(theme)
-            individual[theme["id"]] = symbols
-            tokens = [heading(theme), *symbols]
-            bundle.writestr(theme["id"] + ".txt", ",".join(tokens) + "\n")
+        for item in snapshot['export_manifest']:
+            if item['role'] != 'individual_research':continue
+            content=export_files[item['file']]
+            individual[item['theme_id']]={**item,'symbols':content.strip().split(',')}
+            bundle.writestr(Path(item['file']).name,content)
     _write_json(output_dir / "individual_theme_watchlists.json", individual)
-    audit["tradingview"] = {"identifier_evidence": "config/tradingview_symbols.json", "platform_import_tested": False, "grouped_duplicate_behavior_tested": False, "anchor_first": True, "unresolved": []}
+    audit["tradingview"] = {"identifier_evidence": "config/tradingview_symbols.json", "platform_import_tested": False,
+        "grouped_duplicate_behavior": "User-confirmed round-trip observation: repeated symbols retained once; raw round-trip files unavailable in this session",
+        "broad_scan_sections": False, "individual_section_headings": False, "anchor_first": True, "unresolved": []}
 
     template = (ROOT / "static/dashboard_template.html").read_text(encoding="utf-8")
     style = (ROOT / "static/dashboard.css").read_text(encoding="utf-8")

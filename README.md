@@ -22,7 +22,7 @@ python3 scripts/generate_dashboard.py \
 
 The command validates all five schemas, the session, anchor completeness and breadth-universe sanity checks before calculation. Outputs are staged and validated before publication. A failed import writes `failed_attempt_audit.json` and preserves the previous dashboard and its original session.
 
-The dashboard is self-contained. The output directory also contains `run_audit.json`, canonical JSON/CSV exports, grouped TradingView lists, 53 individual theme lists and `run_bundle.zip`. These files remain local unless the user explicitly moves them.
+The dashboard is self-contained. The output directory also contains `run_audit.json`, canonical JSON/CSV exports, individual TradingView watchlists and their ZIP, optional flat broad scans and `run_bundle.zip`. These files remain local unless the user explicitly moves them.
 
 ## Maintain stock watchlists
 
@@ -53,6 +53,7 @@ python3 -m unittest discover -s tests -v
 python3 -m compileall -q src scripts tests
 node --check static/dashboard.js
 node tests/test_dashboard.js
+python3 tests/browser_check_navigation.py output/manual_csv/dashboard.html
 python3 tests/browser_check_terminal.py output/manual_csv/dashboard.html
 python3 tests/browser_check_manual.py output/manual_csv/dashboard.html
 python3 tests/check_scanning_exports.py output/manual_csv
@@ -77,12 +78,20 @@ Successful manual imports save `local_history/YYYY-MM-DD.json` inside the output
 
 ### Daily scanning files and views
 
-The five versioned groups in `config/watchlist_exports.json` provide stable thematic chart navigation. Use `tradingview_configured_stocks.txt` (stocks only, deduplicated) to collect the daily Stock CSV for every fixed member without screener filters. Candidate screening CSV remains an optional maintenance input; daily generation still requires only the existing five CSV roles. Missing daily rows remain configured and are reported.
+Individual sector/theme files are the primary research export: one per configured active exposure, named ETF first (for example `SMH_Semiconductors.txt`), with the resolved ETF anchor followed by up to 20 configured stocks. They have no section tokens. Download all from `individual_theme_watchlists.zip`, or download the selected Watchlist. Cross-theme memberships remain complete in separate files. Update these lists only when memberships or validated identifiers change.
+
+**Daily Data Stocks — export CSV only** (`tradingview_configured_stocks.txt`) is the separate stock-only, section-free, deduplicated collection list. Import it into TradingView to export daily data for all configured members without screener filters. It does not require reimporting individual research lists every day. Candidate screening CSV remains optional maintenance input; generation still requires only the existing five CSV roles. Missing daily rows remain configured and are reported.
+
+The five versioned groups in `config/watchlist_exports.json`, plus the retained all-theme filename, are optional broad scans. They contain unique instruments without theme sections. The user confirmed through round-trip exports that TradingView deduplicated repeated symbols in a grouped list, losing later membership occurrences. The raw round-trip artifacts are unavailable in this session, so this observation is user-confirmed rather than independently reproduced here; it is not a guarantee about future platform versions.
 
 Daily Plan previews five themes per research group, reports the full count and offers Show all / Show less and Score order. Short groups default to ascending Score; long and observation groups default to descending Score with stable identity ties. Preview order does not imply entry readiness. Expected earnings is a visible section based independently on configured members of final Primary themes, deduplicated by validated instrument identity, from the as-of session through seven calendar days later. Unknown dates remain accessible. Daily Primary Candidates and their dedicated exports have been removed.
 
 Watchlist initially opens in Relative Strength and remembers an explicit view choice. Its # column is stable configured membership position in both views. Matching TradingView stock-minus-selected-ETF differences are percentage points. Navigation restores each page's scroll and each theme/view's table scroll, search and sort; priority expansion and methodology state survive navigation. Local UI state is namespaced by schema/session and storage failures are tolerated.
 
-The interface uses neutral charcoal, restrained amber controls, local monospace data and bundled Inter explanations. Light mode and mobile tables remain available. See `PRODUCT.md`, `DESIGN.md` and `docs/terminal_release_audit.md`.
+The interface uses neutral charcoal, restrained amber controls, local monospace data and bundled Inter explanations. Light mode and mobile tables remain available. See `PRODUCT.md`, `DESIGN.md` and `docs/navigation_export_release_audit.md`.
 
-All thematic files count repeated symbols and anchors against the configured 1,000-instrument limit and split only at theme boundaries; stock-only lists split deterministically. Optional individual-theme files preserve complete overlapping memberships. Grouped-section acceptance and duplicate handling have not been tested in a TradingView account.
+Each individual file contains its anchor in addition to configured stock slots. Optional broad scans and Daily Data Stocks split deterministically at the configured 1,000-instrument limit. All files reuse `config/tradingview_symbols.json`; unresolved identities fail generation rather than acquiring guessed prefixes. Actual imports of the revised files have not been performed in a TradingView account.
+
+Sectors & Themes includes sortable **1D %** directly after ETF. It displays the existing canonical fractional `daily_change` as percent; full and visible CSV exports use `change_1d_pct` in percentage units. Score, State, rank and Priority do not use this column.
+
+Watchlist's upper **Find** field navigates by ticker, company, theme or ETF anchor. Stocks have separate results for every theme membership, including missing daily rows. Results rank exact ticker/anchor, prefix, substring, then text, with stable ties and no Score/Performance influence. Results initially show up to 12 per group, with exact counts and Show more. Arrow keys, Enter, Escape, mouse and touch are supported. Stock selection keeps the chosen view, reveals/highlights the row and clears only hiding filters; Back restores the previous filters, sort and scroll. The lower Search field continues to filter the selected Watchlist.

@@ -2,7 +2,7 @@
 import unittest
 from pathlib import Path
 from src.themescope.manual_csv import breadth
-from src.themescope.tradingview import attach, load_mapping, resolve, theme_symbols
+from src.themescope.tradingview import attach, load_mapping, resolve, theme_symbols, individual_filenames
 from src.themescope.approved_rules import canonical_decision
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -32,6 +32,22 @@ class ExportTests(unittest.TestCase):
         attach({'themes':[t],'context':[]},mapping)
         self.assertEqual(theme_symbols(t), ['AMEX:ETF','NYSE:BRK.B'])
         self.assertTrue(t['selected'][0]['chart_url'].endswith('NYSE%3ABRK.B'))
+
+    def test_etf_first_portable_names_and_collision_handling(self):
+        themes=[{'id':'smh','anchor':'SMH','name':'Semiconductors'},
+                {'id':'energy','anchor':'XLE','name':'Energy'},
+                {'id':'a','anchor':'ETF','name':'../A/B: Test?'},
+                {'id':'b','anchor':'ETF','name':'A B Test'},
+                {'id':'c','anchor':'etf','name':'a b test'}]
+        names=individual_filenames(themes)
+        self.assertEqual(names['smh'],'SMH_Semiconductors.txt')
+        self.assertEqual(names['energy'],'XLE_Energy.txt')
+        self.assertEqual(names,individual_filenames(list(reversed(themes))))
+        self.assertEqual(len({n.casefold() for n in names.values()}),len(names))
+        for name in names.values():
+            self.assertNotIn('/',name);self.assertNotIn('..',name);self.assertNotIn(':',name)
+        self.assertTrue(names['a'].startswith('ETF_A_B_Test_'))
+        with self.assertRaisesRegex(ValueError,'Duplicate theme'):individual_filenames(themes+[themes[0]])
 
     def test_missing_member_stays_denominator(self):
         rows=[{'symbol':str(i),'price':2,'ema21':1,'ema50':1} for i in range(8)]

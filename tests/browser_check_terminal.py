@@ -67,8 +67,8 @@ def main():
    page.select_option('#stock-view','performance');page.select_option('#stock-view','relative')
    assert page.locator('#stock-sort').input_value()=='excess63_pp'
    # Corrupt and inaccessible persistence must leave navigation usable.
-   for script in ("sessionStorage.setItem('themescope-terminal-v2:"+s['session_date']+"','{broken')",
-                  "sessionStorage.setItem('themescope-terminal-v2:"+s['session_date']+"',JSON.stringify({schema:2,session:'"+s['session_date']+"',routes:{watchlist:null,market:{tables:[null],y:1e9}}}))",
+   for script in ("sessionStorage.setItem('themescope-terminal-v3:"+s['session_date']+"','{broken')",
+                  "sessionStorage.setItem('themescope-terminal-v3:"+s['session_date']+"',JSON.stringify({schema:3,session:'"+s['session_date']+"',routes:{watchlist:null,market:{tables:[null],y:1e9}}}))",
                   "Object.defineProperty(window,'sessionStorage',{get(){throw Error('unavailable')}})"):
     context=b.new_context();context.add_init_script(script);trial=context.new_page();trial.on('pageerror',lambda e:errors.append(str(e)))
     trial.goto(url+'#watchlist');assert trial.locator('#stock-view').input_value()=='relative'

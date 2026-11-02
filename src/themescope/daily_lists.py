@@ -1,7 +1,7 @@
 """Canonical browsing lists and bounded TradingView exports, with no market rules."""
 from datetime import date, timedelta
 import math
-from .tradingview import heading, theme_symbols
+from .tradingview import individual_filenames, theme_symbols
 
 
 def rs_state(a, b):
@@ -27,19 +27,6 @@ def earnings_window(candidates, session):
         else:
             later.append(row['tradingview_symbol'])
     return {'as_of':session,'through':(start+timedelta(days=7)).isoformat(),'upcoming':sorted(upcoming,key=lambda r:(r['expected_date'],r['symbol'])),'unknown':unknown,'later_count':len(later)}
-
-
-def pack_sections(sections, limit):
-    chunks=[];current=[];count=0
-    for theme in sections:
-        symbols=theme_symbols(theme)
-        if len(symbols)>limit:
-            raise ValueError(f'TradingView section {theme["id"]} requires {len(symbols)} instruments; configured limit is {limit}. Section cannot be split.')
-        if current and count+len(symbols)>limit:
-            chunks.append((current,count));current=[];count=0
-        current.extend([heading(theme),*symbols]);count+=len(symbols)
-    if current:chunks.append((current,count))
-    return chunks
 
 
 def flat_chunks(symbols, limit):
@@ -83,15 +70,24 @@ def build(snapshot, config):
             if name in files:raise ValueError('Duplicate export filename '+name)
             files[name]=','.join(tokens)+'\n'
             manifest.append({'file':name,'role':role,'group':group,'instrument_count':count,'section_count':sum(t.startswith('###') for t in tokens)})
+    filenames=individual_filenames(snapshot['themes'])
+    for theme in snapshot['themes']:
+        symbols=theme_symbols(theme)
+        if len(symbols)>limit:raise ValueError(f"Individual watchlist {theme['id']} exceeds instrument limit {limit}")
+        name='individual_watchlists/'+filenames[theme['id']]
+        files[name]=','.join(symbols)+'\n'
+        manifest.append({'file':name,'role':'individual_research','theme_id':theme['id'],'anchor':theme['anchor'],'instrument_count':len(symbols),'stock_count':len(theme.get('selected',[])),'section_count':0})
     for group in config['groups']:
-        add('tradingview_group_'+group['id'],pack_sections([themes[i] for i in group['theme_ids']],limit),'thematic_navigation',group['name'])
+        unique=list(dict.fromkeys(symbol for i in group['theme_ids'] for symbol in theme_symbols(themes[i])))
+        add('tradingview_group_'+group['id'],flat_chunks(unique,limit),'optional_broad_scan',group['name'])
     add('tradingview_configured_stocks',flat_chunks(sorted(all_stocks),limit),'configured_stock_daily_data')
-    # Retain the old all-theme filename as an optional alternative, also bounded.
-    add('tradingview_all_theme_stocks',pack_sections(list(themes.values()),limit),'legacy_all_themes')
+    # Optional flat broad scan; per-theme membership belongs to separate files.
+    unique=list(dict.fromkeys(symbol for theme in themes.values() for symbol in theme_symbols(theme)))
+    add('tradingview_all_theme_stocks',flat_chunks(unique,limit),'optional_broad_scan','All configured exposures')
     snapshot['expected_earnings']=earnings_window(earnings_members,snapshot['session_date'])
     snapshot.pop('daily_primary',None)
     snapshot['export_manifest']=manifest
-    snapshot['export_archives']=[]
+    snapshot['export_archives']=['individual_theme_watchlists.zip']
     snapshot['export_configuration']=config
     snapshot['manual_csv_audit']['daily_lists']={'configured_unique_stocks':len(all_stocks),'earnings_scope_unique_stocks':len(primary),'expected_earnings_in_window':len(snapshot['expected_earnings']['upcoming']),'earnings_unknown':len(snapshot['expected_earnings']['unknown']),'instrument_limit':limit,'files':manifest,'platform_import_tested':False}
     return files

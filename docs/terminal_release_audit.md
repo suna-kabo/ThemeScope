@@ -1,5 +1,7 @@
 # ThemeScope quiet research terminal audit
 
+Historical audit of the preceding interface. Export and navigation changes are covered in [the navigation/export audit](navigation_export_release_audit.md).
+
 2 November 2026 UTC. Source baseline: `a542325c0f29c1686d3289171d10d8798372e994`, branch `download`, repository `/workspace/ThemeScope`. The current checkout and latest locally generated output were the working baseline. Existing unrelated dirty/untracked work was preserved. No older bundle was restored. All required inputs were available.
 
 ## Environment and design guidance

@@ -2,7 +2,7 @@ import copy
 import unittest
 import json
 from pathlib import Path
-from src.themescope.daily_lists import build, pack_sections, flat_chunks, earnings_window, rs_state
+from src.themescope.daily_lists import build, flat_chunks, earnings_window, rs_state
 
 
 def stock(ticker, a=.02, b=-.01, earnings=None):
@@ -16,11 +16,12 @@ class DailyListTests(unittest.TestCase):
     def config(self, themes, limit=1000):return {'schema_version':1,'instrument_limit':limit,'groups':[{'id':'test','name':'Test','theme_ids':[t['id'] for t in themes]}]}
     def test_group_validation_and_boundary_splitting(self):
         themes=[theme('a',[stock('A')]),theme('b',[stock('B')]),theme('c',[])]
-        chunks=pack_sections(themes,3)
-        self.assertEqual([c[1] for c in chunks],[2,3])
-        self.assertEqual(chunks[0][0],['###a (A)','AMEX:A','NYSE:A'])
-        self.assertEqual(chunks[1][0][-2:],['###c (C)','AMEX:C'])
-        with self.assertRaisesRegex(ValueError,'cannot be split'):pack_sections(themes,1)
+        snapshot=self.snapshot(themes);files=build(snapshot,self.config(themes,3))
+        broad=[r for r in snapshot['export_manifest'] if r['role']=='optional_broad_scan' and r['group']=='Test']
+        self.assertEqual([r['instrument_count'] for r in broad],[3,2])
+        self.assertTrue(all(r['section_count']==0 for r in snapshot['export_manifest']))
+        self.assertEqual(files['individual_watchlists/C_c.txt'],'AMEX:C\n')
+        with self.assertRaisesRegex(ValueError,'exceeds instrument limit'):build(self.snapshot(themes),self.config(themes,1))
         c=self.config(themes);c['groups'][0]['theme_ids'].append('a')
         with self.assertRaisesRegex(ValueError,'exactly once'):build(self.snapshot(themes),c)
         self.assertEqual([n for _,n in flat_chunks(['a','b','c'],2)],[2,1])
@@ -43,7 +44,7 @@ class DailyListTests(unittest.TestCase):
         self.assertEqual(len(data),4);self.assertIn('NYSE:GUARDED',data)
         self.assertIn('NYSE:MISS',data)
         self.assertFalse(any('primary_stocks' in f for f in files))
-        self.assertEqual(s['export_archives'],[])
+        self.assertEqual(s['export_archives'],['individual_theme_watchlists.zip'])
     def test_rs_equality_and_missing(self):
         self.assertEqual(rs_state(0,1),'Mixed');self.assertEqual(rs_state(1,1),'Outperforming')
         self.assertEqual(rs_state(-1,-1),'Underperforming');self.assertEqual(rs_state(None,1),'Missing')
@@ -66,14 +67,27 @@ class DailyListTests(unittest.TestCase):
         self.assertEqual(set(assigned),set(active))
         self.assertEqual(len(assigned),len(set(assigned)))
 
-    def test_thousand_limit_counts_repeated_occurrences_and_anchors(self):
-        themes=[theme('t'+str(i),[stock('S'+str(j)) for j in range(20)]) for i in range(50)]
+    def test_unique_broad_scan_splitting_and_overlap_in_individuals(self):
+        themes=[theme('t'+str(i),[stock('S'+str(i)+'_'+str(j)) for j in range(20)]) for i in range(50)]
         s=self.snapshot(themes);files=build(s,self.config(themes))
-        groups=[f for f in s['export_manifest'] if f['role']=='thematic_navigation']
-        self.assertEqual([f['instrument_count'] for f in groups],[987,63])
-        self.assertEqual(sum(f['section_count'] for f in groups),50)
-        self.assertEqual([n for _,n in flat_chunks(list(range(1001)),1000)],[1000,1])
-        self.assertTrue(all(f['file'] in files for f in groups))
+        groups=[f for f in s['export_manifest'] if f['role']=='optional_broad_scan' and f['group']=='Test']
+        self.assertEqual([f['instrument_count'] for f in groups],[1000,50])
+        self.assertTrue(all(f['section_count']==0 for f in groups))
+        themes=[theme('a',[stock('SHARED')]),theme('b',[stock('SHARED')])]
+        s=self.snapshot(themes);files=build(s,self.config(themes))
+        self.assertIn('NYSE:SHARED',files['individual_watchlists/A_a.txt'])
+        self.assertIn('NYSE:SHARED',files['individual_watchlists/B_b.txt'])
+        self.assertEqual(files['tradingview_group_test.txt'].count('NYSE:SHARED'),1)
+        self.assertEqual(files['tradingview_configured_stocks.txt'],'NYSE:SHARED\n')
+
+    def test_anchor_plus_twenty_and_unfiltered_daily_missing_rows(self):
+        themes=[theme('a',[stock(str(i)) for i in range(20)])]
+        themes[0]['selected'][0]['metric_status']='unavailable'
+        s=self.snapshot(themes);files=build(s,self.config(themes))
+        self.assertEqual(files['individual_watchlists/A_a.txt'].strip().split(','),['AMEX:A']+['NYSE:'+str(i) for i in range(20)])
+        self.assertEqual(len(files['tradingview_configured_stocks.txt'].strip().split(',')),20)
+        themes[0]['selected'].append(stock('EXTRA'))
+        with self.assertRaisesRegex(ValueError,'more than 20'):build(self.snapshot(themes),self.config(themes))
 
     def test_empty_primary_and_unresolved(self):
         themes=[theme('a',[stock('X')],'observation')];s=self.snapshot(themes);files=build(s,self.config(themes))

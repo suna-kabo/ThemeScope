@@ -188,3 +188,26 @@ assert.equal(ui.marketCap(null),"N/A");
 assert.equal(ui.rsMatches({rs_state:"Missing"},"Mixed"),false);
 assert.equal(ui.rsMatches({rs_state:"Missing"},"All"),true);
 assert.deepEqual(ui.sortRows([{id:"a",market_cap_usd:2.49e9},{id:"b",market_cap_usd:2.41e9}],"market_cap_usd","asc").map(r=>r.id),["b","a"]);
+
+// Navigation is independent of daily metrics and research/performance ranking.
+const navigationThemes=[{id:'one',name:'Pharmaceuticals',anchor:'XPH',tradingview_symbol:'AMEX:XPH',selected:[
+ {ticker:'LLY',company:'Eli Lilly',tradingview_symbol:'NYSE:LLY',metric_status:'unavailable'},
+ {ticker:'LLYX',company:'Prefix',tradingview_symbol:'NYSE:LLYX'},
+ {ticker:'XLLYX',company:'Substring',tradingview_symbol:'NYSE:XLLYX'},
+ {ticker:'ZZZ',company:'LLY Text',tradingview_symbol:'NYSE:ZZZ'}]},
+ {id:'two',name:'Health Care',anchor:'XLV',tradingview_symbol:'AMEX:XLV',selected:[{ticker:'LLY',company:'Eli Lilly',tradingview_symbol:'NYSE:LLY'}]}];
+const navigation=ui.buildNavigationIndex(navigationThemes);
+assert.equal(navigation.filter(r=>r.kind==='stock'&&r.ticker==='LLY').length,2);
+assert.deepEqual(ui.searchNavigation(navigation,'lly').map(r=>r.matchRank),[0,0,1,2,3]);
+assert.equal(ui.searchNavigation(navigation,'XPH')[0].kind,'theme');
+assert.equal(ui.searchNavigation(navigation,'Eli Lilly').filter(r=>r.kind==='stock').length,2);
+assert.equal(ui.searchNavigation(navigation,'Health Care').length,2);
+assert.deepEqual(ui.searchNavigation(navigation,'NOTFOUND'),[]);
+assert.deepEqual(ui.searchNavigation(navigation,' '),[]);
+assert.deepEqual(ui.searchNavigation(ui.buildNavigationIndex(navigationThemes.slice().reverse()),'LLY').map(r=>r.key),ui.searchNavigation(navigation,'LLY').map(r=>r.key));
+assert.equal(ui.emaMatches({price_close:null,ema21:null},'above21'),false);
+assert.equal(ui.emaMatches({price_close:10,ema21:10},'below21'),true);
+assert.deepEqual(ui.sortRows([{id:'a',daily_change:.010001},{id:'b',daily_change:.010002},{id:'c',daily_change:null}], 'daily_change','desc').map(r=>r.id),['b','a','c']);
+const dayCSV=ui.themeRowsToCsv([{id:'one',daily_change:.01234567}], '2026-10-30','test').split('\r\n');
+assert.match(dayCSV[0],/"anchor_etf","change_1d_pct","state"/);
+assert.match(dayCSV[1],/"1.234567"/);

@@ -6,7 +6,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from src.themescope.approved_rules import ACTION_SENTENCES, STATES, canonical_decision, market_direction, price_state, priority
-from src.themescope.manual_csv import CSVValidationError, breadth, parse_csv, percentile, theme_score, theme_state
+from src.themescope.manual_csv import CSVValidationError, breadth, parse_csv, percentile, theme_score, theme_state, _row_fields
 from scripts.generate_dashboard import _run_manual_csv
 
 
@@ -34,6 +34,12 @@ class ManualCSVTests(unittest.TestCase):
         self.assertEqual(rows[0]["ema21"], 19)
         self.assertIsNone(rows[0]["earnings_date"])
         self.assertIn("Unused column", audit["columns"])
+
+    def test_etf_daily_change_fraction_and_unavailable(self):
+        for raw,expected in [('1.234567',.01234567),('-2.5',-.025),('0',0)]:
+            rows,_=parse_csv(self._csv(HEADER+ROW.replace('20,1,','20,'+raw+',')), 'etf')
+            self.assertEqual(_row_fields(rows[0])['daily_change'],expected)
+        self.assertIsNone(_row_fields({})['daily_change'])
 
     def test_missing_invalid_market_cap_retains_stock(self):
         for value in ("", "NaN", "-1"):

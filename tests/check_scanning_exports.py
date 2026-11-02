@@ -25,23 +25,30 @@ def check(root):
         expected={t['id'] for t in s['themes'] if t['research_priority']['category']=='primary' and any(r['tradingview_symbol']==row['symbol'] for r in t['selected'])}
         assert {c['theme_id'] for c in row['contexts']}==expected
     assert not list(root.glob('tradingview_primary_stocks*'))
-    assert not s['export_archives']
-    data=[];sections=0
+    assert s['export_archives']==['individual_theme_watchlists.zip']
+    data=[];individuals=[]
     for item in s['export_manifest']:
         tokens=(root/item['file']).read_text().strip().split(',')
         assert sum(not t.startswith('###') for t in tokens)==item['instrument_count']<=s['export_configuration']['instrument_limit']
         assert sum(t.startswith('###') for t in tokens)==item['section_count']
         if item['role']=='configured_stock_daily_data':data+=tokens
         assert item['role']!='daily_primary_scan'
-        if item['role']=='thematic_navigation':
-            sections+=item['section_count']
-            for i,token in enumerate(tokens):
-                if token.startswith('###'):
-                    theme=next(t for t in s['themes'] if token=='###'+t['name'].replace(',',' ')+' ('+t['anchor']+')')
-                    expected=[theme['tradingview_symbol']]+[r['tradingview_symbol'] for r in theme['selected']]
-                    assert tokens[i+1:i+1+len(expected)]==expected
+        assert item['section_count']==0 and len(tokens)==len(set(tokens))
+        if item['role']=='individual_research':
+            individuals.append(item)
+            theme=next(t for t in s['themes'] if t['id']==item['theme_id'])
+            assert tokens==[theme['tradingview_symbol']]+[r['tradingview_symbol'] for r in theme['selected']]
+            assert Path(item['file']).name.startswith(theme['anchor']+'_')
+        if item['role']=='optional_broad_scan':
+            assert not any(t.startswith('###') for t in tokens)
     assert len(data)==len(set(data)) and set(data)==all_stocks
-    assert sections==len(s['themes'])
+    assert len(individuals)==len(s['themes'])
+    archive_index=json.loads((root/'individual_theme_watchlists.json').read_text())
+    with zipfile.ZipFile(root/'individual_theme_watchlists.zip') as z:
+        assert z.testzip() is None and len(z.namelist())==len(individuals)
+        for item in individuals:
+            assert z.read(Path(item['file']).name)==(root/item['file']).read_bytes()
+            assert archive_index[item['theme_id']]['file']==item['file']
     with zipfile.ZipFile(root/'run_bundle.zip') as z:
         assert z.testzip() is None
         for item in s['export_manifest']:assert z.read(item['file'])==(root/item['file']).read_bytes()
@@ -51,10 +58,10 @@ def check(root):
     with tempfile.TemporaryDirectory() as temporary:
         stage=Path(temporary)
         _manual_csv_outputs(synthetic,{},stage)
-        assert not synthetic['export_archives']
+        assert synthetic['export_archives']==['individual_theme_watchlists.zip']
         assert not list(stage.glob('tradingview_primary_stocks*'))
         assert all(f['instrument_count']<=100 for f in synthetic['export_manifest'])
-    print(json.dumps({'groups':len(s['export_configuration']['groups']),'sections':sections,'configured_unique_stocks':len(data),'earnings_scope_unique_stocks':len(primary),'manifest_agreement':True}))
+    print(json.dumps({'groups':len(s['export_configuration']['groups']),'individuals':len(individuals),'configured_unique_stocks':len(data),'earnings_scope_unique_stocks':len(primary),'manifest_agreement':True}))
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('output',type=Path);check(p.parse_args().output)

@@ -1,5 +1,9 @@
 """Offline, evidence-backed TradingView identifiers; never infer a venue prefix."""
 import json
+import hashlib
+import re
+import unicodedata
+from collections import Counter
 from pathlib import Path
 from urllib.parse import quote
 
@@ -36,5 +40,25 @@ def theme_symbols(theme: dict) -> list[str]:
     return [row['tradingview_symbol'] for row in rows]
 
 
-def heading(theme: dict) -> str:
-    return '###' + theme['name'].replace(',', ' ') + ' (' + theme['anchor'] + ')'
+def individual_filenames(themes: list[dict]) -> dict[str, str]:
+    """Portable ETF-first names, independent of input order and case collisions."""
+    def safe(value, fallback):
+        value = unicodedata.normalize('NFKD', str(value)).encode('ascii', 'ignore').decode()
+        return re.sub(r'[^A-Za-z0-9.-]+', '_', value).strip('_.-')[:100] or fallback
+
+    if len({t['id'] for t in themes}) != len(themes):
+        raise ValueError('Duplicate theme identity in individual exports')
+    bases = {t['id']: safe(t['anchor'], 'ETF') + '_' + safe(t['name'], 'Theme') for t in themes}
+    counts = Counter(base.casefold() for base in bases.values())
+    result, used = {}, set()
+    for theme_id in sorted(bases):
+        base = bases[theme_id]
+        suffix = '_' + hashlib.sha256(theme_id.encode()).hexdigest()[:12] if counts[base.casefold()] > 1 else ''
+        name = base + suffix + '.txt'
+        index = 1
+        while name.casefold() in used:
+            name = base + suffix + '_' + str(index) + '.txt'
+            index += 1
+        used.add(name.casefold())
+        result[theme_id] = name
+    return result

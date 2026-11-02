@@ -85,5 +85,7 @@
         "theme-metals-mining"
       ]
     }
-  ]
+  ],
+  "primary_research_export": "individual_anchor_first",
+  "grouped_purpose": "Optional broad scan: unique instruments, no per-theme sections"
 }
