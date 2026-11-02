@@ -1,5 +1,7 @@
 # ThemeScope focused scanning release — 3 November 2026 HKT
 
+Historical audit of the preceding interface. Its candidate table and Primary export requirements are superseded by [the terminal release audit](terminal_release_audit.md); its counts are not validation of the current interface.
+
 Baseline: a70ce91fac50f819b79f6abca9712aa1471b68ea. Existing unrelated dirty and untracked work is preserved. The latest supplied CSV fixture still describes US session **2026-10-30**; this release does not claim newer market data.
 
 ## Source changes

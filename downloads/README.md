@@ -1,7 +1,9 @@
 # Downloadable run bundle
 
-Download `ThemeScope_v7.1_session_2026-10-23.zip` for the refreshed ThemeScope run. It contains the self-contained dashboard, 53-theme snapshot and CSV exports, the passing release audit, the reviewed stock memberships, and the compressed price-history sidecars.
+Use [ThemeScope_manual_csv_session_2026-10-30.zip](ThemeScope_manual_csv_session_2026-10-30.zip) for the current quiet research terminal interface. Extract the whole ZIP and open `dashboard.html`; no installation or server is needed to view it. Keep sibling exports beside it.
 
-The market session is 23 October 2026, the latest completed session at generation time. The bundle is 18,063,322 bytes.
+The market session is **30 October 2026**, from the supplied manual CSVs. This interface update does not claim newer data. Read `OPEN_FIRST.md` and `RELEASE_AUDIT.md` inside the ZIP. Source, new-data commands and preserved local-history instructions are in the repository README. Actual TradingView account import remains untested.
 
-SHA-256: `c2340493893218538974e561e3d064041fecc260f589a79bd97da58c759f2966`
+Size: 1738213 bytes. SHA-256: `848f6dbe2c8454d7f88ee5b92a489aa8707ff3951f4c733d95dd3df9db95cfde`.
+
+The older v7.1 bundle is retained as a historical artifact and is not the current dashboard.

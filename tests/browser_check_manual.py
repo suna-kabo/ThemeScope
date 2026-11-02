@@ -153,6 +153,7 @@ def main() -> int:
             page.emulate_media(reduced_motion="no-preference")
             page.set_viewport_size({"width": 1536, "height": 864})
             page.click('.side-nav [data-page="watchlist"]')
+            page.select_option("#stock-view", "performance")
             headers = page.locator("#stock-head").inner_text()
             for label in ("1D", "1W", "1M", "3M", "ATR%14", "Avg $Vol30", "Turnover 1D", "Rel Vol", "Earnings"):
                 assert label in headers

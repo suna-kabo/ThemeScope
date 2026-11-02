@@ -20,7 +20,7 @@ def earnings_window(candidates, session):
         except ValueError:
             expected=None
         if expected is None or expected < start:
-            unknown.append({'ticker':row['ticker'],'symbol':row['tradingview_symbol'],'reason':'Past-only expected date' if expected else 'Expected date unavailable','expected_date':raw})
+            unknown.append({'ticker':row['ticker'],'symbol':row['tradingview_symbol'],'reason':'Past-only expected date' if expected else 'Expected date unavailable','expected_date':raw,'contexts':row['primary_contexts']})
         elif expected <= start+timedelta(days=7):
             days=(expected-start).days
             upcoming.append({'ticker':row['ticker'],'symbol':row['tradingview_symbol'],'expected_date':raw,'days_away':days,'timing_label':'Today; timing unverified' if days==0 else f'{days} days away','contexts':row['primary_contexts']})
@@ -72,10 +72,10 @@ def build(snapshot, config):
             stock['rs_state']=rs_state(stock['excess21_pp'],stock['excess63_pp'])
             if theme.get('research_priority',{}).get('category')!='primary':continue
             if symbol not in primary:
-                primary[symbol]={**stock,'primary_contexts':[]}
+                primary[symbol]={'ticker':stock['ticker'],'tradingview_symbol':symbol,'earnings_date':stock.get('earnings_date'),'primary_contexts':[]}
             if not any(c['theme_id']==theme['id'] for c in primary[symbol]['primary_contexts']):
-                primary[symbol]['primary_contexts'].append({'theme_id':theme['id'],'theme_name':theme['name'],'anchor':theme['anchor'],'membership_rationale':stock.get('membership_rationale'),'membership_tag':stock.get('membership_tag'),'anchor_performance_1m':stock['anchor_performance_1m'],'anchor_performance_3m':stock['anchor_performance_3m'],'excess21_pp':stock['excess21_pp'],'excess63_pp':stock['excess63_pp'],'rs_state':stock['rs_state']})
-    candidates=[primary[k] for k in sorted(primary)]
+                primary[symbol]['primary_contexts'].append({'theme_id':theme['id'],'theme_name':theme['name'],'anchor':theme['anchor']})
+    earnings_members=[primary[k] for k in sorted(primary)]
     files={};manifest=[]
     def add(stem,chunks,role,group=None):
         for index,(tokens,count) in enumerate(chunks,1):
@@ -86,12 +86,12 @@ def build(snapshot, config):
     for group in config['groups']:
         add('tradingview_group_'+group['id'],pack_sections([themes[i] for i in group['theme_ids']],limit),'thematic_navigation',group['name'])
     add('tradingview_configured_stocks',flat_chunks(sorted(all_stocks),limit),'configured_stock_daily_data')
-    add('tradingview_primary_stocks_'+snapshot['session_date'],flat_chunks(sorted(primary),limit),'daily_primary_scan')
     # Retain the old all-theme filename as an optional alternative, also bounded.
     add('tradingview_all_theme_stocks',pack_sections(list(themes.values()),limit),'legacy_all_themes')
-    snapshot['daily_primary']={'candidates':candidates,'unique_count':len(candidates),'earnings':earnings_window(candidates,snapshot['session_date'])}
+    snapshot['expected_earnings']=earnings_window(earnings_members,snapshot['session_date'])
+    snapshot.pop('daily_primary',None)
     snapshot['export_manifest']=manifest
-    snapshot['export_archives']=['tradingview_primary_stocks_'+snapshot['session_date']+'.zip'] if sum(f['role']=='daily_primary_scan' for f in manifest)>1 else []
+    snapshot['export_archives']=[]
     snapshot['export_configuration']=config
-    snapshot['manual_csv_audit']['daily_lists']={'configured_unique_stocks':len(all_stocks),'primary_unique_stocks':len(primary),'primary_market_cap_available':sum(r.get('market_cap_usd') is not None for r in candidates),'primary_missing_metrics':sum(r.get('metric_status')!='available' for r in candidates),'expected_earnings_in_window':len(snapshot['daily_primary']['earnings']['upcoming']),'earnings_unknown':len(snapshot['daily_primary']['earnings']['unknown']),'instrument_limit':limit,'files':manifest,'platform_import_tested':False}
+    snapshot['manual_csv_audit']['daily_lists']={'configured_unique_stocks':len(all_stocks),'earnings_scope_unique_stocks':len(primary),'expected_earnings_in_window':len(snapshot['expected_earnings']['upcoming']),'earnings_unknown':len(snapshot['expected_earnings']['unknown']),'instrument_limit':limit,'files':manifest,'platform_import_tested':False}
     return files

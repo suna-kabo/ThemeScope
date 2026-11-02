@@ -9,7 +9,7 @@
 </head>
 <body>
   <aside class="sidebar" aria-label="ThemeScope navigation">
-    <a class="brand" href="#market"><span class="brand-mark">T</span><span>ThemeScope<small>Market research</small></span></a>
+    <a class="brand" href="#market"><span>ThemeScope<small>Market research</small></span></a>
     <div class="sidebar-session"><span>MARKET SESSION</span><b id="sidebar-date">—</b></div>
     <nav class="side-nav" aria-label="Dashboard pages">
       <a href="#market" data-page="market" class="active"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 18 18"><path d="M2.5 9h3l2-4 3.1 8 1.8-4h3.1"/></svg></span>Market</a>
@@ -30,34 +30,28 @@
     </header>
     <main>
       <section id="market" class="page" aria-labelledby="market-title">
-        <div class="page-heading"><div><span class="eyebrow">MARKET</span><h1 id="market-title">Market</h1><p>SPY, QQQ and IWM price states with SPY, QQQ and Russell 2000 Breadth from the assigned TradingView exports.</p></div></div>
+        <div class="page-heading"><div><h1 id="market-title">Market</h1><p>SPY, QQQ and IWM price states with SPY, QQQ and Russell 2000 Breadth from the assigned TradingView exports.</p></div></div>
         <article id="market-direction" class="help-card" aria-live="polite"></article>
         <div id="cards" class="market-cards"></div>
-        <div class="volatility-section"><div><span class="eyebrow">VOLATILITY CONTEXT</span><h2>Volatility Context</h2></div><div id="volatility-card"></div></div>
+        <div class="volatility-section"><div><h2>Volatility Context</h2></div><div id="volatility-card"></div></div>
       </section>
 
       <section id="daily-plan" class="page" hidden aria-labelledby="daily-plan-title">
-        <div class="page-heading daily-plan-heading"><div><span class="eyebrow">DAILY PLAN</span><h1 id="daily-plan-title">Daily Plan</h1><p><span id="daily-session">—</span> · Generated <span id="daily-generated">—</span></p></div></div>
+        <div class="page-heading daily-plan-heading"><div><h1 id="daily-plan-title">Daily Plan</h1><p><span id="daily-session">—</span> · Generated <span id="daily-generated">—</span></p></div></div>
         <div id="daily-classification" class="decision-tag">Unclassified</div>
         <p id="daily-action" class="daily-action"></p>
         <section class="plan-section" aria-labelledby="decision-path-title"><h2 id="decision-path-title">Decision Path</h2><div id="decision-path" class="decision-path" role="table" aria-label="Market decision path"></div></section>
         <section class="plan-section" aria-labelledby="why-result-title"><h2 id="why-result-title">Why this result</h2><div id="why-result" class="plan-card"></div></section>
         <section class="plan-section" aria-labelledby="research-priorities-title"><h2 id="research-priorities-title">Today's Research Priorities</h2><div id="daily-priorities" class="priority-grid"></div><div id="qualification-summary" class="qualification-summary"></div></section>
+        <section id="expected-earnings" class="plan-section" aria-labelledby="earnings-title"><h2 id="earnings-title">Expected earnings within the next 7 calendar days</h2><div id="expected-earnings-content"></div></section>
         <section class="plan-section" aria-labelledby="divergence-title"><h2 id="divergence-title">Divergence context</h2><div id="divergence-context" class="plan-card"></div></section>
-        <section class="plan-section" aria-labelledby="primary-candidates-title">
-          <div class="section-heading"><div><h2 id="primary-candidates-title">Daily Primary Candidates</h2><p class="caption">Configured members of final Primary themes. Review actual setups separately.</p></div><button id="primary-export" type="button">Export all Primary stocks</button></div>
-          <div id="primary-controls" class="controls"></div><p id="primary-count" class="caption" role="status"></p>
-          <div class="table-wrap candidate-table-wrap"><table class="data-table candidate-data-table"><colgroup id="primary-cols"></colgroup><thead id="primary-head"></thead><tbody id="primary-body"></tbody></table></div>
-        </section>
-        <details id="expected-earnings" class="help-card"><summary>Expected earnings within the next 7 calendar days</summary><div id="expected-earnings-content"></div></details>
         <details id="daily-methodology" class="help-card methodology"><summary>View full methodology</summary><div id="methodology-content"></div></details>
         <div class="fixed-limitations"><p>Research Priority is not an entry signal.</p><p>Lagging does not mean oversold.</p><p>Fading does not automatically mean a confirmed downtrend.</p></div>
       </section>
 
       <section id="sectors-themes" class="page" hidden aria-labelledby="themes-title">
-        <div class="page-heading"><div><span class="eyebrow">ELIGIBLE EQUITY EXPOSURES</span><h1 id="themes-title">Sectors &amp; Themes</h1><p>Sortable ETF comparisons. Rank is global within the eligible registry; filters do not rerank the remaining rows.</p></div><a class="download-link" href="themes.csv" download>Full ranking CSV</a></div>
-        <details class="help-card"><summary>Score and state definitions</summary><p id="score-method-description">Score weights and inputs come from this snapshot’s configured methodology.</p><p><b>Improving</b> means the current score is in the stronger half while the medium score is in the weaker half. <b>Fading</b> means the reverse. These cross-sectional labels do not establish a time-series reversal or rotation.</p></details>
-        <details class="help-card export-navigation"><summary>TradingView watchlists and daily data</summary><div id="grouped-export-links"></div><p class="caption">Configured-stock TXT → TradingView daily Stock CSV for all fixed members. Candidate screening CSV is optional maintenance input. Grouped TXT files support chart navigation; Daily Primary TXT supports focused stock scanning. Section and duplicate behavior still require platform import verification.</p></details>
+        <div class="page-heading"><div><h1 id="themes-title">Sectors &amp; Themes</h1><p>Sortable ETF comparisons. Rank is global within the eligible registry; filters do not rerank the remaining rows.</p></div><a class="download-link" href="themes.csv" download>Full ranking CSV</a></div>
+        <section class="export-navigation" aria-label="TradingView exports"><h2>TradingView exports</h2><div id="grouped-export-links"></div></section>
         <div id="theme-controls" class="controls"></div>
         <p id="theme-count" class="caption"></p>
         <div class="table-wrap theme-table-wrap"><table class="data-table theme-data-table"><colgroup id="theme-cols"></colgroup><thead id="theme-head"></thead><tbody id="theme-body"></tbody></table></div>
@@ -71,7 +65,7 @@
           <button id="previous-theme" type="button" aria-label="Previous eligible sector or theme">Previous</button>
           <button id="next-theme" type="button" aria-label="Next eligible sector or theme">Next</button>
         </div>
-        <div class="page-heading"><div><span class="eyebrow">SELECTED COMPANIES</span><h1 id="active-name">Watchlist</h1><p id="active-summary" class="watchlist-summary"></p></div></div>
+        <div class="page-heading"><div><h1 id="active-name">Watchlist</h1><p id="active-summary" class="watchlist-summary"></p></div></div>
         <p id="watchlist-message" class="watchlist-message" hidden></p>
         <div id="stock-controls" class="controls"></div><p id="coverage" class="caption"></p>
         <div class="table-wrap stock-table-wrap" id="stock-table-wrap"><table class="data-table stock-data-table"><colgroup id="stock-cols"></colgroup><thead id="stock-head"></thead><tbody id="stock-body"></tbody></table></div>

@@ -24,20 +24,26 @@ class DailyListTests(unittest.TestCase):
         c=self.config(themes);c['groups'][0]['theme_ids'].append('a')
         with self.assertRaisesRegex(ValueError,'exactly once'):build(self.snapshot(themes),c)
         self.assertEqual([n for _,n in flat_chunks(['a','b','c'],2)],[2,1])
-    def test_dedup_primary_context_units_and_no_mutation_of_rules(self):
-        one=stock('SHARED',.02,-.01);two=stock('SHARED',-.03,.04)
+    def test_independent_earnings_union_and_no_mutation_of_rules(self):
+        one=stock('SHARED',.02,-.01,earnings='2027-01-01');two=stock('SHARED',-.03,.04,earnings='2027-01-01')
         themes=[theme('one',[one,stock('MISS')]),theme('two',[two]),theme('secondary',[stock('ONLY_SECONDARY')],'secondary'),theme('guarded',[stock('GUARDED')],'observation')]
         themes[0]['selected'][1]['metric_status']='unavailable';themes[0]['selected'][1]['returns']={'21':{'value':None},'63':{'value':None}}
         original=copy.deepcopy([t['research_priority'] for t in themes]);s=self.snapshot(themes);files=build(s,self.config(themes))
         self.assertEqual([t['research_priority'] for t in themes],original)
-        self.assertEqual(len(s['daily_primary']['candidates']),2)
-        shared=next(r for r in s['daily_primary']['candidates'] if r['ticker']=='SHARED')
-        self.assertEqual([c['excess21_pp'] for c in shared['primary_contexts']],[2,-3])
-        self.assertEqual([c['excess63_pp'] for c in shared['primary_contexts']],[-1,4])
+        self.assertNotIn('daily_primary',s)
+        self.assertEqual(s['manual_csv_audit']['daily_lists']['earnings_scope_unique_stocks'],2)
+        shared=s['expected_earnings']['upcoming'][0]
+        self.assertEqual(shared['ticker'],'SHARED')
+        self.assertEqual([c['theme_id'] for c in shared['contexts']],['one','two'])
+        self.assertEqual([r['ticker'] for r in s['expected_earnings']['unknown']],['MISS'])
+        self.assertEqual(s['expected_earnings']['unknown'][0]['contexts'][0]['theme_id'],'one')
+        self.assertEqual([one['excess21_pp'],two['excess21_pp']],[2,-3])
+        self.assertEqual([one['excess63_pp'],two['excess63_pp']],[-1,4])
         data=files['tradingview_configured_stocks.txt'].strip().split(',')
         self.assertEqual(len(data),4);self.assertIn('NYSE:GUARDED',data)
-        self.assertIn('NYSE:MISS',files['tradingview_primary_stocks_2026-12-29.txt'])
-        self.assertNotIn('NYSE:ONLY_SECONDARY',files['tradingview_primary_stocks_2026-12-29.txt'])
+        self.assertIn('NYSE:MISS',data)
+        self.assertFalse(any('primary_stocks' in f for f in files))
+        self.assertEqual(s['export_archives'],[])
     def test_rs_equality_and_missing(self):
         self.assertEqual(rs_state(0,1),'Mixed');self.assertEqual(rs_state(1,1),'Outperforming')
         self.assertEqual(rs_state(-1,-1),'Underperforming');self.assertEqual(rs_state(None,1),'Missing')
@@ -71,7 +77,9 @@ class DailyListTests(unittest.TestCase):
 
     def test_empty_primary_and_unresolved(self):
         themes=[theme('a',[stock('X')],'observation')];s=self.snapshot(themes);files=build(s,self.config(themes))
-        self.assertEqual(s['daily_primary']['candidates'],[])
+        self.assertNotIn('daily_primary',s)
+        self.assertEqual(s['expected_earnings']['upcoming'],[])
+        self.assertEqual(s['expected_earnings']['unknown'],[])
         self.assertFalse(any('primary_stocks' in f for f in files))
         themes[0]['selected'][0].pop('tradingview_symbol')
         with self.assertRaisesRegex(ValueError,'Unresolved'):build(self.snapshot(themes),self.config(themes))

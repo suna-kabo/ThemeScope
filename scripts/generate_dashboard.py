@@ -1189,11 +1189,6 @@ def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_di
     export_files = build_daily_lists(snapshot, snapshot["export_configuration"])
     for name, content in export_files.items():
         (output_dir / name).write_text(content, encoding="utf-8")
-    primary_files = [item["file"] for item in snapshot["export_manifest"] if item["role"] == "daily_primary_scan"]
-    if len(primary_files) > 1:
-        with zipfile.ZipFile(output_dir / ("tradingview_primary_stocks_" + snapshot["session_date"] + ".zip"), "w", compression=zipfile.ZIP_DEFLATED) as archive:
-            for name in primary_files:
-                archive.writestr(name, export_files[name])
     audit = snapshot["manual_csv_audit"]
     _write_json(output_dir / "latest_snapshot.json", snapshot)
     _write_json(output_dir / "run_audit.json", audit)
@@ -1202,7 +1197,7 @@ def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_di
         "market_classification": snapshot["market_classification"],
         "context": snapshot["context"],
         "themes": snapshot["themes"],
-        "daily_primary": snapshot["daily_primary"],
+        "expected_earnings": snapshot["expected_earnings"],
         "export_manifest": snapshot["export_manifest"],
     })
     market_rows = []

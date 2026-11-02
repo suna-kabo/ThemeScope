@@ -53,7 +53,9 @@ python3 -m unittest discover -s tests -v
 python3 -m compileall -q src scripts tests
 node --check static/dashboard.js
 node tests/test_dashboard.js
+python3 tests/browser_check_terminal.py output/manual_csv/dashboard.html
 python3 tests/browser_check_manual.py output/manual_csv/dashboard.html
+python3 tests/check_scanning_exports.py output/manual_csv
 ```
 
 The browser check requires Playwright and Chromium. Generated runs belong in ignored `output/` or `dist/`; the persistent `cache/` is ignored by Git. Theme breadth snapshot and export fields use `theme_breadth21_*` and `theme_breadth50_*`; index breadth remains a separate market-context measure.
@@ -77,6 +79,10 @@ Successful manual imports save `local_history/YYYY-MM-DD.json` inside the output
 
 The five versioned groups in `config/watchlist_exports.json` provide stable thematic chart navigation. Use `tradingview_configured_stocks.txt` (stocks only, deduplicated) to collect the daily Stock CSV for every fixed member without screener filters. Candidate screening CSV remains an optional maintenance input; daily generation still requires only the existing five CSV roles. Missing daily rows remain configured and are reported.
 
-Daily Plan contains the deduplicated Daily Primary Candidates view, a complete **Export all Primary stocks** action, and expected earnings within the session date through seven calendar days later. Per-stock anchor selectors retain separate comparisons for overlapping Primary themes. Watchlist offers Performance and Relative Strength views; matching TradingView stock-minus-selected-ETF differences are percentage points. These are browsing tools, not stock entry qualification.
+Daily Plan previews five themes per research group, reports the full count and offers Show all / Show less and Score order. Short groups default to ascending Score; long and observation groups default to descending Score with stable identity ties. Preview order does not imply entry readiness. Expected earnings is a visible section based independently on configured members of final Primary themes, deduplicated by validated instrument identity, from the as-of session through seven calendar days later. Unknown dates remain accessible. Daily Primary Candidates and their dedicated exports have been removed.
+
+Watchlist initially opens in Relative Strength and remembers an explicit view choice. Its # column is stable configured membership position in both views. Matching TradingView stock-minus-selected-ETF differences are percentage points. Navigation restores each page's scroll and each theme/view's table scroll, search and sort; priority expansion and methodology state survive navigation. Local UI state is namespaced by schema/session and storage failures are tolerated.
+
+The interface uses neutral charcoal, restrained amber controls, local monospace data and bundled Inter explanations. Light mode and mobile tables remain available. See `PRODUCT.md`, `DESIGN.md` and `docs/terminal_release_audit.md`.
 
 All thematic files count repeated symbols and anchors against the configured 1,000-instrument limit and split only at theme boundaries; stock-only lists split deterministically. Optional individual-theme files preserve complete overlapping memberships. Grouped-section acceptance and duplicate handling have not been tested in a TradingView account.
