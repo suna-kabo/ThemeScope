@@ -1,14 +1,14 @@
 # Current downloads
 
-- [Complete ThemeScope bundle](ThemeScope_manual_csv_session_2026-10-30.zip): extract the whole ZIP and open `dashboard.html`, keeping sibling files and `individual_watchlists/`.
-- [All individual research watchlists](ThemeScope_individual_watchlists.zip): currently 53 ETF-first TXT files, derived from active configuration. Update these only when memberships or identifiers change.
+- [Latest complete ThemeScope bundle — US session 2 November 2026](ThemeScope_manual_csv_session_2026-11-02.zip): refreshed from the five supplied 3 November Hong Kong exports. Extract everything and open `dashboard.html`, retaining sibling files and `individual_watchlists/`.
+- [All individual research watchlists](ThemeScope_individual_watchlists.zip): 53 ETF-first TXT files. Their contents are unchanged; no daily reimport is required.
 
-Data session remains **30 October 2026**. This is an interface/export update, not newer-session collection. The separate **Daily Data Stocks — export CSV only** list collects daily stock CSV data without reimporting every research list.
+The current run has all 53 anchors, 46/53 valid theme Breadth readings, and rank changes against the real 30 October session. Eleven configured stocks are absent from the Stock CSV; memberships remain intact. Read `REFRESH_AUDIT.md` and `run_audit.json` inside the ZIP, or `docs/refresh_2026-11-02.md`.
 
-Read `OPEN_FIRST.md` and `RELEASE_AUDIT.md` in the complete bundle, or `docs/navigation_export_release_audit.md`. New-data commands remain in the repository README. Actual revised TradingView account imports have not been performed. Direct file:// testing was blocked by managed Chromium policy; local HTTP rendering/download tests pass. A local server fallback is `python -m http.server 8000` from the extracted folder, then `http://localhost:8000/dashboard.html`.
+Both actual `local_history/2026-10-30.json` and `local_history/2026-11-02.json` are included. Preserve that folder for future runs. Daily data collection still uses **Daily Data Stocks — export CSV only** and the existing five-CSV command.
 
-`ThemeScope_manual_csv_session_2026-10-30.zip`: 1,761,009 bytes; SHA-256 `9fa641e9848598cc2fd6a78f21f1cdfc03c927262712247b09494ce1fcfff434`.
+Actual TradingView import is not tested here. Managed Chromium blocks direct file:// testing; local HTTP tests pass. If needed, run `python -m http.server 8000` from the extracted folder and open `http://localhost:8000/dashboard.html`.
 
-`ThemeScope_individual_watchlists.zip`: 11,406 bytes; SHA-256 `8db68671c7b2ca961288ce3177a220fa550b55bad57da46f62f45a280de9e6e5`.
+Latest bundle: 1,786,148 bytes. SHA-256 `dc7d7a33a83cdf48090110672c08500e5a20378457c7c7b829b73eb0a87fe0b7`.
 
-The older v7.1 bundle is retained as a historical artifact.
+Previous dated bundles are retained: [30 October 2026](ThemeScope_manual_csv_session_2026-10-30.zip) and the older v7.1 artifact. They are historical outputs.

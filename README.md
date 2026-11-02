@@ -11,7 +11,7 @@ Generate the dashboard with:
 ```sh
 python3 scripts/generate_dashboard.py \
   --source tradingview-csv \
-  --as-of 2026-10-30 \
+  --as-of 2026-11-02 \
   --stock-csv /path/to/Daily_Stock.csv \
   --etf-csv /path/to/Daily_ETF.csv \
   --spy-csv /path/to/SPY_constituents.csv \

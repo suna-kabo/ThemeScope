@@ -41,6 +41,20 @@ class ManualCSVTests(unittest.TestCase):
             self.assertEqual(_row_fields(rows[0])['daily_change'],expected)
         self.assertIsNone(_row_fields({})['daily_change'])
 
+    def test_unused_etf_blank_metrics_do_not_block_required_universe(self):
+        unused = ROW.replace('AAA,Alpha', 'UNUSED,Unused').replace('20,1,3000000000,2,3,4,', '20,1,3000000000,,3,4,')
+        path = self._csv(HEADER + ROW + unused)
+        rows, audit = parse_csv(path, 'etf', required_symbols={'AAA'})
+        self.assertEqual(len(rows), 2)
+        self.assertIsNone(rows[1]['performance_1w_pct'])
+        self.assertEqual(audit['numeric_warnings'][0]['symbol'], 'UNUSED')
+        with self.assertRaisesRegex(CSVValidationError, 'required numeric value is blank'):
+            parse_csv(path, 'etf', required_symbols={'AAA', 'UNUSED'})
+        with self.assertRaisesRegex(CSVValidationError, 'required numeric value is blank'):
+            parse_csv(path, 'stock', required_symbols={'AAA'})
+        with self.assertRaisesRegex(CSVValidationError, 'invalid numeric value'):
+            parse_csv(self._csv(HEADER + unused.replace(',,3,4,', ',bad,3,4,')), 'etf', required_symbols={'AAA'})
+
     def test_missing_invalid_market_cap_retains_stock(self):
         for value in ("", "NaN", "-1"):
             with self.subTest(value=value):

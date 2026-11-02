@@ -89,7 +89,7 @@ def _number(value: Any, *, required: bool = False, positive: bool = False) -> fl
     return value
 
 
-def parse_csv(path: Path, role: str) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+def parse_csv(path: Path, role: str, *, required_symbols: set[str] | None = None) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     if role not in ROLES:
         raise ValueError(f"Unknown CSV role {role!r}")
     source = path.expanduser().resolve()
@@ -141,7 +141,11 @@ def parse_csv(path: Path, role: str) -> tuple[list[dict[str, Any]], dict[str, An
                     # Breadth universes deliberately retain rows with blank
                     # Price/EMA cells in the denominator; those rows are
                     # excluded from the shared valid set during calculation.
-                    row[key] = _number(raw, required=key in REQUIRED[role] and role in {"stock", "etf"} and key != "market_cap", positive=key in POSITIVE)
+                    required_numeric = key in REQUIRED[role] and role in {"stock", "etf"} and key != "market_cap"
+                    unused_etf = role == "etf" and required_symbols is not None and symbol not in required_symbols
+                    row[key] = _number(raw, required=required_numeric and not unused_etf, positive=key in POSITIVE)
+                    if required_numeric and unused_etf and not raw:
+                        numeric_warnings.append({"symbol":symbol,"line":line_number,"field":key,"reason":"Blank on an unused ETF; excluded from the required anchor/benchmark universe, not filled."})
                     if key == "market_cap" and row[key] is not None and row[key] <= 0:
                         row[key] = None
                         numeric_warnings.append({"symbol":symbol,"line":line_number,"field":key,"reason":"Non-positive market capitalization; displayed as N/A."})
@@ -265,10 +269,11 @@ def build_release(root: Path, paths: dict[str, Path], session: str) -> tuple[dic
         raise CSVValidationError("All five explicit roles are required: stock, etf, spy, qqq and iwm")
     if not _session_valid(root, session):
         raise CSVValidationError(f"{session!r} is not a valid configured US market session")
-    parsed = {role: parse_csv(paths[role], role) for role in ROLES}
+    active = json.loads((root / "config/active_anchors.json").read_text(encoding="utf-8"))["anchors"]
+    required_etfs = {symbol.upper().replace(".", "-") for symbol in [*active.values(), "SPY", "QQQ", "IWM"]}
+    parsed = {role: parse_csv(paths[role], role, required_symbols=required_etfs if role == "etf" else None) for role in ROLES}
     rows = {role: value[0] for role, value in parsed.items()}
     audits = {role: value[1] for role, value in parsed.items()}
-    active = json.loads((root / "config/active_anchors.json").read_text(encoding="utf-8"))["anchors"]
     registry = json.loads((root / "config/themes.json").read_text(encoding="utf-8"))
     watchlists = json.loads((root / "config/theme_watchlists.json").read_text(encoding="utf-8"))
     config_themes = {row["id"]: row for row in registry["themes"]}
