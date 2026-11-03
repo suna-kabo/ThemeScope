@@ -20,7 +20,7 @@ SCHEMA='themescope-site-2'
 ROLES={'individual_research','configured_stock_daily_data','optional_broad_scan','configured_etf_daily_data','individual_primary_research','daily_primary_research'}
 SCALARS='ticker exchange instrument_type currency price_close daily_change ema21 ema50 above_ema21 above_ema50 price_state price_vs_ema21_pct price_vs_ema50_pct adv30_usd atr14_pct relative_volume_1d turnover_1d_usd'.split()
 THEME_FIELDS='id name anchor level global_rank rank_current rank_change_daily rank_comparison_session theme_score current_strength_score medium_strength_score priority_change breadth_status_21 breadth_status_50 configured_watchlist_count watchlist_member_count has_watchlist stock_drilldown_status watchlist_status theme_breadth21_pct theme_breadth21_above theme_breadth21_valid theme_breadth50_pct theme_breadth50_above theme_breadth50_valid'.split()
-STOCK_FIELDS='company theme_id theme_name anchor selection_slot market_cap_usd anchor_performance_1m anchor_performance_3m excess21_pp excess63_pp rs_state earnings_date metric_status session_date'.split()
+STOCK_FIELDS='company theme_id theme_name anchor selection_slot market_cap_usd anchor_performance_1m anchor_performance_3m excess21_pp excess63_pp earnings_date weighted_excess_pp weighted_vs_etf metric_status session_date'.split()
 METRIC_FIELDS='value status above_count valid_count eligible_count configured_count ema_period session_date'.split()
 HEADERS="/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: no-referrer\n  X-Frame-Options: DENY\n  Cache-Control: no-cache\n"
 
@@ -72,13 +72,14 @@ def public_payload(snapshot,root):
             clean['selected'].append(member)
         payload['themes'].append(clean)
     decision=snapshot['decision']
-    payload['decision']=pick(decision,['session_date','generated_at_hkt','market_classification','action_sentence','matrix_rule_id','reason','spy_price_state','qqq_price_state','iwm_price_state','spy_breadth_state','qqq_breadth_state','breadth_consensus','breadth_qualifier','russell_2000_breadth_state'])
+    payload['decision']=pick(decision,['session_date','generated_at_hkt','market_classification','action_sentence','matrix_rule_id','reason','spy_price_state','qqq_price_state','iwm_price_state','spy_breadth_state','qqq_breadth_state','breadth_consensus','breadth_qualifier','russell_2000_breadth_state','decision_path'])
     payload['decision']['primary_groups']={key:list(decision.get('primary_groups',{}).get(key,[])) for key in ('new','continuing','unavailable')}
     payload['decision']['market_matrix']=[pick(r,['spy','qqq','breadth','direction']) for r in decision.get('market_matrix',[])]
     payload['decision']['priority_policy']=pick(decision.get('priority_policy',{}),['priority_version','ema_version','input_semantics','score_boundary','weights','long_rule','short_rule','transition_rule','stock_rule','note'])
     payload['market_classification']=pick(snapshot['market_classification'],['direction','breadth_consensus','breadth_qualifier','reason','action_summary'])
+    payload['display_methodology']=pick(snapshot.get('display_methodology',{}),['maintenance_thresholds','watchlist_capacity','breadth_minimum_coverage','theme_breadth_minimum_valid','liquidity_definition','membership_rules','maintenance_missing_data'])
     research=snapshot['daily_primary_research']
-    payload['daily_primary_research']=pick(research,['session_date','side','theme_ids','combined_file','archive_file','relationships_file','platform_import_tested'])
+    payload['daily_primary_research']=pick(research,['session_date','side','theme_ids','combined_file','archive_file','relationships_file','platform_import_tested','sections','theme_order','overlap_policy'])
     payload['daily_primary_research']['relationships']=[pick(r,['theme_id','theme_name','anchor','symbol','ticker','role','weighted_excess_pp','er1m_pp','er3m_pp']) for r in research['relationships']]
     payload['local_history']={'comparison_session':snapshot.get('local_history',{}).get('comparison_session'),'status':'Compared with the immediately preceding US session.' if any(t.get('rank_change_daily') is not None for t in payload['themes']) else 'No comparable previous-session record.'}
     earnings=snapshot['expected_earnings']
@@ -230,7 +231,10 @@ def prepare_site(root,source,destination,session):
             path=source/item['file']
             if path.is_symlink():raise ValueError('Export source must not be a symlink')
             content=path.read_bytes();tokens=content.decode('utf-8').strip().split(',')
-            if len(tokens)!=len(set(tokens)) or len(tokens)!=item['instrument_count'] or not set(tokens)<=all_symbols:raise ValueError('Website TXT contains unexpected instruments: '+item['file'])
+            instruments=[token for token in tokens if not token.startswith('###')]
+            headings=[token for token in tokens if token.startswith('###')]
+            if headings and item['role']!='daily_primary_research':raise ValueError('Unexpected section in ordinary export')
+            if len(headings)!=item['section_count'] or len(instruments)!=len(set(instruments)) or len(instruments)!=item['instrument_count'] or not set(instruments)<=all_symbols:raise ValueError('Website TXT contains unexpected instruments: '+item['file'])
             if item['role'] in {'individual_primary_research','daily_primary_research'} and content.decode('utf-8').replace('\r\n','\n')!=expected_files[item['file']]:raise ValueError('Primary export differs from weighted per-anchor qualification')
             if item['role']=='configured_etf_daily_data' and tokens!=list(dict.fromkeys(r['tradingview_symbol'] for r in payload['themes']+payload['context'])):raise ValueError('ETF collection list differs from complete configured universe')
             if item['role']=='individual_research':

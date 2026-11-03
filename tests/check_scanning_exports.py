@@ -5,7 +5,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 
 
 def check(root):
-    s=json.loads((root/'latest_snapshot.json').read_text());canonical=json.loads((root/'canonical_dashboard_data.json').read_text())
+    s=json.loads((root/'latest_snapshot.json').read_text(encoding='utf-8'));canonical=json.loads((root/'canonical_dashboard_data.json').read_text(encoding='utf-8'))
     assert s['expected_earnings']==canonical['expected_earnings']
     assert 'daily_primary' not in s and 'daily_primary' not in canonical
     assert s['export_manifest']==canonical['export_manifest']
@@ -28,12 +28,13 @@ def check(root):
     assert s['export_archives'][0]=='individual_theme_watchlists.zip'
     data=[];individuals=[]
     for item in s['export_manifest']:
-        tokens=(root/item['file']).read_text().strip().split(',')
+        tokens=(root/item['file']).read_text(encoding='utf-8').strip().split(',')
         assert sum(not t.startswith('###') for t in tokens)==item['instrument_count']<=s['export_configuration']['instrument_limit']
         assert sum(t.startswith('###') for t in tokens)==item['section_count']
         if item['role']=='configured_stock_daily_data':data+=tokens
         assert item['role']!='daily_primary_scan'
-        assert item['section_count']==0 and len(tokens)==len(set(tokens))
+        assert len(tokens)==len(set(tokens))
+        if item['role']!='daily_primary_research':assert item['section_count']==0
         if item['role']=='individual_research':
             individuals.append(item)
             theme=next(t for t in s['themes'] if t['id']==item['theme_id'])
@@ -43,7 +44,7 @@ def check(root):
             assert not any(t.startswith('###') for t in tokens)
     assert len(data)==len(set(data)) and set(data)==all_stocks
     assert len(individuals)==len(s['themes'])
-    archive_index=json.loads((root/'individual_theme_watchlists.json').read_text())
+    archive_index=json.loads((root/'individual_theme_watchlists.json').read_text(encoding='utf-8'))
     with zipfile.ZipFile(root/'individual_theme_watchlists.zip') as z:
         assert z.testzip() is None and len(z.namelist())==len(individuals)
         for item in individuals:
@@ -56,7 +57,7 @@ def check(root):
     from src.themescope.daily_lists import primary_research
     check_snapshot=copy.deepcopy(s);files,manifest=primary_research(check_snapshot,s['export_configuration']['instrument_limit'])
     assert check_snapshot['daily_primary_research']==s['daily_primary_research']
-    for name,content in files.items():assert (root/name).read_text()==content
+    for name,content in files.items():assert (root/name).read_text(encoding='utf-8')==content
     research=s['daily_primary_research']
     if research['archive_file']:
         with zipfile.ZipFile(root/research['archive_file']) as archive:

@@ -55,18 +55,18 @@ class SiteBoundaryTests(unittest.TestCase):
         save();self.build()
         research=snapshot['daily_primary_research']
         for name,content in files.items():
-            self.assertEqual((self.destination/name).read_text(),content)
+            self.assertEqual((self.destination/name).read_text(encoding='utf-8'),content)
             self.assertEqual((self.destination/name).read_bytes(),(self.source/name).read_bytes())
         self.assertTrue((self.destination/research['relationships_file']).is_file())
         self.assertFalse((self.destination/'daily_primary_audit.json').exists())
         # Same instrument universe/count cannot disguise wrong order or qualification.
-        name=research['combined_file'];original=(self.source/name).read_text()
-        (self.source/name).write_text(','.join(reversed(original.strip().split(',')))+'\n')
+        name=research['combined_file'];original=(self.source/name).read_text(encoding='utf-8')
+        (self.source/name).write_text(','.join(reversed(original.strip().split(',')))+'\n',encoding='utf-8')
         before=(self.destination/'index.html').read_bytes()
         with self.assertRaisesRegex(ValueError,'weighted per-anchor'):
             self.build()
         self.assertEqual((self.destination/'index.html').read_bytes(),before)
-        (self.source/name).write_text(original)
+        (self.source/name).write_text(original,encoding='utf-8')
         snapshot['market_classification']['direction']='Neutral';theme['research_priority']={'category':'watch','label':'Watch'}
         snapshot['export_manifest']=[r for r in snapshot['export_manifest'] if r['role']=='individual_research']
         primary_research(snapshot,1000);save();self.build()

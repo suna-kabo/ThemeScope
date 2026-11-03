@@ -1,15 +1,11 @@
 """Canonical browsing lists and bounded TradingView exports, with no market rules."""
 from datetime import date, timedelta
-from decimal import Decimal, localcontext
 import math
+import re
 from .tradingview import individual_filenames, theme_symbols
-from .research_policy import number, market_side, priority_sort_key, CURRENT_WEIGHT, MEDIUM_WEIGHT
-
-
-def rs_state(a, b):
-    if not all(isinstance(v,(int,float)) and not isinstance(v,bool) and math.isfinite(v) for v in (a,b)):
-        return 'Missing'
-    return 'Outperforming' if a > 0 and b > 0 else 'Underperforming' if a < 0 and b < 0 else 'Mixed'
+from .research_policy import market_side, priority_sort_key
+from .relative_performance import weighted_excess
+from .tradingview import section_heading
 
 
 def earnings_window(candidates, session):
@@ -18,14 +14,14 @@ def earnings_window(candidates, session):
     for row in candidates:
         raw=row.get('earnings_date')
         try:
-            expected=date.fromisoformat(raw) if isinstance(raw,str) else None
+            expected=date.fromisoformat(raw) if isinstance(raw,str) and re.fullmatch(r'\d{4}-\d{2}-\d{2}',raw) else None
         except ValueError:
             expected=None
         if expected is None or expected < start:
             unknown.append({'ticker':row['ticker'],'symbol':row['tradingview_symbol'],'reason':'Past-only expected date' if expected else 'Expected date unavailable','expected_date':raw,'contexts':row['primary_contexts']})
         elif expected <= start+timedelta(days=7):
             days=(expected-start).days
-            upcoming.append({'ticker':row['ticker'],'symbol':row['tradingview_symbol'],'expected_date':raw,'days_away':days,'timing_label':'Today; timing unverified' if days==0 else f'{days} days away','contexts':row['primary_contexts']})
+            upcoming.append({'ticker':row['ticker'],'symbol':row['tradingview_symbol'],'expected_date':raw,'days_away':days,'timing_label':'Today' if days==0 else 'In 1 day' if days==1 else f'In {days} days','contexts':row['primary_contexts']})
         else:
             later.append(row['tradingview_symbol'])
     return {'as_of':session,'through':(start+timedelta(days=7)).isoformat(),'upcoming':sorted(upcoming,key=lambda r:(r['expected_date'],r['symbol'])),'unknown':unknown,'later_count':len(later)}
@@ -40,29 +36,21 @@ def primary_research(snapshot, limit):
     side=market_side(snapshot.get('market_classification',{}).get('direction'))
     themes=sorted((t for t in snapshot['themes'] if side and t.get('research_priority',{}).get('label')=='Primary '+side),key=priority_sort_key)
     session=snapshot['session_date'];files={};manifest=[];relationships=[];evaluations=[];combined=[]
+    reserved_anchors={theme_symbols(t)[0] for t in themes};distributed=set();sections=[]
+    if len(reserved_anchors)!=len(themes):raise ValueError('Grouped Primary themes require distinct anchor identities to preserve anchor-first ordering and global deduplication')
     filenames=individual_filenames(themes)
     for theme in themes:
         anchor=theme_symbols(theme)[0]  # Strict identifier resolution, even ETF-only.
         qualifying=[]
         for stock in theme.get('selected',[]):
-            endpoints={name:row.get('returns',{}).get(period,{}).get('value') for name,row,period in
-                [('stock_1m',stock,'21'),('stock_3m',stock,'63'),('etf_1m',theme,'21'),('etf_3m',theme,'63')]}
-            invalid=[key for key,value in endpoints.items() if not number(value)]
-            row={'theme_id':theme['id'],'anchor':theme['anchor'],'ticker':stock['ticker'],'symbol':stock['tradingview_symbol'],**endpoints}
-            if invalid:row.update(included=False,reason='missing_or_invalid:'+','.join(invalid))
-            else:
-                # Decimal arithmetic avoids giving a zero cross-horizon result
-                # an artificial sign through binary cancellation. No rounding.
-                with localcontext() as context:
-                    context.prec=40
-                    values={key:Decimal(str(value)) for key,value in endpoints.items()}
-                    er1=100*(values['stock_1m']-values['etf_1m']);er3=100*(values['stock_3m']-values['etf_3m'])
-                    weighted=Decimal(str(CURRENT_WEIGHT))*er1+Decimal(str(MEDIUM_WEIGHT))*er3
-                included=weighted>0 if side=='long' else weighted<0
-                row.update(er1m_pp=float(er1),er3m_pp=float(er3),weighted_excess_pp=float(weighted),included=included,reason='included' if included else 'zero_weighted_excess' if weighted==0 else 'opposite_sign')
-                if included:qualifying.append(row)
+            calculation=weighted_excess(stock,theme)
+            classification=calculation['weighted_vs_etf']
+            included=classification==('Outperforming' if side=='long' else 'Underperforming')
+            row={'theme_id':theme['id'],'anchor':theme['anchor'],'ticker':stock['ticker'],'symbol':stock['tradingview_symbol'],**calculation,'included':included}
+            row['reason']=calculation['reason'] or ('included' if included else 'zero_weighted_excess' if classification=='Flat' else 'opposite_sign')
+            if included:qualifying.append(row)
             evaluations.append(row)
-        qualifying.sort(key=lambda r:((-r['weighted_excess_pp'] if side=='long' else r['weighted_excess_pp']),r['ticker'],r['symbol']))
+        qualifying.sort(key=lambda r:((-r['weighted_excess_pp'] if side=='long' else r['weighted_excess_pp']),r['symbol']))
         tokens=[anchor]+[r['symbol'] for r in qualifying]
         if len(tokens)>limit:raise ValueError('Primary theme exceeds TradingView instrument limit: '+theme['id'])
         name='primary_watchlists/'+session+'/'+filenames[theme['id']][:-4]+'_Primary_'+side+'.txt'
@@ -70,17 +58,22 @@ def primary_research(snapshot, limit):
         manifest.append({'file':name,'role':'individual_primary_research','theme_id':theme['id'],'anchor':theme['anchor'],'instrument_count':len(tokens),'stock_count':len(qualifying),'section_count':0})
         relationships.append({'theme_id':theme['id'],'theme_name':theme['name'],'anchor':theme['anchor'],'symbol':anchor,'ticker':theme['anchor'],'role':'anchor','weighted_excess_pp':None,'er1m_pp':None,'er3m_pp':None})
         relationships.extend({key:r.get(key) for key in ('theme_id','anchor','symbol','ticker','weighted_excess_pp','er1m_pp','er3m_pp')}|{'theme_name':theme['name'],'role':'stock'} for r in qualifying)
-        combined.extend(tokens)
-    combined=list(dict.fromkeys(combined))
+        # Anchors belong to their own rows, even when selected as a stock elsewhere.
+        distributed_stocks=[r['symbol'] for r in qualifying if r['symbol'] not in reserved_anchors and r['symbol'] not in distributed]
+        distributed.update(distributed_stocks)
+        section=[section_heading(theme),anchor,*distributed_stocks]
+        sections.append({'theme_id':theme['id'],'heading':section[0],'anchor_symbol':anchor,'stock_symbols':distributed_stocks})
+        combined.extend(section)
+    instrument_count=sum(not token.startswith("###") for token in combined)
     combined_name='tradingview_daily_primary_'+session+'.txt' if themes else None
     if combined_name:
-        if len(combined)>limit:raise ValueError('Combined Daily Primary exceeds TradingView instrument limit; no list was truncated')
+        if instrument_count>limit:raise ValueError('Combined Daily Primary exceeds TradingView instrument limit; no list was truncated')
         files[combined_name]=','.join(combined)+'\n'
-        manifest.append({'file':combined_name,'role':'daily_primary_research','instrument_count':len(combined),'section_count':0})
+        manifest.append({'file':combined_name,'role':'daily_primary_research','instrument_count':instrument_count,'section_count':len(sections)})
     snapshot['daily_primary_research']={'session_date':session,'side':side,'theme_ids':[t['id'] for t in themes],'combined_file':combined_name,
         'archive_file':'daily_primary_watchlists_'+session+'.zip' if themes else None,'relationships_file':'daily_primary_relationships_'+session+'.csv' if themes else None,
-        'relationships':relationships,'evaluations':evaluations,'platform_import_tested':False}
-    snapshot.setdefault('manual_csv_audit',{})['daily_primary_research']={'qualifying_themes':len(themes),'qualifying_stock_memberships':sum(r['included'] for r in evaluations),'excluded_stock_memberships':sum(not r['included'] for r in evaluations),'combined_unique_instruments':len(combined),'platform_import_tested':False}
+        'relationships':relationships,'evaluations':evaluations,'sections':sections,'theme_order':'priority_score_direction_then_theme_id','overlap_policy':'Reserve anchors; assign stocks to the first qualifying theme; full per-theme relationships retained separately','platform_import_tested':False}
+    snapshot.setdefault('manual_csv_audit',{})['daily_primary_research']={'qualifying_themes':len(themes),'qualifying_stock_memberships':sum(r['included'] for r in evaluations),'excluded_stock_memberships':sum(not r['included'] for r in evaluations),'combined_unique_instruments':instrument_count,'platform_import_tested':False}
     return files,manifest
 
 
@@ -107,7 +100,8 @@ def build(snapshot, config):
             for period in ('21','63'):
                 value=excess.get(period,{}).get('value')
                 stock['excess'+period+'_pp']=100*value if value is not None else None
-            stock['rs_state']=rs_state(stock['excess21_pp'],stock['excess63_pp'])
+            weighted=weighted_excess(stock,theme)
+            stock.update(weighted_excess_pp=weighted['weighted_excess_pp'],weighted_vs_etf=weighted['weighted_vs_etf'])
             if theme.get('research_priority',{}).get('category')!='primary':continue
             if symbol not in primary:
                 primary[symbol]={'ticker':stock['ticker'],'tradingview_symbol':symbol,'earnings_date':stock.get('earnings_date'),'primary_contexts':[]}

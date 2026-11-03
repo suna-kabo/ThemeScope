@@ -22,6 +22,8 @@ jobs:
         run: python -m unittest discover -s tests -p test_site_output.py
       - name: EMA policy, holiday history and weighted research exports
         run: python -m unittest discover -s tests -p test_research_policy.py
+      - name: Weighted filter and grouped export invariants
+        run: python -m unittest discover -s tests -p test_refinement.py
       - name: Migration and publication rollback
         run: python -m unittest discover -s tests -p test_policy_publication.py
       - name: Native CMD launchers, clean environment, failure preservation and history

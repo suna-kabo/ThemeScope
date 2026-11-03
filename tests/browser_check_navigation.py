@@ -25,7 +25,7 @@ def check_local_files(browser, root):
     page.click('[data-page="watchlist"]')
     with page.expect_download() as info:page.click('#tv')
     selected=page.locator('#watchlist-theme-selector').input_value()
-    snapshot=json.loads((root/'latest_snapshot.json').read_text())
+    snapshot=json.loads((root/'latest_snapshot.json').read_text(encoding='utf-8'))
     item=next(r for r in snapshot['export_manifest'] if r.get('theme_id')==selected)
     assert Path(info.value.path()).read_bytes()==(root/item['file']).read_bytes()
     page.click('[data-page="sectors-themes"]')
@@ -40,7 +40,7 @@ def check_local_files(browser, root):
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('dashboard',type=Path)
     root=parser.parse_args().dashboard.resolve().parent
-    snapshot=json.loads((root/'latest_snapshot.json').read_text())
+    snapshot=json.loads((root/'latest_snapshot.json').read_text(encoding='utf-8'))
     artifacts=root/'navigation_checks';artifacts.mkdir(exist_ok=True)
     class Quiet(http.server.SimpleHTTPRequestHandler):
         def log_message(self,*args):pass
@@ -59,7 +59,7 @@ def main():
             with page.expect_download() as info:page.click('#all-individual-watchlists')
             with zipfile.ZipFile(info.value.path()) as archive:
                 assert len(archive.namelist())==len(snapshot['themes']) and archive.testzip() is None
-            assert 'Data Collection: All Configured Stocks' in page.locator('#daily-data-export-links').inner_text()
+            assert 'Download All Stocks' in page.locator('#daily-data-export-links').inner_text()
             assert page.locator('#theme-head th').nth(4).inner_text().startswith('1D %')
             page.click('#theme-head [data-sort="daily_change"]')
             ordered=sorted(snapshot['themes'],key=lambda t:(-t['daily_change'],t['id']))
@@ -83,7 +83,7 @@ def main():
             find.press('Enter')
             assert page.locator('#watchlist-theme-selector').input_value()==target_theme
             expect(page.locator('#stock-body .navigation-target')).to_be_visible()
-            assert page.locator('#stock-view').input_value()=='relative'
+            assert page.locator('#stock-view').count()==0
             assert page.locator('#stock-body tr').count()>1
             assert find.get_attribute('aria-expanded')=='false'
 
@@ -94,7 +94,7 @@ def main():
             page.fill('#stock-search','NO_SUCH_STOCK')
             failing_ema='below21' if target['price_close']>target['ema21'] else 'above21'
             page.select_option('#ema-filter',failing_ema)
-            failing_rs=next(r for r in ['Mixed','Missing','Outperforming','Underperforming'] if r!=target['rs_state'])
+            failing_rs=next(r for r in ['Flat','Unavailable','Outperforming','Underperforming'] if r!=target['weighted_vs_etf'])
             page.select_option('#rs-filter',failing_rs)
             prior_y=page.evaluate('window.scrollY')
             find.fill('LLY')
@@ -119,9 +119,9 @@ def main():
 
             # Unavailable daily rows remain navigable; view choice persists through touch selection.
             missing_theme,missing=next((t,r) for t in snapshot['themes'] for r in t['selected'] if r['metric_status']=='unavailable')
-            page.select_option('#stock-view','performance');find.fill(missing['ticker'])
+            find.fill(missing['ticker'])
             page.locator('#navigation-results [data-theme-id="'+missing_theme['id']+'"][data-symbol="'+missing['tradingview_symbol']+'"]').tap()
-            assert page.locator('#stock-view').input_value()=='performance'
+            assert page.locator('#stock-view').count()==0
             expect(page.locator('#stock-body .navigation-target')).to_be_visible()
             assert page.locator('#stock-body .navigation-target .col-ticker').inner_text().startswith(missing['ticker'])
             with page.expect_download() as info:page.click('#tv')
@@ -145,7 +145,7 @@ def main():
             find.fill(selected['anchor'])
             page.locator('#navigation-results [data-navigation-kind="theme"][data-theme-id="'+selected['id']+'"]').click()
             assert page.locator('#stock-body .navigation-target').count()==0
-            find.fill('');page.select_option('#stock-view','relative')
+            find.fill('');page.select_option('#rs-filter','All')
 
             for mode in ('dark','light'):
                 page.set_viewport_size({'width':1536,'height':864})
@@ -157,7 +157,7 @@ def main():
                         assert page.locator('.theme-table-wrap').evaluate('e=>e.scrollWidth<=e.clientWidth+1')
                         a=page.locator('#theme-head th').evaluate_all('es=>es.map(e=>({x:e.getBoundingClientRect().x,w:e.getBoundingClientRect().width}))')
                         b=page.locator('#theme-body tr').first.locator('td').evaluate_all('es=>es.map(e=>({x:e.getBoundingClientRect().x,w:e.getBoundingClientRect().width}))')
-                        assert len(a)==len(b)==17 and all(abs(x['x']-y['x'])<.6 and abs(x['w']-y['w'])<.6 for x,y in zip(a,b))
+                        assert len(a)==len(b)==16 and all(abs(x['x']-y['x'])<.6 and abs(x['w']-y['w'])<.6 for x,y in zip(a,b))
                     if width<1536:
                         page.locator('.theme-table-wrap').evaluate("e=>{e.style.scrollMarginTop='70px';e.scrollIntoView({block:'start'});if(innerWidth<760)e.scrollLeft=260;}")
                     page.screenshot(path=str(artifacts/f'etf-day-{mode}-{width}.png'));screenshots+=1
@@ -177,7 +177,7 @@ def main():
             synthetic=copy.deepcopy(snapshot)
             synthetic['themes'][0]['daily_change']=0;synthetic['themes'][1]['daily_change']=None
             synthetic['themes'][0]['name']='Unsafe <img src=x onerror=alert(1)> text'
-            html=(root/'dashboard.html').read_text()
+            html=(root/'dashboard.html').read_text(encoding='utf-8')
             html=re.sub(r'(<script id="snapshot-data"[^>]*>).*?(</script>)',lambda m:m[1]+json.dumps(synthetic).replace('</','<\\/')+m[2],html,flags=re.S)
             page.route('**/synthetic.html',lambda route:route.fulfill(body=html,content_type='text/html'))
             page.goto(url.replace('dashboard.html','synthetic.html'))

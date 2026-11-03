@@ -116,6 +116,19 @@ def methodology():
             'note':'Configured research policies, not validated trading signals. Theme breadth does not determine Score or Priority.'}
 
 
+def decision_path(spy,qqq,consensus):
+    matched=market_rule(spy,qqq,consensus)
+    if matched['rule_id']=='price-unavailable':
+        return [{'label':ticker+' price','value':'Unavailable','kind':'missing'} for ticker,value in [('SPY',spy),('QQQ',qqq)] if value not in EMA_CLASSES]
+    rows=[{'label':'SPY price','value':spy,'kind':'classification'},{'label':'QQQ price','value':qqq,'kind':'classification'}]
+    if matched['rule_id'].startswith('unanimous-'):
+        rows.append({'label':'Price consensus rule','value':f"Both {spy} → {matched['direction']}",'kind':'rule'})
+    else:
+        rows.append({'label':'SPY/QQQ Breadth Consensus','value':consensus or 'Unavailable','kind':'classification' if consensus else 'missing'})
+        rows.append({'label':'Matched rule','value':matched['reason'],'kind':'rule'})
+    return rows
+
+
 def canonical_decision(session,generated_hkt,contexts,themes):
     indices={r['ticker']:r for r in contexts};spy=indices.get('SPY',{});qqq=indices.get('QQQ',{});iwm=indices.get('IWM',{})
     consensus=breadth_consensus(spy.get('breadth_state'),qqq.get('breadth_state'))
@@ -129,7 +142,7 @@ def canonical_decision(session,generated_hkt,contexts,themes):
             'matrix_rule_id':matched['rule_id'],'reason':matched['reason'],'breadth_qualifier':matched['breadth_qualifier'],
             'spy_price_state':spy.get('price_state'),'qqq_price_state':qqq.get('price_state'),'iwm_price_state':iwm.get('price_state'),
             'spy_breadth_state':spy.get('breadth_state'),'qqq_breadth_state':qqq.get('breadth_state'),'breadth_consensus':consensus,'russell_2000_breadth_state':iwm.get('breadth_state'),
-            'primary_groups':groups,'market_matrix':market_truth_table(),'priority_policy':methodology()}
+            'decision_path':decision_path(spy.get('price_state'),qqq.get('price_state'),consensus),'primary_groups':groups,'market_matrix':market_truth_table(),'priority_policy':methodology()}
 
 
 def apply_policy(snapshot,previous=None,previous_session=None):

@@ -39,20 +39,20 @@ def main():
                 assert page.request.get(url+private).status==404,private
             for name in manifest['files']:
                 assert page.request.get(url+name).status==200,name
-            for route in ['market','daily-plan','sectors-themes','watchlist']:
+            for route in ['market','daily-plan','sectors-themes','watchlist','methodology']:
                 page.click('[data-page="'+route+'"]')
                 expect(page.locator('#'+route)).to_be_visible()
                 for link in page.locator('#'+route+' a[href]').evaluate_all('es=>es.map(e=>e.getAttribute("href"))'):
                     if not link.startswith(('#','https://','blob:')):assert link in manifest['files'],link
             page.click('[data-page="daily-plan"]')
             expected_ids=[t['id'] for t in payload['themes'] if t['research_priority']['category']=='primary']
-            actual_ids=page.locator('[data-daily-theme]').evaluate_all('es=>es.map(e=>e.dataset.dailyTheme)')
+            actual_ids=page.locator('#daily-priorities tr:not(.priority-group-heading) td:first-child [data-daily-theme]').evaluate_all('es=>es.map(e=>e.dataset.dailyTheme)')
             assert sorted(actual_ids)==sorted(expected_ids)
-            page.locator('#daily-methodology > summary').click()
-            assert page.locator('#methodology-content tbody tr').count()==64
+            page.click('[data-page="methodology"]')
+            assert page.locator('#methodology-content .market-matrix tbody tr').count()==64
             assert page.locator('#methodology-content tr.active-cell').count()==1
             for key,ids in payload['decision']['primary_groups'].items():
-                assert page.locator('[data-priority-group="'+key+'"] [data-daily-theme]').evaluate_all('es=>es.map(e=>e.dataset.dailyTheme)')==ids
+                assert page.locator('[data-priority-group="'+key+'"] tr:not(.priority-group-heading)').evaluate_all('es=>es.map(e=>e.querySelector("[data-daily-theme]").dataset.dailyTheme)')==ids
             page.click('[data-page="sectors-themes"]')
             for theme in payload['themes']:
                 row=page.locator('#theme-body tr[data-theme="'+theme['id']+'"]')
@@ -67,12 +67,12 @@ def main():
                 with page.expect_download() as info:page.locator('a[href="'+research['combined_file']+'"]').click()
                 assert Path(info.value.path()).read_bytes()==(site/research['combined_file']).read_bytes()
             page.click('[data-page="watchlist"]')
-            assert page.locator('#stock-view').input_value()=='relative'
-            page.select_option('#stock-view','performance')
+            assert page.locator('#stock-view').count()==0
+            assert page.locator('#stock-head th').count()==14
             page.click('[data-page="daily-plan"]');page.evaluate('window.scrollTo(0,400)');page.wait_for_timeout(160);y=page.evaluate('window.scrollY')
             page.click('[data-page="market"]');page.go_back()
             assert abs(page.evaluate('window.scrollY')-y)<3
-            page.click('[data-page="watchlist"]');assert page.locator('#stock-view').input_value()=='performance'
+            page.click('[data-page="watchlist"]');assert page.locator('#stock-view').count()==0
             stock=next(s for t in payload['themes'] for s in t['selected'])
             find=page.locator('#watchlist-theme-search');find.fill(stock['ticker']);find.press('ArrowDown');find.press('Enter')
             expect(page.locator('#stock-body .navigation-target')).to_be_visible()

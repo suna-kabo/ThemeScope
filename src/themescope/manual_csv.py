@@ -380,6 +380,11 @@ def build_release(root: Path, paths: dict[str, Path], session: str) -> tuple[dic
         "publication_scope": "local_only",
         "manual_csv_audit": audit,
     }
+    snapshot['display_methodology']={'maintenance_thresholds':{key:registry['settings']['watchlist_stock_filters'][key] for key in ('raw_close_floor_usd','market_cap_floor_usd','market_cap_required_when_available','adv30_floor_usd','minimum_history_sessions')},
+        'watchlist_capacity':int(manual_config['watchlist_capacity']),'breadth_minimum_coverage':float(manual_config['breadth_minimum_coverage']),'theme_breadth_minimum_valid':int(manual_config['theme_breadth_minimum_valid']),
+        'liquidity_definition':'TradingView Price × average volume, 30 days is a liquidity proxy, not the exact mean of daily Price × Volume.',
+        'membership_rules':['Material business relevance and US-tradeable identity. ETF holdings membership is not mandatory.','Direct exposure preferred; meaningful multi-theme membership allowed.','Up to the configured capacity, without unrelated filler. Explicit maintenance, not daily performance-driven replacement.','Missing daily rows do not delete members. Existing members were not freshly reselected or revalidated by this presentation update.'],
+        'maintenance_missing_data':'The existing missing-market-cap treatment is retained: missing optional facts remain review notes. No new single-day turnover gate.'}
     apply_policy(snapshot)
     from .tradingview import attach, load_mapping
     attach(snapshot, load_mapping(root))

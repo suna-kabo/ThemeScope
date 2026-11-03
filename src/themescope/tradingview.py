@@ -62,3 +62,9 @@ def individual_filenames(themes: list[dict]) -> dict[str, str]:
         used.add(name.casefold())
         result[theme_id] = name
     return result
+
+
+def section_heading(theme):
+    """TradingView section token, separate from exchange-prefixed instruments."""
+    label=re.sub(r'[,\r\n]+',' ',str(theme['anchor'])+' — '+str(theme['name']))
+    return '###'+re.sub(r'\s+',' ',label).strip()

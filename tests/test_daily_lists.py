@@ -2,7 +2,7 @@ import copy
 import unittest
 import json
 from pathlib import Path
-from src.themescope.daily_lists import build, flat_chunks, earnings_window, rs_state
+from src.themescope.daily_lists import build, flat_chunks, earnings_window
 
 
 def stock(ticker, a=.02, b=-.01, earnings=None):
@@ -45,15 +45,11 @@ class DailyListTests(unittest.TestCase):
         self.assertIn('NYSE:MISS',data)
         self.assertFalse(any('primary_stocks' in f for f in files))
         self.assertEqual(s['export_archives'],['individual_theme_watchlists.zip'])
-    def test_rs_equality_and_missing(self):
-        self.assertEqual(rs_state(0,1),'Mixed');self.assertEqual(rs_state(1,1),'Outperforming')
-        self.assertEqual(rs_state(-1,-1),'Underperforming');self.assertEqual(rs_state(None,1),'Missing')
-        self.assertEqual(rs_state(float('nan'),1),'Missing')
     def test_earnings_year_boundary_inclusive_same_day_missing_and_past(self):
         rows=[{**stock(str(i),earnings=e),'primary_contexts':[]} for i,e in enumerate(['2026-12-29','2027-01-05','2027-01-06',None,'2026-12-28','bad'])]
         result=earnings_window(rows,'2026-12-29')
         self.assertEqual([r['days_away'] for r in result['upcoming']],[0,7])
-        self.assertEqual(result['upcoming'][0]['timing_label'],'Today; timing unverified')
+        self.assertEqual(result['upcoming'][0]['timing_label'],'Today')
         self.assertEqual(len(result['unknown']),3);self.assertEqual(result['later_count'],1)
         weekend=earnings_window([{**stock('W',earnings='2026-10-31'),'primary_contexts':[]}],'2026-10-30')
         self.assertEqual(weekend['upcoming'][0]['days_away'],1)

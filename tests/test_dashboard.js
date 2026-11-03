@@ -185,8 +185,8 @@ assert.equal(ui.marketCap(2.4e9),"$2.4B");
 assert.equal(ui.marketCap(1.2e12),"$1.2T");
 assert.equal(ui.marketCap(-1),"N/A");
 assert.equal(ui.marketCap(null),"N/A");
-assert.equal(ui.rsMatches({rs_state:"Missing"},"Mixed"),false);
-assert.equal(ui.rsMatches({rs_state:"Missing"},"All"),true);
+assert.equal(ui.rsMatches({weighted_vs_etf:"Unavailable"},"Flat"),false);
+assert.equal(ui.rsMatches({weighted_vs_etf:"Unavailable"},"All"),true);
 assert.deepEqual(ui.sortRows([{id:"a",market_cap_usd:2.49e9},{id:"b",market_cap_usd:2.41e9}],"market_cap_usd","asc").map(r=>r.id),["b","a"]);
 
 // Navigation is independent of daily metrics and research/performance ranking.
@@ -214,3 +214,5 @@ assert.match(dayCSV[1],/"1.234567"/);
 
 assert.equal(ui.emaRelationship(10,9),'Above');assert.equal(ui.emaRelationship(10,11),'Below');assert.equal(ui.emaRelationship(10,10),'At');
 for(const invalid of [null,NaN,Infinity,0,-1,true]){assert.equal(ui.emaRelationship(invalid,10),'N/A');assert.equal(ui.emaRelationship(10,invalid),'N/A');}
+
+for(const [date,expected] of [['2026-11-02','Today'],['2026-11-03','In 1 day'],['2027-01-01','In 60 days'],['2026-11-01','Past date'],['2026-02-30','N/A'],[null,'N/A']]) assert.equal(ui.earningsCountdown(date,'2026-11-02'),expected);
