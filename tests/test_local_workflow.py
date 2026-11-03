@@ -11,7 +11,7 @@ from scripts.refresh_local import input_paths,STEMS
 class InputSelectionTests(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
-        self.root=Path(self.temp.name);(self.root/'config/calendars').mkdir(parents=True)
+        self.root=Path(self.temp.name).resolve();(self.root/'config/calendars').mkdir(parents=True)
         (self.root/'config/calendars/xnys_2020_2035_v1.json').write_text(json.dumps({'sessions':[{'session':'2026-11-02','close':'2026-11-02T16:00:00-05:00'},{'session':'2026-11-03','close':'2026-11-03T16:00:00-05:00'}]}))
         self.folder=self.root/'inputs/2026-11-02';self.folder.mkdir(parents=True)
         for stem in STEMS.values():(self.folder/(stem+'_2026-11-03.csv')).write_text('test data')

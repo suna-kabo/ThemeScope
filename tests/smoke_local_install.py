@@ -4,6 +4,7 @@ On Windows this executes setup.cmd, refresh.cmd and prepare-site.cmd from a
 different working directory. Elsewhere it exercises their Python entry points.
 It never touches the real output/history, commits, pushes or deploys anything.
 """
+import argparse
 import csv
 import hashlib
 import io
@@ -24,6 +25,7 @@ def hashes(folder):
 
 
 def main():
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--browser',action='store_true');args=parser.parse_args()
     tree=subprocess.check_output(['git','write-tree'],cwd=ROOT,text=True).strip()
     source=subprocess.check_output(['git','archive','--format=zip',tree],cwd=ROOT)
     with tempfile.TemporaryDirectory(prefix='themescope clean test ') as temporary:
@@ -40,8 +42,8 @@ def main():
             if (result.returncode==0)!=success:raise AssertionError(script+'\n'+result.stdout+'\n'+result.stderr)
             return result
         run('setup')
-        active=json.loads((clone/'config/active_anchors.json').read_text())['anchors']
-        lists=json.loads((clone/'config/theme_watchlists.json').read_text())['watchlists']
+        active=json.loads((clone/'config/active_anchors.json').read_text(encoding='utf-8'))['anchors']
+        lists=json.loads((clone/'config/theme_watchlists.json').read_text(encoding='utf-8'))['watchlists']
         members=sorted({m['ticker'] for t in lists if t['theme_id'] in active for m in t['members']})
         symbols={'Daily_Stock':members,'Daily_ETF':sorted(set(active.values())|{'SPY','QQQ','IWM'}),'SPY':['TESTSPY'+str(i) for i in range(500)],'QQQ':['TESTQQQ'+str(i) for i in range(100)],'IWM':['TESTIWM'+str(i) for i in range(2000)]}
         folder=base/'synthetic csv';folder.mkdir()
@@ -68,13 +70,14 @@ def main():
         # Reusing yesterday's exact CSVs under a new session is refused.
         run('refresh',['--session','2024-01-04','--input-dir',str(folder)],success=False)
         inputs(101);run('refresh',['--session','2024-01-04','--input-dir',str(folder)])
-        snapshot=json.loads((output/'latest_snapshot.json').read_text())
+        snapshot=json.loads((output/'latest_snapshot.json').read_text(encoding='utf-8'))
         assert snapshot['local_history']['comparison_session']=='2024-01-03'
         assert all(t['rank_change_daily'] is not None for t in snapshot['themes'])
         assert (output/'local_history/2024-01-03.json').exists()
         assert hashes(site)==site_before
         run('prepare-site',['--session','2024-01-04'])
         assert not (site/'raw_inputs.json').exists() and not (site/'run_audit.json').exists() and not (site/'local_history').exists()
+        if args.browser:subprocess.run([sys.executable,str(ROOT/'tests/browser_check_site.py'),str(site)],cwd=ROOT,check=True,timeout=90)
     print(json.dumps({'clean_staged_tree':tree,'platform':sys.platform,'native_cmd_launchers':os.name=='nt','setup_refresh_site':'passed','invalid_input_preservation':'passed','stale_input_refusal':'passed','two_session_history':'passed','synthetic_data':'temporary only'}))
 
 

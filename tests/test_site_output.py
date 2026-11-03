@@ -23,7 +23,7 @@ def sample():
 class SiteBoundaryTests(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
-        self.base=Path(self.temp.name);self.source=self.base/'private-run';self.source.mkdir();self.destination=self.base/'site'
+        self.base=Path(self.temp.name).resolve();self.source=self.base/'private-run';self.source.mkdir();self.destination=self.base/'site'
         self.snapshot=sample();(self.source/'latest_snapshot.json').write_text(json.dumps(self.snapshot))
         (self.source/'individual_watchlists').mkdir()
         (self.source/'individual_watchlists/SMH_Semiconductors.txt').write_text('NASDAQ:SMH,NASDAQ:NVDA\n')
@@ -50,7 +50,7 @@ class SiteBoundaryTests(unittest.TestCase):
         self.assertEqual(payload['themes'][0]['rank_change_daily'],0)
         with zipfile.ZipFile(self.destination/'individual_theme_watchlists.zip') as z:
             self.assertEqual(z.namelist(),['SMH_Semiconductors.txt'])
-            self.assertEqual(z.read('SMH_Semiconductors.txt'),b'NASDAQ:SMH,NASDAQ:NVDA\n')
+            self.assertEqual(z.read('SMH_Semiconductors.txt'),(self.source/'individual_watchlists/SMH_Semiconductors.txt').read_bytes())
 
     def test_invalid_session_or_export_preserves_previous_site(self):
         self.build();before={p.relative_to(self.destination):p.read_bytes() for p in self.destination.rglob('*') if p.is_file()}
@@ -91,7 +91,7 @@ class SiteBoundaryTests(unittest.TestCase):
         self.snapshot['themes'][0]['selected'][0]['company']=company
         (self.source/'latest_snapshot.json').write_text(json.dumps(self.snapshot))
         self.build()
-        text=(self.destination/'index.html').read_text()
+        text=(self.destination/'index.html').read_text(encoding='utf-8')
         payload=json.loads(re.search(r'<script id="snapshot-data"[^>]*>(.*?)</script>',text,re.S)[1])
         self.assertEqual(payload['context'][0]['index_breadth']['50']['value'],60)
         self.assertEqual(payload['themes'][0]['theme_watchlist_breadth']['50']['value'],65)
@@ -104,6 +104,6 @@ class SiteBoundaryTests(unittest.TestCase):
         self.assertEqual(set(result['files']),{'index.html','_headers'})
 
     def test_private_payload_key_even_in_a_resealed_site_is_rejected(self):
-        self.build();path=self.destination/'index.html';text=path.read_text();text=text.replace('"schema_version":"themescope-site-1"','"manual_csv_audit":{},"schema_version":"themescope-site-1"');path.write_text(text)
+        self.build();path=self.destination/'index.html';text=path.read_text(encoding='utf-8');text=text.replace('"schema_version":"themescope-site-1"','"manual_csv_audit":{},"schema_version":"themescope-site-1"');path.write_text(text)
         seal_site(self.destination,'snapshot','2026-11-02')
         with self.assertRaisesRegex(ValueError,'Private metadata'):validate_site(self.destination)

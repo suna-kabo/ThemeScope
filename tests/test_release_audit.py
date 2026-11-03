@@ -86,7 +86,14 @@ class ReleaseAuditTests(unittest.TestCase):
     def test_incomplete_configuration_fails_with_exact_unfinished_exposure_count(self):
         incomplete = json.loads((ROOT / "config/theme_watchlists.json").read_text())
         incomplete["watchlists"] = incomplete["watchlists"][:16]
-        report = audit_release(ROOT, registry_audit_path=ROOT / "output/registry_audit.csv", watchlist_data=incomplete)
+        # Use an explicit fixture, never a developer's ignored generated audit.
+        active = json.loads((ROOT / "config/active_anchors.json").read_text())["anchors"]
+        names = {row["id"] for row in json.loads((ROOT / "config/themes.json").read_text())["themes"]}
+        inactive = sorted(names - set(active))
+        with tempfile.TemporaryDirectory() as folder:
+            audit_path = Path(folder) / "registry.csv"
+            audit_path.write_text("id,status\n" + "".join(inactive[i % len(inactive)] + ",rejected_candidate\n" for i in range(19)), encoding="utf-8")
+            report = audit_release(ROOT, registry_audit_path=audit_path, watchlist_data=incomplete)
         self.assertFalse(report["passed"])
         self.assertEqual(report["summary"]["active_exposures"], 53)
         self.assertEqual(report["summary"]["inactive_exposures"], 12)
