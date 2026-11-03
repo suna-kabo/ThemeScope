@@ -156,13 +156,17 @@
   function statusClass(value) {
     return ["Bullish","Positive"].includes(value) ? "positive" : ["Bearish","Negative"].includes(value) ? "negative" : value === "Mixed" ? "warning" : "muted";
   }
-  function priorityCategory(row) { return row.research_priority?.category || "observation"; }
+  function priorityCategory(row) { return row.research_priority?.category || "watch"; }
   function marketCap(value) {
     if (!finiteNumber(value) || value <= 0) return "N/A";
     var unit = value >= 1e12 ? [1e12,"T"] : value >= 1e9 ? [1e9,"B"] : value >= 1e6 ? [1e6,"M"] : [1,""];
     return "$" + (value/unit[0]).toLocaleString("en-US",{maximumFractionDigits:1}) + unit[1];
   }
   function rsMatches(row, filter) { return !filter || filter === "All" || row.rs_state === filter; }
+  function emaRelationship(price,average) {
+    if(!finiteNumber(price) || !finiteNumber(average) || price<=0 || average<=0)return 'N/A';
+    return price>average?'Above':price<average?'Below':'At';
+  }
   function emaMatches(row, filter) {
     if (!filter || filter === "all") return true;
     var period=filter.endsWith("21")?21:50;
@@ -196,13 +200,13 @@
     });
   }
   function themeRowsToCsv(rows, session, generatedAt) {
-    var columns = ["rank_current", "rank_change_daily", "type", "theme_id", "name", "anchor_etf", "change_1d_pct", "state", "research_priority", "theme_score", "current_strength", "medium_strength", "return5_pct", "return21_pct", "return63_pct", "theme_breadth21_pct", "theme_breadth21_above", "theme_breadth21_valid", "theme_breadth50_pct", "theme_breadth50_above", "theme_breadth50_valid", "configured_watchlist_count", "session_date", "generated_at"];
+    var columns = ["rank_current", "rank_change_daily", "type", "theme_id", "name", "anchor_etf", "change_1d_pct", "priority_change", "research_priority", "vs_ema21", "vs_ema50", "theme_score", "current_strength", "medium_strength", "return5_pct", "return21_pct", "return63_pct", "theme_breadth21_pct", "theme_breadth21_above", "theme_breadth21_valid", "theme_breadth50_pct", "theme_breadth50_above", "theme_breadth50_valid", "configured_watchlist_count", "session_date", "generated_at"];
     var lines = [columns.map(csvEscape).join(",")];
     rows.forEach(function (row) {
       var b21 = row.theme_watchlist_breadth && row.theme_watchlist_breadth["21"] || {};
       var b50 = row.theme_watchlist_breadth && row.theme_watchlist_breadth["50"] || {};
       var values = [row.rank_current ?? row.global_rank, row.rank_change_daily,
-        row.level === "Sector" ? "Sector" : "Theme", row.id, row.name, row.anchor, finiteNumber(row.daily_change)?row.daily_change*100:null, row.theme_state, row.research_priority?.label,
+        row.level === "Sector" ? "Sector" : "Theme", row.id, row.name, row.anchor, finiteNumber(row.daily_change)?row.daily_change*100:null, row.priority_change, row.research_priority?.label, emaRelationship(row.price_close,row.ema21), emaRelationship(row.price_close,row.ema50),
         row.theme_score, row.current_strength_score, row.medium_strength_score,
         finiteNumber(valueAt(row, "return5")) ? valueAt(row, "return5") * 100 : null,
         finiteNumber(valueAt(row, "return21")) ? valueAt(row, "return21") * 100 : null,
@@ -384,13 +388,12 @@
 
     var infoText = {
       daily_change: "TradingView one-day price change percentage for the anchor ETF.",
-      priority: "Market direction and relative state determine a research group. Long labels require close above EMA50; short labels require close below EMA50. These are research priorities, not entry signals.",
-      state: "Determined by whether Current and Medium are at least 50. Leading means both are in the stronger half; Improving means only Current is; Fading means only Medium is; Lagging means both are in the weaker half.",
+      priority: "Market direction, Theme Score and valid ETF EMA inputs determine Priority. Full and Selective markets use identical rules. Research policies, not entry signals.",
       theme_score: currentWeight + " Current plus " + mediumWeight + " Medium. The color represents a relative score band, not a Long or Short signal.",
       current_strength_score: "The ETF's TradingView 1-month Performance, converted to an ascending average-rank percentile among the same eligible ETF set used for Medium.",
       medium_strength_score: "The ETF's TradingView 3-month Performance, converted to an ascending average-rank percentile among the same eligible ETF set used for Current.",
-      theme_breadth21_pct: "The percentage of configured theme-watchlist stocks trading above EMA21. It does not affect Theme Score or state.",
-      theme_breadth50_pct: "The percentage of configured theme-watchlist stocks trading above EMA50. It does not affect Theme Score or state.",
+      theme_breadth21_pct: "The percentage of configured theme-watchlist stocks trading above EMA21. It does not affect Theme Score or Priority.",
+      theme_breadth50_pct: "The percentage of configured theme-watchlist stocks trading above EMA50. It does not affect Theme Score or Priority.",
       rank_change_daily: "Previous-session canonical rank minus current rank. Compare only the immediately preceding US session with identical eligible universe, anchors and ranking configuration. Comparison session: " + (data.local_history?.comparison_session || "N/A") + ". " + (data.local_history?.status || "No comparable history."),
       rank_current: "The global rank of this ETF exposure by Theme Score among eligible exposures. Equal Theme Scores receive average ranks. Breadth and stock drilldown do not affect rank."
     };
@@ -450,7 +453,7 @@
       return '<button type="button" class="info-button" data-tip-text="' + esc(description) + '" aria-label="' + esc(label) + '" aria-expanded="false">i</button>';
     }
     function infoControl(key) {
-      var labels = {rank_current:"Current rank",state:"State",theme_score:"Theme Score",current_strength_score:"Current",medium_strength_score:"Medium",excess21:"1M versus SPY",excess63:"3M versus SPY",theme_breadth21_pct:"Above EMA21",theme_breadth50_pct:"Above EMA50"};
+      var labels = {rank_current:"Current rank",theme_score:"Theme Score",current_strength_score:"Current",medium_strength_score:"Medium",excess21:"1M versus SPY",excess63:"3M versus SPY",theme_breadth21_pct:"Above EMA21",theme_breadth50_pct:"Above EMA50"};
       var description = infoText[key] || LABELS[key]?.definition || "Methodology explanation unavailable.";
       var id = "themescope-info-" + key + "-" + (++infoCounter);
       return '<span class="info-control"><button class="info-button" type="button" id="' + id + '" data-tip-text="' + esc(description) + '" aria-label="Explain ' + esc(labels[key] || LABELS[key]?.label || key) + '" aria-expanded="false">i</button></span>';
@@ -540,11 +543,8 @@
       return '<div class="condition-box"><small>Price vs EMA' + period + '</small><b class="ema-fact ' + color + '">' + relationship + '</b><span class="coverage-line">' + money(close) + ' vs ' + (finite(movingAverage) ? money(movingAverage) : "EMA unavailable") + ' · ' + (finite(distance) ? (distance > 0 ? "+" : "") + distance.toFixed(1) + "%" : "distance unavailable") + '</span></div>';
     }
     function ema(row, period) {
-      const close = row.price_close;
-      const average = row["ema" + period];
-      return finite(close) && finite(average)
-        ? close > average ? '<span class="positive">Above</span>' : close < average ? '<span class="negative">Below</span>' : '<span class="muted">At</span>'
-        : missing;
+      var label=emaRelationship(row.price_close,row['ema'+period]);
+      return '<span class="'+(label==='Above'?'positive':label==='Below'?'negative':'muted')+'">'+label+'</span>';
     }
     function conditions(row) {
       const breadthTitle = row.ticker === "IWM" ? "Russell 2000 Breadth" : row.ticker + " Breadth";
@@ -628,94 +628,90 @@
     };
     var pageIds = ["market", "daily-plan", "sectors-themes", "watchlist"];
     var initialTheme = data.themes.find((t) => (t.selected || []).length) || data.themes[0];
-    var state = {
+    var viewState = {
       theme: initialTheme?.id, themeKey: "theme_score", themeDir: "desc",
-      stockKey: "excess21_pp", stockDir: "desc", themeType: "All", themeState: "All", themePriority: "All",
-      stockView: "relative", rsFilter: "All", stockSorts: {}, priorityExpanded: {}, priorityOrders: {},
+      stockKey: "excess21_pp", stockDir: "desc", themeType: "All", themePriority: "All",
+      stockView: "relative", rsFilter: "All", stockSorts: {},
       page: location.hash.slice(1) || "market", themeNavigationOrder: null
     };
-    if (history.state?.themescope && history.state.view?.ui_schema === 3 && history.state.view.session_date === data.session_date) {
+    if (history.state?.themescope && history.state.view?.ui_schema === 4 && history.state.view.session_date === data.session_date) {
       var firstView = history.state.view;
-      state.theme = firstView.selected_theme_id || state.theme;
-      state.themeSearch = firstView.theme_search || "";
-      state.themeType = firstView.theme_type_filter || "All";
-      state.themeState = firstView.theme_state_filter || "All";
-      state.themePriority = firstView.theme_priority_filter || "All";
-      state.themeKey = firstView.theme_sort_key || state.themeKey;
-      state.themeDir = firstView.theme_sort_direction || state.themeDir;
-      state.stockSearch = firstView.stock_search || "";
-      state.stockEmaFilter = firstView.stock_ema_filter || "all";
-      state.stockKey = firstView.stock_sort_key || state.stockKey;
-      state.stockDir = firstView.stock_sort_direction || state.stockDir;
-      state.navigationQuery = firstView.navigation_query || "";
-      state.themeNavigationOrder = firstView.theme_navigation_order || null;
-      state.dailyMethodologyOpen = Boolean(firstView.daily_methodology_open);
-      state.page = firstView.page || state.page;
+      viewState.theme = firstView.selected_theme_id || viewState.theme;
+      viewState.themeSearch = firstView.theme_search || "";
+      viewState.themeType = firstView.theme_type_filter || "All";
+      viewState.themePriority = firstView.theme_priority_filter || "All";
+      viewState.themeKey = firstView.theme_sort_key || viewState.themeKey;
+      viewState.themeDir = firstView.theme_sort_direction || viewState.themeDir;
+      viewState.stockSearch = firstView.stock_search || "";
+      viewState.stockEmaFilter = firstView.stock_ema_filter || "all";
+      viewState.stockKey = firstView.stock_sort_key || viewState.stockKey;
+      viewState.stockDir = firstView.stock_sort_direction || viewState.stockDir;
+      viewState.navigationQuery = firstView.navigation_query || "";
+      viewState.themeNavigationOrder = firstView.theme_navigation_order || null;
+      viewState.dailyMethodologyOpen = Boolean(firstView.daily_methodology_open);
+      viewState.page = firstView.page || viewState.page;
       restoreNewView(firstView);
     }
     function restoreNewView(view) {
-      state.stockView=view.stock_view || "relative"; state.rsFilter=view.rs_filter || "All"; state.stockSorts=view.stock_sorts || {};
-      state.priorityExpanded=view.priority_expanded || {}; state.priorityOrders=view.priority_orders || {};
+      viewState.stockView=view.stock_view || "relative"; viewState.rsFilter=view.rs_filter || "All"; viewState.stockSorts=view.stock_sorts || {};
     }
     var routeCache={};
-    var storageKey="themescope-terminal-v3:"+data.session_date;
-    try {var stored=JSON.parse(sessionStorage.getItem(storageKey));if(stored && stored.schema===3 && stored.session===data.session_date && stored.routes && typeof stored.routes==='object' && !Array.isArray(stored.routes))routeCache=stored.routes;}catch(error){}
+    var storageKey="themescope-terminal-v4:"+data.session_date;
+    try {var stored=JSON.parse(sessionStorage.getItem(storageKey));if(stored && stored.schema===4 && stored.session===data.session_date && stored.routes && typeof stored.routes==='object' && !Array.isArray(stored.routes))routeCache=stored.routes;}catch(error){}
     var displayedKey=null;
     try {history.scrollRestoration="manual";}catch(error){}
-    function routeKey(){return state.page==='watchlist'?'watchlist:'+state.theme+':'+state.stockView:state.page;}
+    function routeKey(){return viewState.page==='watchlist'?'watchlist:'+viewState.theme+':'+viewState.stockView:viewState.page;}
     function readRoute(){
-      return {y:window.scrollY,tables:Array.from(document.querySelectorAll('#'+state.page+' .table-wrap')).map(function(e,i){return {index:i,x:e.scrollLeft,y:e.scrollTop};}),search:$("stock-search")?.value || "",ema:$("ema-filter")?.value || "all",rsFilter:state.rsFilter,key:state.stockKey,dir:state.stockDir};
+      return {y:window.scrollY,tables:Array.from(document.querySelectorAll('#'+viewState.page+' .table-wrap')).map(function(e,i){return {index:i,x:e.scrollLeft,y:e.scrollTop};}),search:$("stock-search")?.value || "",ema:$("ema-filter")?.value || "all",rsFilter:viewState.rsFilter,key:viewState.stockKey,dir:viewState.stockDir};
     }
     function saveRoute(){
       if(!displayedKey)return;
       routeCache[displayedKey]=readRoute();
-      try{sessionStorage.setItem(storageKey,JSON.stringify({schema:3,session:data.session_date,routes:routeCache}));}catch(error){}
+      try{sessionStorage.setItem(storageKey,JSON.stringify({schema:4,session:data.session_date,routes:routeCache}));}catch(error){}
     }
     function restoreRoute(override, options){
       displayedKey=routeKey();var saved=override || routeCache[displayedKey];
       if(override)routeCache[displayedKey]=override;
-      if(state.page==='watchlist'){
-        var sort=state.stockSorts[state.stockView] || {key:state.stockView==='relative'?"excess21_pp":"return21",dir:"desc"};
-        state.stockSearch=typeof saved?.search==='string'?saved.search:"";state.stockEmaFilter=typeof saved?.ema==='string'?saved.ema:"all";
-        state.stockKey=typeof saved?.key==='string'?saved.key:sort.key;state.stockDir=(saved?.dir || sort.dir)==='asc'?'asc':'desc';
-        state.rsFilter=typeof saved?.rsFilter==='string'?saved.rsFilter:"All";
-        $("stock-search").value=state.stockSearch;$("ema-filter").value=state.stockEmaFilter;$("rs-filter").value=state.rsFilter;render();
+      if(viewState.page==='watchlist'){
+        var sort=viewState.stockSorts[viewState.stockView] || {key:viewState.stockView==='relative'?"excess21_pp":"return21",dir:"desc"};
+        viewState.stockSearch=typeof saved?.search==='string'?saved.search:"";viewState.stockEmaFilter=typeof saved?.ema==='string'?saved.ema:"all";
+        viewState.stockKey=typeof saved?.key==='string'?saved.key:sort.key;viewState.stockDir=(saved?.dir || sort.dir)==='asc'?'asc':'desc';
+        viewState.rsFilter=typeof saved?.rsFilter==='string'?saved.rsFilter:"All";
+        $("stock-search").value=viewState.stockSearch;$("ema-filter").value=viewState.stockEmaFilter;$("rs-filter").value=viewState.rsFilter;render();
       }
       if(options?.skipScroll)return;
-      document.querySelectorAll('#'+state.page+' .table-wrap').forEach(function(e,i){var t=Array.isArray(saved?.tables)?saved.tables.find(function(t){return t && t.index===i;}):null;e.scrollLeft=Number.isFinite(t?.x)?Math.max(0,t.x):0;e.scrollTop=Number.isFinite(t?.y)?Math.max(0,t.y):0;});
+      document.querySelectorAll('#'+viewState.page+' .table-wrap').forEach(function(e,i){var t=Array.isArray(saved?.tables)?saved.tables.find(function(t){return t && t.index===i;}):null;e.scrollLeft=Number.isFinite(t?.x)?Math.max(0,t.x):0;e.scrollTop=Number.isFinite(t?.y)?Math.max(0,t.y):0;});
       var y=Number.isFinite(saved?.y)?saved.y:0;window.scrollTo(0,Math.max(0,Math.min(y,document.documentElement.scrollHeight-window.innerHeight)));
     }
     function captureView() {
-      if ($("theme-search")) state.themeSearch = $("theme-search").value;
-      if ($("theme-type")) state.themeType = $("theme-type").value;
-      if ($("theme-state")) state.themeState = $("theme-state").value;
-      if ($("theme-sort")?.value) state.themeKey = $("theme-sort").value;
-      if ($("stock-search")) state.stockSearch = $("stock-search").value;
-      if ($("ema-filter")) state.stockEmaFilter = $("ema-filter").value;
-      if ($("stock-sort")?.value) state.stockKey = $("stock-sort").value;
-      if ($("watchlist-theme-search")) state.navigationQuery = $("watchlist-theme-search").value;
-      if ($("daily-methodology")) state.dailyMethodologyOpen = $("daily-methodology").open;
-      state.stockSorts[state.stockView]={key:state.stockKey,dir:state.stockDir};
-      state.scroll_position = window.scrollY || 0;
+      if ($("theme-search")) viewState.themeSearch = $("theme-search").value;
+      if ($("theme-type")) viewState.themeType = $("theme-type").value;
+      if ($("theme-sort")?.value) viewState.themeKey = $("theme-sort").value;
+      if ($("stock-search")) viewState.stockSearch = $("stock-search").value;
+      if ($("ema-filter")) viewState.stockEmaFilter = $("ema-filter").value;
+      if ($("stock-sort")?.value) viewState.stockKey = $("stock-sort").value;
+      if ($("watchlist-theme-search")) viewState.navigationQuery = $("watchlist-theme-search").value;
+      if ($("daily-methodology")) viewState.dailyMethodologyOpen = $("daily-methodology").open;
+      viewState.stockSorts[viewState.stockView]={key:viewState.stockKey,dir:viewState.stockDir};
+      viewState.scroll_position = window.scrollY || 0;
       return {
-        ui_schema:3,session_date:data.session_date,route_state:readRoute(),stock_view:state.stockView,rs_filter:state.rsFilter,stock_sorts:state.stockSorts,
-        priority_expanded:state.priorityExpanded,priority_orders:state.priorityOrders,
-        page: state.page, selected_theme_id: state.theme,
-        theme_search: state.themeSearch || "", theme_type_filter: state.themeType,
-        theme_state_filter: state.themeState, theme_priority_filter: state.themePriority, theme_sort_key: state.themeKey,
-        theme_sort_direction: state.themeDir, stock_search: state.stockSearch || "",
-        stock_ema_filter: state.stockEmaFilter || "all", stock_sort_key: state.stockKey,
-        stock_sort_direction: state.stockDir,
-        navigation_query: state.navigationQuery || "",
-        theme_navigation_order: state.themeNavigationOrder,
-        daily_methodology_open: Boolean(state.dailyMethodologyOpen),
-        scroll_position: state.scroll_position
+        ui_schema:4,session_date:data.session_date,route_state:readRoute(),stock_view:viewState.stockView,rs_filter:viewState.rsFilter,stock_sorts:viewState.stockSorts,
+        page: viewState.page, selected_theme_id: viewState.theme,
+        theme_search: viewState.themeSearch || "", theme_type_filter: viewState.themeType,
+        theme_priority_filter: viewState.themePriority, theme_sort_key: viewState.themeKey,
+        theme_sort_direction: viewState.themeDir, stock_search: viewState.stockSearch || "",
+        stock_ema_filter: viewState.stockEmaFilter || "all", stock_sort_key: viewState.stockKey,
+        stock_sort_direction: viewState.stockDir,
+        navigation_query: viewState.navigationQuery || "",
+        theme_navigation_order: viewState.themeNavigationOrder,
+        daily_methodology_open: Boolean(viewState.dailyMethodologyOpen),
+        scroll_position: viewState.scroll_position
       };
     }
     function replaceHistoryState() {
       var current = history.state;
       if (current && current.themescope) {
-        try { history.replaceState({ themescope: true, index: current.index, view: captureView() }, "", "#" + state.page); } catch (e) {}
+        try { history.replaceState({ themescope: true, index: current.index, view: captureView() }, "", "#" + viewState.page); } catch (e) {}
       }
     }
     function updateBackControl() {
@@ -727,15 +723,15 @@
       if (!pageIds.includes(id)) id = "market";
       if (navigation.push) {
         saveRoute();replaceHistoryState();
-        if(navigation.theme)state.theme=navigation.theme;
-        if(navigation.themeOrder)state.themeNavigationOrder=navigation.themeOrder;
+        if(navigation.theme)viewState.theme=navigation.theme;
+        if(navigation.themeOrder)viewState.themeNavigationOrder=navigation.themeOrder;
         var view = captureView();
         view.page = id;
         var previous = history.state;
         var index = previous && previous.themescope ? previous.index + 1 : 1;
         try { history.pushState({ themescope: true, index: index, view: view }, "", "#" + id); } catch (e) {}
       }
-      state.page = id;
+      viewState.page = id;
       closeInfoTooltip();closeNavigation();$("navigation-status").textContent="";
       document.querySelectorAll(".page").forEach(function (page) {
         page.hidden = page.id !== id;
@@ -754,7 +750,7 @@
     document.querySelectorAll(".side-nav [data-page]").forEach(function (link) {
       link.addEventListener("click", function (event) {
         event.preventDefault();
-        if (link.dataset.page !== state.page) showPage(link.dataset.page, { push: true });
+        if (link.dataset.page !== viewState.page) showPage(link.dataset.page, { push: true });
       });
     });
     $("app-back").addEventListener("click", function () {
@@ -762,26 +758,25 @@
     });
     window.addEventListener("popstate", function (event) {
       saveRoute();
-      var view = event.state?.themescope && event.state.view?.ui_schema===3 && event.state.view.session_date===data.session_date ? event.state.view : null;
+      var view = event.state?.themescope && event.state.view?.ui_schema===4 && event.state.view.session_date===data.session_date ? event.state.view : null;
       if (!view) { updateBackControl(); return; }
       restoreNewView(view);
-      state.page = view.page || "market";
-      state.theme = view.selected_theme_id || state.theme;
-      state.themeSearch = view.theme_search || ""; state.themeType = view.theme_type_filter || "All";
-      state.themePriority = view.theme_priority_filter || "All";
-      state.themeState = view.theme_state_filter || "All"; state.themeKey = view.theme_sort_key || "theme_score";
-      state.themeDir = view.theme_sort_direction || "desc"; state.stockSearch = view.stock_search || "";
-      state.stockDir = view.stock_sort_direction || "desc";
-      state.stockEmaFilter = view.stock_ema_filter || "all"; state.stockKey = view.stock_sort_key || "return21";
-      state.navigationQuery = view.navigation_query || ""; state.themeNavigationOrder = view.theme_navigation_order || null;
-      state.dailyMethodologyOpen = Boolean(view.daily_methodology_open);
-      state.scroll_position = view.scroll_position || 0;
-      var fields = {"theme-search":"themeSearch","theme-type":"themeType","theme-state":"themeState","theme-priority":"themePriority","theme-sort":"themeKey","stock-search":"stockSearch","ema-filter":"stockEmaFilter","stock-sort":"stockKey","watchlist-theme-search":"navigationQuery"};
-      Object.keys(fields).forEach(function (id) { if ($(id) && state[fields[id]] !== undefined) $(id).value = state[fields[id]]; });
-      $("stock-view").value=state.stockView; $("rs-filter").value=state.rsFilter;
+      viewState.page = view.page || "market";
+      viewState.theme = view.selected_theme_id || viewState.theme;
+      viewState.themeSearch = view.theme_search || ""; viewState.themeType = view.theme_type_filter || "All";
+      viewState.themePriority = view.theme_priority_filter || "All"; viewState.themeKey = view.theme_sort_key || "theme_score";
+      viewState.themeDir = view.theme_sort_direction || "desc"; viewState.stockSearch = view.stock_search || "";
+      viewState.stockDir = view.stock_sort_direction || "desc";
+      viewState.stockEmaFilter = view.stock_ema_filter || "all"; viewState.stockKey = view.stock_sort_key || "return21";
+      viewState.navigationQuery = view.navigation_query || ""; viewState.themeNavigationOrder = view.theme_navigation_order || null;
+      viewState.dailyMethodologyOpen = Boolean(view.daily_methodology_open);
+      viewState.scroll_position = view.scroll_position || 0;
+      var fields = {"theme-search":"themeSearch","theme-type":"themeType","theme-priority":"themePriority","theme-sort":"themeKey","stock-search":"stockSearch","ema-filter":"stockEmaFilter","stock-sort":"stockKey","watchlist-theme-search":"navigationQuery"};
+      Object.keys(fields).forEach(function (id) { if ($(id) && viewState[fields[id]] !== undefined) $(id).value = viewState[fields[id]]; });
+      $("stock-view").value=viewState.stockView; $("rs-filter").value=viewState.rsFilter;
       render(); renderDailyPlan();
-      $("daily-methodology").open = state.dailyMethodologyOpen;
-      showPage(state.page, { scroll: false });
+      $("daily-methodology").open = viewState.dailyMethodologyOpen;
+      showPage(viewState.page, { scroll: false });
       restoreRoute(view.route_state);
     });
     function sessionDisplay(value) {
@@ -798,76 +793,52 @@
       document.querySelectorAll("section.page").forEach((section) => (section.hidden = true));
       return;
     }
-    showPage(state.page, { scroll: false });
+    showPage(viewState.page, { scroll: false });
     var decision = data.decision || data.market_classification?.decision || {};
     var classification = data.market_classification || {};
     function themeById(id) { return data.themes.find(function (row) { return row.id === id; }); }
-    function priorityDefinition(key) {
-      var definition = decision.priority_definitions?.[key] || {};
-      var states = (definition.theme_states || []).join(" / ");
-      return (states ? states + " · " : "") + (definition.labels || []).join(" / ") + (definition.ema50_guard ? " · " + definition.ema50_guard : "");
-    }
     function dailyThemeLink(row) {
-      if (!row) return "";
-      var context = finite(row.price_close) && finite(row.ema50) ? (row.price_close > row.ema50 ? "Above EMA50" : row.price_close < row.ema50 ? "Below EMA50" : "At EMA50") : "EMA50 unavailable";
-      return '<li><a class="priority-theme-link" href="#watchlist" data-daily-theme="' + esc(row.id) + '"><b>' + esc(row.name) + '</b><span>' + esc(row.anchor) + '</span><small>' + esc(row.theme_state || "Unavailable") + ' · ' + context + '</small><span>' + score(row, "theme_score") + '</span></a></li>';
+      return '<li><a class="priority-theme-link" href="#watchlist" data-daily-theme="' + esc(row.id) + '"><b>' + esc(row.anchor+' · '+row.name) + '</b><small>' + esc(row.research_priority.label) + '</small><span>' + score(row,"theme_score") + '</span></a></li>';
+    }
+    function researchDownloads() {
+      var research=data.daily_primary_research || {};
+      if (!research.combined_file) return '<p class="muted">No directional Primary research list was generated for this session.</p>';
+      return '<div class="exports">'+[[research.combined_file,"Research: Daily Primary TXT"],[research.archive_file,"Primary-filtered theme TXT ZIP"],[research.relationships_file,"Qualifying theme relationships CSV"]].map(function(item){return '<a class="download-link" download href="'+esc(item[0])+'">'+item[1]+'</a>';}).join('')+'</div><p class="caption">Anchor first in each filtered theme file. Stocks qualify by weighted stock-minus-ETF performance; the combined list deduplicates identifiers. Separate from complete data collection.</p>';
     }
     function renderMethodology() {
-      var marketRows = (decision.market_matrix || []).map(function(cell) {
-        var active = decision.spy_price_state === cell.spy && decision.qqq_price_state === cell.qqq && decision.combined_breadth_state === cell.breadth;
-        return '<tr' + (active ? ' class="active-cell"' : '') + '><td class="' + statusClass(cell.spy) + '">' + esc(cell.spy) + '</td><td class="' + statusClass(cell.qqq) + '">' + esc(cell.qqq) + '</td><td class="' + statusClass(cell.breadth) + '">' + esc(cell.breadth) + '</td><td class="' + directionClass(cell.direction) + '">' + esc(cell.direction) + '</td></tr>';
-      });
-      var priorityRows = ["Long bias","Selective long","Neutral","Selective short","Short bias","Unclassified"].map(function (direction) {
-        var matrixRow = decision.priority_matrix?.[direction] || {};
-        var labels = ["Leading","Improving","Fading","Lagging"].map(function (themeState) { return matrixRow[themeState] || "Unavailable"; });
-        return '<tr' + (decision.market_classification === direction ? ' class="active-cell"' : '') + '><td class="' + directionClass(direction) + '">' + direction + '</td>' + labels.map(function (x) { return '<td>' + x + '</td>'; }).join("") + '</tr>';
-      }).join("");
-      $("methodology-content").innerHTML = '<h3>Scores and ranks</h3><p>Current: ' + esc(infoText.current_strength_score) + '</p><p>Medium: ' + esc(infoText.medium_strength_score) + '</p><p>Theme Score: ' + esc(infoText.theme_score) + '</p><p>' + esc(infoText.rank_current) + '</p><h3>Market matrix</h3><div class="table-wrap"><table><thead><tr><th>SPY Price</th><th>QQQ Price</th><th>Combined Breadth</th><th>Result</th></tr></thead><tbody>' + marketRows.join("") + '</tbody></table></div><h3>Market × Theme State priorities</h3><div class="table-wrap"><table><thead><tr><th>Market</th><th>Leading</th><th>Improving</th><th>Fading</th><th>Lagging</th></tr></thead><tbody>' + priorityRows + '</tbody></table></div><p><b>EMA50 guard:</b> Long labels require the anchor close strictly above EMA50; short labels require it strictly below EMA50.</p><p><b>States:</b> Leading has Current and Medium at or above 50; Improving has only Current at or above 50; Fading has only Medium at or above 50; Lagging has both below 50.</p><p>Research Priority is not an entry signal.</p>';
+      var marketRows=(decision.market_matrix || []).map(function(cell){
+        var active=decision.spy_price_state===cell.spy && decision.qqq_price_state===cell.qqq && decision.breadth_consensus===cell.breadth;
+        return '<tr'+(active?' class="active-cell"':'')+'><td>'+esc(cell.spy || 'Unavailable')+'</td><td>'+esc(cell.qqq || 'Unavailable')+'</td><td>'+esc(cell.breadth || 'Unavailable')+'</td><td>'+esc(cell.direction)+'</td></tr>';
+      }).join('');
+      var policy=decision.priority_policy || {};
+      $("methodology-content").innerHTML='<h3>Scores and ranks</h3><p>'+esc(infoText.current_strength_score)+'</p><p>'+esc(infoText.medium_strength_score)+'</p><p>'+esc(infoText.theme_score)+'</p><p>'+esc(infoText.rank_current)+'</p><h3>Priority policy</h3><p><b>Long bias / Selective long:</b> '+esc(policy.long_rule)+'</p><p><b>Short bias / Selective short:</b> '+esc(policy.short_rule)+'</p><p>Neutral / Unclassified: Watch for every theme.</p><p>'+esc(policy.transition_rule)+'</p><p>Priority Change compares compatible immediately preceding sessions. New long / New short includes a direction switch; Removed means Primary became Watch. N/A means no comparable priority history. This is a workflow change, not a confirmed EMA breakdown.</p><p>'+esc(policy.stock_rule)+'</p><p>'+esc(policy.note)+'</p><h3>Complete Market matrix</h3><p>Consensus is between SPY and QQQ breadth classifications, not merged constituents. IWM is context only. Unavailable evidence is never Mixed or Neutral. Unanimous price direction is retained regardless of breadth.</p><div class="table-wrap"><table><thead><tr><th>SPY Price</th><th>QQQ Price</th><th>SPY/QQQ Breadth Consensus</th><th>Result</th></tr></thead><tbody>'+marketRows+'</tbody></table></div>';
     }
     function renderDailyPlan() {
-      $("daily-session").textContent = sessionDisplay(decision.session_date || data.session_date);
-      $("daily-generated").textContent = data.dashboard_generated_at_hkt_display || decision.generated_at_hkt || "Unavailable";
-      $("daily-classification").className = "decision-tag " + directionClass(decision.market_classification);
-      $("daily-classification").textContent = decision.market_classification || classification.direction || "Unclassified";
-      $("daily-action").textContent = decision.action_sentence || classification.action_summary || "Required inputs unavailable.";
-      var pathRows = [
-        ["SPY Price State", decision.spy_price_state, "Primary vote", "market"],
-        ["QQQ Price State", decision.qqq_price_state, "Primary vote", "market"],
-        ["Combined Breadth", decision.combined_breadth_state, "Selective-tilt input or context"],
-        ["IWM Price State", decision.iwm_price_state, "Context only, no vote"],
-        ["Russell 2000 Breadth", decision.russell_2000_breadth_state, "Context only, no vote"],
-        ["Final Market result", decision.market_classification, "Approved matrix output"],
-      ];
-      $("decision-path").innerHTML = '<div class="decision-row header" role="row"><span>Input</span><span>Current reading</span><span>Decision role</span></div>' + pathRows.map(function (row) { var reading = row[1] || "Unavailable"; return '<div class="decision-row" role="row"><span>' + (row[3] ? '<a href="#market" data-page-link="market">' + row[0] + '</a>' : row[0]) + '</span><span><span class="reading-tag ' + (row[0] === "Final Market result" ? directionClass(reading) : statusClass(reading)) + '">' + esc(reading) + '</span></span><span>' + row[2] + '</span></div>'; }).join("");
-      $("why-result").innerHTML = '<p>' + esc(decision.reason || classification.reason || "Required inputs unavailable.") + '</p>';
-      var labels = {primary:"Primary",secondary:"Secondary",exception:"Lower priority / exception",observation:"Observation only"};
-      $("daily-priorities").innerHTML = ["primary","secondary","exception","observation"].map(function (key) {
-        var ids = decision.priority_groups?.[key] || [], rows = ids.map(themeById).filter(Boolean);
-        var side=key === "observation" ? null : rows.find(function(r){return r.research_priority.side;})?.research_priority.side;
-        var order=state.priorityOrders[key] || (side === "short" ? "asc" : "desc");
-        rows=sortRows(rows,"theme_score",order);
-        var shown=state.priorityExpanded[key] ? rows : rows.slice(0,5);
-        return '<article class="priority-card"><h3>' + labels[key] + '</h3><p class="priority-rule">' + esc(priorityDefinition(key) || (key === "observation" ? "No directional label or EMA50 guard not met." : "No active rule.")) + '</p><div class="priority-toolbar"><span>' + Math.min(shown.length,rows.length) + ' of ' + rows.length + ' themes</span><select data-priority-order="'+key+'" aria-label="Score order for '+labels[key]+'"><option value="asc"'+(order==='asc'?' selected':'')+'>Score ascending</option><option value="desc"'+(order==='desc'?' selected':'')+'>Score descending</option></select></div>' + (rows.length ? '<ul class="priority-theme-list">' + shown.map(dailyThemeLink).join("") + '</ul>'+ (rows.length>5?'<button type="button" data-priority-expand="'+key+'" aria-expanded="'+Boolean(state.priorityExpanded[key])+'">'+(state.priorityExpanded[key]?'Show less':'Show all')+'</button>':'') : '<p class="muted">None today</p>') + '</article>';
-      }).join("");
-      var failures = decision.guard_failures || [];
-      if (failures.length) {
-        var byState = {};
-        failures.forEach(function (failure) { var row=themeById(failure.theme_id); if (row) byState[row.theme_state]=(byState[row.theme_state]||0)+1; });
-        $("qualification-summary").innerHTML = Object.keys(byState).map(function (themeState) { var total=data.themes.filter(function (row) { return row.theme_state === themeState; }).length; return '<p>' + total + ' ' + esc(themeState) + ' themes · ' + (total-byState[themeState]) + ' retain a directional priority · ' + byState[themeState] + ' remain Observation only because the anchor does not pass the EMA50 guard.</p>'; }).join("");
-      } else $("qualification-summary").innerHTML = '<p>Theme State totals and priority totals reconcile without EMA50 guard failures.</p>';
-      $("divergence-context").innerHTML = '<p>' + esc(decision.divergence || "Price direction and Breadth are aligned.") + '</p>';
+      $("daily-session").textContent=sessionDisplay(decision.session_date || data.session_date);
+      $("daily-generated").textContent=data.dashboard_generated_at_hkt_display || decision.generated_at_hkt || "Unavailable";
+      $("daily-classification").className="decision-tag "+directionClass(decision.market_classification);
+      $("daily-classification").textContent=decision.market_classification || "Unclassified";
+      $("daily-action").textContent=decision.action_sentence || "Required inputs unavailable.";
+      var rows=[["SPY Price",decision.spy_price_state,"Directional input"],["QQQ Price",decision.qqq_price_state,"Directional input"],["SPY/QQQ Breadth Consensus",decision.breadth_consensus,"Consensus of two index classifications"],["Breadth qualifier",decision.breadth_qualifier,"Context for unanimous price direction"],["IWM Price",decision.iwm_price_state,"Context only, no vote"],["Russell 2000 Breadth",decision.russell_2000_breadth_state,"Context only, no vote"]];
+      if(!decision.breadth_qualifier)rows=rows.filter(function(r){return r[0]!=="Breadth qualifier";});
+      $("decision-path").innerHTML='<div class="decision-row header"><span>Input</span><span>Current reading</span><span>Decision role</span></div>'+rows.map(function(r){return '<div class="decision-row"><span>'+esc(r[0])+'</span><span class="'+statusClass(r[1])+'">'+esc(r[1] || 'Unavailable')+'</span><span>'+esc(r[2])+'</span></div>';}).join('');
+      $("why-result").textContent=decision.reason || "Required inputs unavailable.";
+      var labels={new:"New Primary Today",continuing:"Continuing Primary",unavailable:"Comparison unavailable"};
+      $("daily-priorities").innerHTML=Object.keys(labels).map(function(key){
+        var themes=(decision.primary_groups?.[key] || []).map(themeById).filter(Boolean);
+        return '<article class="priority-card" data-priority-group="'+key+'"><h3>'+labels[key]+'</h3><p class="caption">'+themes.length+' themes</p>'+(themes.length?'<ul class="priority-theme-list">'+themes.map(dailyThemeLink).join('')+'</ul>':'<p class="muted">None today</p>')+'</article>';
+      }).join('');
+      $("qualification-summary").innerHTML=researchDownloads();
+      $("divergence-context").textContent=decision.breadth_qualifier?'Breadth context: '+decision.breadth_qualifier+'. '+decision.reason:decision.reason;
       renderMethodology();
     }
     renderDailyPlan();
-    $("daily-methodology").open = Boolean(state.dailyMethodologyOpen);
-    $("daily-methodology").addEventListener("toggle", function () { state.dailyMethodologyOpen=this.open; replaceHistoryState(); });
+    $("daily-methodology").open = Boolean(viewState.dailyMethodologyOpen);
+    $("daily-methodology").addEventListener("toggle", function () { viewState.dailyMethodologyOpen=this.open; replaceHistoryState(); });
     document.querySelectorAll("[data-page-link]").forEach(function (link) { link.addEventListener("click", function (event) { event.preventDefault(); showPage(link.dataset.pageLink, {push:true}); }); });
-    $("daily-priorities").addEventListener("change",function(event){if(event.target.matches('[data-priority-order]')){state.priorityOrders[event.target.dataset.priorityOrder]=event.target.value;renderDailyPlan();persistView();}});
-    $("daily-priorities").addEventListener("click",function(event){var button=event.target.closest('[data-priority-expand]');if(button){var key=button.dataset.priorityExpand;state.priorityExpanded[key]=!state.priorityExpanded[key];renderDailyPlan();persistView();}});
     $("daily-priorities").addEventListener("click", function (event) { var link=event.target.closest("[data-daily-theme]"); if (!link) return; event.preventDefault(); showPage("watchlist", {push:true,theme:link.dataset.dailyTheme}); render(); replaceHistoryState(); });
     if ($("market-direction")) {
-      var primary = priorityDefinition("primary") || "None today", secondary = priorityDefinition("secondary") || "None today";
-      $("market-direction").innerHTML='<div class="market-action-card"><div><h2 class="' + directionClass(decision.market_classification) + '">' + esc(decision.market_classification || classification.direction || "Unclassified") + '</h2></div><div class="market-action-details"><p>SPY ' + esc(decision.spy_price_state || "Unavailable") + ' + QQQ ' + esc(decision.qqq_price_state || "Unavailable") + ' → ' + esc(decision.market_classification || "Unclassified") + '</p><p>Combined Breadth: ' + esc(decision.combined_breadth_state || "Unavailable") + '</p><p>Primary: ' + esc(primary) + '</p><p>Secondary: ' + esc(secondary) + '</p></div><button type="button" class="open-plan">Open Daily Plan</button></div>';
+      $("market-direction").innerHTML='<div class="market-action-card"><div><h2 class="'+directionClass(decision.market_classification)+'">'+esc(decision.market_classification)+'</h2></div><div class="market-action-details"><p>'+esc(decision.reason)+'</p><p>'+esc(decision.action_sentence)+'</p></div><button type="button" class="open-plan">Open Daily Plan</button></div>';
       $("market-direction").querySelector(".open-plan").onclick=function(){showPage("daily-plan",{push:true});};
     }
     const marketWarnings = (data.context || []).filter((row) => [21, 50].some((period) => row.index_breadth?.[String(period)]?.status !== "valid")).map((row) => row.ticker + " breadth unavailable");
@@ -877,7 +848,7 @@
     }).join("");
     document.querySelector(".volatility-section").hidden = !(data.volatility_context || []).length;
     $("volatility-card").innerHTML = (data.volatility_context || []).map(function (item) {
-      const badge = item.source_status && item.source_status !== "available" ? '<span class="source-state source-missing">' + esc(item.source_status) + '</span>' : '';
+      const badge = item.source_status && item.source_status !== "available" ? '<span class="source-viewState source-missing">' + esc(item.source_status) + '</span>' : '';
       const percentile = finite(item.trailing_1y_percentile) ? 'Higher than ' + item.trailing_1y_percentile.toFixed(1) + '% of observations in the last ' + item.trailing_1y_observations + ' sessions.' : '1-year percentile unavailable.';
       const summary = item.vix_direction_summary || 'Volatility direction is mixed across the displayed periods.';
       return '<article class="market-card volatility-card"><div class="market-card-head"><div><div class="market-ticker">VIX</div><div class="market-title-sub">CBOE Volatility Index</div></div>' + badge + '</div>' +
@@ -890,7 +861,6 @@
       rank_current: "Current rank",
       rank_change_daily: "Δ Rank",
       priority: "Research priority",
-      theme_state: "State",
       return21: "1-month Performance",
       return63: "3-month Performance",
       theme_score: "Theme Score",
@@ -924,38 +894,35 @@
     }
     $("theme-controls").innerHTML = '<label>Search <input id="theme-search" placeholder="Sector, theme or ETF"></label>' +
       '<label>Type <select id="theme-type"><option>All</option><option>Sector</option><option>Theme</option></select></label>' +
-      '<label>State <select id="theme-state"><option>All</option><option>Leading</option><option>Improving</option><option>Fading</option><option>Lagging</option></select></label>' +
-      '<label>Research Priority <select id="theme-priority"><option value="All">All</option><option value="primary">Primary</option><option value="secondary">Secondary</option><option value="exception">Exceptions</option><option value="observation">Observation only</option></select></label>' +
+      '<label>Research Priority <select id="theme-priority"><option value="All">All</option><option>Primary long</option><option>Watch</option><option>Primary short</option></select></label>' +
       '<label>Sort by <select id="theme-sort">' + options(Object.entries(metrics).filter(([key]) => !["price_close","adv30_usd","name"].includes(key))) + '</select></label>' +
       '<button id="theme-direction" type="button"></button>';
     $("stock-controls").innerHTML = stockControls();
-    $("theme-search").value = state.themeSearch || "";
-    $("theme-type").value = state.themeType;
-    $("theme-state").value = state.themeState;
-    $("theme-priority").value = state.themePriority;
-    $("theme-priority").onchange = function(){state.themePriority=this.value;render();persistView();};
-    $("theme-sort").value = state.themeKey;
-    $("stock-search").value = state.stockSearch || "";
-    $("stock-view").value=state.stockView; $("rs-filter").value=state.rsFilter;
+    $("theme-search").value = viewState.themeSearch || "";
+    $("theme-type").value = viewState.themeType;
+    $("theme-priority").value = viewState.themePriority;
+    $("theme-priority").onchange = function(){viewState.themePriority=this.value;render();persistView();};
+    $("theme-sort").value = viewState.themeKey;
+    $("stock-search").value = viewState.stockSearch || "";
+    $("stock-view").value=viewState.stockView; $("rs-filter").value=viewState.rsFilter;
     $("stock-view").onchange=function(){
-      saveRoute();state.stockSorts[state.stockView]={key:state.stockKey,dir:state.stockDir};state.stockView=this.value;
-      var sort=state.stockSorts[state.stockView] || {key:state.stockView === "relative" ? "excess21_pp" : "return21",dir:"desc"};
-      state.stockKey=sort.key;state.stockDir=sort.dir;$("stock-sort").value=sort.key;render();restoreRoute();persistView();
+      saveRoute();viewState.stockSorts[viewState.stockView]={key:viewState.stockKey,dir:viewState.stockDir};viewState.stockView=this.value;
+      var sort=viewState.stockSorts[viewState.stockView] || {key:viewState.stockView === "relative" ? "excess21_pp" : "return21",dir:"desc"};
+      viewState.stockKey=sort.key;viewState.stockDir=sort.dir;$("stock-sort").value=sort.key;render();restoreRoute();persistView();
     };
-    $("rs-filter").onchange=function(){state.rsFilter=this.value;render();persistView();};
-    $("stock-sort").value = state.stockKey;
-    $("ema-filter").value = state.stockEmaFilter || "all";
-    $("watchlist-theme-search").value = state.navigationQuery || "";
+    $("rs-filter").onchange=function(){viewState.rsFilter=this.value;render();persistView();};
+    $("stock-sort").value = viewState.stockKey;
+    $("ema-filter").value = viewState.stockEmaFilter || "all";
+    $("watchlist-theme-search").value = viewState.navigationQuery || "";
     function persistView() { replaceHistoryState(); }
-    $("theme-sort").onchange = function () { state.themeKey = this.value; render(); persistView(); };
-    $("theme-direction").onclick = function () { state.themeDir = state.themeDir === "desc" ? "asc" : "desc"; render(); persistView(); };
-    $("theme-search").addEventListener("input", function () { state.themeSearch = this.value; render(); persistView(); });
-    $("theme-type").onchange = function () { state.themeType = this.value; render(); persistView(); };
-    $("theme-state").onchange = function () { state.themeState = this.value; render(); persistView(); };
-    $("stock-sort").onchange = function () { state.stockKey = this.value; render(); persistView(); };
-    $("stock-direction").onclick = function () { state.stockDir = state.stockDir === "desc" ? "asc" : "desc"; render(); persistView(); };
-    $("stock-search").addEventListener("input", function () { state.stockSearch = this.value; render(); persistView(); });
-    $("ema-filter").onchange = function () { state.stockEmaFilter = this.value; render(); persistView(); };
+    $("theme-sort").onchange = function () { viewState.themeKey = this.value; render(); persistView(); };
+    $("theme-direction").onclick = function () { viewState.themeDir = viewState.themeDir === "desc" ? "asc" : "desc"; render(); persistView(); };
+    $("theme-search").addEventListener("input", function () { viewState.themeSearch = this.value; render(); persistView(); });
+    $("theme-type").onchange = function () { viewState.themeType = this.value; render(); persistView(); };
+    $("stock-sort").onchange = function () { viewState.stockKey = this.value; render(); persistView(); };
+    $("stock-direction").onclick = function () { viewState.stockDir = viewState.stockDir === "desc" ? "asc" : "desc"; render(); persistView(); };
+    $("stock-search").addEventListener("input", function () { viewState.stockSearch = this.value; render(); persistView(); });
+    $("ema-filter").onchange = function () { viewState.stockEmaFilter = this.value; render(); persistView(); };
 
     var navigationInput=$("watchlist-theme-search"), navigationPopup=$("navigation-popup");
     var navigationIndex=buildNavigationIndex(data.themes), navigationMatches=[], navigationShown=[];
@@ -1013,9 +980,9 @@
       }
       showPage('watchlist',{push:true,theme:result.themeId,stockTarget:true});
       var theme=themeById(result.themeId),stock=theme.selected.find(function(r){return r.tradingview_symbol===result.symbol;}),adjusted=[];
-      if(!filterRows([stock],{query:$("stock-search").value}).length){$("stock-search").value='';state.stockSearch='';adjusted.push('within-list search');}
-      if(!emaMatches(stock,$("ema-filter").value)){$("ema-filter").value='all';state.stockEmaFilter='all';adjusted.push('EMA');}
-      if(state.stockView==='relative' && !rsMatches(stock,state.rsFilter)){state.rsFilter='All';$("rs-filter").value='All';adjusted.push('RS');}
+      if(!filterRows([stock],{query:$("stock-search").value}).length){$("stock-search").value='';viewState.stockSearch='';adjusted.push('within-list search');}
+      if(!emaMatches(stock,$("ema-filter").value)){$("ema-filter").value='all';viewState.stockEmaFilter='all';adjusted.push('EMA');}
+      if(viewState.stockView==='relative' && !rsMatches(stock,viewState.rsFilter)){viewState.rsFilter='All';$("rs-filter").value='All';adjusted.push('RS');}
       render();
       $("navigation-status").textContent=adjusted.length?'Filters adjusted to reveal '+stock.ticker+': '+adjusted.join(', ')+'.':'';
       var row=Array.from($("stock-body").rows).find(function(r){return r.dataset.stockSymbol===result.symbol;});
@@ -1026,7 +993,7 @@
       }
       saveRoute();replaceHistoryState();
     }
-    navigationInput.addEventListener('input',function(){state.navigationQuery=this.value;navigationLimits={stock:12,theme:12};renderNavigation();persistView();});
+    navigationInput.addEventListener('input',function(){viewState.navigationQuery=this.value;navigationLimits={stock:12,theme:12};renderNavigation();persistView();});
     navigationInput.addEventListener('focus',function(){if(!navigationSuppressFocus){revealNavigationInput();if(this.value.trim())renderNavigation();}});
     navigationInput.addEventListener('keydown',function(event){
       if(event.key==='Escape'){event.preventDefault();closeNavigation();return;}
@@ -1050,39 +1017,38 @@
         return rows.filter(function (row) {
           const matchesText = !query || [row.name, row.anchor, row.id].some((v) => String(v || "").toLowerCase().includes(query));
           const type = row.level === "Sector" ? "Sector" : "Theme";
-          const matchesType = state.themeType === "All" || type === state.themeType;
-          const matchesState = state.themeState === "All" || row.theme_state === state.themeState;
-          return matchesText && matchesType && matchesState && (state.themePriority === "All" || priorityCategory(row) === state.themePriority);
+          const matchesType = viewState.themeType === "All" || type === viewState.themeType;
+          return matchesText && matchesType && (viewState.themePriority === "All" || row.research_priority?.label === viewState.themePriority);
         });
       }
-      return filterRows(rows, { query: $("stock-search").value }).filter(function(row){return state.stockView !== "relative" || rsMatches(row,state.rsFilter);}).filter(function(row){return emaMatches(row,$("ema-filter").value);});
+      return filterRows(rows, { query: $("stock-search").value }).filter(function(row){return viewState.stockView !== "relative" || rsMatches(row,viewState.rsFilter);}).filter(function(row){return emaMatches(row,$("ema-filter").value);});
     }
 
     function renderThemeSelector() {
       var sectorOptions = (data.themes || []).filter((row) => row.level === "Sector").map((row) => '<option value="' + esc(row.id) + '">' + esc(row.name) + ' · ' + esc(row.anchor) + '</option>').join("");
       var themeOptions = (data.themes || []).filter((row) => row.level !== "Sector").map((row) => '<option value="' + esc(row.id) + '">' + esc(row.name) + ' · ' + esc(row.anchor) + '</option>').join("");
       $("watchlist-theme-selector").innerHTML = '<optgroup label="Sectors">' + (sectorOptions || '<option disabled>No matching sectors</option>') + '</optgroup><optgroup label="Themes">' + (themeOptions || '<option disabled>No matching themes</option>') + '</optgroup>';
-      if ((data.themes || []).some((row) => row.id === state.theme)) $("watchlist-theme-selector").value = state.theme;
+      if ((data.themes || []).some((row) => row.id === viewState.theme)) $("watchlist-theme-selector").value = viewState.theme;
     }
     function themeNavigationOrder() {
       var allIds = new Set((data.themes || []).map((row) => row.id));
-      var order = (state.themeNavigationOrder || []).filter((id) => allIds.has(id));
+      var order = (viewState.themeNavigationOrder || []).filter((id) => allIds.has(id));
       return order.length > 0 ? order : sortRows(data.themes || [], "theme_score", "desc").map((row) => row.id);
     }
     function switchTheme(id, order) {
-      if (!id || id === state.theme) return;
+      if (!id || id === viewState.theme) return;
       showPage("watchlist", { push: true, theme:id, themeOrder:order });
       render();
       replaceHistoryState();
     }
     $("watchlist-theme-selector").onchange = function () { switchTheme(this.value); };
     $("previous-theme").onclick = function () {
-      var order = themeNavigationOrder(), index = order.indexOf(state.theme);
+      var order = themeNavigationOrder(), index = order.indexOf(viewState.theme);
       if (index < 0) index = 0;
       if (order.length) switchTheme(order[(index - 1 + order.length) % order.length], order);
     };
     $("next-theme").onclick = function () {
-      var order = themeNavigationOrder(), index = order.indexOf(state.theme);
+      var order = themeNavigationOrder(), index = order.indexOf(viewState.theme);
       if (index < 0) index = -1;
       if (order.length) switchTheme(order[(index + 1) % order.length], order);
     };
@@ -1095,9 +1061,9 @@
             (c) => {
               var fullLabel = c[4] || c[0];
               var label = c[1]
-                ? '<button data-sort="' + c[1] + '" title="Sort by ' + esc(fullLabel) + '; unavailable values stay last" aria-label="Sort by ' + esc(fullLabel) + '">' + c[0] + (state[p + "Key"] === c[1] ? arrowIcon(state[p + "Dir"]) : "") + '</button>'
+                ? '<button data-sort="' + c[1] + '" title="Sort by ' + esc(fullLabel) + '; unavailable values stay last" aria-label="Sort by ' + esc(fullLabel) + '">' + c[0] + (viewState[p + "Key"] === c[1] ? arrowIcon(viewState[p + "Dir"]) : "") + '</button>'
                 : '<span title="' + esc(fullLabel) + '">' + c[0] + '</span>';
-              var sortState = c[1] ? (state[p + "Key"] === c[1] ? (state[p + "Dir"] === "asc" ? "ascending" : "descending") : "none") : null;
+              var sortState = c[1] ? (viewState[p + "Key"] === c[1] ? (viewState[p + "Dir"] === "asc" ? "ascending" : "descending") : "none") : null;
               return '<th class="' + esc(c[5] || "") + '"' + (sortState ? ' aria-sort="' + sortState + '"' : '') + '><div class="th-content">' + label + (c[3] ? infoControl(c[3]) : '') + '</div></th>';
             },
           )
@@ -1109,11 +1075,11 @@
           (b) =>
             (b.onclick = function () {
               var key = this.dataset.sort;
-              state[p + "Dir"] =
-                state[p + "Key"] === key && state[p + "Dir"] === "desc"
+              viewState[p + "Dir"] =
+                viewState[p + "Key"] === key && viewState[p + "Dir"] === "desc"
                   ? "asc"
                   : "desc";
-              state[p + "Key"] = key;
+              viewState[p + "Key"] = key;
               if ($(p + "-sort")) $(p + "-sort").value = key;
               render();
               persistView();
@@ -1122,21 +1088,6 @@
     }
     function td(columnClass, content, extraAttributes) {
       return '<td class="' + columnClass + '"' + (extraAttributes || '') + '>' + content + '</td>';
-    }
-    function themeStateType(value) {
-      if (value === "Leading") return "leading";
-      if (value === "Improving") return "improving";
-      if (value === "Fading") return "fading";
-      if (value === "Lagging") return "lagging";
-      return "unavailable";
-    }
-    function stateBadge(value) {
-      const help = value === "Improving"
-        ? "Current score is in the stronger half while medium score is in the weaker half. This does not prove a reversal or rotation."
-        : value === "Fading"
-          ? "Current score is in the weaker half while medium score is in the stronger half. This does not prove a reversal or rotation."
-        : "Cross-sectional state from Current and Medium relative-strength percentiles.";
-      return '<span class="state-tag state-' + themeStateType(value) + '" aria-label="' + esc(value || "State unavailable") + ': ' + esc(help) + '">' + esc(value || "N/A") + "</span>";
     }
     function themeBreadthCell(row, period) {
       const metric = row.theme_watchlist_breadth?.[String(period)];
@@ -1191,51 +1142,51 @@
     var researchFiles=(data.export_manifest || []).filter(function(f){return f.role==='individual_research';});
     $("all-individual-watchlists").hidden=!researchFiles.length;
     $("individual-export-count").textContent=researchFiles.length+' individual files · anchor first, then configured stocks. Update only when memberships or identifiers change.';
-    $("daily-data-export-links").innerHTML=(data.export_manifest || []).filter(function(f){return f.role==='configured_stock_daily_data';}).map(function(f){return '<a class="download-link" download href="'+esc(f.file)+'">Daily Data Stocks — export CSV only · '+f.instrument_count+' stocks</a>';}).join(' ');
+    $("daily-data-export-links").innerHTML=(data.export_manifest || []).filter(function(f){return ['configured_stock_daily_data','configured_etf_daily_data'].includes(f.role);}).map(function(f){return '<a class="download-link" download href="'+esc(f.file)+'">'+(f.role==='configured_stock_daily_data'?'Data Collection: All Configured Stocks':'Data Collection: All ETFs')+' · '+f.instrument_count+'</a>';}).join(' ');
     $("grouped-export-links").innerHTML=(data.export_manifest || []).filter(function(f){return f.role==='optional_broad_scan';}).map(function(f){return '<a class="download-link" download href="'+esc(f.file)+'">'+esc(f.group)+' · '+f.instrument_count+' unique instruments</a>';}).join(' ');
     var visible = [];
     var visibleThemes = [];
     function render() {
       closeInfoTooltip();
-      var viewSortOptions=state.stockView === "relative" ? [["return21","Stock 1M"],["anchor_performance_1m","ETF 1M"],["excess21_pp","1M vs ETF (pp)"],["return63","Stock 3M"],["anchor_performance_3m","ETF 3M"],["excess63_pp","3M vs ETF (pp)"]] : [["return5","1W Performance"],["return21","1M Performance"],["return63","3M Performance"],["market_cap_usd","Market Cap"],["adv30_usd","Avg $Vol30"],["turnover_1d_usd","Turnover 1D"],["relative_volume_1d","Rel Vol"],["price_close","Price"]];
-      if(!viewSortOptions.some(function(o){return o[0]===state.stockKey;}))state.stockKey=state.stockView === "relative" ? "excess21_pp" : "return21";
-      $("stock-sort").innerHTML=options(viewSortOptions);$("stock-sort").value=state.stockKey;
-      setDirectionButton($("stock-direction"), state.stockDir);
-      setDirectionButton($("theme-direction"), state.themeDir);
-      var all = sortRows(data.themes || [], state.themeKey, state.themeDir).map((row) => Object.assign({}, row, { display_rank: row.global_rank }));
+      var viewSortOptions=viewState.stockView === "relative" ? [["return21","Stock 1M"],["anchor_performance_1m","ETF 1M"],["excess21_pp","1M vs ETF (pp)"],["return63","Stock 3M"],["anchor_performance_3m","ETF 3M"],["excess63_pp","3M vs ETF (pp)"]] : [["return5","1W Performance"],["return21","1M Performance"],["return63","3M Performance"],["market_cap_usd","Market Cap"],["adv30_usd","Avg $Vol30"],["turnover_1d_usd","Turnover 1D"],["relative_volume_1d","Rel Vol"],["price_close","Price"]];
+      if(!viewSortOptions.some(function(o){return o[0]===viewState.stockKey;}))viewState.stockKey=viewState.stockView === "relative" ? "excess21_pp" : "return21";
+      $("stock-sort").innerHTML=options(viewSortOptions);$("stock-sort").value=viewState.stockKey;
+      setDirectionButton($("stock-direction"), viewState.stockDir);
+      setDirectionButton($("theme-direction"), viewState.themeDir);
+      var all = sortRows(data.themes || [], viewState.themeKey, viewState.themeDir).map((row) => Object.assign({}, row, { display_rank: row.global_rank }));
       visibleThemes = filtered(all, "theme");
       renderThemeSelector();
       const breadthUnavailable = visibleThemes.filter((row) => row.breadth_status_21 !== "valid" || row.breadth_status_50 !== "valid").length;
       $("theme-count").textContent = visibleThemes.length + " of " + all.length + " exposures" + (breadthUnavailable ? " · " + breadthUnavailable + " with breadth unavailable" : "");
       const themeColumns = [
-        ["#", "rank_current", null, "rank_current", "Current rank", "col-rank"], ["Δ Rank", "rank_change_daily", null, "rank_change_daily", "Previous-session rank minus current-session rank", "col-rank-daily"], ["Name", "name", null, null, "Sector or theme name with exposure type", "col-name"], ["ETF", null, null, null, "Anchor ETF", "col-etf"], ["1D %", "daily_change", null, "daily_change", "TradingView one-day price change percentage for the anchor ETF.", "col-day-change"], ["State", "theme_state", null, "state", "State", "col-state"],
-        ["Research priority", "priority", null, "priority", "Directional research priority with an absolute EMA50 guard; not an entry signal.", "col-priority"], ["Score", "theme_score", null, "theme_score", "Theme Score", "col-score"], ["Current", "current_strength_score", null, "current_strength_score", "1-month Performance percentile", "col-score"], ["Medium", "medium_strength_score", null, "medium_strength_score", "3-month Performance percentile", "col-score"],
-        ["1W", "return5", null, null, "TradingView 1-week Performance; context only", "col-return"], ["1M", "return21", null, null, "TradingView 1-month Performance", "col-return"], ["3M", "return63", null, null, "TradingView 3-month Performance", "col-return"], ["EMA50", null, null, null, "Anchor price relative to EMA50", "col-ema"],
-        ["% > EMA21", "theme_breadth21_pct", null, "theme_breadth21_pct", "Available when at least eight configured members and 80 percent coverage have valid Price, EMA21 and EMA50 values. Does not affect Theme Score or state.", "col-breadth"], ["% > EMA50", "theme_breadth50_pct", null, "theme_breadth50_pct", "Available when at least eight configured members and 80 percent coverage have valid Price, EMA21 and EMA50 values. Does not affect Theme Score or state.", "col-breadth"],
+        ["#", "rank_current", null, "rank_current", "Current rank", "col-rank"], ["Δ Rank", "rank_change_daily", null, "rank_change_daily", "Previous-session rank minus current-session rank", "col-rank-daily"], ["Name", "name", null, null, "Sector or theme name with exposure type", "col-name"], ["ETF", null, null, null, "Anchor ETF", "col-etf"], ["1D %", "daily_change", null, "daily_change", "TradingView one-day price change percentage for the anchor ETF.", "col-day-change"],
+        ["Priority", "priority", null, "priority", "Configured directional research priority; not an entry signal.", "col-priority"], ["Priority Change", "priority_change", null, null, "Workflow change since the compatible immediately preceding session; N/A without comparable history.", "col-priority-change"], ["Score", "theme_score", null, "theme_score", "Theme Score", "col-score"], ["Current", "current_strength_score", null, "current_strength_score", "1-month Performance percentile", "col-current"], ["Medium", "medium_strength_score", null, "medium_strength_score", "3-month Performance percentile", "col-medium"],
+        ["1W", "return5", null, null, "TradingView 1-week Performance; context only", "col-return"], ["1M", "return21", null, null, "TradingView 1-month Performance", "col-return"], ["3M", "return63", null, null, "TradingView 3-month Performance", "col-return"], ["vs EMA21", null, null, null, "Anchor price relative to daily EMA21", "col-ema"], ["vs EMA50", null, null, null, "Anchor price relative to daily EMA50", "col-ema"],
+        ["% > EMA21", "theme_breadth21_pct", null, "theme_breadth21_pct", "Available when at least eight configured members and 80 percent coverage have valid Price, EMA21 and EMA50 values. Does not affect Theme Score or Priority.", "col-breadth"], ["% > EMA50", "theme_breadth50_pct", null, "theme_breadth50_pct", "Available when at least eight configured members and 80 percent coverage have valid Price, EMA21 and EMA50 values. Does not affect Theme Score or Priority.", "col-breadth"],
       ];
       $("theme-cols").innerHTML = themeColumns.map(function (column) { return '<col class="' + column[5] + '">'; }).join("");
       head("theme", themeColumns);
       $("theme-body").innerHTML = visibleThemes.map(function (row) {
         const type = row.level === "Sector" ? "Sector" : "Theme";
-        return '<tr data-theme="' + esc(row.id) + '" class="' + (row.id === state.theme ? "active " : "") + (priorityCategory(row) === "primary" ? "primary-row primary-" + row.research_priority.side : "") + '">' +
+        return '<tr data-theme="' + esc(row.id) + '" class="' + (row.id === viewState.theme ? "active " : "") + (priorityCategory(row) === "primary" ? "primary-row primary-" + row.research_priority.side : "") + '">' +
           td("col-rank", row.display_rank ?? "N/A") +
           td("col-rank-daily", finite(row.rank_change_daily) ? '<span class="' + (row.rank_change_daily > 0 ? "positive" : row.rank_change_daily < 0 ? "negative" : "muted") + '">' + (row.rank_change_daily > 0 ? "+" : "") + row.rank_change_daily + '</span>' : "N/A") +
           td("col-name", '<div class="theme-name-cell"><span class="type-tag">' + type + '</span><button class="theme-select" aria-label="Open watchlist for ' + esc(row.name) + '">' + esc(row.name) + '</button></div>') +
           td("col-etf", row.chart_url ? '<a href="' + esc(row.chart_url) + '" target="_blank" rel="noopener noreferrer">' + esc(row.anchor) + '</a>' : esc(row.anchor)) +
           td("col-day-change", pct(row.daily_change)) +
-          td("col-state", stateBadge(row.theme_state)) +
-          td("col-priority", '<span title="'+esc(row.research_priority?.reason || "Required inputs unavailable")+'">'+esc(row.research_priority?.label || "No directional priority")+'</span>') +
+          td("col-priority", '<span class="'+(row.research_priority?.category==='primary'?'':'muted')+'">'+esc(row.research_priority?.label || "Watch")+'</span>') +
+          td("col-priority-change", '<span class="'+(row.priority_change==='New long'?'positive':row.priority_change==='New short'?'negative':'muted')+'">'+esc(row.priority_change || "N/A")+'</span>') +
           td("col-score", score(row, "theme_score")) +
-          td("col-score", score(row, "current_strength_score")) +
-          td("col-score", score(row, "medium_strength_score")) +
+          td("col-current", score(row, "current_strength_score")) +
+          td("col-medium", score(row, "medium_strength_score")) +
           td("col-return", pct(valueAt(row, "return5"))) +
           td("col-return", pct(valueAt(row, "return21"))) +
           td("col-return", pct(valueAt(row, "return63"))) +
-          td("col-ema", ema(row, 50)) +
+          td("col-ema", ema(row, 21)) + td("col-ema", ema(row, 50)) +
           td("col-breadth", themeBreadthCell(row, 21)) +
           td("col-breadth", themeBreadthCell(row, 50)) + '</tr>';
-      }).join("") || '<tr><td colspan="16">No eligible ETF exposures are available in this snapshot.</td></tr>';
-      var selected = data.themes.find((row) => row.id === state.theme) || data.themes[0];
+      }).join("") || '<tr><td colspan="17">No eligible ETF exposures are available in this snapshot.</td></tr>';
+      var selected = data.themes.find((row) => row.id === viewState.theme) || data.themes[0];
       if (!selected) {
         $("active-name").textContent = "Watchlist";
         $("active-summary").textContent = "No eligible ETF anchor is available in this snapshot.";
@@ -1260,14 +1211,17 @@
       $("active-name").textContent = selected.name
         ? selected.name + (selected.anchor ? " / " + selected.anchor : "")
         : "Watchlist";
-      $("active-summary").innerHTML = '<div class="summary-scores">' + stateBadge(selected.theme_state) + ' ' + score(selected, "theme_score") + ' ' + score(selected, "current_strength_score") + ' ' + score(selected, "medium_strength_score") + '</div>' +
+      $("active-summary").innerHTML = '<div class="summary-scores">' + esc(selected.research_priority?.label || "Watch") + ' · ' + score(selected, "theme_score") + ' ' + score(selected, "current_strength_score") + ' ' + score(selected, "medium_strength_score") + '</div>' +
         '<div class="summary-returns"><span>1W Performance ' + pct(valueAt(selected, "return5")) + '</span><span>1M Performance ' + pct(valueAt(selected, "return21")) + '</span><span>3M Performance ' + pct(valueAt(selected, "return63")) + '</span></div>' +
         '<div class="summary-rank">Rank ' + (selected.rank_current ?? selected.global_rank ?? "unavailable") + ' of ' + data.themes.length + '</div>' +
         '<div class="summary-breadth">Theme breadth — EMA21 ' + breadthSummary(selected, 21) + ' · EMA50 ' + breadthSummary(selected, 50) + '</div>' +
         '<div class="summary-returns"><span>Anchor EMA21 ' + ema(selected, 21) + '</span><span>Anchor EMA50 ' + ema(selected, 50) + '</span></div>';
+      var primaryExport=(data.export_manifest || []).find(function(item){return item.role==='individual_primary_research' && item.theme_id===selected.id;});
+      $("tv-primary").hidden=!primaryExport;
+      if(primaryExport)$("tv-primary").href=primaryExport.file;else $("tv-primary").removeAttribute('href');
       var base = (selected.selected || []).slice();
       base = base.map((row) => Object.assign({}, row, { theme_id: selected.id, theme_name: selected.name, generated_at: data.dashboard_generated_at || data.generated_at }));
-      visible = filtered(sortRows(base, state.stockKey, state.stockDir).map((row) => Object.assign({}, row, { display_rank: row.selection_slot })), "stock");
+      visible = filtered(sortRows(base, viewState.stockKey, viewState.stockDir).map((row) => Object.assign({}, row, { display_rank: row.selection_slot })), "stock");
       var hasCuratedList = base.length > 0;
       $("stock-controls").hidden = !hasCuratedList;
       $("stock-table-wrap").hidden = !hasCuratedList;
@@ -1282,8 +1236,8 @@
       } else {
         $("coverage").textContent = visible.length + " of " + base.length + " configured stocks";
       }
-      $("rs-filter").closest("label").hidden = state.stockView !== "relative";
-      $("stock-table-wrap").classList.toggle("relative-view",state.stockView === "relative");
+      $("rs-filter").closest("label").hidden = viewState.stockView !== "relative";
+      $("stock-table-wrap").classList.toggle("relative-view",viewState.stockView === "relative");
       var stockColumns = [
         ["#",null,null,null,"Configured position","col-rank"], ["Ticker",null,null,null,"Stock ticker; information includes company, exchange and membership rationale","col-ticker"],
         ["Price","price_close",null,null,"Stock Price","col-price"], ["1D","daily_change",null,null,"TradingView one-day price change percent","col-return"], ["Market Cap","market_cap_usd",null,"market_cap_usd","Company market capitalization in USD; supplied Stock CSV value","col-cap"],
@@ -1292,7 +1246,7 @@
         ["ATR%14","atr14_pct",null,"atr14_pct",LABELS.atr14_pct.definition,"col-return"], ["Avg $Vol30","adv30_usd",null,"adv30_usd",LABELS.adv30_usd.definition,"col-adv"],
         ["Turnover 1D","turnover_1d_usd",null,"turnover_1d_usd",LABELS.turnover_1d_usd.definition,"col-adv"], ["Rel Vol","relative_volume_1d",null,"relative_volume_1d",LABELS.relative_volume_1d.definition,"col-relvol"], ["Earnings",null,null,null,"Upcoming earnings; full date in accessible label","col-earnings"]
       ];
-      if(state.stockView === "relative") stockColumns=[
+      if(viewState.stockView === "relative") stockColumns=[
         ["#",null,null,null,"Stable configured membership position; not RS rank","col-rank"],["Ticker",null,null,null,"Stock ticker","col-ticker"],["Anchor",null,null,null,"Selected anchor ETF","col-anchor"],
         ["Stock 1M","return21",null,null,"Stock TradingView 1M Performance percent","col-rs-return"],["ETF 1M","anchor_performance_1m",null,null,"Selected ETF TradingView 1M Performance percent","col-rs-return"],["1M vs ETF (pp)","excess21_pp",null,"excess21_pp","Stock minus selected ETF 1M Performance, in percentage points","col-rs-diff"],
         ["Stock 3M","return63",null,null,"Stock TradingView 3M Performance percent","col-rs-return"],["ETF 3M","anchor_performance_3m",null,null,"Selected ETF TradingView 3M Performance percent","col-rs-return"],["3M vs ETF (pp)","excess63_pp",null,"excess63_pp","Stock minus selected ETF 3M Performance, in percentage points","col-rs-diff"],
@@ -1303,7 +1257,7 @@
       $("stock-body").innerHTML = visible.map(function (row) {
         const url = row.chart_url || null;
         const rationale = row.membership_rationale || row.evidence_note || "Business relevance rationale recorded in the membership source.";
-        if(state.stockView === "relative")return '<tr tabindex="-1" data-stock-symbol="'+esc(row.tradingview_symbol)+'">'+td("col-rank",row.selection_slot ?? "N/A")+td("col-ticker",tickerCell(row))+td("col-anchor",esc(selected.anchor))+
+        if(viewState.stockView === "relative")return '<tr tabindex="-1" data-stock-symbol="'+esc(row.tradingview_symbol)+'">'+td("col-rank",row.selection_slot ?? "N/A")+td("col-ticker",tickerCell(row))+td("col-anchor",esc(selected.anchor))+
           td("col-rs-return",pct(valueAt(row,"return21")))+td("col-rs-return",pct(row.anchor_performance_1m))+td("col-rs-diff",pp(row.excess21_pp))+
           td("col-rs-return",pct(valueAt(row,"return63")))+td("col-rs-return",pct(row.anchor_performance_3m))+td("col-rs-diff",pp(row.excess63_pp))+
           td("col-ema",ema(row,21))+td("col-ema",ema(row,50))+td("col-earnings",earnings(row.earnings_date))+'</tr>';
@@ -1339,7 +1293,7 @@
     };
     $("csv").onclick = () => {
       download(
-        "themescope-" + state.theme + "-" + data.session_date + ".csv",
+        "themescope-" + viewState.theme + "-" + data.session_date + ".csv",
         rowsToCsv(visible),
         "text/csv;charset=utf-8",
       );
@@ -1348,10 +1302,10 @@
     };
 
     render();
-    showPage(state.page, { scroll: false });
+    showPage(viewState.page, { scroll: false });
     restoreRoute(firstView?.route_state);
     if (!history.state?.themescope) {
-      try { history.replaceState({ themescope: true, index: 0, view: captureView() }, "", "#" + state.page); } catch (e) {}
+      try { history.replaceState({ themescope: true, index: 0, view: captureView() }, "", "#" + viewState.page); } catch (e) {}
     } else {
       replaceHistoryState();
     }
@@ -1377,6 +1331,6 @@
     resolvedScoreBands: resolvedScoreBands,
     breadthThresholdClass: breadthThresholdClass,
     marketCap:marketCap, rsMatches:rsMatches,
-    directionClass: directionClass, statusClass: statusClass, priorityCategory: priorityCategory, labels: LABELS,
+    directionClass: directionClass, statusClass: statusClass, priorityCategory: priorityCategory, emaRelationship: emaRelationship, labels: LABELS,
   };
 });

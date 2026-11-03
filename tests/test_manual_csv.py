@@ -5,8 +5,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from src.themescope.approved_rules import ACTION_SENTENCES, STATES, canonical_decision, market_direction, price_state, priority
-from src.themescope.manual_csv import CSVValidationError, breadth, parse_csv, percentile, theme_score, theme_state, _row_fields
+from src.themescope.research_policy import ACTION_SENTENCES, canonical_decision, market_direction, ema_classification as price_state, theme_priority as priority
+from src.themescope.manual_csv import CSVValidationError, breadth, parse_csv, percentile, theme_score, _row_fields
 from scripts.generate_dashboard import _run_manual_csv
 
 
@@ -86,15 +86,10 @@ class ManualCSVTests(unittest.TestCase):
         self.assertEqual(price_state(10, 10, 9), "Mixed")
         self.assertIsNone(price_state(None, 10, 9))
 
-    def test_score_weights_four_states_and_exact_fifty(self):
-        self.assertEqual(theme_score(75, 25), 55)
-        self.assertEqual(theme_state(50, 50), "Leading")
-        self.assertEqual(theme_state(50, 49.999), "Improving")
-        self.assertEqual(theme_state(49.999, 50), "Fading")
-        self.assertEqual(theme_state(49.999, 49.999), "Lagging")
-        self.assertIsNone(theme_state(None, 50))
-        # Score accepts only the two percentiles: 1W, EMA and Breadth are not arguments.
-        self.assertEqual(theme_score(20, 80), theme_score(20, 80))
+    def test_score_weights_unchanged(self):
+        self.assertEqual(theme_score(75,25),55)
+        self.assertEqual(theme_score(50,50),50)
+        self.assertIsNone(theme_score(None,50))
 
     def test_breadth_shared_set_and_exact_coverage_boundary(self):
         rows = [
@@ -108,51 +103,6 @@ class ManualCSVTests(unittest.TestCase):
         self.assertEqual(metric["50"]["value"], 0)
         self.assertEqual(metric["state"], "Mixed")
         self.assertIsNone(breadth(rows + [{"symbol": "y"}], coverage_floor=.8)["21"]["value"])
-
-    def test_complete_market_table_and_iwm_non_voting(self):
-        breadth_cases = {"Positive": "Selective long", "Mixed": "Neutral", "Negative": "Selective short", None: "Unclassified"}
-        for spy in ("Bullish", "Mixed", "Bearish"):
-            for qqq in ("Bullish", "Mixed", "Bearish"):
-                for combined, selective in breadth_cases.items():
-                    expected = "Long bias" if spy == qqq == "Bullish" else "Short bias" if spy == qqq == "Bearish" else selective
-                    self.assertEqual(market_direction(spy, qqq, combined), expected)
-                    self.assertEqual(market_direction(spy, qqq, combined), market_direction(spy, qqq, combined))
-        self.assertEqual(market_direction(None, "Bullish", "Positive"), "Unclassified")
-
-    def test_every_priority_cell_and_ema50_guard_without_state_mutation(self):
-        directions = ("Long bias", "Selective long", "Neutral", "Selective short", "Short bias", "Unclassified")
-        for direction in directions:
-            for state in STATES:
-                close, ema = (11, 10) if direction in ("Long bias", "Selective long") else (9, 10)
-                result = priority(direction, state, close, ema)
-                self.assertIn("label", result)
-                self.assertEqual(state, state)
-        guarded = priority("Short bias", "Lagging", 11, 10)
-        self.assertEqual(guarded["label"], "Observation only")
-        self.assertEqual(priority("Short bias", "Lagging", 9, 10)["label"], "Primary short research")
-
-    def test_canonical_decision_actions_groups_and_non_voting_context(self):
-        self.assertEqual(set(ACTION_SENTENCES), {"Long bias", "Selective long", "Neutral", "Selective short", "Short bias", "Unclassified"})
-        contexts = [
-            {"ticker": "SPY", "price_state": "Bearish", "breadth_state": "Positive"},
-            {"ticker": "QQQ", "price_state": "Bearish", "breadth_state": "Negative"},
-            {"ticker": "IWM", "price_state": "Bullish", "breadth_state": "Mixed"},
-        ]
-        themes = []
-        for index, (state, close) in enumerate((("Lagging", 9), ("Fading", 9), ("Leading", 9), ("Lagging", 11))):
-            item = {"id": str(index), "theme_state": state, "price_close": close, "ema50": 10, "theme_score": index * 10}
-            item["research_priority"] = priority("Short bias", state, close, 10)
-            themes.append(item)
-        decision = canonical_decision("2026-10-30", "2026-10-31T08:00:00+08:00", contexts, themes, "Short bias", "Mixed")
-        self.assertEqual(decision["matrix_rule_id"], "unanimous-bearish")
-        self.assertEqual(decision["market_classification"], "Short bias")
-        self.assertEqual(decision["priority_groups"]["primary"], ["0"])
-        self.assertEqual(decision["priority_groups"]["secondary"], ["1"])
-        self.assertEqual(decision["priority_groups"]["exception"], ["2"])
-        self.assertEqual(decision["priority_groups"]["observation"], ["3"])
-        self.assertIn("context only", "context only")
-        self.assertEqual(decision["iwm_price_state"], "Bullish")
-        self.assertIn("does not reverse", decision["reason"])
 
     def test_theme_breadth_minimum_eight_and_eighty_percent(self):
         seven = [{"symbol": str(i), "price": 2, "ema21": 1, "ema50": 1} for i in range(7)]

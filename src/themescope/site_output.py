@@ -16,15 +16,12 @@ import tempfile
 from urllib.parse import quote
 import zipfile
 
-SCHEMA='themescope-site-1'
-ROLES={'individual_research','configured_stock_daily_data','optional_broad_scan'}
+SCHEMA='themescope-site-2'
+ROLES={'individual_research','configured_stock_daily_data','optional_broad_scan','configured_etf_daily_data','individual_primary_research','daily_primary_research'}
 SCALARS='ticker exchange instrument_type currency price_close daily_change ema21 ema50 above_ema21 above_ema50 price_state price_vs_ema21_pct price_vs_ema50_pct adv30_usd atr14_pct relative_volume_1d turnover_1d_usd'.split()
-THEME_FIELDS='id name anchor level global_rank rank_current rank_change_daily rank_comparison_session theme_score current_strength_score medium_strength_score theme_state breadth_status_21 breadth_status_50 configured_watchlist_count watchlist_member_count has_watchlist stock_drilldown_status watchlist_status theme_breadth21_pct theme_breadth21_above theme_breadth21_valid theme_breadth50_pct theme_breadth50_above theme_breadth50_valid'.split()
+THEME_FIELDS='id name anchor level global_rank rank_current rank_change_daily rank_comparison_session theme_score current_strength_score medium_strength_score priority_change breadth_status_21 breadth_status_50 configured_watchlist_count watchlist_member_count has_watchlist stock_drilldown_status watchlist_status theme_breadth21_pct theme_breadth21_above theme_breadth21_valid theme_breadth50_pct theme_breadth50_above theme_breadth50_valid'.split()
 STOCK_FIELDS='company theme_id theme_name anchor selection_slot market_cap_usd anchor_performance_1m anchor_performance_3m excess21_pp excess63_pp rs_state earnings_date metric_status session_date'.split()
 METRIC_FIELDS='value status above_count valid_count eligible_count configured_count ema_period session_date'.split()
-GROUPS=('primary','secondary','exception','observation')
-STATES=('Leading','Improving','Fading','Lagging')
-DIRECTIONS=('Long bias','Selective long','Neutral','Selective short','Short bias','Unclassified')
 HEADERS="/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: no-referrer\n  X-Frame-Options: DENY\n  Cache-Control: no-cache\n"
 
 
@@ -56,7 +53,7 @@ def public_payload(snapshot,root):
         return result
     payload=pick(snapshot,['session_date','generated_at','dashboard_generated_at','dashboard_generated_at_hkt_display'])
     payload.update(schema_version=SCHEMA,run_kind='manual_csv',volatility_context=[])
-    payload['score_methodology']=pick(snapshot['score_methodology'],['current','medium','state_threshold','method'])
+    payload['score_methodology']=pick(snapshot['score_methodology'],['current','medium','method'])
     payload['score_methodology']['theme_score_weights']=pick(snapshot['score_methodology']['theme_score_weights'],['current_strength','medium_strength'])
     payload['ui_configuration']={'score_bands':[pick(b,['min','max','class']) for b in snapshot['ui_configuration']['score_bands']]}
     payload['context']=[]
@@ -66,7 +63,7 @@ def public_payload(snapshot,root):
     payload['themes']=[]
     for row in snapshot['themes']:
         clean=instrument(row,row['anchor']);clean.update(pick(row,THEME_FIELDS))
-        clean['research_priority']=pick(row['research_priority'],['label','group','side','reason','category'])
+        clean['research_priority']=pick(row['research_priority'],['label','group','side','category'])
         clean['theme_watchlist_breadth']=metric_periods(row.get('theme_watchlist_breadth',{}))
         clean['selected']=[]
         for stock in row.get('selected',[]):
@@ -75,15 +72,14 @@ def public_payload(snapshot,root):
             clean['selected'].append(member)
         payload['themes'].append(clean)
     decision=snapshot['decision']
-    payload['decision']=pick(decision,['session_date','generated_at_hkt','market_classification','action_sentence','matrix_rule_id','reason','spy_price_state','qqq_price_state','iwm_price_state','spy_breadth_state','qqq_breadth_state','combined_breadth_state','russell_2000_breadth_state','divergence'])
-    d=payload['decision']
-    d['matrix_inputs']=pick(decision.get('matrix_inputs',{}),['spy_price_state','qqq_price_state','combined_breadth_state'])
-    d['priority_groups']={key:list(decision.get('priority_groups',{}).get(key,[])) for key in GROUPS}
-    d['priority_definitions']={key:pick(decision.get('priority_definitions',{}).get(key,{}),['labels','theme_states','ema50_guard']) for key in GROUPS}
-    d['guard_failures']=[pick(r,['theme_id']) for r in decision.get('guard_failures',[])]
-    d['market_matrix']=[pick(r,['spy','qqq','breadth','direction']) for r in decision.get('market_matrix',[])]
-    d['priority_matrix']={direction:pick(decision.get('priority_matrix',{}).get(direction,{}),STATES) for direction in DIRECTIONS}
-    payload['market_classification']=pick(snapshot['market_classification'],['direction','combined_breadth','reason','action_summary'])
+    payload['decision']=pick(decision,['session_date','generated_at_hkt','market_classification','action_sentence','matrix_rule_id','reason','spy_price_state','qqq_price_state','iwm_price_state','spy_breadth_state','qqq_breadth_state','breadth_consensus','breadth_qualifier','russell_2000_breadth_state'])
+    payload['decision']['primary_groups']={key:list(decision.get('primary_groups',{}).get(key,[])) for key in ('new','continuing','unavailable')}
+    payload['decision']['market_matrix']=[pick(r,['spy','qqq','breadth','direction']) for r in decision.get('market_matrix',[])]
+    payload['decision']['priority_policy']=pick(decision.get('priority_policy',{}),['priority_version','ema_version','input_semantics','score_boundary','weights','long_rule','short_rule','transition_rule','stock_rule','note'])
+    payload['market_classification']=pick(snapshot['market_classification'],['direction','breadth_consensus','breadth_qualifier','reason','action_summary'])
+    research=snapshot['daily_primary_research']
+    payload['daily_primary_research']=pick(research,['session_date','side','theme_ids','combined_file','archive_file','relationships_file','platform_import_tested'])
+    payload['daily_primary_research']['relationships']=[pick(r,['theme_id','theme_name','anchor','symbol','ticker','role','weighted_excess_pp','er1m_pp','er3m_pp']) for r in research['relationships']]
     payload['local_history']={'comparison_session':snapshot.get('local_history',{}).get('comparison_session'),'status':'Compared with the immediately preceding US session.' if any(t.get('rank_change_daily') is not None for t in payload['themes']) else 'No comparable previous-session record.'}
     earnings=snapshot['expected_earnings']
     payload['expected_earnings']=pick(earnings,['as_of','through','later_count'])
@@ -99,7 +95,7 @@ def public_payload(snapshot,root):
     for row in snapshot['export_manifest']:
         if row['role'] not in ROLES:raise ValueError('Unapproved website export role: '+row['role'])
         safe_name(row['file'])
-        if not (re.fullmatch(r'tradingview_[A-Za-z0-9_-]+\.txt',row['file']) or re.fullmatch(r'individual_watchlists/[A-Za-z0-9_.-]+\.txt',row['file'])):
+        if not (re.fullmatch(r'tradingview_[A-Za-z0-9_-]+\.txt',row['file']) or re.fullmatch(r'(?:individual_watchlists|primary_watchlists/\d{4}-\d{2}-\d{2})/[A-Za-z0-9_.-]+\.txt',row['file'])):
             raise ValueError('Unapproved website export name: '+row['file'])
         payload['export_manifest'].append(pick(row,['file','role','theme_id','anchor','group','instrument_count','stock_count','section_count']))
     return payload
@@ -123,11 +119,12 @@ def write_json(path,value):
 
 def write_public_csvs(folder,payload):
     """Derive downloads from the same sanitized display data, never private CSVs."""
+    from .research_policy import ema_relationship
     themes=[];stocks=[]
     def percent(value):return value*100 if isinstance(value,(int,float)) else None
     def returns(row):return {'performance_'+label+'_pct':percent(row.get('returns',{}).get(period,{}).get('value')) for period,label in [('5','1w'),('21','1m'),('63','3m')]}
     for theme in sorted(payload['themes'],key=lambda t:(t.get('global_rank') is None,t.get('global_rank') or float('inf'),t['id'])):
-        themes.append({'rank':theme.get('global_rank'),'type':theme.get('level'),'theme_id':theme['id'],'name':theme['name'],'anchor':theme['anchor'],'change_1d_pct':percent(theme.get('daily_change')),'rank_change_daily':theme.get('rank_change_daily'),'rank_comparison_session':theme.get('rank_comparison_session'),'state':theme.get('theme_state'),'research_priority':theme['research_priority'].get('label'),'theme_score':theme.get('theme_score'),'current':theme.get('current_strength_score'),'medium':theme.get('medium_strength_score'),**returns(theme),'price':theme.get('price_close'),'ema21':theme.get('ema21'),'ema50':theme.get('ema50'),'theme_breadth21_pct':theme.get('theme_breadth21_pct'),'theme_breadth50_pct':theme.get('theme_breadth50_pct'),'configured_stock_count':len(theme['selected']),'session_date':payload['session_date']})
+        themes.append({'rank':theme.get('global_rank'),'type':theme.get('level'),'theme_id':theme['id'],'name':theme['name'],'anchor':theme['anchor'],'change_1d_pct':percent(theme.get('daily_change')),'rank_change_daily':theme.get('rank_change_daily'),'rank_comparison_session':theme.get('rank_comparison_session'),'priority_change':theme.get('priority_change'),'vs_ema21':ema_relationship(theme.get('price_close'),theme.get('ema21')),'vs_ema50':ema_relationship(theme.get('price_close'),theme.get('ema50')),'research_priority':theme['research_priority'].get('label'),'theme_score':theme.get('theme_score'),'current':theme.get('current_strength_score'),'medium':theme.get('medium_strength_score'),**returns(theme),'price':theme.get('price_close'),'ema21':theme.get('ema21'),'ema50':theme.get('ema50'),'theme_breadth21_pct':theme.get('theme_breadth21_pct'),'theme_breadth50_pct':theme.get('theme_breadth50_pct'),'configured_stock_count':len(theme['selected']),'session_date':payload['session_date']})
         for stock in theme['selected']:
             stocks.append({'theme_id':theme['id'],'theme':theme['name'],'anchor':theme['anchor'],**pick(stock,['ticker','company','exchange','market_cap_usd','metric_status','ema21','ema50','atr14_pct','adv30_usd','turnover_1d_usd','relative_volume_1d']),'excess_1m_pp':stock.get('excess21_pp'),'excess_3m_pp':stock.get('excess63_pp'),'price':stock.get('price_close'),'change_1d_pct':percent(stock.get('daily_change')),**returns(stock),'upcoming_earnings_date':stock.get('earnings_date'),'session_date':payload['session_date']})
     for name,rows in [('themes.csv',themes),('theme_stocks.csv',stocks)]:
@@ -144,7 +141,7 @@ def seal_site(folder,kind,session):
 def validate_site(folder):
     if folder.is_symlink():raise ValueError('Site folder must not be a symlink')
     manifest=json.loads((folder/'site_manifest.json').read_text(encoding='utf-8'))
-    if manifest.get('schema')!=SCHEMA or manifest.get('kind') not in {'snapshot','placeholder'}:raise ValueError('Unknown site manifest')
+    if manifest.get('schema') not in {SCHEMA,'themescope-site-1'} or manifest.get('kind') not in {'snapshot','placeholder'}:raise ValueError('Unknown site manifest')
     files=manifest['files']
     if not isinstance(files,dict):raise ValueError('Invalid site file manifest')
     actual=set()
@@ -155,7 +152,7 @@ def validate_site(folder):
     base={'index.html','_headers','themes.csv','theme_stocks.csv','snapshot_summary.json','individual_theme_watchlists.zip','Inter-LICENSE.txt'}
     for name,digest in files.items():
         safe_name(name)
-        if name not in base and not re.fullmatch(r'(?:tradingview_[A-Za-z0-9_-]+|individual_watchlists/[A-Za-z0-9_.-]+)\.txt',name):raise ValueError('Forbidden site artifact: '+name)
+        if name not in base and not re.fullmatch(r'(?:(?:tradingview_[A-Za-z0-9_-]+|individual_watchlists/[A-Za-z0-9_.-]+|primary_watchlists/\d{4}-\d{2}-\d{2}/[A-Za-z0-9_.-]+)\.txt|daily_primary_watchlists_\d{4}-\d{2}-\d{2}\.zip|daily_primary_relationships_\d{4}-\d{2}-\d{2}\.csv)',name):raise ValueError('Forbidden site artifact: '+name)
         path=folder/name
         if path.stat().st_size>25*1024*1024:raise ValueError('Site file exceeds the Pages 25 MiB file limit: '+name)
         if hashlib.sha256(path.read_bytes()).hexdigest()!=digest:raise ValueError('Site artifact changed after preparation: '+name)
@@ -175,8 +172,9 @@ def validate_site(folder):
         match=re.search(r'<script id="snapshot-data"[^>]*>(.*?)</script>',text,re.S)
         if not match:raise ValueError('Snapshot payload missing')
         payload=json.loads(match.group(1))
-        if payload.get('schema_version')!=SCHEMA or payload.get('session_date')!=manifest['session_date']:raise ValueError('Public payload/manifest session mismatch')
+        if payload.get('schema_version')!=manifest['schema'] or payload.get('session_date')!=manifest['session_date']:raise ValueError('Public payload/manifest session mismatch')
         forbidden={'manual_csv_audit','raw_inputs','inputs','source_matrix','fingerprint','maintenance','reviewed_date','reason_source_url','source_url','membership_rationale','ranking_configuration_fingerprint','candidate_metrics'}
+        if manifest['schema']==SCHEMA:forbidden.update({'theme_state','theme_states','state_threshold','state_boundary','priority_matrix','priority_definitions','guard_failures'})
         def check(value):
             if isinstance(value,dict):
                 if forbidden&set(value):raise ValueError('Private metadata found in public payload')
@@ -186,6 +184,10 @@ def validate_site(folder):
         check(payload)
         for row in payload['export_manifest']:
             if row['file'] not in files:raise ValueError('A dynamic website download is missing')
+        if manifest['schema']==SCHEMA:
+            for field in ('combined_file','archive_file','relationships_file'):
+                name=payload['daily_primary_research'].get(field)
+                if name and name not in files:raise ValueError('A Daily Primary website download is missing')
     return manifest
 
 
@@ -216,13 +218,21 @@ def prepare_site(root,source,destination,session):
         (stage/'_headers').write_text(HEADERS,encoding='utf-8')
         (stage/'Inter-LICENSE.txt').write_bytes((root/'static/Inter-LICENSE.txt').read_bytes())
         stock_symbols={s['tradingview_symbol'] for t in payload['themes'] for s in t['selected']}
-        all_symbols=stock_symbols|{t['tradingview_symbol'] for t in payload['themes']}
+        all_symbols=stock_symbols|{t['tradingview_symbol'] for t in payload['themes']+payload['context']}
+        from .daily_lists import primary_research
+        expected_research=copy.deepcopy(payload)
+        expected_files,expected_manifest=primary_research(expected_research,snapshot['export_configuration']['instrument_limit'])
+        if payload['daily_primary_research']!= {k:v for k,v in expected_research['daily_primary_research'].items() if k!='evaluations'}:raise ValueError('Primary research relationships differ from current returns/policy')
+        actual_manifest=[r for r in payload['export_manifest'] if r['role'] in {'individual_primary_research','daily_primary_research'}]
+        if actual_manifest!=expected_manifest:raise ValueError('Primary research manifest differs from current qualification')
         daily_symbols=[]
         for item in payload['export_manifest']:
             path=source/item['file']
             if path.is_symlink():raise ValueError('Export source must not be a symlink')
             content=path.read_bytes();tokens=content.decode('utf-8').strip().split(',')
             if len(tokens)!=len(set(tokens)) or len(tokens)!=item['instrument_count'] or not set(tokens)<=all_symbols:raise ValueError('Website TXT contains unexpected instruments: '+item['file'])
+            if item['role'] in {'individual_primary_research','daily_primary_research'} and content.decode('utf-8')!=expected_files[item['file']]:raise ValueError('Primary export differs from weighted per-anchor qualification')
+            if item['role']=='configured_etf_daily_data' and tokens!=list(dict.fromkeys(r['tradingview_symbol'] for r in payload['themes']+payload['context'])):raise ValueError('ETF collection list differs from complete configured universe')
             if item['role']=='individual_research':
                 theme=next(t for t in payload['themes'] if t['id']==item['theme_id'])
                 if tokens!=[theme['tradingview_symbol']]+[s['tradingview_symbol'] for s in theme['selected']]:raise ValueError('Individual website export differs from configured membership')
@@ -232,6 +242,14 @@ def prepare_site(root,source,destination,session):
         individuals=[r for r in payload['export_manifest'] if r['role']=='individual_research']
         with zipfile.ZipFile(stage/'individual_theme_watchlists.zip','w',compression=zipfile.ZIP_DEFLATED) as archive:
             for item in individuals:archive.write(stage/item['file'],arcname=Path(item['file']).name)
+        research=payload['daily_primary_research']
+        if research['archive_file']:
+            with zipfile.ZipFile(stage/research['archive_file'],'w',compression=zipfile.ZIP_DEFLATED) as archive:
+                for item in expected_manifest:
+                    if item['role']=='individual_primary_research':archive.write(stage/item['file'],arcname=Path(item['file']).name)
+            rows=research['relationships']
+            with (stage/research['relationships_file']).open('w',encoding='utf-8',newline='') as handle:
+                writer=csv.DictWriter(handle,fieldnames=list(rows[0]));writer.writeheader();writer.writerows(rows)
         write_public_csvs(stage,payload)
         stocks={r['tradingview_symbol']:r for t in payload['themes'] for r in t['selected']}
         write_json(stage/'snapshot_summary.json',{'session_date':session,'generated_at_hkt':payload['dashboard_generated_at_hkt_display'],'source':'User-supplied TradingView CSV exports','configured_themes':len(payload['themes']),'configured_unique_stocks':len(stocks),'missing_daily_stocks':sum(s['metric_status']!='available' for s in stocks.values()),'rank_comparison_session':payload['local_history']['comparison_session']})

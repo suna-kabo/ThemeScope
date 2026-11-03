@@ -19,27 +19,19 @@ def main():
    page.select_option('#stock-view','performance');page.click('[data-page="market"]');page.click('[data-page="watchlist"]');assert page.locator('#stock-view').input_value()=='performance'
    page.click('[data-page="daily-plan"]');assert page.locator('#expected-earnings').evaluate('e=>e.tagName')=='SECTION'
    assert page.locator('#sectors-themes > details').count()==0
-   for k,ids in s['decision']['priority_groups'].items():
-    themes=[t for t in s['themes'] if t['id'] in ids]
-    side=next((t['research_priority'].get('side') for t in themes if t['research_priority'].get('side')),None)
-    order='asc' if k!='observation' and side=='short' else 'desc'
-    select=page.locator('[data-priority-order="'+k+'"]')
-    assert select.input_value()==order
-    article=select.locator('xpath=ancestor::article')
-    assert article.locator('[data-daily-theme]').count()==min(5,len(ids))
-    assert f'{min(5,len(ids))} of {len(ids)} themes' in article.inner_text()
-    expected=sorted(themes,key=lambda t:((1 if order=='asc' else -1)*t['theme_score'],t['id']))
-    assert article.locator('[data-daily-theme]').evaluate_all('es=>es.map(e=>e.dataset.dailyTheme)')==[t['id'] for t in expected[:5]]
-   key=next(k for k,v in s['decision']['priority_groups'].items() if len(v)>5)
-   button=page.locator('[data-priority-expand="'+key+'"]');button.click();assert button.get_attribute('aria-expanded')=='true'
-   group=page.locator('.priority-card').filter(has=page.locator('[data-priority-expand="'+key+'"]'))
-   assert group.locator('[data-daily-theme]').count()==len(s['decision']['priority_groups'][key])
-   page.select_option('[data-priority-order="'+key+'"]','desc')
-   expected=sorted([t for t in s['themes'] if t['id'] in s['decision']['priority_groups'][key]],key=lambda t:(-t['theme_score'],t['id']))
-   assert group.locator('[data-daily-theme]').first.get_attribute('data-daily-theme')==expected[0]['id']
+   for key,ids in s['decision']['primary_groups'].items():
+    article=page.locator('[data-priority-group="'+key+'"]')
+    assert article.locator('[data-daily-theme]').evaluate_all('es=>es.map(e=>e.dataset.dailyTheme)')==ids
+   assert page.locator('[data-priority-expand]').count()==0
+   assert page.locator('#daily-priorities [data-daily-theme]').count()==sum(t['research_priority']['category']=='primary' for t in s['themes'])
+   page.locator('#daily-methodology > summary').click()
+   assert page.locator('#methodology-content tbody tr').count()==64
+   assert page.locator('#methodology-content tr.active-cell').count()==1
+   page.locator('#daily-methodology > summary').click()
+   for obsolete in ('Leading','Improving','Fading','Lagging','Secondary'):
+    assert obsolete not in page.locator('body').inner_text()
    page.evaluate('window.scrollTo(0,500)');page.wait_for_timeout(180);before=page.evaluate('window.scrollY')
    page.click('[data-page="market"]');page.click('[data-page="daily-plan"]');assert abs(page.evaluate('window.scrollY')-before)<3
-   assert page.locator('[data-priority-expand="'+key+'"]').get_attribute('aria-expanded')=='true'
    page.go_back();page.go_forward();assert abs(page.evaluate('window.scrollY')-before)<3
    # Theme/view-specific filters, sort and horizontal scroll, including browser history.
    page.click('[data-page="watchlist"]');page.select_option('#stock-view','relative')
@@ -67,8 +59,8 @@ def main():
    page.select_option('#stock-view','performance');page.select_option('#stock-view','relative')
    assert page.locator('#stock-sort').input_value()=='excess63_pp'
    # Corrupt and inaccessible persistence must leave navigation usable.
-   for script in ("sessionStorage.setItem('themescope-terminal-v3:"+s['session_date']+"','{broken')",
-                  "sessionStorage.setItem('themescope-terminal-v3:"+s['session_date']+"',JSON.stringify({schema:3,session:'"+s['session_date']+"',routes:{watchlist:null,market:{tables:[null],y:1e9}}}))",
+   for script in ("sessionStorage.setItem('themescope-terminal-v4:"+s['session_date']+"','{broken')",
+                  "sessionStorage.setItem('themescope-terminal-v4:"+s['session_date']+"',JSON.stringify({schema:4,session:'"+s['session_date']+"',routes:{watchlist:null,market:{tables:[null],y:1e9}}}))",
                   "Object.defineProperty(window,'sessionStorage',{get(){throw Error('unavailable')}})"):
     context=b.new_context();context.add_init_script(script);trial=context.new_page();trial.on('pageerror',lambda e:errors.append(str(e)))
     trial.goto(url+'#watchlist');assert trial.locator('#stock-view').input_value()=='relative'
@@ -93,7 +85,19 @@ def main():
          assert len(a)==len(c) and all(abs(x['x']-y['x'])<.6 and abs(x['w']-y['w'])<.6 for x,y in zip(a,c))
         page.screenshot(path=str(out/f'watchlist-{view}-{mode}-{w}.png'))
       else:
-       if route=='sectors-themes' and w>=1536:assert page.locator('.theme-table-wrap').evaluate('e=>e.scrollWidth<=e.clientWidth+1')
+       if route=='sectors-themes':
+        assert page.locator('#theme-head th').count()==17
+        assert page.locator('#theme-body .col-priority [title]').count()==0
+        for theme in s['themes']:
+         row=page.locator('#theme-body tr[data-theme="'+theme['id']+'"]')
+         assert row.locator('.col-priority').inner_text()==theme['research_priority']['label']
+         assert row.locator('.col-priority-change').inner_text()==theme['priority_change']
+        if w>=1536:
+         assert page.locator('.theme-table-wrap').evaluate('e=>e.scrollWidth<=e.clientWidth+1')
+         assert page.locator('#theme-head .col-score [data-sort],#theme-head .col-current [data-sort],#theme-head .col-medium [data-sort]').evaluate_all('es=>es.every(e=>e.scrollWidth<=e.clientWidth+1)')
+         a=page.locator('#theme-head th').evaluate_all('es=>es.map(e=>e.getBoundingClientRect().x)')
+         c=page.locator('#theme-body tr').first.locator('td').evaluate_all('es=>es.map(e=>e.getBoundingClientRect().x)')
+         assert all(abs(x-y)<.6 for x,y in zip(a,c))
        page.screenshot(path=str(out/f'{route}-{mode}-{w}.png'))
       assert page.evaluate('document.documentElement.scrollWidth<=document.documentElement.clientWidth+1')
    page.set_viewport_size({'width':1536,'height':864});page.click('[data-page="daily-plan"]')
@@ -113,5 +117,5 @@ def main():
    assert not [r for r in requests if r.startswith(('http:','https:')) and not r.startswith('http://127.0.0.1:')]
    b.close()
  finally:server.shutdown();server.server_close()
- print(json.dumps({'errors':errors,'external_requests':0,'screenshots':42,'scroll_restoration':'passed'}))
+ print(json.dumps({'errors':errors,'external_requests':0,'screenshots':42,'native_expanded_dropdown_visually_verified':False,'scroll_restoration':'passed'}))
 if __name__=='__main__':main()

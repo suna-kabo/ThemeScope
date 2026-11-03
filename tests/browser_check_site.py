@@ -44,6 +44,29 @@ def main():
                 expect(page.locator('#'+route)).to_be_visible()
                 for link in page.locator('#'+route+' a[href]').evaluate_all('es=>es.map(e=>e.getAttribute("href"))'):
                     if not link.startswith(('#','https://','blob:')):assert link in manifest['files'],link
+            page.click('[data-page="daily-plan"]')
+            expected_ids=[t['id'] for t in payload['themes'] if t['research_priority']['category']=='primary']
+            actual_ids=page.locator('[data-daily-theme]').evaluate_all('es=>es.map(e=>e.dataset.dailyTheme)')
+            assert sorted(actual_ids)==sorted(expected_ids)
+            page.locator('#daily-methodology > summary').click()
+            assert page.locator('#methodology-content tbody tr').count()==64
+            assert page.locator('#methodology-content tr.active-cell').count()==1
+            for key,ids in payload['decision']['primary_groups'].items():
+                assert page.locator('[data-priority-group="'+key+'"] [data-daily-theme]').evaluate_all('es=>es.map(e=>e.dataset.dailyTheme)')==ids
+            page.click('[data-page="sectors-themes"]')
+            for theme in payload['themes']:
+                row=page.locator('#theme-body tr[data-theme="'+theme['id']+'"]')
+                assert row.locator('.col-priority').inner_text()==theme['research_priority']['label']
+                assert row.locator('.col-priority-change').inner_text()==theme['priority_change']
+            assert page.locator('#theme-body .col-priority [title]').count()==0
+            for label in ('Leading','Improving','Fading','Lagging','Secondary'):
+                assert label not in page.locator('body').inner_text()
+            research=payload['daily_primary_research']
+            if research['combined_file']:
+                page.click('[data-page="daily-plan"]')
+                with page.expect_download() as info:page.locator('a[href="'+research['combined_file']+'"]').click()
+                assert Path(info.value.path()).read_bytes()==(site/research['combined_file']).read_bytes()
+            page.click('[data-page="watchlist"]')
             assert page.locator('#stock-view').input_value()=='relative'
             page.select_option('#stock-view','performance')
             page.click('[data-page="daily-plan"]');page.evaluate('window.scrollTo(0,400)');page.wait_for_timeout(160);y=page.evaluate('window.scrollY')

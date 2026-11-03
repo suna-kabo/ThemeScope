@@ -56,6 +56,8 @@ def main():
         options=['--session','2024-01-03','--input-dir',str(folder)]
         run('refresh',options);run('prepare-site',['--session','2024-01-03'])
         output=clone/'output/manual_csv';site=clone/'site'
+        first_snapshot=json.loads((output/'latest_snapshot.json').read_text(encoding='utf-8'))
+        assert all(t['priority_change']=='N/A' for t in first_snapshot['themes'])
         before=hashes(output);site_before=hashes(site)
         # A real invalid CSV must preserve every existing successful output/history.
         stock=folder/'Daily_Stock.csv'
@@ -73,6 +75,7 @@ def main():
         snapshot=json.loads((output/'latest_snapshot.json').read_text(encoding='utf-8'))
         assert snapshot['local_history']['comparison_session']=='2024-01-03'
         assert all(t['rank_change_daily'] is not None for t in snapshot['themes'])
+        assert all(t['priority_change']=='—' for t in snapshot['themes'])
         assert (output/'local_history/2024-01-03.json').exists()
         assert hashes(site)==site_before
         run('prepare-site',['--session','2024-01-04'])

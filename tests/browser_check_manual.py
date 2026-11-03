@@ -58,7 +58,7 @@ def main() -> int:
             page.click("#market-direction .open-plan")
             assert page.locator("#daily-plan").is_visible()
             assert page.locator("#decision-path .decision-row").count() == 7
-            assert page.locator("#daily-priorities .priority-card").count() == 4
+            assert page.locator("#daily-priorities .priority-card").count() == 3
             assert page.locator("#daily-classification").inner_text() == snapshot["decision"]["market_classification"]
             first_theme_link = page.locator("#daily-priorities [data-daily-theme]").first
             target_theme = first_theme_link.get_attribute("data-daily-theme")
@@ -77,9 +77,9 @@ def main() -> int:
             for label in ("Current", "Medium", "1W", "1M", "3M", "EMA50"):
                 assert label in headers
             assert "Δ5D" not in headers and "Rk−5D" not in headers and "Facts" not in headers and "Type" not in headers
-            assert page.locator("#theme-cols col").count() == 16
-            assert page.locator("#theme-head th").count() == 16
-            assert page.locator("#theme-body tr[data-theme]").first.locator("td").count() == 16
+            assert page.locator("#theme-cols col").count() == 17
+            assert page.locator("#theme-head th").count() == 17
+            assert page.locator("#theme-body tr[data-theme]").first.locator("td").count() == 17
             assert page.locator("#theme-body .type-tag").count() == len(snapshot["themes"])
             assert page.locator("#theme-body .breadth-unavailable-cell small").count() == 0
             assert page.locator("#theme-body .score-chip:not(.score-na)").count() > 0
@@ -89,7 +89,7 @@ def main() -> int:
             assert page.locator(".primary-marker").count() == 0
             for row in snapshot["themes"]:
                 assert page.locator('#theme-body tr[data-theme="' + row["id"] + '"] .col-priority').inner_text() == row["research_priority"]["label"]
-            page.select_option("#theme-priority", "primary")
+            page.select_option("#theme-priority", "Primary short" if snapshot["market_classification"]["direction"] in ("Short bias","Selective short") else "Primary long")
             assert page.locator("#theme-body tr[data-theme]").count() == primary_count
             page.select_option("#theme-priority", "All")
             xs = page.locator("#theme-body .theme-select").evaluate_all("els => els.map(e => e.getBoundingClientRect().x)")
@@ -130,7 +130,7 @@ def main() -> int:
                         assert page.evaluate("document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1")
                         head_boxes = page.locator("#theme-head th").evaluate_all("els => els.map(e => ({x:e.getBoundingClientRect().x,w:e.getBoundingClientRect().width}))")
                         row_boxes = page.locator("#theme-body tr[data-theme]").first.locator("td").evaluate_all("els => els.map(e => ({x:e.getBoundingClientRect().x,w:e.getBoundingClientRect().width}))")
-                        assert len(head_boxes) == len(row_boxes) == 16
+                        assert len(head_boxes) == len(row_boxes) == 17
                         assert all(abs(a["x"] - b["x"]) < .6 and abs(a["w"] - b["w"]) < .6 for a, b in zip(head_boxes, row_boxes))
                 for page_id in ("market", "daily-plan"):
                     for width, height in ((1920, 1080), (1536, 864), (1366, 768), (390, 844)):

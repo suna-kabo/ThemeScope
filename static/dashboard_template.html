@@ -46,12 +46,12 @@
         <section id="expected-earnings" class="plan-section" aria-labelledby="earnings-title"><h2 id="earnings-title">Expected earnings within the next 7 calendar days</h2><div id="expected-earnings-content"></div></section>
         <section class="plan-section" aria-labelledby="divergence-title"><h2 id="divergence-title">Divergence context</h2><div id="divergence-context" class="plan-card"></div></section>
         <details id="daily-methodology" class="help-card methodology"><summary>View full methodology</summary><div id="methodology-content"></div></details>
-        <div class="fixed-limitations"><p>Research Priority is not an entry signal.</p><p>Lagging does not mean oversold.</p><p>Fading does not automatically mean a confirmed downtrend.</p></div>
+        <div class="fixed-limitations"><p>Research Priority is not an entry signal.</p><p>Score measures relative ETF momentum. Evaluate charts and setups separately.</p></div>
       </section>
 
       <section id="sectors-themes" class="page" hidden aria-labelledby="themes-title">
         <div class="page-heading"><div><h1 id="themes-title">Sectors &amp; Themes</h1><p>Sortable ETF comparisons. Rank is global within the eligible registry; filters do not rerank the remaining rows.</p></div><a class="download-link" href="themes.csv" download>Full ranking CSV</a></div>
-        <section class="export-navigation" aria-label="TradingView exports"><h2>Individual research watchlists</h2><a id="all-individual-watchlists" class="download-link" href="individual_theme_watchlists.zip" download>Download all individual watchlists</a><p class="caption" id="individual-export-count"></p><div id="daily-data-export-links"></div><p class="caption">Import this stock-only list into TradingView to export daily data for all configured members without screener filters.</p><details class="optional-scan-exports"><summary>Optional broad scan lists</summary><p class="caption">Unique instruments only; these lists do not preserve separate theme memberships.</p><div id="grouped-export-links"></div></details></section>
+        <section class="export-navigation" aria-label="TradingView exports"><h2>Individual research watchlists</h2><a id="all-individual-watchlists" class="download-link" href="individual_theme_watchlists.zip" download>Download all individual watchlists</a><p class="caption" id="individual-export-count"></p><div id="daily-data-export-links"></div><p class="caption">Use the complete stock and ETF collection lists for daily CSV exports, independently of today’s research priorities.</p><details class="optional-scan-exports"><summary>Optional broad scan lists</summary><p class="caption">Unique instruments only; these lists do not preserve separate theme memberships.</p><div id="grouped-export-links"></div></details></section>
         <div id="theme-controls" class="controls"></div>
         <p id="theme-count" class="caption"></p>
         <div class="table-wrap theme-table-wrap"><table class="data-table theme-data-table"><colgroup id="theme-cols"></colgroup><thead id="theme-head"></thead><tbody id="theme-body"></tbody></table></div>
@@ -66,7 +66,7 @@
           <button id="next-theme" type="button" aria-label="Next eligible sector or theme">Next</button>
         </div>
         <p id="navigation-status" class="caption" role="status" aria-live="polite"></p>
-        <div class="watchlist-research-exports"><a class="download-link" id="tv" download>Download selected watchlist</a></div>
+        <div class="watchlist-research-exports"><a class="download-link" id="tv" download>Download full selected watchlist</a> <a class="download-link" id="tv-primary" download hidden>Download Primary-filtered watchlist</a></div>
         <div class="page-heading"><div><h1 id="active-name">Watchlist</h1><p id="active-summary" class="watchlist-summary"></p></div></div>
         <p id="watchlist-message" class="watchlist-message" hidden></p>
         <div id="stock-controls" class="controls"></div><p id="coverage" class="caption"></p>

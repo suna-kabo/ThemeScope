@@ -209,5 +209,8 @@ assert.equal(ui.emaMatches({price_close:null,ema21:null},'above21'),false);
 assert.equal(ui.emaMatches({price_close:10,ema21:10},'below21'),true);
 assert.deepEqual(ui.sortRows([{id:'a',daily_change:.010001},{id:'b',daily_change:.010002},{id:'c',daily_change:null}], 'daily_change','desc').map(r=>r.id),['b','a','c']);
 const dayCSV=ui.themeRowsToCsv([{id:'one',daily_change:.01234567}], '2026-10-30','test').split('\r\n');
-assert.match(dayCSV[0],/"anchor_etf","change_1d_pct","state"/);
+assert.match(dayCSV[0],/"anchor_etf","change_1d_pct","priority_change"/);
 assert.match(dayCSV[1],/"1.234567"/);
+
+assert.equal(ui.emaRelationship(10,9),'Above');assert.equal(ui.emaRelationship(10,11),'Below');assert.equal(ui.emaRelationship(10,10),'At');
+for(const invalid of [null,NaN,Infinity,0,-1,true]){assert.equal(ui.emaRelationship(invalid,10),'N/A');assert.equal(ui.emaRelationship(10,invalid),'N/A');}

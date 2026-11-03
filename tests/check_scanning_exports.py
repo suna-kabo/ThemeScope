@@ -25,7 +25,7 @@ def check(root):
         expected={t['id'] for t in s['themes'] if t['research_priority']['category']=='primary' and any(r['tradingview_symbol']==row['symbol'] for r in t['selected'])}
         assert {c['theme_id'] for c in row['contexts']}==expected
     assert not list(root.glob('tradingview_primary_stocks*'))
-    assert s['export_archives']==['individual_theme_watchlists.zip']
+    assert s['export_archives'][0]=='individual_theme_watchlists.zip'
     data=[];individuals=[]
     for item in s['export_manifest']:
         tokens=(root/item['file']).read_text().strip().split(',')
@@ -52,15 +52,17 @@ def check(root):
     with zipfile.ZipFile(root/'run_bundle.zip') as z:
         assert z.testzip() is None
         for item in s['export_manifest']:assert z.read(item['file'])==(root/item['file']).read_bytes()
-    # Exercise the real writer with a synthetic lower limit, without changing real configuration/history.
-    from scripts.generate_dashboard import _manual_csv_outputs
-    synthetic=copy.deepcopy(s);synthetic['export_configuration']['instrument_limit']=100
-    with tempfile.TemporaryDirectory() as temporary:
-        stage=Path(temporary)
-        _manual_csv_outputs(synthetic,{},stage)
-        assert synthetic['export_archives']==['individual_theme_watchlists.zip']
-        assert not list(stage.glob('tradingview_primary_stocks*'))
-        assert all(f['instrument_count']<=100 for f in synthetic['export_manifest'])
+    # Recompute filtered lists from endpoints, preserving per-anchor overlap relationships.
+    from src.themescope.daily_lists import primary_research
+    check_snapshot=copy.deepcopy(s);files,manifest=primary_research(check_snapshot,s['export_configuration']['instrument_limit'])
+    assert check_snapshot['daily_primary_research']==s['daily_primary_research']
+    for name,content in files.items():assert (root/name).read_text()==content
+    research=s['daily_primary_research']
+    if research['archive_file']:
+        with zipfile.ZipFile(root/research['archive_file']) as archive:
+            expected=[r for r in manifest if r['role']=='individual_primary_research']
+            assert len(archive.namelist())==len(expected)
+            for item in expected:assert archive.read(Path(item['file']).name)==(root/item['file']).read_bytes()
     print(json.dumps({'groups':len(s['export_configuration']['groups']),'individuals':len(individuals),'configured_unique_stocks':len(data),'earnings_scope_unique_stocks':len(primary),'manifest_agreement':True}))
 
 if __name__=='__main__':

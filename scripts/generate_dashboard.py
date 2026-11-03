@@ -1185,6 +1185,7 @@ def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_di
     """Write the compact local-only manual CSV release without live-source artifacts."""
     output_dir.mkdir(parents=True, exist_ok=True)
     from src.themescope.daily_lists import build as build_daily_lists
+    from src.themescope.research_policy import ema_relationship
     export_files = build_daily_lists(snapshot, snapshot["export_configuration"])
     for name, content in export_files.items():
         (output_dir / name).parent.mkdir(parents=True, exist_ok=True)
@@ -1199,6 +1200,7 @@ def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_di
         "themes": snapshot["themes"],
         "expected_earnings": snapshot["expected_earnings"],
         "export_manifest": snapshot["export_manifest"],
+        "decision": snapshot["decision"], "daily_primary_research": snapshot["daily_primary_research"],
     })
     market_rows = []
     for row in snapshot["context"]:
@@ -1217,7 +1219,8 @@ def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_di
             "rank": row.get("global_rank"), "type": row.get("level"), "theme_id": row["id"], "name": row["name"], "anchor": row["anchor"],
             "change_1d_pct": row["daily_change"] * 100 if row.get("daily_change") is not None else None,
             "rank_change_daily": row.get("rank_change_daily"), "rank_comparison_session": row.get("rank_comparison_session"),
-            "state": row.get("theme_state"), "research_priority": row.get("research_priority", {}).get("label"), "theme_score": row.get("theme_score"),
+            "vs_ema21": ema_relationship(row.get("price_close"),row.get("ema21")), "vs_ema50": ema_relationship(row.get("price_close"),row.get("ema50")),
+            "priority_change": row.get("priority_change"), "research_priority": row.get("research_priority", {}).get("label"), "theme_score": row.get("theme_score"),
             "current": row.get("current_strength_score"), "medium": row.get("medium_strength_score"),
             "performance_1w_pct": row.get("returns", {}).get("5", {}).get("value") * 100 if row.get("returns", {}).get("5", {}).get("value") is not None else None,
             "performance_1m_pct": row.get("returns", {}).get("21", {}).get("value") * 100 if row.get("returns", {}).get("21", {}).get("value") is not None else None,
@@ -1252,6 +1255,15 @@ def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_di
             individual[item['theme_id']]={**item,'symbols':content.strip().split(',')}
             bundle.writestr(Path(item['file']).name,content)
     _write_json(output_dir / "individual_theme_watchlists.json", individual)
+    research=snapshot['daily_primary_research']
+    if research['archive_file']:
+        with zipfile.ZipFile(output_dir/research['archive_file'],'w',compression=zipfile.ZIP_DEFLATED) as bundle:
+            for item in snapshot['export_manifest']:
+                if item['role']=='individual_primary_research':bundle.writestr(Path(item['file']).name,export_files[item['file']])
+        relationships=research['relationships']
+        _write_csv(output_dir/research['relationships_file'],relationships,list(relationships[0]))
+    _write_json(output_dir/'daily_primary_audit.json',research)
+
     audit["tradingview"] = {"identifier_evidence": "config/tradingview_symbols.json", "platform_import_tested": False,
         "grouped_duplicate_behavior": "User-confirmed round-trip observation: repeated symbols retained once; raw round-trip files unavailable in this session",
         "broad_scan_sections": False, "individual_section_headings": False, "anchor_first": True, "unresolved": []}
@@ -1273,7 +1285,7 @@ def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_di
     (output_dir / "latest_run.md").write_text(
         "# Manual CSV run\n\nUS session: " + snapshot["session_date"] + "\n\nMarket: " + snapshot["decision"]["market_classification"] +
         "\n\n" + snapshot["decision"]["reason"] + "\n\nDetailed metrics and input hashes: run_audit.json. TradingView platform import has not been performed.\n", encoding="utf-8")
-    audit["export_file_counts"] = {"theme_watchlists": len(individual), "canonical_json": 1, "csv": 3, "tradingview_text": len(snapshot["export_manifest"]) + 1, "watchlist_zip": 1}
+    audit["export_file_counts"] = {"theme_watchlists": len(individual), "canonical_json": 1, "csv": 3 + bool(research["relationships_file"]), "tradingview_text": len(snapshot["export_manifest"]), "watchlist_zip": len(snapshot["export_archives"])}
     audit["browser_validation"] = {"inline_assets": True, "csp_connect_none": True, "automatic_external_requests": "not measured by generator; see browser audit"}
     audit["publication_pass"] = True
     _write_json(output_dir / "run_audit.json", audit)
@@ -1320,6 +1332,14 @@ def _run_manual_csv(args: argparse.Namespace, output: Path, launched_at: float) 
             payload = json.dumps(_dashboard_snapshot(snapshot), ensure_ascii=False, separators=(",", ":"), allow_nan=False).replace("</", "<\\/").replace("\u2028", "\\u2028").replace("\u2029", "\\u2029")
             font_data = base64.b64encode((ROOT / "static/InterVariable.woff2").read_bytes()).decode("ascii")
             (stage / "dashboard.html").write_text(template.replace("{{STYLE}}", style.replace("{{FONT_DATA}}", font_data)).replace("{{SCRIPT}}", script).replace("{{SNAPSHOT_JSON}}", payload), encoding="utf-8")
+            existing_history=output / "local_history" / (snapshot["session_date"] + ".json")
+            if existing_history.is_file():
+                previous_bytes=existing_history.read_bytes()
+                previous_record=json.loads(previous_bytes)
+                if previous_record.get('research_history',{}).get('priority_methodology') != history_record.get('research_history',{}).get('priority_methodology'):
+                    import hashlib
+                    saved=stage / 'local_history' / 'backups' / (snapshot['session_date']+'.pre-priority-migration.'+hashlib.sha256(previous_bytes).hexdigest()[:12]+'.json')
+                    saved.parent.mkdir(parents=True,exist_ok=True);saved.write_bytes(previous_bytes)
             _write_json(stage / "local_history" / (snapshot["session_date"] + ".json"), history_record)
             bundle_files = [path for path in stage.rglob("*") if path.is_file() and path.name != "run_bundle.zip"]
             with zipfile.ZipFile(stage / "run_bundle.zip", "w", compression=zipfile.ZIP_DEFLATED) as bundle:

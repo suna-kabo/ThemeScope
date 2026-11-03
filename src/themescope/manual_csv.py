@@ -8,13 +8,12 @@ import json
 import math
 import re
 import unicodedata
-from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
-from .approved_rules import STATES, breadth_state, canonical_decision, market_direction, price_state, priority
+from .research_policy import (breadth_classification, breadth_consensus, market_direction, ema_classification, apply_policy, CURRENT_WEIGHT, MEDIUM_WEIGHT)
 from .ranking import average_ranks
 
 
@@ -196,13 +195,7 @@ def percentile(values: dict[str, float | None], minimum: int) -> dict[str, float
 
 
 def theme_score(current: float | None, medium: float | None) -> float | None:
-    return 0.6 * current + 0.4 * medium if current is not None and medium is not None else None
-
-
-def theme_state(current: float | None, medium: float | None) -> str | None:
-    if current is None or medium is None:
-        return None
-    return STATES[(0 if current >= 50 else 2) + (0 if medium >= 50 else 1)]
+    return CURRENT_WEIGHT * current + MEDIUM_WEIGHT * medium if current is not None and medium is not None else None
 
 
 def breadth(rows: list[dict[str, Any]], minimum: int = 0, coverage_floor: float = 0.8) -> dict[str, Any]:
@@ -212,12 +205,12 @@ def breadth(rows: list[dict[str, Any]], minimum: int = 0, coverage_floor: float 
     available = denominator > 0 and len(valid) >= minimum and coverage >= coverage_floor
     b21 = 100 * sum(row["price"] > row["ema21"] for row in valid) / len(valid) if available else None
     b50 = 100 * sum(row["price"] > row["ema50"] for row in valid) / len(valid) if available else None
-    state = breadth_state(b21, b50)
+    classification = breadth_classification(b21, b50)
     reason = None if available else f"Requires at least {minimum} valid rows and {coverage_floor:.0%} coverage; found {len(valid)}/{denominator}."
     return {
         "21": {"value": b21, "status": "valid" if available else "unavailable", "above_count": sum(row["price"] > row["ema21"] for row in valid), "valid_count": len(valid), "eligible_count": denominator, "configured_count": denominator, "coverage_pct": 100 * coverage, "reason": reason, "ema_period": 21},
         "50": {"value": b50, "status": "valid" if available else "unavailable", "above_count": sum(row["price"] > row["ema50"] for row in valid), "valid_count": len(valid), "eligible_count": denominator, "configured_count": denominator, "coverage_pct": 100 * coverage, "reason": reason, "ema_period": 50},
-        "state": state,
+        "state": classification,
         "valid_rows": len(valid),
         "denominator": denominator,
         "coverage_pct": 100 * coverage,
@@ -244,7 +237,7 @@ def _row_fields(row: dict[str, Any]) -> dict[str, Any]:
         "above_ema50": close > ema50 if close is not None and ema50 is not None else None,
         "price_vs_ema21_pct": 100 * (close / ema21 - 1) if close is not None and ema21 else None,
         "price_vs_ema50_pct": 100 * (close / ema50 - 1) if close is not None and ema50 else None,
-        "price_state": price_state(close, ema21, ema50),
+        "price_state": ema_classification(close, ema21, ema50),
         "returns": _returns(row),
         "atr14_pct": row.get("atr14_pct"),
         "turnover_1d_usd": row.get("turnover_1d"),
@@ -298,7 +291,6 @@ def build_release(root: Path, paths: dict[str, Path], session: str) -> tuple[dic
     for theme_id, anchor in active.items():
         source = etfs[anchor]
         a, b = current[theme_id], medium[theme_id]
-        state = theme_state(a, b)
         record = watch_by_id.get(theme_id, {"members": []})
         selected = []
         breadth_inputs = []
@@ -314,7 +306,7 @@ def build_release(root: Path, paths: dict[str, Path], session: str) -> tuple[dic
         name = config_themes.get(theme_id, {}).get("name", theme_id)
         has_members = bool(record.get("members"))
         score = theme_score(a, b)
-        theme = {"id": theme_id, "name": name, "anchor": anchor, "ticker": anchor, "level": config_themes.get(theme_id, {}).get("level", "Theme"), **fields, "current_strength_score": a, "medium_strength_score": b, "theme_score": score, "theme_state": state, "selected": selected, "configured_watchlist_count": len(record.get("members", [])), "watchlist_member_count": len(record.get("members", [])), "watchlist_status": record.get("status", "configured"), "watchlist_reviewed_date": record.get("reviewed_date"), "has_watchlist": has_members, "stock_scope": "Configured watchlist" if has_members else "Reviewed ETF-only", "stock_drilldown_status": "available" if has_members else "reviewed_etf_only", "theme_watchlist_breadth": {"21": theme_breadth["21"], "50": theme_breadth["50"]}, "theme_breadth21_pct": theme_breadth["21"]["value"], "theme_breadth50_pct": theme_breadth["50"]["value"], "theme_breadth21_valid": theme_breadth["21"]["valid_count"], "theme_breadth50_valid": theme_breadth["50"]["valid_count"], "theme_breadth21_above": theme_breadth["21"]["above_count"], "theme_breadth50_above": theme_breadth["50"]["above_count"], "breadth_status_21": theme_breadth["21"]["status"], "breadth_status_50": theme_breadth["50"]["status"], "field_status": {key: {"status": "valid" if value is not None else "unavailable", "value": value} for key, value in (("current_strength_score", a), ("medium_strength_score", b), ("theme_score", score))}}
+        theme = {"id": theme_id, "name": name, "anchor": anchor, "ticker": anchor, "level": config_themes.get(theme_id, {}).get("level", "Theme"), **fields, "current_strength_score": a, "medium_strength_score": b, "theme_score": score, "selected": selected, "configured_watchlist_count": len(record.get("members", [])), "watchlist_member_count": len(record.get("members", [])), "watchlist_status": record.get("status", "configured"), "watchlist_reviewed_date": record.get("reviewed_date"), "has_watchlist": has_members, "stock_scope": "Configured watchlist" if has_members else "Reviewed ETF-only", "stock_drilldown_status": "available" if has_members else "reviewed_etf_only", "theme_watchlist_breadth": {"21": theme_breadth["21"], "50": theme_breadth["50"]}, "theme_breadth21_pct": theme_breadth["21"]["value"], "theme_breadth50_pct": theme_breadth["50"]["value"], "theme_breadth21_valid": theme_breadth["21"]["valid_count"], "theme_breadth50_valid": theme_breadth["50"]["valid_count"], "theme_breadth21_above": theme_breadth["21"]["above_count"], "theme_breadth50_above": theme_breadth["50"]["above_count"], "breadth_status_21": theme_breadth["21"]["status"], "breadth_status_50": theme_breadth["50"]["status"], "field_status": {key: {"status": "valid" if value is not None else "unavailable", "value": value} for key, value in (("current_strength_score", a), ("medium_strength_score", b), ("theme_score", score))}}
         themes.append(theme)
     ranks = average_ranks({row["id"]: row["theme_score"] for row in themes})
     index_metrics = {role: breadth(rows[role], coverage_floor=float(manual_config["breadth_minimum_coverage"])) for role in ("spy", "qqq", "iwm")}
@@ -324,11 +316,11 @@ def build_release(root: Path, paths: dict[str, Path], session: str) -> tuple[dic
         contexts.append({"ticker": symbol, "name": symbol, "instrument_type": "equity_market_etf", **_row_fields(market_etfs[symbol]), "index_breadth": {"21": index_metrics[role]["21"], "50": index_metrics[role]["50"]}, "breadth_state": index_metrics[role]["state"], "breadth_label": "Russell 2000 Breadth" if symbol == "IWM" else f"{symbol} Breadth"})
     context_by_symbol = {row["ticker"]: row for row in contexts}
     spy_breadth, qqq_breadth = index_metrics["spy"]["state"], index_metrics["qqq"]["state"]
-    combined = spy_breadth if spy_breadth == qqq_breadth else "Mixed" if spy_breadth and qqq_breadth else None
-    direction = market_direction(context_by_symbol["SPY"]["price_state"], context_by_symbol["QQQ"]["price_state"], combined)
+    consensus = breadth_consensus(spy_breadth, qqq_breadth)
+    direction = market_direction(context_by_symbol["SPY"]["price_state"], context_by_symbol["QQQ"]["price_state"], consensus)
     for row in themes:
         row["global_rank"] = row["rank_current"] = ranks[row["id"]]
-        row["research_priority"] = priority(direction, row["theme_state"], row["price_close"], row["ema50"])
+
     generated = datetime.now(timezone.utc).isoformat(timespec="seconds")
     unmatched = [
         {"theme_id": record["theme_id"], "ticker": member["ticker"], "exchange": member.get("exchange")}
@@ -337,8 +329,6 @@ def build_release(root: Path, paths: dict[str, Path], session: str) -> tuple[dic
     ]
     configured_memberships = sum(len(record.get("members", [])) for record in watchlists["watchlists"])
     matched_memberships = configured_memberships - len(unmatched)
-    state_counts = Counter(row["theme_state"] or "Unavailable" for row in themes)
-    priority_counts = Counter(row["research_priority"]["label"] for row in themes)
     audit = {
         "schema_version": "manual-csv-1",
         "declared_us_session": session,
@@ -353,11 +343,9 @@ def build_release(root: Path, paths: dict[str, Path], session: str) -> tuple[dic
         "score_peer_set": sorted(eligible),
         "percentile_method": "ascending average rank; 100*(rank-1)/(N-1); all-equal=50",
         "price_states": {symbol: context_by_symbol[symbol]["price_state"] for symbol in ("SPY", "QQQ", "IWM")},
-        "breadth": {"SPY": index_metrics["spy"], "QQQ": index_metrics["qqq"], "Russell 2000": index_metrics["iwm"], "combined": combined},
+        "breadth": {"SPY": index_metrics["spy"], "QQQ": index_metrics["qqq"], "Russell 2000": index_metrics["iwm"], "consensus": consensus},
         "breadth_available": {"SPY": index_metrics["spy"]["state"] is not None, "QQQ": index_metrics["qqq"]["state"] is not None, "Russell 2000": index_metrics["iwm"]["state"] is not None},
         "market_classification": direction,
-        "theme_state_counts": dict(state_counts),
-        "priority_counts": dict(priority_counts),
         "configured_theme_list_sizes": {record["theme_id"]: len(record.get("members", [])) for record in watchlists["watchlists"]},
         "configured_memberships": configured_memberships,
         "stock_member_matches": matched_memberships,
@@ -370,11 +358,10 @@ def build_release(root: Path, paths: dict[str, Path], session: str) -> tuple[dic
         "runtime_seconds": None,
     }
     generated_hkt = datetime.fromisoformat(generated).astimezone(ZoneInfo("Asia/Hong_Kong"))
-    decision = canonical_decision(session, generated_hkt.isoformat(timespec="seconds"), contexts, themes, direction, combined)
     snapshot = {
         "schema_version": "manual-csv-1",
         "methodology_version": "manual-csv-1",
-        "ranking_configuration": {"minimum_coverage": manual_config["theme_score_minimum_coverage"], "state_boundary": 50},
+        "ranking_configuration": {"minimum_coverage": manual_config["theme_score_minimum_coverage"]},
         "run_kind": "manual_csv",
         "session_date": session,
         "generated_at": generated,
@@ -383,18 +370,17 @@ def build_release(root: Path, paths: dict[str, Path], session: str) -> tuple[dic
         "dashboard_generated_at_hkt_display": generated_hkt.strftime("%d %b %Y, %I:%M %p HKT").lstrip("0"),
         "dashboard_display_timezone": "Asia/Hong_Kong",
         "settings": {**registry.get("settings", {}), "watchlist_capacity": int(manual_config["watchlist_capacity"]), "watchlist_default_limit": int(manual_config["watchlist_capacity"]), "configured_active_anchor_count": len(active)},
-        "score_methodology": {"current": "TradingView 1-month Performance percentile", "medium": "TradingView 3-month Performance percentile", "theme_score_weights": {"current_strength": 0.6, "medium_strength": 0.4}, "state_threshold": 50, "method": "Cross-sectional ETF momentum from manual CSV"},
+        "score_methodology": {"current": "TradingView 1-month Performance percentile", "medium": "TradingView 3-month Performance percentile", "theme_score_weights": {"current_strength": CURRENT_WEIGHT, "medium_strength": MEDIUM_WEIGHT}, "method": "Cross-sectional ETF momentum from manual CSV"},
         "context": contexts,
         "volatility_context": [],
         "themes": themes,
-        "market_classification": {"direction": direction, "combined_breadth": combined, "inputs": {symbol: {"price": context_by_symbol[symbol]["price_state"], "breadth": context_by_symbol[symbol]["breadth_state"]} for symbol in ("SPY", "QQQ", "IWM")}, "reason": decision["reason"], "action_summary": decision["action_sentence"], "decision": decision},
-        "decision": decision,
         "ui_configuration": {"score_bands": [{"min": 0, "max": 25, "class": "score-q1"}, {"min": 25, "max": 50, "class": "score-q2"}, {"min": 50, "max": 75, "class": "score-q3"}, {"min": 75, "max": 100, "class": "score-q4"}]},
         "source_status": {"theme_watchlists": {"status": "complete"}},
         "data_complete": True,
         "publication_scope": "local_only",
         "manual_csv_audit": audit,
     }
+    apply_policy(snapshot)
     from .tradingview import attach, load_mapping
     attach(snapshot, load_mapping(root))
     from .daily_lists import build as build_daily_lists
