@@ -98,6 +98,9 @@ def main():
                             header_classes=page.locator('#'+prefix+'-head th').evaluate_all('es=>es.map(e=>e.className)')
                             body_classes=page.locator('#'+prefix+'-body tr').first.locator('td').evaluate_all('es=>es.map(e=>e.className)')
                             assert header_classes==body_classes
+                            if prefix=='theme':
+                                assert page.locator('#theme-head [data-sort]').evaluate_all('es=>es.every(e=>e.scrollWidth<=e.clientWidth+1)')
+                                assert page.locator('#theme-body td.col-return,#theme-body td.col-day-change').evaluate_all('es=>es.every(e=>e.scrollWidth<=e.clientWidth+1)')
                         if route=='sectors-themes':
                             assert '1W' not in page.locator('#theme-head').inner_text();assert page.locator('.optional-scan-exports').count()==0
                             assert page.locator('.collection-downloads a').count()==3
