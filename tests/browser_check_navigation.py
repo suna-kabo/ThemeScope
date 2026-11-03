@@ -60,7 +60,7 @@ def main():
             with zipfile.ZipFile(info.value.path()) as archive:
                 assert len(archive.namelist())==len(snapshot['themes']) and archive.testzip() is None
             assert 'Download All Stocks' in page.locator('#daily-data-export-links').inner_text()
-            assert page.locator('#theme-head th').nth(4).inner_text().startswith('1D %')
+            assert page.locator('#theme-head .col-day-change .header-label').inner_text()=='1D %'
             page.click('#theme-head [data-sort="daily_change"]')
             ordered=sorted(snapshot['themes'],key=lambda t:(-t['daily_change'],t['id']))
             assert page.locator('#theme-body tr').first.get_attribute('data-theme')==ordered[0]['id']
@@ -90,7 +90,7 @@ def main():
             # Same-theme target must reveal a hidden member while preserving Back state.
             selected=next(t for t in snapshot['themes'] if t['id']==target_theme)
             target=next(r for r in selected['selected'] if r['ticker']=='LLY')
-            page.select_option('#stock-sort','excess63_pp')
+            page.select_option('#stock-sort','return63')
             page.fill('#stock-search','NO_SUCH_STOCK')
             failing_ema='below21' if target['price_close']>target['ema21'] else 'above21'
             page.select_option('#ema-filter',failing_ema)
@@ -109,7 +109,7 @@ def main():
             assert page.locator('#stock-search').input_value()=='NO_SUCH_STOCK'
             assert page.locator('#ema-filter').input_value()==failing_ema
             assert page.locator('#rs-filter').input_value()==failing_rs
-            assert page.locator('#stock-sort').input_value()=='excess63_pp'
+            assert page.locator('#stock-sort').input_value()=='return63'
             assert abs(page.evaluate('window.scrollY')-prior_y)<3
             page.go_forward();assert page.locator('#stock-search').input_value()==''
             page.fill('#stock-search','LLY')
@@ -157,7 +157,7 @@ def main():
                         assert page.locator('.theme-table-wrap').evaluate('e=>e.scrollWidth<=e.clientWidth+1')
                         a=page.locator('#theme-head th').evaluate_all('es=>es.map(e=>({x:e.getBoundingClientRect().x,w:e.getBoundingClientRect().width}))')
                         b=page.locator('#theme-body tr').first.locator('td').evaluate_all('es=>es.map(e=>({x:e.getBoundingClientRect().x,w:e.getBoundingClientRect().width}))')
-                        assert len(a)==len(b)==16 and all(abs(x['x']-y['x'])<.6 and abs(x['w']-y['w'])<.6 for x,y in zip(a,b))
+                        assert len(a)==len(b)==15 and all(abs(x['x']-y['x'])<.6 and abs(x['w']-y['w'])<.6 for x,y in zip(a,b))
                     if width<1536:
                         page.locator('.theme-table-wrap').evaluate("e=>{e.style.scrollMarginTop='70px';e.scrollIntoView({block:'start'});if(innerWidth<760)e.scrollLeft=260;}")
                     page.screenshot(path=str(artifacts/f'etf-day-{mode}-{width}.png'));screenshots+=1

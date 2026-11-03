@@ -43,7 +43,7 @@ def main():
             selected=next(t for t in snapshot['themes'] if t['id']==page.locator('#watchlist-theme-selector').input_value())
             first_id=selected['id'];member=next(r for r in selected['selected'] if r['price_close'] is not None)
             breadth=page.locator('#active-summary .summary-breadth').inner_text()
-            page.select_option('#stock-sort','weighted_excess_pp')
+            page.select_option('#stock-sort','return21')
             rows=page.locator('#stock-body tr').evaluate_all('es=>es.map(e=>({ticker:e.querySelector(".col-ticker a,.col-ticker b").textContent,slot:e.querySelector(".col-rank").textContent}))')
             positions={r['ticker']:str(r['selection_slot']) for r in selected['selected']};assert all(positions[r['ticker']]==r['slot'] for r in rows)
             for classification in ['All','Outperforming','Underperforming','Flat','Unavailable']:
@@ -54,7 +54,7 @@ def main():
                 assert page.locator('#active-summary .summary-breadth').inner_text()==breadth
             page.fill('#stock-search','');page.select_option('#ema-filter','all');page.select_option('#rs-filter','All')
             page.click('#next-theme');page.go_back();assert page.locator('#watchlist-theme-selector').input_value()==first_id
-            assert page.locator('#stock-sort').input_value()=='weighted_excess_pp'
+            assert page.locator('#stock-sort').input_value()=='return21'
             with page.expect_download() as info:page.click('#tv')
             assert Path(info.value.path()).read_text().strip().split(',')==[selected['tradingview_symbol']]+[r['tradingview_symbol'] for r in selected['selected']]
             page.click('.side-nav [data-page="methodology"]')
@@ -90,7 +90,7 @@ def main():
                         page.click('.side-nav [data-page="'+route+'"]');page.evaluate('window.scrollTo(0,0)')
                         assert page.evaluate('document.documentElement.scrollWidth<=document.documentElement.clientWidth+1')
                         if route in ['sectors-themes','watchlist']:
-                            prefix='theme' if route=='sectors-themes' else 'stock';count=16 if prefix=='theme' else 14
+                            prefix='theme' if route=='sectors-themes' else 'stock';count=15 if prefix=='theme' else 14
                             assert page.locator('#'+prefix+'-head th').count()==count
                             a=page.locator('#'+prefix+'-head th').evaluate_all('es=>es.map(e=>e.getBoundingClientRect().x)')
                             b=page.locator('#'+prefix+'-body tr').first.locator('td').evaluate_all('es=>es.map(e=>e.getBoundingClientRect().x)')

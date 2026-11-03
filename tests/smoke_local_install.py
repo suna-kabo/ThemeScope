@@ -80,7 +80,9 @@ def main():
         assert hashes(site)==site_before
         run('prepare-site',['--session','2024-01-04'])
         assert not (site/'raw_inputs.json').exists() and not (site/'run_audit.json').exists() and not (site/'local_history').exists()
-        if args.browser:subprocess.run([sys.executable,str(ROOT/'tests/browser_check_site.py'),str(site)],cwd=ROOT,check=True,timeout=90)
+        if args.browser:
+            subprocess.run([sys.executable,str(ROOT/'tests/browser_check_site.py'),str(site)],cwd=ROOT,check=True,timeout=90)
+            subprocess.run([sys.executable,str(ROOT/'tests/browser_check_tables.py'),str(output/'dashboard.html')],cwd=ROOT,check=True,timeout=90)
     print(json.dumps({'clean_staged_tree':tree,'platform':sys.platform,'native_cmd_launchers':os.name=='nt','setup_refresh_site':'passed','invalid_input_preservation':'passed','stale_input_refusal':'passed','two_session_history':'passed','synthetic_data':'temporary only'}))
 
 

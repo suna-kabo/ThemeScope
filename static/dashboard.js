@@ -877,7 +877,6 @@
     var metrics = {
       daily_change: "1D %",
       rank_current: "Current rank",
-      rank_change_daily: "Δ Rank",
       priority: "Research priority",
       return21: "1-month Performance",
       return63: "3-month Performance",
@@ -1071,10 +1070,12 @@
             (c) => {
               var fullLabel = c[4] || c[0];
               var label = c[1]
-                ? '<button data-sort="' + c[1] + '" title="Sort by ' + esc(fullLabel) + '; unavailable values stay last" aria-label="Sort by ' + esc(fullLabel) + '">' + c[0] + '<span class="sort-indicator" aria-hidden="true">'+(viewState[p + "Key"] === c[1] ? arrowIcon(viewState[p + "Dir"]) : "")+'</span>' + '</button>'
-                : '<span title="' + esc(fullLabel) + '">' + c[0] + '</span>';
-              var sortState = c[1] ? (viewState[p + "Key"] === c[1] ? (viewState[p + "Dir"] === "asc" ? "ascending" : "descending") : "none") : null;
-              return '<th class="' + esc(c[5] || "") + '"' + (sortState ? ' aria-sort="' + sortState + '"' : '') + '><div class="th-content">' + label + (c[3] ? infoControl(c[3]) : '') + '</div></th>';
+                ? '<button class="header-label" data-sort="'+c[1]+'" title="Sort by '+esc(fullLabel)+'; unavailable values stay last" aria-label="Sort by '+esc(fullLabel)+'">'+c[0]+'</button>'
+                : '<span class="header-label" title="'+esc(fullLabel)+'">'+c[0]+'</span>';
+              var tools=(c[1]?'<span class="sort-indicator" aria-hidden="true">'+(viewState[p+'Key']===c[1]?arrowIcon(viewState[p+'Dir']):'')+'</span>':'')+(c[3]?infoControl(c[3]):'');
+              var sortState=c[1]?(viewState[p+'Key']===c[1]?(viewState[p+'Dir']==='asc'?'ascending':'descending'):'none'):null;
+              return '<th class="'+esc(c[5] || '')+'"'+(sortState?' aria-sort="'+sortState+'"':'')+'><div class="th-content'+(tools?' has-tools':'')+'">'+label+(tools?'<span class="header-tools">'+tools+'</span>':'')+'</div></th>';
+
             },
           )
           .join("") +
@@ -1117,7 +1118,7 @@
       return row["theme_breadth" + period + "_pct"].toFixed(1) + "% (" + metric.above_count + "/" + metric.valid_count + ")";
     }
     function pp(value){return finite(value) ? '<span class="'+(value>0?"positive":value<0?"negative":"muted")+'">'+(value>0?"+":"")+value.toFixed(2)+' pp</span>' : "N/A";}
-    function tickerCell(row){return '<a href="'+esc(row.chart_url || "#watchlist")+'" target="_blank" rel="noopener noreferrer">'+esc(row.ticker)+'</a> '+customInfo([row.company,row.exchange,row.membership_rationale].filter(Boolean).join(" · "),"Information for "+row.ticker);}
+    function tickerCell(row){return '<span class="ticker-content"><a href="'+esc(row.chart_url || "#watchlist")+'" target="_blank" rel="noopener noreferrer">'+esc(row.ticker)+'</a> '+customInfo([row.company,row.exchange,row.membership_rationale].filter(Boolean).join(" · "),"Information for "+row.ticker)+'</span>';}
     function earnings(value) {
       return '<span>'+esc(earningsCountdown(value,data.session_date))+'</span>';
     }
@@ -1152,18 +1153,20 @@
     var visibleThemes = [];
     function render() {
       closeInfoTooltip();
-      var viewSortOptions=[["return5","1W Performance"],["return21","1M Performance"],["return63","3M Performance"],["market_cap_usd","Market Cap"],["excess21_pp","1M vs ETF (pp)"],["excess63_pp","3M vs ETF (pp)"],["weighted_excess_pp","Weighted vs ETF"],["price_close","Price"],["daily_change","1D Performance"]];
+      var viewSortOptions=[["return5","1W Performance"],["return21","1M Performance"],["return63","3M Performance"],["market_cap_usd","Market Cap"],["price_close","Price"],["daily_change","1D Performance"]];
       if(!viewSortOptions.some(function(o){return o[0]===viewState.stockKey;}))viewState.stockKey="return21";
       $("stock-sort").innerHTML=options(viewSortOptions);$("stock-sort").value=viewState.stockKey;
       setDirectionButton($("stock-direction"), viewState.stockDir);
       setDirectionButton($("theme-direction"), viewState.themeDir);
+      if(viewState.themeKey==="rank_change_daily"){viewState.themeKey="theme_score";viewState.themeDir="desc";}
+      $("theme-sort").value=viewState.themeKey;
       var all = sortRows(data.themes || [], viewState.themeKey, viewState.themeDir).map((row) => Object.assign({}, row, { display_rank: row.global_rank }));
       visibleThemes = filtered(all, "theme");
       renderThemeSelector();
       const breadthUnavailable = visibleThemes.filter((row) => row.breadth_status_21 !== "valid" || row.breadth_status_50 !== "valid").length;
       $("theme-count").textContent = visibleThemes.length + " of " + all.length + " exposures" + (breadthUnavailable ? " · " + breadthUnavailable + " with breadth unavailable" : "");
       const themeColumns = [
-        ["#", "rank_current", null, "rank_current", "Current rank", "col-rank"], ["Δ Rank", "rank_change_daily", null, "rank_change_daily", "Previous-session rank minus current-session rank", "col-rank-daily"], ["Name", "name", null, null, "Sector or theme name with exposure type", "col-name"], ["ETF", null, null, null, "Anchor ETF", "col-etf"], ["1D %", "daily_change", null, "daily_change", "TradingView one-day price change percentage for the anchor ETF.", "col-day-change"],
+        ["#", "rank_current", null, "rank_current", "Current rank", "col-rank"], ["Name", "name", null, null, "Sector or theme name", "col-name"], ["ETF", null, null, null, "Anchor ETF", "col-etf"], ["1D %", "daily_change", null, "daily_change", "TradingView one-day price change percentage for the anchor ETF.", "col-day-change"],
         ["Priority", "priority", null, "priority", "Configured directional research priority; not an entry signal.", "col-priority"], ["Priority Change", "priority_change", null, null, "Workflow change since the compatible immediately preceding session; N/A without comparable history.", "col-priority-change"], ["Score", "theme_score", null, "theme_score", "Theme Score", "col-score"], ["Current", "current_strength_score", null, "current_strength_score", "1-month Performance percentile", "col-current"], ["Medium", "medium_strength_score", null, "medium_strength_score", "3-month Performance percentile", "col-medium"],
         ["1M", "return21", null, null, "TradingView 1-month Performance", "col-return"], ["3M", "return63", null, null, "TradingView 3-month Performance", "col-return"], ["vs EMA21", null, null, null, "Anchor price relative to daily EMA21", "col-ema"], ["vs EMA50", null, null, null, "Anchor price relative to daily EMA50", "col-ema"],
         ["% > EMA21", "theme_breadth21_pct", null, "theme_breadth21_pct", "Available when at least eight configured members and 80 percent coverage have valid Price, EMA21 and EMA50 values. Does not affect Theme Score or Priority.", "col-breadth"], ["% > EMA50", "theme_breadth50_pct", null, "theme_breadth50_pct", "Available when at least eight configured members and 80 percent coverage have valid Price, EMA21 and EMA50 values. Does not affect Theme Score or Priority.", "col-breadth"],
@@ -1171,11 +1174,9 @@
       $("theme-cols").innerHTML = themeColumns.map(function (column) { return '<col class="' + column[5] + '">'; }).join("");
       head("theme", themeColumns);
       $("theme-body").innerHTML = visibleThemes.map(function (row) {
-        const type = row.level === "Sector" ? "Sector" : "Theme";
         return '<tr data-theme="' + esc(row.id) + '" class="' + (row.id === viewState.theme ? "active " : "") + (priorityCategory(row) === "primary" ? "primary-row primary-" + row.research_priority.side : "") + '">' +
           td("col-rank", row.display_rank ?? "N/A") +
-          td("col-rank-daily", finite(row.rank_change_daily) ? '<span class="' + (row.rank_change_daily > 0 ? "positive" : row.rank_change_daily < 0 ? "negative" : "muted") + '">' + (row.rank_change_daily > 0 ? "+" : "") + row.rank_change_daily + '</span>' : "N/A") +
-          td("col-name", '<div class="theme-name-cell"><span class="type-tag">' + type + '</span><button class="theme-select" aria-label="Open watchlist for ' + esc(row.name) + '">' + esc(row.name) + '</button></div>') +
+          td("col-name", '<div class="theme-name-cell"><button class="theme-select" aria-label="Open watchlist for ' + esc(row.name) + '">' + esc(row.name) + '</button></div>') +
           td("col-etf", row.chart_url ? '<a href="' + esc(row.chart_url) + '" target="_blank" rel="noopener noreferrer">' + esc(row.anchor) + '</a>' : esc(row.anchor)) +
           td("col-day-change", pct(row.daily_change)) +
           td("col-priority", '<span class="'+(row.research_priority?.category==='primary'?'':'muted')+'">'+esc(row.research_priority?.label || "Watch")+'</span>') +
@@ -1188,7 +1189,7 @@
           td("col-ema", ema(row, 21)) + td("col-ema", ema(row, 50)) +
           td("col-breadth", themeBreadthCell(row, 21)) +
           td("col-breadth", themeBreadthCell(row, 50)) + '</tr>';
-      }).join("") || '<tr><td colspan="16">No eligible ETF exposures are available in this snapshot.</td></tr>';
+      }).join("") || '<tr><td colspan="15">No eligible ETF exposures are available in this snapshot.</td></tr>';
       var selected = data.themes.find((row) => row.id === viewState.theme) || data.themes[0];
       if (!selected) {
         $("active-name").textContent = "Watchlist";
@@ -1223,13 +1224,13 @@
       base = base.map((row) => Object.assign({}, row, { theme_id: selected.id, theme_name: selected.name, generated_at: data.dashboard_generated_at || data.generated_at }));
       visible = filtered(sortRows(base, viewState.stockKey, viewState.stockDir).map((row) => Object.assign({}, row, { display_rank: row.selection_slot })), "stock");
       var hasCuratedList = base.length > 0;
-      $("stock-controls").hidden = !hasCuratedList;
+      $("stock-controls").hidden = false;
       $("stock-table-wrap").hidden = !hasCuratedList;
       $("stock-exports").hidden = !hasCuratedList;
       $("watchlist-message").hidden = hasCuratedList;
       if (!hasCuratedList) {
         $("watchlist-message").textContent = stockDrilldownMessage(selected);
-        $("coverage").textContent = "";
+        $("coverage").textContent = "0 of 0 stocks";
         visible = [];
         $("csv").disabled = true;
 
@@ -1240,9 +1241,9 @@
         ["#",null,null,null,"Stable configured position","col-rank"],["Ticker",null,null,null,"Stock ticker","col-ticker"],
         ["Price","price_close",null,null,"Stock Price","col-price"],["Market Cap","market_cap_usd",null,"market_cap_usd","Market capitalization in USD","col-cap"],
         ["1D","daily_change",null,null,"One-day price change","col-return"],["1W","return5",null,null,"1W Performance","col-return"],["1M","return21",null,null,"1M Performance","col-return"],["3M","return63",null,null,"3M Performance","col-return"],
-        ["1M vs ETF (pp)","excess21_pp",null,null,"Stock minus selected ETF 1M Performance in percentage points","col-rs-diff"],["3M vs ETF (pp)","excess63_pp",null,null,"Stock minus selected ETF 3M Performance in percentage points","col-rs-diff"],
+        ["1M vs ETF (pp)",null,null,null,"Stock minus selected ETF 1M Performance in percentage points","col-rs-diff"],["3M vs ETF (pp)",null,null,null,"Stock minus selected ETF 3M Performance in percentage points","col-rs-diff"],
         ["EMA21",null,null,null,"Price vs EMA21","col-ema"],["EMA50",null,null,null,"Price vs EMA50","col-ema"],
-        ["ATR%14","atr14_pct",null,"atr14_pct",LABELS.atr14_pct.definition,"col-return"],["Earnings",null,null,null,"Calendar days from the selected US session","col-earnings"]];
+        ["ATR%14","atr14_pct",null,"atr14_pct",LABELS.atr14_pct.definition,"col-atr"],["Earnings",null,null,null,"Calendar days from the selected US session","col-earnings"]];
       $("stock-cols").innerHTML = stockColumns.map(function(c){return '<col class="' + c[5] + '">';}).join("");
       head("stock", stockColumns);
       var stockColumnCount=stockColumns.length;
@@ -1251,7 +1252,7 @@
         const rationale = row.membership_rationale || row.evidence_note || "Business relevance rationale recorded in the membership source.";
         return '<tr tabindex="-1" data-stock-symbol="'+esc(row.tradingview_symbol)+'">' +
           td("col-rank", row.display_rank || "N/A") +
-          td("col-ticker", (url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + esc(row.ticker) + '</a>' : '<b>' + esc(row.ticker) + '</b>') + ' ' + customInfo([row.company,row.exchange,rationale].filter(Boolean).join(" · "), "Information for " + row.ticker)) +
+          td("col-ticker", tickerCell(row)) +
           td("col-price", money(row.price_close)) +
           td("col-cap",marketCap(row.market_cap_usd)) +
           td("col-return", pct(row.daily_change)) +
@@ -1261,7 +1262,7 @@
           td("col-rs-diff", pp(row.excess21_pp)) + td("col-rs-diff", pp(row.excess63_pp)) +
           td("col-ema", ema(row,21)) +
           td("col-ema", ema(row,50)) +
-          td("col-return", finite(row.atr14_pct) ? row.atr14_pct.toFixed(2) + "%" : "N/A") +
+          td("col-atr", finite(row.atr14_pct) ? row.atr14_pct.toFixed(2) + "%" : "N/A") +
           td("col-earnings", earnings(row.earnings_date)) + '</tr>';
       }).join("") || (hasCuratedList ? '<tr><td colspan="' + stockColumnCount + '">No stocks match these filters.</td></tr>' : "");
     }
