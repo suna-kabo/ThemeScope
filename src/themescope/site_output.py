@@ -231,7 +231,7 @@ def prepare_site(root,source,destination,session):
             if path.is_symlink():raise ValueError('Export source must not be a symlink')
             content=path.read_bytes();tokens=content.decode('utf-8').strip().split(',')
             if len(tokens)!=len(set(tokens)) or len(tokens)!=item['instrument_count'] or not set(tokens)<=all_symbols:raise ValueError('Website TXT contains unexpected instruments: '+item['file'])
-            if item['role'] in {'individual_primary_research','daily_primary_research'} and content.decode('utf-8')!=expected_files[item['file']]:raise ValueError('Primary export differs from weighted per-anchor qualification')
+            if item['role'] in {'individual_primary_research','daily_primary_research'} and content.decode('utf-8').replace('\r\n','\n')!=expected_files[item['file']]:raise ValueError('Primary export differs from weighted per-anchor qualification')
             if item['role']=='configured_etf_daily_data' and tokens!=list(dict.fromkeys(r['tradingview_symbol'] for r in payload['themes']+payload['context'])):raise ValueError('ETF collection list differs from complete configured universe')
             if item['role']=='individual_research':
                 theme=next(t for t in payload['themes'] if t['id']==item['theme_id'])

@@ -50,11 +50,13 @@ class SiteBoundaryTests(unittest.TestCase):
         files,manifest=primary_research(snapshot,1000)
         snapshot['export_manifest']+=manifest
         for name,content in files.items():
-            path=self.source/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_text(content)
+            path=self.source/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(content.replace('\n','\r\n').encode('utf-8'))
         def save(): (self.source/'latest_snapshot.json').write_text(json.dumps(snapshot))
         save();self.build()
         research=snapshot['daily_primary_research']
-        for name,content in files.items():self.assertEqual((self.destination/name).read_text(),content)
+        for name,content in files.items():
+            self.assertEqual((self.destination/name).read_text(),content)
+            self.assertEqual((self.destination/name).read_bytes(),(self.source/name).read_bytes())
         self.assertTrue((self.destination/research['relationships_file']).is_file())
         self.assertFalse((self.destination/'daily_primary_audit.json').exists())
         # Same instrument universe/count cannot disguise wrong order or qualification.

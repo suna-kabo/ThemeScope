@@ -1189,7 +1189,7 @@ def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_di
     export_files = build_daily_lists(snapshot, snapshot["export_configuration"])
     for name, content in export_files.items():
         (output_dir / name).parent.mkdir(parents=True, exist_ok=True)
-        (output_dir / name).write_text(content, encoding="utf-8")
+        (output_dir / name).write_text(content, encoding="utf-8", newline="\n")
     audit = snapshot["manual_csv_audit"]
     _write_json(output_dir / "latest_snapshot.json", snapshot)
     _write_json(output_dir / "run_audit.json", audit)
