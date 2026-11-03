@@ -104,6 +104,6 @@ class SiteBoundaryTests(unittest.TestCase):
         self.assertEqual(set(result['files']),{'index.html','_headers'})
 
     def test_private_payload_key_even_in_a_resealed_site_is_rejected(self):
-        self.build();path=self.destination/'index.html';text=path.read_text(encoding='utf-8');text=text.replace('"schema_version":"themescope-site-1"','"manual_csv_audit":{},"schema_version":"themescope-site-1"');path.write_text(text)
+        self.build();path=self.destination/'index.html';text=path.read_text(encoding='utf-8');text=text.replace('"schema_version":"themescope-site-1"','"manual_csv_audit":{},"schema_version":"themescope-site-1"');path.write_text(text,encoding='utf-8')
         seal_site(self.destination,'snapshot','2026-11-02')
         with self.assertRaisesRegex(ValueError,'Private metadata'):validate_site(self.destination)
