@@ -85,6 +85,7 @@ def main():
                             assert abs(g['labelLeft']-g['valueLeft'])<.6 if expected=='left' else abs(g['labelRight']-g['valueRight'])<.6 if expected=='right' else abs(g['labelCenter']-g['valueCenter'])<.6,g
                             assert g['labelFits'] and g['font']>=12 and 'tabular-nums' in g['tabular'],g
                         if prefix=='stock':
+                            assert page.locator('.stock-table-wrap').evaluate('e=>e.scrollWidth<=e.clientWidth+1')
                             gap=page.evaluate('''()=>{let r=document.querySelector('#stock-body tr'),cells=r.children,a=cells[9].querySelector('span').getBoundingClientRect(),b=cells[10].querySelector('span').getBoundingClientRect();return b.left-a.right;}''')
                             assert gap>=16,gap
                         else:
