@@ -1,97 +1,220 @@
-# ThemeScope
+# ThemeScope: local CSV refresh and optional Cloudflare Pages
 
-ThemeScope is an on-demand, offline end-of-day dashboard for US market context, ETF momentum ranking and configured stock watchlists. It does not generate entries, trade recommendations, allocations or orders.
+ThemeScope is an offline end-of-day research dashboard. **Use branch `download`, not the older `main`.** Daily use needs Python and five TradingView CSVs. It needs no market-data API, credentials, Node, database, backend or scheduler. The Cloudflare deployment branch is `pages`; publishing is a separate, deliberate operation.
 
-## Manual CSV release
+## First-time Windows setup
 
-The release accepts five user-selected TradingView CSV exports and makes no network requests during import or when the generated HTML opens. Input roles are explicit; filenames are not interpreted. The declared `--as-of` value is the US market session, even when Hong Kong export filenames show the following calendar day.
+These commands are for Windows 10/11 in **PowerShell**. Software on your PC has not been inspected. Install **Git for Windows** and **Python 3.12** first:
 
-Generate the dashboard with:
-
-```sh
-python3 scripts/generate_dashboard.py \
-  --source tradingview-csv \
-  --as-of 2026-11-02 \
-  --stock-csv /path/to/Daily_Stock.csv \
-  --etf-csv /path/to/Daily_ETF.csv \
-  --spy-csv /path/to/SPY_constituents.csv \
-  --qqq-csv /path/to/QQQ_constituents.csv \
-  --iwm-csv /path/to/Russell_2000_constituents.csv \
-  --output-dir output/manual_csv
+```powershell
+winget install --id Git.Git --exact --source winget
+winget install --id Python.Python.3.12 --exact --source winget
 ```
 
-The command validates all five schemas, the session, anchor completeness and breadth-universe sanity checks before calculation. Outputs are staged and validated before publication. A failed import writes `failed_attempt_audit.json` and preserves the previous dashboard and its original session.
+If `winget` is unavailable, use the official [Git Windows installer](https://git-scm.com/downloads/win) and [Python 3.12 Windows installer](https://www.python.org/downloads/release/python-31210/). Include the Python launcher (`py`) and Git command-line tools. Close and reopen PowerShell after installation, then verify:
 
-The dashboard is self-contained. The output directory also contains `run_audit.json`, canonical JSON/CSV exports, individual TradingView watchlists and their ZIP, optional flat broad scans and `run_bundle.zip`. These files remain local unless the user explicitly moves them.
-
-## Maintain stock watchlists
-
-The fixed many-to-many memberships are in `config/theme_watchlists.json`: all 53 active exposures, up to 20 configured companies per list, with honest shorter lists retained for narrow themes. Daily CSV import does not change this file.
-
-Membership maintenance is separate from daily refresh. The manual import joins CSV rows to configured memberships and never removes an absent member or rebuilds lists from performance, turnover, Sector or Industry. An explicit maintenance workflow remains available:
-
-```sh
-python3 scripts/maintain_watchlists.py --input licensed_candidate_snapshot.csv --maintenance-date YYYY-MM-DD
+```powershell
+git --version
+py -3.12 --version
+Set-Location $env:USERPROFILE
+git clone --branch download https://github.com/suna-kabo/ThemeScope.git ThemeScope
+Set-Location .\ThemeScope
+.\setup.cmd
 ```
 
-Stock price, average dollar volume, market-cap and history filters are configured under `settings.watchlist_stock_filters` in `config/themes.json`. Ordinary dashboard refresh does not conduct company research, retrieve SEC filings, request daily market caps, or reconstruct memberships from ETF holdings.
+The repository is private: sign into GitHub through Git's browser/credential-manager prompt. Never paste credentials into chat or files in the repository. If `ThemeScope` already exists, stop and inspect it rather than overwriting it. An alternative is GitHub's **download branch → Code → Download ZIP**; extract it, open that folder, and run `setup.cmd`. Git updates and Pages staging require a clone.
 
-## Methodology
+Setup creates **`.venv` inside this folder**, installs the pinned, hash-checked `tzdata` package required for Windows timezone support, verifies the actual manual-CSV imports, and creates collection lists. Everything else in the daily Python path uses the standard library. No PowerShell activation or execution-policy change is needed. Setup can be rerun; it does not erase an existing environment, collect data, refresh a dashboard or publish anything.
 
-Current is the ascending percentile of TradingView 1-month Performance. Medium is the ascending percentile of TradingView 3-month Performance, using the same eligible anchor set. Theme Score is `0.60 × Current + 0.40 × Medium`; four states compare those percentiles with 50. TradingView 1-week Performance is context only. EMA, Breadth, stocks and market context never enter Theme Score, State or rank. Average ranks resolve exact ties.
+The `.cmd` launchers work from another working directory and keep their console open after an error. You may double-click them. `refresh.cmd` and `prepare-site.cmd` ask for the US session when no arguments are supplied.
 
-Theme Breadth uses the fixed configured stock list. It requires at least 8 valid rows and 80% configured-list coverage. SPY, QQQ and Russell 2000 Breadth come from their explicitly assigned TradingView exported-universe snapshots. Russell 2000 Breadth and the IWM price-state card remain context only.
+## Exact daily TradingView CSV exports
 
-SPY and QQQ price consensus plus combined SPY/QQQ Breadth produce the five-level Market classification. IWM, Russell 2000 Breadth and VIX do not vote. VIX is hidden when no optional current input exists.
+Export **after the intended US trading session closes**, using daily EMA/ATR/volume fields. Export the complete requested universe, without performance, turnover, price or market-cap screener filters. The code joins the fixed memberships; it does not rebuild them from that day's screen.
 
-## Checks and files
+| Role | TradingView universe | Simple filename |
+|---|---|---|
+| Stock | Every fixed configured stock from `inputs\_lists\Daily_Data_Stocks.txt` | `Daily_Stock.csv` |
+| ETF | Every anchor plus SPY, QQQ and IWM from `inputs\_lists\Daily_ETFs.txt` | `Daily_ETF.csv` |
+| SPY breadth | Full S&P 500 constituent universe | `SPY.csv` |
+| QQQ breadth | Full Nasdaq-100 constituent universe | `QQQ.csv` |
+| IWM context breadth | Full Russell 2000 constituent universe | `IWM.csv` |
 
-Run the repository checks with:
+Setup currently exports 563 unique stock identities and 56 ETFs/benchmarks, derived from configuration. Import those two TXT collection lists into TradingView to select the required instruments. They contain symbols, not prices. The three breadth CSVs contain **constituent rows**, not one ETF row; an IWM price row or an arbitrary small-cap screen cannot replace Russell 2000 breadth. Your TradingView account must allow the relevant universe/CSV exports. The account UI and constituent selection were not tested here; existing supplied files were used for end-to-end validation.
 
-```sh
-python3 -m unittest discover -s tests -v
-python3 -m compileall -q src scripts tests
-node --check static/dashboard.js
-node tests/test_dashboard.js
-python3 tests/browser_check_navigation.py output/manual_csv/dashboard.html
-python3 tests/browser_check_terminal.py output/manual_csv/dashboard.html
-python3 tests/browser_check_manual.py output/manual_csv/dashboard.html
-python3 tests/check_scanning_exports.py output/manual_csv
+Required exported **column headers** (header aliases are in `src/themescope/manual_csv.py`; extra columns are allowed):
+
+- **Stock and ETF:** `Symbol`, `Description`, `Price`, `Price change %, 1 day`, `Performance %, 1 week`, `Performance %, 1 month`, `Performance %, 3 months`, `Exchange`, `Exponential moving average, 21, 1 day`, `Exponential moving average, 50, 1 day`, `Average true range %, 14, 1 day`, `Price × volume (turnover), 1 day`, `Relative volume, 1 day`.
+- **Additional Stock fields:** `Market capitalization`, `Industry`, `Sector`, `Price × average volume, 30 days`.
+- **Each breadth CSV:** `Symbol`, `Price`, `Exponential moving average, 21, 1 day`, `Exponential moving average, 50, 1 day`.
+- **Optional:** `Upcoming earnings date` (ISO `YYYY-MM-DD` expected dates; blank means unavailable), currency and other recognized fields. Use USD quotes for the configured US instruments; no FX conversion is performed.
+
+Keep TradingView's native CSV headers and numeric values. Percent values are parsed as percentage units and normalized once. Duplicate symbols and malformed numbers are rejected. Stock and required-anchor numeric cells must be valid; Market Cap can be unavailable with a warning. Blank numeric cells on unrelated ETFs in a broader ETF file are audited but do not enter calculations. Breadth rows with blank Price/EMA stay in the denominator, reducing coverage. Current sanity ranges are 350–700 SPY rows, 70–150 QQQ rows and 1,000–3,000 Russell 2000 rows; these checks do not prove constituent identity or licensing.
+
+## Input folder and session date
+
+Make a **new folder for the US session**, not the Hong Kong export date. For the supplied 3 November Hong Kong exports, the US session is 2 November:
+
+```powershell
+Set-Location "$env:USERPROFILE\ThemeScope"
+New-Item -ItemType Directory -Force .\inputs\2026-11-02
 ```
 
-The browser check requires Playwright and Chromium. Generated runs belong in ignored `output/` or `dist/`; the persistent `cache/` is ignored by Git. Theme breadth snapshot and export fields use `theme_breadth21_*` and `theme_breadth50_*`; index breadth remains a separate market-context measure.
+Put exactly these five files into it; either naming style below works:
 
-Key files:
+```text
+C:\Users\Alice\ThemeScope\inputs\2026-11-02\
+    Daily_Stock_2026-11-03.csv
+    Daily_ETF_2026-11-03.csv
+    SPY_2026-11-03.csv
+    QQQ_2026-11-03.csv
+    IWM_2026-11-03.csv
+```
 
-- `config/themes.json`: exposure records, ranking, eligibility and watchlist-maintenance settings.
-- `config/active_anchors.json`: the 53 active anchor choices and retained inactive-candidate notes.
-- `config/theme_watchlists.json`: approved stable theme membership.
-- `config/calendars/xnys_2020_2035_v1.json`: versioned XNYS sessions and actual close times.
-- `src/themescope/manual_csv.py`: TradingView header normalization, validation and manual-input calculations.
-- `src/themescope/watchlists.py`: membership validation, stock metrics and watchlist breadth.
-- `scripts/maintain_watchlists.py`: one-time eligibility import, explicit theme assignment, and audited apply workflow.
-- `scripts/generate_dashboard.py`: calculations, exports, offline dashboard and staged publication.
+`Alice` is a folder example, not text to put into commands. Undated `Daily_Stock.csv`, `Daily_ETF.csv`, `SPY.csv`, `QQQ.csv`, `IWM.csv` are also accepted. One Windows download suffix such as `(1)` is accepted if it is the only matching export. **Two matching files for a role cause an error; the script never chooses whichever is newest.** Dated names must agree with the US date or the next calendar day. The folder date must match `--session`.
 
-### Local daily rank history
+You explicitly select `--session`. The wrapper checks the versioned US calendar, holidays, actual close times and DST, and rejects a session that has not closed. It never infers the session from the filename or silently advances it to today's date. CSVs generally lack quote timestamps: the program cannot independently certify when every row was exported. Export fresh files after the declared close. Reusing byte-identical inputs from the previous successful session is rejected; rerunning the same explicitly declared session is allowed.
 
-Successful manual imports save `local_history/YYYY-MM-DD.json` inside the output directory and include the current session record in the run ZIP. Reuse the same output directory for daily runs and preserve its `local_history` folder. Δ Rank compares canonical ranks only against the immediately preceding US trading session with matching methodology, ranking configuration and eligible anchors. First runs and missing or incompatible prior sessions show N/A. Same-session reruns replace that date only; failed imports preserve existing dashboard/history. Synthetic history tests use temporary directories.
+## Daily refresh
 
-### Daily scanning files and views
+From PowerShell in the repository:
 
-Individual sector/theme files are the primary research export: one per configured active exposure, named ETF first (for example `SMH_Semiconductors.txt`), with the resolved ETF anchor followed by up to 20 configured stocks. They have no section tokens. Download all from `individual_theme_watchlists.zip`, or download the selected Watchlist. Cross-theme memberships remain complete in separate files. Update these lists only when memberships or validated identifiers change.
+```powershell
+.\refresh.cmd --session 2026-11-02
+```
 
-**Daily Data Stocks — export CSV only** (`tradingview_configured_stocks.txt`) is the separate stock-only, section-free, deduplicated collection list. Import it into TradingView to export daily data for all configured members without screener filters. It does not require reimporting individual research lists every day. Candidate screening CSV remains optional maintenance input; generation still requires only the existing five CSV roles. Missing daily rows remain configured and are reported.
+For a later day, create that US session's folder, export all five fresh files, and supply that session date. Double-clicking `refresh.cmd` prompts for it. A specific input folder is optional; relative paths are always resolved from the repository:
 
-The five versioned groups in `config/watchlist_exports.json`, plus the retained all-theme filename, are optional broad scans. They contain unique instruments without theme sections. The user confirmed through round-trip exports that TradingView deduplicated repeated symbols in a grouped list, losing later membership occurrences. The raw round-trip artifacts are unavailable in this session, so this observation is user-confirmed rather than independently reproduced here; it is not a guarantee about future platform versions.
+```powershell
+.\refresh.cmd --session 2026-11-02 --input-dir inputs\2026-11-02
+```
 
-Daily Plan previews five themes per research group, reports the full count and offers Show all / Show less and Score order. Short groups default to ascending Score; long and observation groups default to descending Score with stable identity ties. Preview order does not imply entry readiness. Expected earnings is a visible section based independently on configured members of final Primary themes, deduplicated by validated instrument identity, from the as-of session through seven calendar days later. Unknown dates remain accessible. Daily Primary Candidates and their dedicated exports have been removed.
+The launcher uses the existing manual-CSV generator, equivalent to:
 
-Watchlist initially opens in Relative Strength and remembers an explicit view choice. Its # column is stable configured membership position in both views. Matching TradingView stock-minus-selected-ETF differences are percentage points. Navigation restores each page's scroll and each theme/view's table scroll, search and sort; priority expansion and methodology state survive navigation. Local UI state is namespaced by schema/session and storage failures are tolerated.
+```powershell
+.\.venv\Scripts\python.exe .\scripts\generate_dashboard.py --source tradingview-csv --as-of 2026-11-02 --stock-csv .\inputs\2026-11-02\Daily_Stock_2026-11-03.csv --etf-csv .\inputs\2026-11-02\Daily_ETF_2026-11-03.csv --spy-csv .\inputs\2026-11-02\SPY_2026-11-03.csv --qqq-csv .\inputs\2026-11-02\QQQ_2026-11-03.csv --iwm-csv .\inputs\2026-11-02\IWM_2026-11-03.csv --output-dir output\manual_csv
+```
 
-The interface uses neutral charcoal, restrained amber controls, local monospace data and bundled Inter explanations. Light mode and mobile tables remain available. See `PRODUCT.md`, `DESIGN.md` and `docs/navigation_export_release_audit.md`.
+Use the launcher for the additional date/folder/stale-file checks. The lower-level command is shown to make the real entry point explicit. **Do not run the legacy generator without `--source tradingview-csv`; its default is an older collection path, not this setup.**
 
-Each individual file contains its anchor in addition to configured stock slots. Optional broad scans and Daily Data Stocks split deterministically at the configured 1,000-instrument limit. All files reuse `config/tradingview_symbols.json`; unresolved identities fail generation rather than acquiring guessed prefixes. Actual imports of the revised files have not been performed in a TradingView account.
+Validation and calculation happen before staged publication. Failed imports preserve the last successful HTML, real dates and history. A failure may create `output\manual_csv\failed_attempt_audit.json` locally; it is not a new successful run. Refresh never changes `site/`, runs Git, pushes or deploys.
 
-Sectors & Themes includes sortable **1D %** directly after ETF. It displays the existing canonical fractional `daily_change` as percent; full and visible CSV exports use `change_1d_pct` in percentage units. Score, State, rank and Priority do not use this column.
+## Opening and checking the dashboard
 
-Watchlist's upper **Find** field navigates by ticker, company, theme or ETF anchor. Stocks have separate results for every theme membership, including missing daily rows. Results rank exact ticker/anchor, prefix, substring, then text, with stable ties and no Score/Performance influence. Results initially show up to 12 per group, with exact counts and Show more. Arrow keys, Enter, Escape, mouse and touch are supported. Stock selection keeps the chosen view, reveals/highlights the row and clears only hiding filters; Back restores the previous filters, sort and scroll. The lower Search field continues to filter the selected Watchlist.
+```powershell
+.\open-dashboard.cmd
+```
+
+This opens `http://127.0.0.1:8000/dashboard.html` and serves **only** `output\manual_csv` on your own PC. Keep its console window open. Ctrl+C stops it. It is a local static-file preview, not an API/backend. If port 8000 is busy, use `--port 8001`. Refreshing in another window updates files; reload the browser and check **Data through**, the generated timestamp, coverage and unavailable rows. A first refresh has no comparable previous history, so Δ Rank can correctly be N/A.
+
+The local folder contains private audits, input metadata, normalized raw payloads and a run ZIP. Do not publish that folder. Expected earnings dates remain unverified. Primary/Secondary labels are research priorities, not entry signals. Missing daily rows do not remove configured stocks. Individual research watchlists update only when membership/identifiers change; the separate Daily Data Stocks list is for daily CSV collection.
+
+## Common errors and recovery
+
+| Error | What to do |
+|---|---|
+| `py`, `python` or `git` not found | Install the software above; reopen PowerShell and verify versions. |
+| Missing/incomplete `.venv` or timezone error | Run `setup.cmd`. If an existing environment is invalid, rename `.venv` as a backup first; setup never deletes it automatically. |
+| Setup cannot download `tzdata` | Check your internet/proxy access and retry setup. Daily refresh itself does not need network access. |
+| Missing role, duplicate file or wrong filename date | Correct the five-file folder; remove obsolete duplicates from that folder. No cached file will be selected. |
+| Weekend, holiday, future or not-yet-closed session | Use the US session you actually exported after close, not the next Hong Kong calendar date. |
+| Input identical to previous session | Re-export that universe. If this really is the same historical session, explicitly rerun that date. |
+| Missing columns, malformed values or missing anchor | Export the listed fields/instruments again. Do not fill a missing value with invented data. |
+| Breadth unavailable or missing stock rows | Check exported universe/coverage; use complete collection lists without screener filters. Existing minimum-eight/80% rules still apply. |
+| Existing same-session history is malformed | Back up the entire output folder, inspect the reported record, and restore the genuine backup; never invent prior ranks. |
+| Site validation finds extra/modified files | Do not force a build. Move the edited site aside as a backup, inspect it, then prepare a clean site. |
+
+An error leaves the previous success intact. Its older **Data through** date remains real; success is not inferred from the fact that an HTML file exists.
+
+## History storage and backup
+
+Daily rank history lives at **`output\manual_csv\local_history\YYYY-MM-DD.json`**, locally and outside Git. Always reuse `output\manual_csv`. Matching methodology, anchors and eligible universe plus the immediately preceding US session are required for comparisons. A first run or a missing/incompatible prior session shows N/A; same-session reruns replace that date only.
+
+Back up the complete private output folder outside the repository before moving PCs, replacing a checkout or repairing history:
+
+```powershell
+Copy-Item -Recurse .\output\manual_csv (Join-Path $env:USERPROFILE ("ThemeScope-backup-" + (Get-Date -Format yyyyMMdd-HHmmss)))
+```
+
+To restore history, copy the genuine backup's `local_history` folder into `output\manual_csv\local_history` before refreshing. A downloaded older private run bundle may contain real history, but do not assume it includes every prior session. Never replace history with test fixtures. Cloudflare is **not** the history store: it receives only already computed display values, including the visible Δ Rank and comparison date, not internal history records/fingerprints or raw inputs. A Pages build does not calculate or retain local history.
+
+## Updating local source from GitHub safely
+
+From the `download` checkout:
+
+```powershell
+git status --short
+git fetch origin
+git log --oneline HEAD..origin/download
+git pull --ff-only origin download
+.\setup.cmd
+```
+
+If `git status` lists changes to source/config, stop and back them up or commit your intentional edits before pulling. Do not use `reset --hard`, force-push or delete the folder. A non-fast-forward error needs review, not a forced update. Inputs, outputs, `.venv`, caches and prepared `site/` are ignored. Existing legacy bundles/audit documents already tracked by the private repository remain historical; they are never selected as Pages assets. Do not use `git add .` to publish.
+
+## Prepare `site/` separately — no deployment
+
+After a successful refresh:
+
+```powershell
+.\prepare-site.cmd --session 2026-11-02
+.\preview-site.cmd
+```
+
+Preview opens `http://127.0.0.1:8000/index.html`. Stop the other preview first or add `--port 8001`. Only **`site/`** is deployable. It contains `index.html` with inline code/fonts and a sanitized display payload, the intended CSV/TXT downloads and individual-watchlist ZIP, font license, public snapshot summary, headers and a hashed file manifest. It does **not** contain the whole repository, private run ZIP, raw CSVs/normalized inputs, audits, configuration review evidence, absolute input paths or internal history files. CSVs are regenerated from the same sanitized payload; TXT contents are checked against configured identities.
+
+Preparation requires the saved session to match explicitly; it cannot relabel an old dashboard. A staged/validated directory replacement preserves the previous site on failure and refuses to discard unrecognized edits. Neither preparation nor preview performs a Git commit, push or Cloudflare operation. `site/` is ignored in the source checkout to prevent accidental publishing.
+
+## Cloudflare Pages Git integration (when you choose to deploy)
+
+No Cloudflare project, domain or deployment is created by these scripts. When ready, connect the **private** `suna-kabo/ThemeScope` repository using Cloudflare Pages' GitHub integration and grant access only as needed. Use these exact settings:
+
+| Setting | Value |
+|---|---|
+| Production branch | **`pages`** |
+| Framework preset | **None** |
+| Root directory | Repository root (leave blank) |
+| Build command | **`python scripts/pages_build.py`** |
+| Build output directory | **`site`** |
+| Build environment variable | **`PYTHON_VERSION=3.12`** |
+| Preview branch deployments | **None / disabled** (default all-branch previews would publish other branches) |
+| Production automatic deployment | Leave disabled while preparing; enable only when you intend `pages` pushes to publish |
+| Secrets/API keys | None for this static/manual workflow |
+
+The `pages` branch is prepared with source and **no committed market site**. A fresh checkout's build creates an empty placeholder if no `site/` was explicitly committed. It never opens an old download ZIP or looks for CSVs. Once a dated site is committed, the build validates its file hashes/allowlist and uploads only `site/`. Unexpected/private artifacts make it fail. Even connecting a new Pages project can deploy its placeholder; **do not create/connect/save a deployment now if you want no public deployment yet**.
+
+The public data workflow below is for a later, deliberate deployment; **do not run the commit/push steps until you intend the snapshot to be hosted**. Keep source and Pages worktrees separate. First time only, from the source checkout:
+
+```powershell
+git fetch origin
+git worktree add --track -b pages ..\ThemeScope-pages origin/pages
+```
+
+After preparing and reviewing `site/`, stage it in the separate worktree:
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\stage_site.py ..\ThemeScope-pages
+git -C ..\ThemeScope-pages add -f -- site
+git -C ..\ThemeScope-pages diff --cached --stat
+```
+
+`stage_site.py` checks that this is a clean `pages` worktree of the same repository and copies only the validated website. It does not commit or push. Review the session/data/downloads first. When you explicitly want publication:
+
+```powershell
+git -C ..\ThemeScope-pages commit -m "Publish reviewed ThemeScope snapshot"
+git -C ..\ThemeScope-pages push origin pages
+```
+
+For subsequent publication, first ensure the Pages worktree is clean, then `git -C ..\ThemeScope-pages pull --ff-only origin pages`. After source updates, fetch and run `git -C ..\ThemeScope-pages merge --no-edit origin/download` in the deployment worktree before staging, so its validator/template source is current. Resolve any conflict without discarding work. Refresh and site preparation alone never publish. Source-only pushes to `download` do not deploy when previews are disabled and production is `pages`.
+
+Official references: [Pages Git integration](https://developers.cloudflare.com/pages/configuration/git-integration/), [build configuration](https://developers.cloudflare.com/pages/configuration/build-configuration/), [branch controls](https://developers.cloudflare.com/pages/configuration/branch-build-controls/). Settings/build behavior were prepared and tested locally; your Cloudflare account integration, permissions and actual deployment remain untested.
+
+## Code privacy versus website data
+
+A private GitHub repository hides its source from unauthenticated GitHub visitors; Cloudflare's authorized build still reads the repository. A normal Pages website is publicly accessible. Visitors can read its inline HTML/JavaScript/data and download every deployed asset, including visible prices, ranks, configured memberships and CSVs. Private Git does **not** make website data private. The sanitizer removes internal artifacts, not the financial information the dashboard intentionally displays. Decide whether that public access is intended before enabling deployment; no authentication or access-protection system is added here.
+
+## Methodology and developer checks
+
+Methodology is unchanged: Score is 60% Current (1M ascending average-rank percentile) plus 40% Medium (3M), with the same four States, Market matrix, EMA50 guard and fixed many-to-many memberships. Theme Breadth requires at least eight valid members and 80% coverage. Watchlist defaults to Relative Strength, configured # stays stable, and stock-minus-anchor differences are percentage points. Daily Primary Candidates remain removed.
+
+Developer/browser checks are optional, **not daily dependencies**. The existing `requirements-dev.txt` pins Playwright; installing it and its Chromium browser is needed only for browser tests. Node is needed only for JS helper tests. Standard checks are `python -m unittest discover -s tests`, `node tests/test_dashboard.js`, `python tests/check_scanning_exports.py output/manual_csv`, and `python tests/browser_check_site.py site`. Windows launchers and a clean synthetic end-to-end install also have a separate Windows CI check. This does not mean the code has been tested on your particular Windows PC.

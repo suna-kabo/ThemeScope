@@ -6,3 +6,11 @@ __pycache__/
 /exports/
 /ThemeScope-delivery.zip
 /cache/
+
+# First-time local use and explicit deployment preparation
+/.venv/
+/inputs/
+/site/
+/.themescope-site-*/
+.env
+.env.*
