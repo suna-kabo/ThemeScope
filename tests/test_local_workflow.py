@@ -45,3 +45,31 @@ class InputSelectionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'identical to the previous'):self.paths()
         value['session_date']='2026-11-02';(out/'latest_snapshot.json').write_text(json.dumps(value))
         self.assertEqual(len(self.paths()),5) # Explicit rerun of the same session is allowed.
+
+class MultipleSessionTests(unittest.TestCase):
+    setUp=InputSelectionTests.setUp
+    paths=InputSelectionTests.paths
+    def test_two_sessions_coexist_without_cross_folder_selection(self):
+        self.now=datetime(2026,11,5,0,tzinfo=timezone.utc)
+        newer=self.root/'inputs/2026-11-03';newer.mkdir()
+        for stem in STEMS.values():(newer/(stem+'_2026-11-04 (1).csv')).write_text('new data')
+        self.assertTrue(all(path.parent==self.folder for path in self.paths().values()))
+        self.assertTrue(all(path.parent==newer for path in self.paths('2026-11-03').values()))
+        (newer/'SPY_2026-11-04 (1).csv').unlink()
+        with self.assertRaisesRegex(ValueError,'found 0'):self.paths('2026-11-03')
+        self.assertEqual(len(self.paths()),5) # Incomplete newer folder does not poison older.
+        with self.assertRaisesRegex(ValueError,'missing'):self.paths(folder='inputs/not-here')
+    def test_exact_suffixes_bad_dates_and_no_implicit_role_merge(self):
+        self.now=datetime(2026,11,5,0,tzinfo=timezone.utc)
+        spy=self.folder/'SPY_2026-11-03.csv';spy.rename(self.folder/'SPY_2026-11-03 (1).csv')
+        self.assertEqual(len(self.paths()),5)
+        (self.folder/'SPY_2026-11-03 (2).csv').write_text('duplicate')
+        with self.assertRaisesRegex(ValueError,'found 2'):self.paths()
+        (self.folder/'SPY_2026-11-03 (2).csv').unlink()
+        (self.folder/'SPY_2026-11-03 (1).csv').rename(self.folder/'SPY_2026-11-04.csv')
+        with self.assertRaisesRegex(ValueError,'filename date'):self.paths()
+    def test_explicit_older_replay_does_not_apply_forward_freshness_heuristic(self):
+        out=self.root/'output/manual_csv';out.mkdir(parents=True)
+        value={'session_date':'2026-11-03','manual_csv_audit':{'inputs':{'spy':{'sha256':hashlib.sha256(b'test data').hexdigest()}}}}
+        (out/'latest_snapshot.json').write_text(json.dumps(value))
+        self.assertEqual(len(self.paths()),5)

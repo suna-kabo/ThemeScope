@@ -195,16 +195,13 @@ def validate_site(folder):
 def replace_site(stage,destination):
     """Replace only a previously sealed generated site, with rollback on failure."""
     if destination.exists():validate_site(destination)
-    backup=stage.parent/'previous-site'
-    existed=destination.exists()
-    if existed:os.replace(destination,backup)
-    try:os.replace(stage,destination)
-    except BaseException:
-        if existed:os.replace(backup,destination)
-        raise
+    from .local_publication import publish_tree
+    previous={p.relative_to(destination).as_posix() for p in destination.rglob('*') if p.is_file()} if destination.exists() else set()
+    current={p.relative_to(stage).as_posix() for p in stage.rglob('*') if p.is_file()}
+    publish_tree(stage,destination,previous-current,validate_site)
 
 
-def prepare_site(root,source,destination,session):
+def _prepare_site(root,source,destination,session):
     root,source,destination=root.resolve(),source.resolve(),destination.resolve()
     if destination==root or destination==source or destination in source.parents or source in destination.parents:
         raise ValueError('Site must be separate from repository root and private run output')
@@ -259,6 +256,15 @@ def prepare_site(root,source,destination,session):
         write_json(stage/'snapshot_summary.json',{'session_date':session,'generated_at_hkt':payload['dashboard_generated_at_hkt_display'],'source':'User-supplied TradingView CSV exports','configured_themes':len(payload['themes']),'configured_unique_stocks':len(stocks),'missing_daily_stocks':sum(s['metric_status']!='available' for s in stocks.values()),'rank_comparison_session':payload['local_history']['comparison_session']})
         seal_site(stage,'snapshot',session);validate_site(stage);replace_site(stage,destination)
     return validate_site(destination)
+
+
+def prepare_site(root,source,destination,session):
+    from .local_publication import output_lock,recover,validate_published_files
+    root,source,destination=Path(root).resolve(),Path(source).resolve(),Path(destination).resolve()
+    if destination==root or destination==source or destination in source.parents or source in destination.parents:raise ValueError('Site must be separate from repository root and private run output')
+    with output_lock(source,timeout=5),output_lock(destination,timeout=5):
+        recover(source);recover(destination);validate_published_files(source)
+        return _prepare_site(root,source,destination,session)
 
 
 def placeholder_site(destination):

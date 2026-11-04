@@ -39,6 +39,6 @@ class PolicyPublicationTests(unittest.TestCase):
                 self.assertEqual(_run_manual_csv(args,out,time.perf_counter()),1)
             for path,content in before.items():self.assertEqual((root/path).read_bytes(),content,str(path))
             self.assertFalse(list(history.glob('backups/*.json')))
-            self.assertTrue(json.loads((out/'failed_attempt_audit.json').read_text())['dashboard_preserved'])
+            failed=json.loads((out/'failed_attempt_audit.json').read_text());self.assertTrue(failed['dashboard_preserved']);self.assertIn('injected final dashboard',failed['reason'])
 
 if __name__=='__main__':unittest.main()

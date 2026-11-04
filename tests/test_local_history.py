@@ -43,6 +43,18 @@ class LocalHistoryTests(unittest.TestCase):
         future=self.history/'2026-11-02.json';future.write_text('unrelated newer data')
         apply(self.s,self.history,self.calendar);self.assertEqual(future.read_text(),'unrelated newer data')
 
+class DisplayIsolationTests(unittest.TestCase):
+    def test_compacting_dashboard_does_not_mutate_history_or_source_metadata(self):
+        from scripts.generate_dashboard import _dashboard_snapshot
+        from src.themescope.local_history import market_history_inputs
+        snapshot={'themes':[],'context':[{'ticker':'SPY','index_breadth':{'21':{'value':80,'valid_count':8,'eligible_count':10,'coverage_pct':80}}}]}
+        before=copy.deepcopy(snapshot);history=market_history_inputs(snapshot['context'])
+        displayed=_dashboard_snapshot(snapshot)
+        self.assertEqual(snapshot,before)
+        self.assertNotIn('coverage_pct',displayed['context'][0]['index_breadth']['21'])
+        self.assertNotIn('coverage_pct',history[0]['index_breadth']['21'])
+        self.assertEqual(history[0]['index_breadth']['21']['value'],80)
+
 class PrimaryCategoryTests(unittest.TestCase):
     def test_final_guard_controls_category_for_both_directions(self):
         from src.themescope.approved_rules import canonical_decision, priority

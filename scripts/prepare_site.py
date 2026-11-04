@@ -9,7 +9,12 @@ from src.themescope.site_output import prepare_site
 
 
 def main():
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--session');args=parser.parse_args()
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--session');parser.add_argument('--recover',action='store_true');args=parser.parse_args()
+    if args.recover:
+        from src.themescope.local_publication import output_lock,recover
+        with output_lock(ROOT/'site',timeout=5):restored=recover(ROOT/'site')
+        print('Interrupted site preparation restored.' if restored else 'No interrupted site preparation needs recovery.')
+        return 0
     session=args.session
     if not session:
         if not sys.stdin.isatty():parser.error('--session is required')

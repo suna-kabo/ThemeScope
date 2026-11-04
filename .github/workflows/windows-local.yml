@@ -26,5 +26,11 @@ jobs:
         run: python -m unittest discover -s tests -p test_refinement.py
       - name: Migration and publication rollback
         run: python -m unittest discover -s tests -p test_policy_publication.py
+      - name: Preview HTTP, exclusive ports and publication recovery
+        run: |
+          python -m unittest discover -s tests -p test_preview.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m unittest discover -s tests -p test_local_publication.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Native CMD launchers, clean environment, failure preservation and history
         run: python tests/smoke_local_install.py

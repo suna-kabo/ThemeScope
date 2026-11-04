@@ -14,3 +14,7 @@ __pycache__/
 /.themescope-site-*/
 .env
 .env.*
+
+# Local publication recovery stays private, outside the served site.
+/.site-publication.lock
+/.site-publication/

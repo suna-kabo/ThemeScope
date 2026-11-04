@@ -105,7 +105,13 @@ Validation and calculation happen before staged publication. Failed imports pres
 .\open-dashboard.cmd
 ```
 
-This opens `http://127.0.0.1:8000/dashboard.html` and serves **only** `output\manual_csv` on your own PC. Keep its console window open. Ctrl+C stops it. It is a local static-file preview, not an API/backend. If port 8000 is busy, use `--port 8001`. Refreshing in another window updates files; reload the browser and check **Data through**, the generated timestamp, coverage and unavailable rows. A first refresh has no comparable previous history, so Δ Rank can correctly be N/A.
+Double-click **open-dashboard.cmd** after refresh. Its console prints the absolute folder, preview type, real US session, generation time, HTML fingerprint and **exact URL**. Use that URL; do not reuse a tab/bookmark from another downloaded copy. The server binds **127.0.0.1 only**, normally on port 8000 for dashboard output. It selects an available port if the default is busy and opens the browser only after binding succeeds. Leave the console open; Ctrl+C stops that preview.
+
+Double-click **preview-site.cmd** only after preparing the desired session. Prepared-site preview normally uses **8001**, so it can coexist with dashboard preview. Both defaults can select another free port; the printed URL is authoritative. Explicit `--port` remains strict: an occupied requested port fails clearly, opens no browser and stops no process. For a chosen alternative use `.\open-dashboard.cmd --port 8002` or `.\preview-site.cmd --port 8003`.
+
+Preview HTML and metadata use no-store/no-cache responses, and preview does not return a stale 304 after regeneration. URLs include the project-copy identity and a versioned static-file prefix. Reloading an old HTML URL redirects to the current completed version. An old tab's download links return a clear reload message instead of downloading files from a newer run under an older date. No polling or automatic requests were added to the exported dashboard.
+
+If preview shows the wrong date: compare **Serving directory**, **Actual snapshot session**, **Exact URL**, and **Latest metadata URL** in the intended console. Check whether you launched dashboard output or prepared site. Close only the known old preview console with Ctrl+C, then launch from the intended project folder and use its newly printed URL. Clearing cache is not the first diagnostic step. Refresh/preparation may run while preview stays open; reload after success. Requests during publication return a temporary-unavailable response, never staging/mixed files. Moving a project or updating from a ZIP requires stopping active refresh/preparation operations first; relaunch preview from its new folder afterward. Launchers work from another working directory and with spaces/Unicode in the project path.
 
 The local folder contains private audits, input metadata, normalized raw payloads and a run ZIP. Do not publish that folder. Expected earnings dates remain unverified. Primary long, Watch and Primary short are research priorities, not entry signals. Missing daily rows do not remove configured stocks. Full individual watchlists contain configured memberships. Daily Primary downloads are filtered research lists that change each session; complete stock/ETF collection lists remain separate.
 
@@ -161,9 +167,9 @@ After a successful refresh:
 .\preview-site.cmd
 ```
 
-Preview opens `http://127.0.0.1:8000/index.html`. Stop the other preview first or add `--port 8001`. Only **`site/`** is deployable. It contains `index.html` with inline code/fonts and a sanitized display payload, the intended CSV/TXT downloads and individual-watchlist ZIP, font license, public snapshot summary, headers and a hashed file manifest. It does **not** contain the whole repository, private run ZIP, raw CSVs/normalized inputs, audits, configuration review evidence, absolute input paths or internal history files. CSVs are regenerated from the same sanitized payload; TXT contents are checked against configured identities.
+Prepared-site preview uses the exact URL printed by `preview-site.cmd`, normally on port 8001 (or an automatically selected free port). Only **`site/`** is deployable. It contains `index.html` with inline code/fonts and a sanitized display payload, the intended CSV/TXT downloads and individual-watchlist ZIP, font license, public snapshot summary, headers and a hashed file manifest. It does **not** contain the whole repository, private run ZIP, raw CSVs/normalized inputs, audits, configuration review evidence, absolute input paths or internal history files. CSVs are regenerated from the same sanitized payload; TXT contents are checked against configured identities.
 
-Preparation requires the saved session to match explicitly; it cannot relabel an old dashboard. A staged/validated directory replacement preserves the previous site on failure and refuses to discard unrecognized edits. Neither preparation nor preview performs a Git commit, push or Cloudflare operation. `site/` is ignored in the source checkout to prevent accidental publishing.
+Preparation requires the saved session to match explicitly; it cannot relabel an old dashboard. A staged/validated, journaled publication preserves the previous site on failure and refuses to discard unrecognized edits. Neither preparation nor preview performs a Git commit, push or Cloudflare operation. `site/` is ignored in the source checkout to prevent accidental publishing.
 
 ## Cloudflare Pages Git integration (when you choose to deploy)
 
@@ -271,3 +277,35 @@ If upgrading from the preceding `8cba7f8` release, this focused table correction
 Leave `inputs/`, all of `output/` (especially `output/manual_csv/local_history/`), `site/`, `.venv/`, caches, personal configuration and other local data in place. The membership/anchor/identifier configuration is unchanged by this refinement; do not replace it unnecessarily. Tests/CI files may be copied if you run developer checks; they are not daily runtime files. No setup rerun is needed when the existing environment works, since dependencies are unchanged.
 
 Refresh through `refresh.cmd` using the actual selected US session and its five CSVs, review with `open-dashboard.cmd`, then prepare `site/` separately if desired. For the supplied example: `.\refresh.cmd --session 2026-11-02`, followed by `.\open-dashboard.cmd`. Existing ordinary individual watchlists do not need reimporting. ZIP installations cannot use Git pull; use this selective program-file replacement for this version.
+
+## Multiple dates, completed updates and safe recovery
+
+Keep all dated input folders. `refresh.cmd --session 2026-11-03` reads only `inputs\2026-11-03` unless you explicitly supply `--input-dir`. A complete older folder and an incomplete newer folder may coexist; missing, duplicate or incorrectly dated files in the selected folder cause failure. There is no newest-file search, date fallback or role merging across folders. Windows `(1)` suffixes are accepted only when a role still has one matching file. HK next-day filenames are allowed inside the explicitly selected US-session folder. Filenames and hashes **cannot prove quote freshness**: the CSV has no reliable per-row session timestamp. Verify that you exported after the selected US close; unchanged-content checks are a conservative guard, not proof of observation time.
+
+| Artifact | Where to check its real session | Changes when |
+|---|---|---|
+| Latest refreshed dashboard | `output/manual_csv/dashboard.html`, `latest_snapshot.json`, successful `refresh_status.json` | Refresh succeeds |
+| Latest prepared site | `site/index.html`, `snapshot_summary.json`, `site_manifest.json` | Explicit matching-session prepare-site succeeds |
+| Running local preview | Its console directory/type/URL plus response `X-ThemeScope-Session`, `X-ThemeScope-Root-ID` and `X-ThemeScope-Run` headers | Serves completed files from its own fixed folder; reload after updates |
+| Previously uploaded Cloudflare site | The deployed website and its displayed date | Separate, explicitly authorized publication only |
+
+A local refresh never updates Cloudflare, and it does not prepare `site/`. Even the two local outputs can differ. Preparing another date cannot relabel the current successful output. An explicit replay of an older session may become the displayed dashboard, but later-session history is retained byte-for-byte. A replay that would change history already used by later sessions is refused; use original inputs/configuration or a separate output folder for alternate historical calculations.
+
+Refresh and site publication now use process locks, durable backups and a journal **beside** their output folder. Completed files are verified before success. Locked files or ordinary write failures roll back; close Excel/editor handles and retry. If a process was interrupted and restoration is incomplete, preview refuses the partial output. Do not delete journals/backups or edit staging files. Close active refresh/preparation operations and any locked files, then run:
+
+```powershell
+.\refresh.cmd --recover
+.\prepare-site.cmd --recover
+```
+
+Recovery reads no CSVs and publishes no new session. Run only the command for the affected artifact, then retry its normal refresh/preparation with the intended date. A second writer briefly waits for short preview reads, then waits or fails clearly if another writer is active; it never kills that process. Temporary directories are never preview assets. Old generated daily research download files retire after successful publication; ordinary watchlists, inputs, history and unrelated local files are retained. Same-session reruns use the genuine preceding US session, never an earlier run that day. This protects against interrupted processes and locked-file failures; it is not a claim of protection from physical disk failure.
+
+### Updating this preview/workflow fix in a ZIP installation
+
+Extract the new **download** ZIP into a separate folder and back up inputs/history. Preserve your existing `inputs/`, `output/manual_csv/local_history/`, `.venv/`, configuration, site and other local data. If the preceding UI release is already installed, copy only these changed/new program files into their matching existing paths:
+
+- `scripts/serve_local.py`, `scripts/refresh_local.py`, `scripts/prepare_site.py`, `scripts/generate_dashboard.py`
+- **`src/themescope/local_publication.py` (new)**, `src/themescope/local_history.py` and `src/themescope/site_output.py`
+- `README.md`
+
+The existing `.cmd` launchers already call these scripts relative to their own folder; no dependency change or setup rerun is required. Stop old preview consoles, refresh the intended date, prepare that same date if needed, and launch the desired preview. Use its exact printed URL. Do not overwrite the entire installation folder or reimport unchanged TradingView watchlists.

@@ -72,7 +72,7 @@ def _clean_v7_output(value: Any) -> Any:
 
 def _dashboard_snapshot(snapshot: dict[str, Any]) -> dict[str, Any]:
     """Keep the offline UI payload small; detailed audit data remains downloadable."""
-    payload = dict(snapshot)
+    payload = copy.deepcopy(snapshot)
     for key in ("candidate_metrics", "registry_diagnostics", "historical_rank_metrics", "source_matrix", "classification_catalog"):
         payload.pop(key, None)
     theme_internal = {
@@ -1291,7 +1291,7 @@ def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_di
     _write_json(output_dir / "run_audit.json", audit)
 
 
-def _run_manual_csv(args: argparse.Namespace, output: Path, launched_at: float) -> int:
+def _run_manual_csv_unlocked(args: argparse.Namespace, output: Path, launched_at: float) -> int:
     from src.themescope.manual_csv import build_release
     from src.themescope.local_history import apply as apply_history
     paths = {role: getattr(args, role + "_csv") for role in ("stock", "etf", "spy", "qqq", "iwm")}
@@ -1300,17 +1300,34 @@ def _run_manual_csv(args: argparse.Namespace, output: Path, launched_at: float) 
         build_started = time.perf_counter()
         snapshot, raw = build_release(ROOT, paths, args.as_of)
         history_record = apply_history(snapshot, output / "local_history", ROOT / "config/calendars/xnys_2020_2035_v1.json")
+        # An older rerun may replace the displayed dashboard, but it must not
+        # rewrite evidence already used by later-session comparisons.
+        later=list((output/'local_history').glob('????-??-??.json'))
+        if any(path.stem>snapshot['session_date'] for path in later):
+            original=output/'local_history'/(snapshot['session_date']+'.json')
+            if not original.exists() or json.loads(original.read_text(encoding='utf-8'))!=history_record:
+                raise ValueError('Older-session rerun would change history used by a later session. Original history was preserved. Use the original inputs/configuration or a separate output folder for alternate historical calculations.')
         build_elapsed = time.perf_counter() - build_started
         previous_exports = {"tradingview_all_theme_stocks.txt"}
         previous_path = output / "latest_snapshot.json"
         if previous_path.exists():
             try:
-                previous_snapshot = json.loads(previous_path.read_text())
+                previous_snapshot = json.loads(previous_path.read_text(encoding='utf-8'))
                 previous_exports.update(item["file"] for item in previous_snapshot.get("export_manifest", []))
                 previous_exports.update(previous_snapshot.get("export_archives", []))
+                relationship_file=previous_snapshot.get('daily_primary_research',{}).get('relationships_file')
+                if relationship_file:previous_exports.add(relationship_file)
             except (ValueError, KeyError, TypeError, AttributeError):
                 pass  # Unknown artifacts are preserved, never guessed for deletion.
-        obsolete_exports = {name for name in previous_exports if isinstance(name,str) and Path(name).name == name and name.startswith("tradingview_") and name.endswith((".txt", ".zip"))} - ({item["file"] for item in snapshot["export_manifest"]} | set(snapshot["export_archives"]))
+        # Retire only generated export namespaces, never inputs, audit/history
+        # records or arbitrary files. This also cleans old dated Primary lists.
+        for pattern in ('tradingview_daily_primary_*.txt','daily_primary_watchlists_*.zip','daily_primary_relationships_*.csv','primary_watchlists/*/*.txt','individual_watchlists/*.txt'):
+            previous_exports.update(path.relative_to(output).as_posix() for path in output.glob(pattern))
+        managed=re.compile(r'(?:tradingview_[A-Za-z0-9_-]+\.(?:txt|zip)|daily_primary_(?:watchlists_\d{4}-\d{2}-\d{2}\.zip|relationships_\d{4}-\d{2}-\d{2}\.csv)|(?:individual_watchlists|primary_watchlists/\d{4}-\d{2}-\d{2})/[A-Za-z0-9_.-]+\.txt)')
+        current_exports={item['file'] for item in snapshot['export_manifest']}|set(snapshot['export_archives'])
+        if snapshot.get('daily_primary_research',{}).get('relationships_file'):current_exports.add(snapshot['daily_primary_research']['relationships_file'])
+        obsolete_exports={name for name in previous_exports if isinstance(name,str) and managed.fullmatch(name)}-current_exports
+
         output.parent.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(prefix=".themescope-manual-stage-", dir=output.parent) as temporary:
             stage = Path(temporary) / "run"
@@ -1345,48 +1362,37 @@ def _run_manual_csv(args: argparse.Namespace, output: Path, launched_at: float) 
             with zipfile.ZipFile(stage / "run_bundle.zip", "w", compression=zipfile.ZIP_DEFLATED) as bundle:
                 for path in bundle_files:
                     bundle.write(path, arcname=str(path.relative_to(stage)))
-            output.mkdir(parents=True, exist_ok=True)
-            backup = Path(temporary) / "previous"
-            backup.mkdir()
-            changed = []
-            try:
-                for source in sorted((p for p in stage.rglob("*") if p.is_file()), key=lambda path: path.name == "dashboard.html"):
-                    relative = source.relative_to(stage)
-                    target = output / relative
-                    target.parent.mkdir(parents=True, exist_ok=True)
-                    (backup / relative).parent.mkdir(parents=True, exist_ok=True)
-                    if target.exists():
-                        shutil.copy2(target, backup / relative)
-                    os.replace(source, target)
-                    changed.append(relative)
-                for name in sorted(obsolete_exports):
-                    target = output / name
-                    if target.exists():
-                        shutil.copy2(target, backup / name)
-                        target.unlink()
-                        changed.append(Path(name))
-            except BaseException:
-                for name in reversed(changed):
-                    previous = backup / name
-                    if previous.exists():
-                        os.replace(previous, output / name)
-                    else:
-                        (output / name).unlink(missing_ok=True)
-                raise
+            import hashlib,uuid
+            publication_files={path.relative_to(stage).as_posix():hashlib.sha256(path.read_bytes()).hexdigest() for path in stage.rglob('*') if path.is_file() and not path.relative_to(stage).parts[0]=='local_history'}
+            _write_json(stage/'publication_manifest.json',{'schema':'themescope-local-publication-1','session_date':snapshot['session_date'],'publication_id':uuid.uuid4().hex,'files':publication_files})
+            from src.themescope.local_publication import publish_tree
+            publish_tree(stage,output,obsolete_exports)
         (output / "failed_attempt_audit.json").unlink(missing_ok=True)
-        print(f"SUCCESS: manual CSV session {snapshot['session_date']}; {len(snapshot['themes'])} anchors; {elapsed:.3f}s")
+        print(f"SUCCESS: manual CSV session {snapshot['session_date']}; {len(snapshot['themes'])} anchors; completed in {time.perf_counter()-launched_at:.3f}s")
         print(f"Open {output / 'dashboard.html'}\nAudit: {output / 'run_audit.json'}\nDownload bundle: {output / 'run_bundle.zip'}")
         return 0
     except Exception as exc:
         output.mkdir(parents=True, exist_ok=True)
         preserved_date = None
-        if (output / "latest_snapshot.json").is_file() and (output / "dashboard.html").is_file():
+        from src.themescope.local_publication import pending
+        if not pending(output) and (output / "latest_snapshot.json").is_file() and (output / "dashboard.html").is_file():
             try:
                 preserved_date = json.loads((output / "latest_snapshot.json").read_text(encoding="utf-8")).get("session_date")
             except (OSError, ValueError):
                 preserved_date = None
         _write_json(output / "failed_attempt_audit.json", {"status": "failed", "source": "tradingview-csv", "attempted_at": attempted, "declared_us_session": args.as_of, "reason": f"{type(exc).__name__}: {exc}", "dashboard_preserved": bool(preserved_date), "preserved_data_date": preserved_date, "runtime_seconds": time.perf_counter() - launched_at})
         print(f"MANUAL CSV GENERATION FAILED: {exc}\n" + (f"Existing dashboard preserved with session {preserved_date}." if preserved_date else "No successful dashboard exists in this output directory.") + f"\nDetails: {output / 'failed_attempt_audit.json'}", file=sys.stderr)
+        return 1
+
+
+def _run_manual_csv(args,output,launched_at):
+    from src.themescope.local_publication import output_lock,recover
+    try:
+        with output_lock(output,timeout=5):
+            recover(output)
+            return _run_manual_csv_unlocked(args,output,launched_at)
+    except (OSError,ValueError) as error:
+        print('MANUAL CSV GENERATION FAILED: '+str(error)+'; no new successful run was published.',file=sys.stderr)
         return 1
 
 

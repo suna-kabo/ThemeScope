@@ -9,6 +9,7 @@ import subprocess
 import sys
 
 ROOT=Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(ROOT))
 STEMS={'stock':'Daily_Stock','etf':'Daily_ETF','spy':'SPY','qqq':'QQQ','iwm':'IWM'}
 
 
@@ -40,7 +41,7 @@ def input_paths(root, session, folder=None, now=None):
     previous=root/'output/manual_csv/latest_snapshot.json'
     if previous.exists():
         saved=json.loads(previous.read_text(encoding='utf-8'))
-        if saved['session_date']!=session:
+        if saved['session_date']<session:
             old=saved.get('manual_csv_audit',{}).get('inputs',{})
             reused=[role for role,p in result.items() if hashlib.sha256(p.read_bytes()).hexdigest()==old.get(role,{}).get('sha256')]
             if reused:raise ValueError('Inputs identical to the previous successful session: '+', '.join(reused)+'. Export fresh CSVs; old files were not reused.')
@@ -50,8 +51,15 @@ def input_paths(root, session, folder=None, now=None):
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--session',help='Declared completed US session, YYYY-MM-DD; never inferred from filenames')
+    parser.add_argument('--recover',action='store_true',help='Restore an interrupted local publication without reading CSVs')
     parser.add_argument('--input-dir',help='Defaults to inputs/SESSION; relative paths are based on the repository, not the shell')
     args=parser.parse_args()
+    from src.themescope.local_publication import output_lock,recover
+    with output_lock(ROOT/'output/manual_csv',timeout=5):
+        restored=recover(ROOT/'output/manual_csv')
+    if args.recover:
+        print('Interrupted dashboard publication restored.' if restored else 'No interrupted dashboard publication needs recovery.')
+        return 0
     session=args.session
     if not session:
         if not sys.stdin.isatty():parser.error('--session is required when not running interactively')

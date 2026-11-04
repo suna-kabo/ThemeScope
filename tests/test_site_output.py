@@ -102,7 +102,7 @@ class SiteBoundaryTests(unittest.TestCase):
         from src.themescope import site_output
         real=site_output.os.replace
         def fail(src,dst):
-            if Path(src)!=self.destination and Path(src).name=='site' and Path(dst)==self.destination:raise OSError('injected replacement failure')
+            if Path(src).name=='index.html' and Path(src).parent.name=='site' and Path(dst)==self.destination/'index.html':raise OSError('injected replacement failure')
             return real(src,dst)
         with patch.object(site_output.os,'replace',side_effect=fail):
             with self.assertRaisesRegex(OSError,'injected'):self.build()

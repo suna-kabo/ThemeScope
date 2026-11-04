@@ -8,6 +8,19 @@ from pathlib import Path
 SCHEMA = 'themescope-ranking-history-1'
 
 
+def market_history_inputs(contexts):
+    rows=[]
+    for source in contexts:
+        row=copy.deepcopy({k:source.get(k) for k in ('ticker','price_close','ema21','ema50','price_state','breadth_state','index_breadth')})
+        # Derived coverage is reproducible from the retained counts. Historical
+        # records omitted it; normalize storage independently of UI compaction.
+        if isinstance(row.get('index_breadth'),dict):
+            for metric in row['index_breadth'].values():
+                if isinstance(metric,dict):metric.pop('coverage_pct',None)
+        rows.append(row)
+    return rows
+
+
 def record(snapshot):
     themes = sorted(snapshot['themes'], key=lambda t: t['id'])
     # Old rank fingerprints included two retired presentation thresholds. Retain
@@ -32,7 +45,7 @@ def record(snapshot):
         from .research_policy import EMA_VERSION,PRIORITY_VERSION,INPUT_SEMANTICS
         result['research_history']={'ema_methodology':EMA_VERSION,'priority_methodology':PRIORITY_VERSION,'input_semantics':INPUT_SEMANTICS,
             'market_classification':snapshot['market_classification']['direction'],
-            'market_inputs':[{k:r.get(k) for k in ('ticker','price_close','ema21','ema50','price_state','breadth_state','index_breadth')} for r in snapshot.get('context',[])]}
+            'market_inputs':market_history_inputs(snapshot.get('context',[]))}
         by_id={t['id']:t for t in snapshot['themes']}
         for row in result['themes']:
             theme=by_id[row['id']]
