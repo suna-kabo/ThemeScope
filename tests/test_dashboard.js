@@ -1,6 +1,17 @@
 const assert = require("node:assert/strict");
 const ui = require("../static/dashboard.js");
 
+// Grouping changes presentation only: preserve every original cell and its order.
+const resultOrder=["Long bias","Selective long","Neutral","Selective short","Short bias","Unclassified"];
+const matrixCells=[...resultOrder.slice().reverse(),"Neutral","Long bias"].map((direction,i)=>({direction,spy:i,qqq:null,breadth:null}));
+const matrixBefore=JSON.stringify(matrixCells);
+const matrixGroups=ui.groupMarketMatrix(matrixCells);
+assert.deepEqual(matrixGroups.map(g=>g.result),resultOrder);
+assert.equal(matrixGroups.flatMap(g=>g.cells).length,matrixCells.length);
+assert.equal(new Set(matrixGroups.flatMap(g=>g.cells)).size,matrixCells.length);
+for(const group of matrixGroups)assert.deepEqual(group.cells,matrixCells.filter(c=>c.direction===group.result));
+assert.equal(JSON.stringify(matrixCells),matrixBefore);
+
 const rows = [
   {
     ticker: "AAA",

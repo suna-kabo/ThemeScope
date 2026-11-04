@@ -85,6 +85,15 @@ html[data-mode=light] {color-scheme:light;--bg:#f1efe9;--sidebar:#e7e4dc;--panel
 .methodology th,.methodology td {text-align:left;padding:10px 14px;overflow-wrap:anywhere;vertical-align:top}
 .methodology th {position:static;font:500 12px/1.65 var(--sans);height:auto}
 .definition-label {width:210px}.methodology .active-cell {background:var(--raised)}
+.primary-research-actions {display:flex;align-items:center;flex-wrap:wrap;gap:12px}
+.primary-research-method {max-width:90ch;line-height:1.7}
+.primary-research-method h2 {scroll-margin-top:90px}
+.primary-research-method h2:focus-visible {outline:2px solid var(--accent);outline-offset:6px}
+.primary-research-method h3 {margin-top:24px}.primary-research-method li {margin:8px 0}
+.method-formula {font-variant-numeric:tabular-nums}
+.matrix-result-group {margin:24px 0;padding:0 14px;border-left:2px solid var(--line)}
+.matrix-result-group h3 {font-size:16px;font-weight:500;margin:0}
+.matrix-group-current {border-left-color:var(--accent)}
 .col-ema {text-align:left;--header-justify:flex-start}
 
 .sort-indicator {display:inline-block;width:14px;min-width:14px}

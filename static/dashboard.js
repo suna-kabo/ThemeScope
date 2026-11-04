@@ -155,6 +155,11 @@
   function statusClass(value) {
     return ["Bullish","Positive"].includes(value) ? "positive" : ["Bearish","Negative"].includes(value) ? "negative" : value === "Mixed" ? "warning" : "muted";
   }
+  function groupMarketMatrix(matrix) {
+    return ["Long bias","Selective long","Neutral","Selective short","Short bias","Unclassified"].map(function(result){
+      return {result:result,cells:matrix.filter(function(cell){return cell.direction===result;})};
+    });
+  }
   function priorityCategory(row) { return row.research_priority?.category || "watch"; }
   function marketCap(value) {
     if (!finiteNumber(value) || value <= 0) return "N/A";
@@ -644,7 +649,7 @@
       theme: initialTheme?.id, themeKey: "theme_score", themeDir: "desc",
       stockKey: "return21", stockDir: "desc", themeType: "All", themePriority: "All",
       rsFilter: "All",
-      page: location.hash.slice(1) || "market", themeNavigationOrder: null
+      page: location.hash.slice(1).split('/')[0] || "market", section: location.hash==='#methodology/primary-research-watchlist'?'primary-research-watchlist':null, themeNavigationOrder: null
     };
     if (history.state?.themescope && [4,5].includes(history.state.view?.ui_schema) && history.state.view.session_date === data.session_date) {
       var firstView = history.state.view;
@@ -662,6 +667,7 @@
       viewState.themeNavigationOrder = firstView.theme_navigation_order || null;
 
       viewState.page = firstView.page || viewState.page;
+      viewState.section = firstView.section || null;
       restoreNewView(firstView);
     }
     function restoreNewView(view) {
@@ -710,7 +716,7 @@
       viewState.scroll_position = window.scrollY || 0;
       return {
         ui_schema:5,session_date:data.session_date,route_state:readRoute(),rs_filter:viewState.rsFilter,
-        page: viewState.page, selected_theme_id: viewState.theme,
+        page: viewState.page, section:viewState.section, selected_theme_id: viewState.theme,
         theme_search: viewState.themeSearch || "", theme_type_filter: viewState.themeType,
         theme_priority_filter: viewState.themePriority, theme_sort_key: viewState.themeKey,
         theme_sort_direction: viewState.themeDir, stock_search: viewState.stockSearch || "",
@@ -724,8 +730,13 @@
     function replaceHistoryState() {
       var current = history.state;
       if (current && current.themescope) {
-        try { history.replaceState({ themescope: true, index: current.index, view: captureView() }, "", "#" + viewState.page); } catch (e) {}
+        try { history.replaceState({ themescope: true, index: current.index, view: captureView() }, "", pageHash(viewState.page,viewState.section)); } catch (e) {}
       }
+    }
+    function pageHash(page,section){return '#'+page+(page==='methodology' && section==='primary-research-watchlist'?'/'+section:'');}
+    function focusMethodSection(scroll){
+      var heading=$("primary-research-watchlist");
+      if(heading){if(scroll)heading.scrollIntoView({block:'start',behavior:'auto'});heading.focus({preventScroll:true});}
     }
     function updateBackControl() {
       var current = history.state;
@@ -740,11 +751,13 @@
         if(navigation.themeOrder)viewState.themeNavigationOrder=navigation.themeOrder;
         var view = captureView();
         view.page = id;
+        view.section=navigation.section || null;
         var previous = history.state;
         var index = previous && previous.themescope ? previous.index + 1 : 1;
-        try { history.pushState({ themescope: true, index: index, view: view }, "", "#" + id); } catch (e) {}
+        try { history.pushState({ themescope: true, index: index, view: view }, "", pageHash(id,view.section)); } catch (e) {}
       }
       viewState.page = id;
+      if(navigation.push)viewState.section=navigation.section || null;
       closeInfoTooltip();closeNavigation();$("navigation-status").textContent="";
       document.querySelectorAll(".page").forEach(function (page) {
         page.hidden = page.id !== id;
@@ -758,6 +771,7 @@
       });
       updateBackControl();
       if(navigation.scroll !== false)restoreRoute(null,{skipScroll:Boolean(navigation.stockTarget)});
+      if(id==='methodology' && navigation.section==='primary-research-watchlist')focusMethodSection(true);
       if(navigation.push)replaceHistoryState();
     }
     document.querySelectorAll(".side-nav [data-page]").forEach(function (link) {
@@ -776,6 +790,7 @@
       if (!view) { updateBackControl(); return; }
       restoreNewView(view);
       viewState.page = view.page || "market";
+      viewState.section=view.section || null;
       viewState.theme = view.selected_theme_id || viewState.theme;
       viewState.themeSearch = view.theme_search || ""; viewState.themeType = view.theme_type_filter || "All";
       viewState.themePriority = view.theme_priority_filter || "All"; viewState.themeKey = view.theme_sort_key || "theme_score";
@@ -791,6 +806,7 @@
       render(); renderDailyPlan();
       showPage(viewState.page, { scroll: false });
       restoreRoute(migratedRoute(view));
+      if(viewState.page==='methodology' && viewState.section==='primary-research-watchlist')focusMethodSection(false);
     });
     function sessionDisplay(value) {
       if (!value) return "Unavailable";
@@ -815,26 +831,35 @@
     }
     function researchDownloads() {
       var file=data.daily_primary_research?.combined_file;
-      return file?'<a class="download-link primary-download" download href="'+esc(file)+'">Download Today&#39;s Primary Research Watchlist</a>':'<p class="muted">No Primary research watchlist for this session.</p>';
+      return '<div class="primary-research-actions">'+(file?'<a class="download-link primary-download" download href="'+esc(file)+'">Download Today&#39;s Primary Research Watchlist</a>':'<p class="muted">No Primary research watchlist for this session.</p>')+'<a class="download-link" href="#methodology/primary-research-watchlist" data-method-section="primary-research-watchlist">How this list is built</a></div>';
     }
     function renderMethodology() {
-      var marketRows=(decision.market_matrix || []).map(function(cell){
+      var marketGroups=groupMarketMatrix(decision.market_matrix || []).map(function(group){
+        var marketRows=group.cells.map(function(cell){
         var active=decision.spy_price_state===cell.spy && decision.qqq_price_state===cell.qqq && decision.breadth_consensus===cell.breadth;
-        return '<tr'+(active?' class="active-cell"':'')+'><td class="'+statusClass(cell.spy)+'">'+esc(cell.spy || 'Unavailable')+'</td><td class="'+statusClass(cell.qqq)+'">'+esc(cell.qqq || 'Unavailable')+'</td><td class="'+statusClass(cell.breadth)+'">'+esc(cell.breadth || 'Unavailable')+'</td><td class="'+directionClass(cell.direction)+'">'+esc(cell.direction)+'</td></tr>';
+        return '<tr'+(active?' class="active-cell" aria-current="true"':'')+'><td class="'+statusClass(cell.spy)+'">'+esc(cell.spy || 'Unavailable')+'</td><td class="'+statusClass(cell.qqq)+'">'+esc(cell.qqq || 'Unavailable')+'</td><td class="'+statusClass(cell.breadth)+'">'+esc(cell.breadth || 'Unavailable')+'</td><td class="'+directionClass(cell.direction)+'">'+esc(cell.direction)+(active?' · Today':'')+'</td></tr>';
+        }).join('');
+        var activeGroup=group.cells.some(function(cell){return decision.spy_price_state===cell.spy && decision.qqq_price_state===cell.qqq && decision.breadth_consensus===cell.breadth;});
+        return '<section class="matrix-result-group'+(activeGroup?' matrix-group-current':'')+'" data-matrix-result="'+esc(group.result)+'"><h3 class="'+directionClass(group.result)+'">'+esc(group.result)+(activeGroup?' · Today':'')+'</h3>'+(group.result==='Unclassified'?'<p class="muted">Missing or invalid required inputs; distinct from Neutral.</p>':'')+'<div class="table-wrap"><table class="market-matrix"><thead><tr><th scope="col">SPY Price</th><th scope="col">QQQ Price</th><th scope="col">SPY/QQQ Breadth Consensus</th><th scope="col">Result</th></tr></thead><tbody>'+marketRows+'</tbody></table></div></section>';
       }).join('');
       var policy=decision.priority_policy || {};
       var definitions=data.display_methodology || {},maintenance=definitions.maintenance_thresholds || {};
       function table(title,rows){return '<section class="method-section"><h2>'+title+'</h2><div class="table-wrap"><table class="method-definition-table"><colgroup><col class="definition-label"><col></colgroup><tbody>'+rows.map(function(row){return '<tr><th scope="row">'+esc(row[0])+'</th><td>'+esc(row[1])+'</td></tr>';}).join('')+'</tbody></table></div></section>';}
+      var weights=policy.weights || {};
+      var example=Number((weights.current*4+weights.medium*-3).toFixed(10));
+      var primaryGuide='<section class="method-section primary-research-method" aria-labelledby="primary-research-watchlist"><h2 id="primary-research-watchlist" tabindex="-1">How Today\'s Primary Research Watchlist Is Built</h2>'+
+        '<p>Primary identifies research priorities; each chart still needs a separate entry/setup assessment.</p><h3>1. Select Primary themes</h3><p>Long bias and Selective long share the same rules; Short bias and Selective short share the same rules.</p><ul><li><strong>Primary long:</strong> '+esc(policy.long_rule)+'</li><li><strong>Primary short:</strong> '+esc(policy.short_rule)+'</li></ul><p>Bullish: ETF price above EMA21 and EMA50. Bearish: below both. Mixed: other valid combinations, including equality.</p><p>'+esc(policy.transition_rule)+' Missing or incompatible preceding-session history disables the transition exception. Neutral and Unclassified produce no directional Primary list.</p>'+
+        '<h3>2. Select stocks within each Primary theme</h3><p>Start with the existing configured membership, not a new market-wide scan. ER1M = Stock 1M performance − selected ETF 1M performance; ER3M = Stock 3M performance − selected ETF 3M performance.</p><p class="method-formula">Weighted Excess Return = '+esc(Number(weights.current).toFixed(2))+' × ER1M + '+esc(Number(weights.medium).toFixed(2))+' × ER3M</p><p>Units are percentage points (pp). Primary long includes results &gt; 0; Primary short includes results &lt; 0. Exactly zero and missing required returns are excluded. The two horizons do not need the same sign. A multi-theme stock is evaluated separately against each anchor. This differs from Theme Score, which uses cross-sectional ETF percentiles.</p><p>Example: ER1M = +4 pp and ER3M = −3 pp → '+esc(Number(weights.current).toFixed(2))+' × 4 + '+esc(Number(weights.medium).toFixed(2))+' × (−3) = +'+esc(example)+' pp: outperforming.</p>'+
+        '<h3>3. Assemble the TradingView export</h3><p>One section per qualifying Primary theme, with the ETF ticker then readable theme name in its heading and the anchor ETF as its first instrument. Long stocks sort by weighted excess return descending; short stocks sort ascending, with identifier tie-breaks. Identifiers are resolved exchange-prefixed symbols.</p><p>Sections follow Theme Score descending for long or ascending for short, then theme ID. All anchors are reserved first; an overlapping stock appears once in the combined list, assigned to its first qualifying section in that order. An ETF-only qualifying theme still contributes its anchor. Full ordinary individual-theme exports preserve complete configured membership.</p><p>No Primary result means no current directional download, never a stale previous list. Browser search and filters do not alter this export. It does not change configured membership or replace complete data-collection watchlists.</p></section>';
       $("methodology-content").innerHTML=
         table('Market classification',[["Current matched rule",(decision.decision_path || []).map(function(row){return row.label+': '+row.value;}).join(' · ')],["Price classifications","Bullish: Price > EMA21 and EMA50. Bearish: Price < both. Mixed: other valid combinations, including equality. Invalid or missing inputs: Unavailable."],["Price consensus","Both Bullish → Long bias; both Bearish → Short bias, regardless of breadth. Otherwise use the matched cell below. IWM is context only."]])+
         table('Breadth calculation and validity',[["Index breadth","Percent of eligible index-export rows above each EMA, using a shared set with valid Price, EMA21 and EMA50. Missing rows remain in the denominator."],["Validity",(definitions.breadth_minimum_coverage*100)+'% coverage required. Theme breadth additionally requires '+definitions.theme_breadth_minimum_valid+' valid configured members. No influence on Theme Score or Priority.'],["SPY/QQQ Breadth Consensus","Each index is Positive when both EMA breadth readings are ≥50%, Negative when both are <50%, otherwise Mixed. Consensus is Positive/Negative only when both agree; other valid combinations are Mixed. Either unavailable index makes consensus Unavailable. This is not merged-constituent breadth."]])+
         table('Theme Score',[["Current",infoText.current_strength_score],["Medium",infoText.medium_strength_score],["Score",infoText.theme_score],["Ranks",infoText.rank_current]])+
-        table('Primary research policy',[["Long / Selective long",policy.long_rule],["Short / Selective short",policy.short_rule],["Neutral / Unclassified","Watch for every theme; no directional Primary export."],["Transition exception",policy.transition_rule],["Research policy",policy.note]])+
+        primaryGuide+
         table('Configured-stock selection',(definitions.membership_rules || []).map(function(rule,i){return [i===0?'Stable membership':'Membership',rule];}).concat([["Maintenance thresholds",'Price floor $'+maintenance.raw_close_floor_usd+'; market-cap floor $'+(maintenance.market_cap_floor_usd/1e9)+' billion; liquidity proxy $'+(maintenance.adv30_floor_usd/1e6)+' million; minimum history '+maintenance.minimum_history_sessions+' sessions; maximum '+definitions.watchlist_capacity+' stocks per theme. Maintenance only, not new daily gates.'],["Missing maintenance facts",definitions.maintenance_missing_data],["Liquidity",definitions.liquidity_definition]]))+
-        table('Stock versus ETF performance',[["Per-anchor comparison","ER1M = Stock 1M − selected ETF 1M; ER3M = Stock 3M − selected ETF 3M, in percentage points. Multi-theme stocks are evaluated independently against each anchor."],["Weighted comparison",policy.stock_rule],["vs ETF filter","Outperforming: W > 0; Underperforming: W < 0; Flat: W = 0; Unavailable: any missing endpoint. Uses underlying decimal values without a trading deadband. Search, EMA and relative filters combine with AND; they do not change membership, breadth or exports."]])+
-        table('Daily exports',[["Daily Primary","Current directional Primary themes only. Grouped TXT uses ### section tokens, anchor first. Reserve all anchors, then distribute each qualifying stock once under its first qualifying theme in priority/score order. Long stocks sort by W descending, short ascending, identifier tie-break."],["Complete collection","All Stocks and All Themes retain the complete configured data universe. Ordinary individual files retain complete per-theme memberships and stable slots. No reimport is needed for unchanged ordinary watchlists."],["Import validation","Local syntax and identifier consistency are tested. Actual TradingView platform import remains unverified for this grouped file."]])+
+        table('Watchlist browsing and import',[["vs ETF filter","Outperforming: W > 0; Underperforming: W < 0; Flat: W = 0; Unavailable: any missing endpoint. Uses underlying decimal values without a trading deadband. Search, EMA and relative filters combine with AND; they do not change membership, breadth or exports."],["Import validation","Local syntax and identifier consistency are tested. Actual TradingView platform import remains unverified for this grouped file."]])+
         table('History and missing data',[["Priority Change","New long/New short includes direction switches; Removed means Primary became Watch; — means unchanged. N/A means incompatible or missing immediately preceding-session priority. It is a workflow change, not a confirmed breakdown."],["History","Same-session reruns compare against the preceding US session, never an earlier same-day run. Versioned EMA and priority compatibility is independent of rank compatibility. Preserve historical records and migration backups."],["Unavailable inputs","No zero substitution or replacement members. Earnings countdown uses calendar days from the selected US session, not browser today; past dates remain Past date. Refresh failure preserves the last successful dashboard, exports, history and prepared site."]])+
-        '<section class="method-section"><h2>Complete Market matrix</h2><div class="table-wrap"><table class="market-matrix"><thead><tr><th>SPY price</th><th>QQQ price</th><th>Breadth consensus</th><th>Result</th></tr></thead><tbody>'+marketRows+'</tbody></table></div></section>';
+        '<section class="method-section"><h2>Complete Market Matrix</h2>'+marketGroups+'</section>';
 
     }
     function renderDailyPlan() {
@@ -853,6 +878,7 @@
       renderMethodology();
     }
     renderDailyPlan();
+    $("qualification-summary").addEventListener('click',function(event){var link=event.target.closest('[data-method-section]');if(!link)return;event.preventDefault();showPage('methodology',{push:true,section:link.dataset.methodSection});});
     document.querySelectorAll("[data-page-link]").forEach(function (link) { link.addEventListener("click", function (event) { event.preventDefault(); showPage(link.dataset.pageLink, {push:true}); }); });
     $("daily-priorities").addEventListener("click", function (event) { var link=event.target.closest("[data-daily-theme]"); if (!link) return; event.preventDefault(); showPage("watchlist", {push:true,theme:link.dataset.dailyTheme}); render(); replaceHistoryState(); });
     if ($("market-direction")) {
@@ -1291,8 +1317,9 @@
     render();
     showPage(viewState.page, { scroll: false });
     restoreRoute(migratedRoute(firstView));
+    if(!firstView && viewState.page==='methodology' && viewState.section==='primary-research-watchlist')focusMethodSection(true);
     if (!history.state?.themescope) {
-      try { history.replaceState({ themescope: true, index: 0, view: captureView() }, "", "#" + viewState.page); } catch (e) {}
+      try { history.replaceState({ themescope: true, index: 0, view: captureView() }, "", pageHash(viewState.page,viewState.section)); } catch (e) {}
     } else {
       replaceHistoryState();
     }
@@ -1319,5 +1346,6 @@
     breadthThresholdClass: breadthThresholdClass,
     marketCap:marketCap, rsMatches:rsMatches, earningsCountdown:earningsCountdown,
     directionClass: directionClass, statusClass: statusClass, priorityCategory: priorityCategory, emaRelationship: emaRelationship, labels: LABELS,
+    groupMarketMatrix:groupMarketMatrix,
   };
 });

@@ -280,6 +280,8 @@ Refresh through `refresh.cmd` using the actual selected US session and its five 
 
 ## Multiple dates, completed updates and safe recovery
 
+The Daily Plan's **How this list is built** action opens **Methodology → How Today's Primary Research Watchlist Is Built** at `#methodology/primary-research-watchlist`. It remains available when there is no Primary download, supports keyboard focus and browser Back, and explains the existing theme rules, weighted stock comparison and export ordering/deduplication. The complete Market Matrix is grouped by Result in this order: Long bias, Selective long, Neutral, Selective short, Short bias; Unclassified has its own missing/invalid-input group. Today's matching row and group are marked. These are documentation and navigation changes; classification, priority, membership and export calculations are unchanged.
+
 Keep all dated input folders. `refresh.cmd --session 2026-11-03` reads only `inputs\2026-11-03` unless you explicitly supply `--input-dir`. A complete older folder and an incomplete newer folder may coexist; missing, duplicate or incorrectly dated files in the selected folder cause failure. There is no newest-file search, date fallback or role merging across folders. Windows `(1)` suffixes are accepted only when a role still has one matching file. HK next-day filenames are allowed inside the explicitly selected US-session folder. Filenames and hashes **cannot prove quote freshness**: the CSV has no reliable per-row session timestamp. Verify that you exported after the selected US close; unchanged-content checks are a conservative guard, not proof of observation time.
 
 | Artifact | Where to check its real session | Changes when |
@@ -309,3 +311,5 @@ Extract the new **download** ZIP into a separate folder, stop active previews/re
 - `README.md`
 
 The existing `.cmd` launchers already call these scripts relative to their own folder; no dependency change or setup rerun is required. Stop old preview consoles, refresh the intended date, prepare that same date if needed, and launch the desired preview. Use its exact printed URL. Do not overwrite the entire installation folder or reimport unchanged TradingView watchlists.
+
+For the current Methodology/navigation update, also replace **`static/dashboard.js`** and **`static/dashboard.css`** from the latest ZIP, plus this README. If the preview/workflow fix is already installed, these are the only changed runtime files. Refresh the same genuine saved session to rebuild the local dashboard, then prepare that matching session separately to rebuild `site/`.

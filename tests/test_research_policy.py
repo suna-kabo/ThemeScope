@@ -18,6 +18,18 @@ def snapshot(session='2026-07-06', price=11, score=20):
         'themes':[{'id':'a','name':'Alpha','anchor':'ETF','tradingview_symbol':'AMEX:ETF','price_close':price,'ema21':10,'ema50':10,'theme_score':score,'global_rank':1,'returns':{'21':{'value':.1},'63':{'value':.2}},'selected':[]}]}
 
 class PolicyTests(unittest.TestCase):
+    def test_documented_primary_requirements_and_opposed_horizon_example(self):
+        from src.themescope.relative_performance import weighted_excess
+        policy=methodology()
+        self.assertEqual(policy['weights'],{'current':CURRENT_WEIGHT,'medium':MEDIUM_WEIGHT})
+        self.assertIn(str(SCORE_BOUNDARY),policy['long_rule']);self.assertIn(str(SCORE_BOUNDARY),policy['short_rule'])
+        self.assertIn('Valid Score and current EMA inputs are always required',policy['long_rule'])
+        self.assertIn('immediately preceding US session',policy['transition_rule'])
+        for direction,transition,classification in [('Long bias','newly_bullish','Bullish'),('Short bias','newly_bearish','Bearish')]:
+            for score,ema in [(None,classification),(50,None),(float('nan'),classification),(-1,classification),(101,classification)]:
+                self.assertEqual(theme_priority(direction,score,ema,transition)['label'],'Watch')
+        example=weighted_excess({'returns':{'21':{'value':.14},'63':{'value':.17}}},{'returns':{'21':{'value':.10},'63':{'value':.20}}})
+        self.assertEqual((example['er1m_pp'],example['er3m_pp'],example['weighted_excess_pp'],example['weighted_vs_etf']),(4,-3,1.2,'Outperforming'))
     def test_complete_market_truth_table_independent_expected_and_symmetry(self):
         table=market_truth_table();self.assertEqual(len(table),64)
         for cell in table:

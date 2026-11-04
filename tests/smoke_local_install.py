@@ -169,6 +169,7 @@ def main():
                 browser.close()
             subprocess.run([sys.executable,str(ROOT/'tests/browser_check_site.py'),str(site)],cwd=ROOT,check=True,timeout=90)
             subprocess.run([sys.executable,str(ROOT/'tests/browser_check_tables.py'),str(output/'dashboard.html')],cwd=ROOT,check=True,timeout=90)
+            subprocess.run([sys.executable,str(ROOT/'tests/browser_check_methodology.py'),str(output/'dashboard.html'),str(site/'index.html')],cwd=ROOT,check=True,timeout=90)
         for server in (dashboard_server,site_server):server.shutdown();server.server_close()
     print(json.dumps({'multiple_dated_folders':'passed','running_production_previews_reload':'passed','older_replay_history':'passed','retired_downloads':'passed','non_ascii_path':True,'clean_staged_tree':tree,'platform':sys.platform,'native_cmd_launchers':os.name=='nt','setup_refresh_site':'passed','invalid_input_preservation':'passed','stale_input_refusal':'passed','two_session_history':'passed','synthetic_data':'temporary only'}))
 
