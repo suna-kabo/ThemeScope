@@ -266,7 +266,7 @@ Developer/browser checks are optional, **not daily dependencies**. The existing 
 
 Download the latest **download** branch ZIP and extract it into a **separate temporary folder**. Stop local previews and back up your existing `inputs`, `output\manual_csv\local_history` and other local data first. Keep the existing installation folder and its data; do not extract the ZIP over the entire folder.
 
-If upgrading from the preceding `8cba7f8` release, this focused table correction changes only `static/dashboard.js` and `static/dashboard.css` at runtime, plus this README. For older installations that still need the preceding workflow refinement, replace these program files from the new ZIP into their matching paths (add the new module):
+For older installations that also need the earlier UI/workflow refinements, copy these program files **in addition to the current preview/workflow file list below** (add the new module):
 
 - `static/dashboard.js`, `static/dashboard.css`, `static/dashboard_template.html`
 - `src/themescope/daily_lists.py`, **`src/themescope/relative_performance.py` (new)**
@@ -302,7 +302,7 @@ Recovery reads no CSVs and publishes no new session. Run only the command for th
 
 ### Updating this preview/workflow fix in a ZIP installation
 
-Extract the new **download** ZIP into a separate folder and back up inputs/history. Preserve your existing `inputs/`, `output/manual_csv/local_history/`, `.venv/`, configuration, site and other local data. If the preceding UI release is already installed, copy only these changed/new program files into their matching existing paths:
+Extract the new **download** ZIP into a separate folder, stop active previews/refresh/preparation, and back up inputs/history. Preserve your existing `inputs/`, `output/manual_csv/local_history/`, `.venv/`, configuration, site and other local data. If the preceding UI release is already installed, copy only these changed/new program files into their matching existing paths:
 
 - `scripts/serve_local.py`, `scripts/refresh_local.py`, `scripts/prepare_site.py`, `scripts/generate_dashboard.py`
 - **`src/themescope/local_publication.py` (new)**, `src/themescope/local_history.py` and `src/themescope/site_output.py`
