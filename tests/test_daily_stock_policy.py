@@ -1,7 +1,6 @@
 """Independent boundaries for Daily Stock CSV v2 and unchanged membership/breadth."""
 import copy
 import csv
-from datetime import datetime,timezone
 import io
 import json
 from pathlib import Path
@@ -89,7 +88,8 @@ class DailyStockPolicyTests(unittest.TestCase):
         for role in ('spy','qqq','iwm'):self.assertEqual(len(parse_csv(p,role)[0]),1)
 
     def test_explicit_turnover_currency_is_usd_without_conversion(self):
-        path=self.csv();rows=list(csv.reader(path.open(encoding='utf-8',newline='')))
+        path=self.csv()
+        with path.open(encoding='utf-8',newline='') as handle:rows=list(csv.reader(handle))
         rows[0].append('Price × volume (turnover), 1 day - Currency');rows[1].append('EUR')
         with path.open('w',encoding='utf-8',newline='') as handle:csv.writer(handle).writerows(rows)
         with self.assertRaisesRegex(CSVValidationError,'expected USD'):parse_csv(path,'stock')
