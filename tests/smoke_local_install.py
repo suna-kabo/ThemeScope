@@ -107,11 +107,12 @@ def main():
         inputs(100);run('refresh',options);run('prepare-site',['--session','2024-01-03'])
         # Extra eligible rows are evaluated/audited, never adopted as members.
         with stock_file.open(encoding='utf-8',newline='') as handle:with_extra=list(csv.reader(handle))
-        extra=list(with_extra[1]);extra[0]='EXTRA_VALID_STOCK';with_extra.append(extra)
+        extra=list(with_extra[1]);extra[0]='EXTRA_VALID_STOCK';extra[12]='';with_extra.append(extra)
         with stock_file.open('w',encoding='utf-8',newline='') as handle:csv.writer(handle).writerows(with_extra)
         run('refresh',options)
         extra_snapshot=json.loads((output/'latest_snapshot.json').read_text(encoding='utf-8'))
         assert extra_snapshot['manual_csv_audit']['extra_csv_stock_count']==1
+        assert any(w['symbol']=='EXTRA_VALID_STOCK' and w['field']=='ema50' for w in extra_snapshot['manual_csv_audit']['inputs']['stock']['numeric_warnings'])
         assert extra_snapshot['manual_csv_audit']['parsed_csv_eligibility_counts']['eligible']==extra_snapshot['manual_csv_audit']['daily_stock_eligibility_counts']['eligible']+1
         assert all(s['ticker']!='EXTRA_VALID_STOCK' for t in extra_snapshot['themes'] for s in t['selected'])
         assert 'EXTRA_VALID_STOCK' not in (output/'tradingview_configured_stocks.txt').read_text(encoding='utf-8')
@@ -155,6 +156,12 @@ def main():
         with stock.open('w',encoding='utf-8',newline='') as handle:csv.writer(handle).writerows(missing_header)
         rejected=run('refresh',options,success=False)
         assert 'accepted 10-day shares headers' in rejected.stderr
+        for name,digest in before.items():assert hashes(output)[name]==digest,name
+        inputs(100)
+        with stock.open(encoding='utf-8',newline='') as handle:configured_blank=list(csv.reader(handle))
+        configured_blank[1][12]=''
+        with stock.open('w',encoding='utf-8',newline='') as handle:csv.writer(handle).writerows(configured_blank)
+        rejected=run('refresh',options,success=False);assert 'ema50: required numeric value is blank' in rejected.stderr
         for name,digest in before.items():assert hashes(output)[name]==digest,name
         inputs(100)
         with stock.open(encoding='utf-8',newline='') as f:rows=list(csv.reader(f))

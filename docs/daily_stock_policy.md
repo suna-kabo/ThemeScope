@@ -29,10 +29,10 @@ It is shares per trading session, not money. Keep **Price × volume (turnover),
 1 day**, in USD. Remove **Price × average volume, 30 days** if no longer needed.
 The old field may be read optionally but never affects the current policy.
 
-The supplied `Daily_Stock_2026-10-31.csv` and `Daily_Stock_2026-11-03.csv` contain
-the old 30-day dollar-volume field and no 10-day share-volume header. Therefore
-an actual new native header is not sample-verified. The explicit accepted,
-case-insensitive contract is:
+The older supplied CSVs contain only the 30-day proxy. The later supplied
+`Daily_Stock_2026-11-04 (1).csv` confirms the native header **`Average volume,
+10 days`**. The sample also exercises a blank EMA50 on an unconfigured stock.
+The accepted, case-insensitive contract is:
 
 - `Average volume, 10 days`
 - `Average Volume 10D` (deliberate alias)
@@ -42,6 +42,13 @@ A missing column lists these accepted names. Today's volume, relative volume,
 30-day average volume and dollar volume cannot substitute; no 10-day value is
 derived from turnover/price or any other column. Actual new TradingView import or
 scanner UI behavior is not claimed.
+
+The importer scopes required price/performance/EMA measurements to configured
+members. Blank unused metrics on an extra stock are retained as null and audited
+with its symbol, line and field; no row or value is silently replaced. Required
+liquidity fields remain strict even on extra rows, malformed supplied numeric
+values still fail, and any configured stock with a blank required EMA still
+fails the import. Extra stocks never enter membership, breadth or Primary exports.
 
 All unrelated required fields stay required. Blank, malformed, non-finite or
 negative liquidity inputs fail with the role/line/field and preserve the previous
@@ -107,7 +114,9 @@ modes, demonstrate that vs ETF still includes that ineligible outperformer, and
 compare local/public eligibility. Genuine user history is never overwritten.
 
 The available real old CSVs can test only explicit legacy compatibility. A real
-current-policy run still needs the user's new 10-day volume export; no values are
+current-policy full-session run still needs all five same-session CSVs; the new
+Stock CSV can now be validated separately using its observed native header.
+No other role is borrowed from a different real session and no values are
 fabricated. Tests and CI results are reported in the associated PR/handoff.
 
 Main is the normal branch. Old audit/download/provider branches are optional
