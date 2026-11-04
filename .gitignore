@@ -5,3 +5,21 @@ __pycache__/
 /dist/
 /exports/
 /ThemeScope-delivery.zip
+/cache/
+
+# First-time local use and explicit deployment preparation
+/.venv/
+/inputs/
+/site/
+/.themescope-site-*/
+.env
+.env.*
+
+# Local publication recovery stays private, outside the served site.
+/.site-publication.lock
+/.site-publication/
+
+# Generated delivery archives and diagnostic reports stay local.
+/downloads/*.zip
+/reports/latest_run.md
+/reports/v7_browser_verification.json

@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "instrument_limit": 1000,
+  "groups": [
+    {
+      "id": "core-sectors",
+      "name": "Core Sectors",
+      "theme_ids": [
+        "sector-communication-services",
+        "sector-consumer-discretionary",
+        "sector-consumer-staples",
+        "sector-energy",
+        "sector-financials",
+        "sector-health-care",
+        "sector-industrials",
+        "sector-information-technology",
+        "sector-materials",
+        "sector-real-estate",
+        "sector-utilities"
+      ]
+    },
+    {
+      "id": "technology-growth",
+      "name": "Technology & Growth",
+      "theme_ids": [
+        "theme-semiconductors",
+        "theme-software",
+        "theme-cloud-computing",
+        "theme-cybersecurity",
+        "theme-internet",
+        "theme-artificial-intelligence",
+        "theme-robotics-automation",
+        "theme-quantum-computing",
+        "theme-blockchain",
+        "theme-autonomous-electric-vehicles"
+      ]
+    },
+    {
+      "id": "consumer-financial",
+      "name": "Consumer & Financial",
+      "theme_ids": [
+        "theme-regional-banks",
+        "theme-insurance",
+        "theme-capital-markets",
+        "theme-homebuilders",
+        "theme-retail",
+        "theme-residential-real-estate",
+        "theme-mortgage-reits"
+      ]
+    },
+    {
+      "id": "healthcare-industries",
+      "name": "Healthcare & Industries",
+      "theme_ids": [
+        "theme-biotechnology",
+        "theme-pharmaceuticals",
+        "theme-medical-devices",
+        "theme-healthcare-providers",
+        "theme-genomics",
+        "theme-aerospace-defense",
+        "theme-space",
+        "theme-us-infrastructure",
+        "theme-transportation",
+        "theme-airlines"
+      ]
+    },
+    {
+      "id": "energy-resources",
+      "name": "Energy & Resources",
+      "theme_ids": [
+        "theme-agribusiness",
+        "theme-oil-gas-exploration",
+        "theme-oil-services",
+        "theme-midstream",
+        "theme-natural-gas-equities",
+        "theme-clean-energy",
+        "theme-solar",
+        "theme-uranium-miners",
+        "theme-nuclear-energy",
+        "theme-lithium-batteries",
+        "theme-copper-miners",
+        "theme-rare-earths",
+        "theme-gold-miners",
+        "theme-silver-miners",
+        "theme-metals-mining"
+      ]
+    }
+  ],
+  "primary_research_export": "individual_anchor_first",
+  "grouped_purpose": "Optional broad scan: unique instruments, no per-theme sections"
+}

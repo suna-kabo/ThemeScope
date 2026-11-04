@@ -123,7 +123,7 @@ class V62MetricTests(unittest.TestCase):
         self.assertEqual(result["current_session"], "2026-10-22")
         missing = breadth_change(metric(63.0), metric(reason="below 80% completeness"), "2026-10-22", "2026-10-15")
         self.assertIsNone(missing["value"])
-        self.assertIn("five-session-prior breadth unavailable", missing["reason"])
+        self.assertEqual(missing["reason"], "The earlier breadth observation required for change is unavailable.")
 
     def test_historical_rank_recomputes_scores_and_averages_ties(self):
         calendar = [(date(2026, 1, 1) + timedelta(days=i)).isoformat() for i in range(100)]

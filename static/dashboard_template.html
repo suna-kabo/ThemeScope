@@ -9,12 +9,14 @@
 </head>
 <body>
   <aside class="sidebar" aria-label="ThemeScope navigation">
-    <a class="brand" href="#market"><span class="brand-mark">T</span><span>ThemeScope<small>Market research</small></span></a>
+    <a class="brand" href="#market" data-page="market" aria-label="ThemeScope home — Market"><span>ThemeScope<small>Market research</small></span></a>
     <div class="sidebar-session"><span>MARKET SESSION</span><b id="sidebar-date">—</b></div>
     <nav class="side-nav" aria-label="Dashboard pages">
       <a href="#market" data-page="market" class="active"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 18 18"><path d="M2.5 9h3l2-4 3.1 8 1.8-4h3.1"/></svg></span>Market</a>
+      <a href="#daily-plan" data-page="daily-plan"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 18 18"><path d="M4 3.5h10v11H4zM6.5 7h5M6.5 10h5"/></svg></span>Daily Plan</a>
       <a href="#sectors-themes" data-page="sectors-themes"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 18 18"><path d="M3 3.5h12v11H3zM3 7.5h12M7 7.5v7"/></svg></span>Sectors &amp; Themes</a>
       <a href="#watchlist" data-page="watchlist"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 18 18"><path d="M3.5 4.5h11M3.5 9h11M3.5 13.5h11"/></svg></span>Watchlist</a>
+      <a href="#methodology" data-page="methodology"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 18 18"><path d="M3 3.5h5.5L9 5l.5-1.5H15v11H9.5L9 13l-.5 1.5H3zM9 5v8"/></svg></span>Methodology</a>
     </nav>
     <div class="sidebar-bottom">
       <span class="offline-label"><i></i>Offline snapshot</span>
@@ -29,33 +31,44 @@
     </header>
     <main>
       <section id="market" class="page" aria-labelledby="market-title">
-        <div class="page-heading"><div><span class="eyebrow">MARKET</span><h1 id="market-title">Market</h1><p>SPY, QQQ and IWM price facts. IWM breadth uses iShares holdings as a practical Russell 2000 proxy.</p></div></div>
+        <div class="page-heading"><div><h1 id="market-title">Market</h1></div></div>
+        <article id="market-direction" class="help-card" aria-live="polite"></article>
         <div id="cards" class="market-cards"></div>
-        <div class="volatility-section"><div><span class="eyebrow">VOLATILITY CONTEXT</span><h2>Volatility Context</h2></div><div id="volatility-card"></div></div>
+        <div class="volatility-section"><div><h2>Volatility Context</h2></div><div id="volatility-card"></div></div>
+      </section>
+
+      <section id="daily-plan" class="page" hidden aria-labelledby="daily-plan-title">
+        <div class="page-heading daily-plan-heading"><div><h1 id="daily-plan-title">Today's Plan: <span id="daily-classification">Unclassified</span></h1><p><span id="daily-session">—</span> · Generated <span id="daily-generated">—</span></p></div></div>
+        <section class="plan-section" aria-labelledby="decision-path-title"><h2 id="decision-path-title">Decision Path</h2><div id="decision-path" class="decision-path" role="table" aria-label="Market decision path"></div></section>
+        <section class="plan-section" aria-labelledby="research-priorities-title"><h2 id="research-priorities-title">Today's Research Priorities</h2><div id="qualification-summary" class="qualification-summary"></div><div id="daily-priorities" class="priority-grid"></div></section>
+        <section id="expected-earnings" class="plan-section" aria-labelledby="earnings-title"><h2 id="earnings-title">Expected earnings within the next 7 calendar days</h2><div id="expected-earnings-content"></div></section>
       </section>
 
       <section id="sectors-themes" class="page" hidden aria-labelledby="themes-title">
-        <div class="page-heading"><div><span class="eyebrow">ELIGIBLE EQUITY EXPOSURES</span><h1 id="themes-title">Sectors &amp; Themes</h1><p>Sortable ETF comparisons. Rank is global within the eligible registry; filters do not rerank the remaining rows.</p></div><a class="download-link" href="themes.csv" download>Full ranking CSV</a></div>
-        <details class="help-card"><summary>Score and state definitions</summary><p id="score-method-description">Score weights and inputs come from this snapshot’s configured methodology.</p><p><b>Improving</b> means the current score is in the stronger half while the medium score is in the weaker half. <b>Fading</b> means the reverse. These cross-sectional labels do not establish a time-series reversal or rotation.</p></details>
+        <div class="page-heading"><div><h1 id="themes-title">Sectors &amp; Themes</h1></div><a class="download-link" href="themes.csv" download>Full ranking CSV</a></div>
+        <section class="export-navigation" aria-label="Watchlist downloads"><div class="collection-downloads"><a id="all-individual-watchlists" class="download-link" href="individual_theme_watchlists.zip" download>Download Individual Watchlists</a><div id="daily-data-export-links"></div></div></section>
         <div id="theme-controls" class="controls"></div>
         <p id="theme-count" class="caption"></p>
-        <div class="table-wrap theme-table-wrap"><table><thead id="theme-head"></thead><tbody id="theme-body"></tbody></table></div>
+        <div class="table-wrap theme-table-wrap"><table class="data-table theme-data-table"><colgroup id="theme-cols"></colgroup><thead id="theme-head"></thead><tbody id="theme-body"></tbody></table></div>
         <div class="exports"><button id="theme-visible-csv">Download visible table CSV</button><a href="registry_audit.csv" download>Registry audit CSV</a><span id="theme-export-status" role="status"></span></div>
       </section>
 
       <section id="watchlist" class="page" hidden aria-labelledby="active-name">
         <div id="watchlist-navigation" class="controls watchlist-navigation">
-          <label>Search themes <input id="watchlist-theme-search" type="search" placeholder="Find sector or theme"></label>
+          <div class="navigation-search"><label for="watchlist-theme-search">Find</label><input id="watchlist-theme-search" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="navigation-results" aria-label="Find a ticker, company or theme to navigate to its Watchlist" placeholder="Ticker or theme" autocomplete="off" spellcheck="false"><div id="navigation-popup" class="navigation-popup" hidden><div id="navigation-result-count" class="navigation-result-count" role="status" aria-live="polite"></div><div id="navigation-results" role="listbox" aria-label="Stocks and Sectors &amp; Themes"></div><div id="navigation-more"></div></div></div>
           <label>Sector / Theme <select id="watchlist-theme-selector" aria-label="Select a sector or theme"></select></label>
           <button id="previous-theme" type="button" aria-label="Previous eligible sector or theme">Previous</button>
           <button id="next-theme" type="button" aria-label="Next eligible sector or theme">Next</button>
         </div>
-        <div class="page-heading"><div><span class="eyebrow">SELECTED COMPANIES</span><h1 id="active-name">Watchlist</h1><p id="active-summary" class="watchlist-summary"></p></div></div>
+        <p id="navigation-status" class="caption" role="status" aria-live="polite"></p>
+        <div class="watchlist-research-exports"><a class="download-link" id="tv" download>Download full selected watchlist</a></div>
+        <div class="page-heading"><div><h1 id="active-name">Watchlist</h1><p id="active-summary" class="watchlist-summary"></p></div></div>
         <p id="watchlist-message" class="watchlist-message" hidden></p>
         <div id="stock-controls" class="controls"></div><p id="coverage" class="caption"></p>
-        <div class="table-wrap" id="stock-table-wrap"><table><thead id="stock-head"></thead><tbody id="stock-body"></tbody></table></div>
-        <div class="exports" id="stock-exports"><button id="csv">Download visible CSV</button><button id="tv">Download TradingView list</button><a href="stock_diagnostics.csv" download>Stock eligibility audit</a><span id="export-status" role="status"></span></div>
+        <div class="table-wrap stock-table-wrap" id="stock-table-wrap"><table class="data-table stock-data-table"><colgroup id="stock-cols"></colgroup><thead id="stock-head"></thead><tbody id="stock-body"></tbody></table></div>
+        <div class="exports" id="stock-exports"><button id="csv">Download visible CSV</button><a href="stock_diagnostics.csv" download>Stock eligibility audit</a><span id="export-status" role="status"></span></div>
       </section>
+      <section id="methodology" class="page methodology" hidden aria-labelledby="methodology-title"><div class="page-heading"><h1 id="methodology-title">Methodology</h1></div><div id="methodology-content"></div></section>
       <footer><a href="latest_run.md" download>Run report</a> · <a href="latest_snapshot.json" download>Snapshot JSON</a> · <a href="run_bundle.zip" download>Download complete run ZIP</a></footer>
     </main>
   </div>
