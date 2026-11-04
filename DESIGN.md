@@ -1,6 +1,6 @@
 # Quiet research terminal
 
-Operate mode. Charcoal neutral grounds and restrained amber navigation. Green/red preserve defined financial meanings; Theme States and relative score bands keep their separate semantics. Local system monospace carries tabular measurements and tickers; bundled Inter carries longer explanations. No proprietary assets.
+Operate mode. Charcoal neutral grounds and restrained amber navigation. Green/red preserve defined financial meanings; ETF EMA classifications and relative score bands keep their separate semantics. Local system monospace carries tabular measurements and tickers; bundled Inter carries longer explanations. No proprietary assets.
 
 Flat sections, fine dividers, compact 34px native controls, small 3px radii and a fixed column grid. No nested panels, glass, gradients, decorative tiles, load choreography or added motion framework. Dark and light variants have equivalent hierarchy and visible focus. Responsive sidebar and bounded, horizontally scrollable tables preserve data access on narrow screens.
 

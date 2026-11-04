@@ -1,8 +1,6 @@
 """Explicit five-file daily refresh. Never selects the newest file or pushes Git."""
 import argparse
-from datetime import date, datetime, timedelta, timezone
-import hashlib
-import json
+from datetime import date, timedelta
 from pathlib import Path
 import re
 import subprocess
@@ -17,11 +15,8 @@ def input_paths(root, session, folder=None, now=None):
     try:day=date.fromisoformat(session)
     except ValueError:raise ValueError('Use the US session in YYYY-MM-DD form, for example 2026-11-02.') from None
     if day.isoformat()!=session:raise ValueError('Session must use YYYY-MM-DD form.')
-    calendar=json.loads((root/'config/calendars/xnys_2020_2035_v1.json').read_text(encoding='utf-8'))['sessions']
-    record=next((r for r in calendar if r['session']==session),None)
-    if not record:raise ValueError(f'{session} is not a configured US trading session (weekend/holiday or outside calendar range).')
-    if datetime.fromisoformat(record['close']) > (now or datetime.now(timezone.utc)):
-        raise ValueError(f'{session} has not closed yet. Export after the US close; no future session will be labeled current.')
+    from src.themescope.manual_csv import require_completed_session
+    require_completed_session(root,session,now)
     folder=Path(folder) if folder else Path('inputs')/session
     if not folder.is_absolute():folder=root/folder
     folder=folder.resolve()
@@ -38,13 +33,8 @@ def input_paths(root, session, folder=None, now=None):
         if stamp and stamp not in {session,(day+timedelta(days=1)).isoformat()}:
             raise ValueError(f'{role}: filename date {stamp} disagrees with US session {session} and its next-day Hong Kong export date.')
         result[role]=file
-    previous=root/'output/manual_csv/latest_snapshot.json'
-    if previous.exists():
-        saved=json.loads(previous.read_text(encoding='utf-8'))
-        if saved['session_date']<session:
-            old=saved.get('manual_csv_audit',{}).get('inputs',{})
-            reused=[role for role,p in result.items() if hashlib.sha256(p.read_bytes()).hexdigest()==old.get(role,{}).get('sha256')]
-            if reused:raise ValueError('Inputs identical to the previous successful session: '+', '.join(reused)+'. Export fresh CSVs; old files were not reused.')
+    from src.themescope.manual_csv import reject_reused_inputs
+    reject_reused_inputs(result,root/'output/manual_csv/latest_snapshot.json',session)
     return result
 
 

@@ -1,3 +1,5 @@
+> Historical record. Current setup and audit: [README](../README.md) and [repository audit](repository_audit.md). Bundle paths below refer to retained local files or historical Git commits, not current source downloads.
+
 # ThemeScope final release audit — 31 October 2026 (HKT)
 
 ## A. Verdict

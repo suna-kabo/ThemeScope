@@ -82,7 +82,7 @@ def preview_handler(directory,site=False):
                 pinned=parts[1];requested=parts[2]
             name=requested or ('index.html' if site else 'dashboard.html')
             path=PurePosixPath(name)
-            if '\\' in name or '..' in path.parts or any(part.startswith('.') for part in path.parts) or str(path)!=name:
+            if ':' in name or '\\' in name or '..' in path.parts or any(part.startswith('.') for part in path.parts) or str(path)!=name:
                 self.reply(404,b'Not a completed preview asset.\n','text/plain; charset=utf-8',body);return
             try:
                 with output_lock(directory,timeout=.5):

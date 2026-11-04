@@ -37,6 +37,15 @@ def main():
             assert 'initialization failed' not in page.locator('#status').inner_text()
             for private in ['run_audit.json','raw_inputs.json','latest_snapshot.json','canonical_dashboard_data.json','run_bundle.zip','local_history/'+manifest['session_date']+'.json','.git/config']:
                 assert page.request.get(url+private).status==404,private
+            hidden=['tradingview_all_theme_stocks.txt','daily_primary_relationships_'+manifest['session_date']+'.csv','daily_primary_watchlists_'+manifest['session_date']+'.zip']
+            groups=json.loads((ROOT/'config/watchlist_exports.json').read_text(encoding='utf-8'))['groups']
+            hidden+=['tradingview_group_'+group['id']+'.txt' for group in groups]
+            research=payload['daily_primary_research']
+            if research['theme_ids']:
+                theme_id=research['theme_ids'][0]
+                ordinary=next(r['file'] for r in payload['export_manifest'] if r['role']=='individual_research' and r['theme_id']==theme_id)
+                hidden.append('primary_watchlists/'+manifest['session_date']+'/'+Path(ordinary).stem+'_Primary_'+research['side']+'.txt')
+            for private in hidden:assert page.request.get(url+private).status==404,private
             for name in manifest['files']:
                 assert page.request.get(url+name).status==200,name
             for route in ['market','daily-plan','sectors-themes','watchlist','methodology']:

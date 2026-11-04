@@ -114,7 +114,7 @@ class PreviewTests(unittest.TestCase):
     def test_staging_unknown_paths_and_traversal_are_not_served(self):
         _,info,url=self.start(self.new);folder=Path(info['directory']);(folder/'.secret').write_text('hidden');(folder/'unfinished.tmp').write_text('partial')
         base=url.split('/dashboard.html')[0]
-        for name in ('.secret','unfinished.tmp','../other','local_history/2026-11-03.json'):
+        for name in ('.secret','unfinished.tmp','../other','local_history/2026-11-03.json','C:/outside.txt','file.txt:private'):
             self.assertEqual(self.get(base+'/'+name)[0],404,name)
         self.assertEqual(self.get(base+'/download.txt')[2],b'one')
     def test_moved_project_and_other_working_directory(self):

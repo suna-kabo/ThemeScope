@@ -1,3 +1,5 @@
+> Historical record. Current setup and audit: [README](../README.md) and [repository audit](repository_audit.md). Bundle paths below refer to retained local files or historical Git commits, not current source downloads.
+
 # ThemeScope individual exports and navigation audit
 
 3 November 2026, Hong Kong time. Baseline: `e53850a`, branch `download`, current `/workspace/ThemeScope` checkout and its latest local outputs. Unrelated dirty/untracked work is preserved. The real data session remains **2026-10-30**; this update does not claim newer market data.

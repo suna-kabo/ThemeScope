@@ -1,3 +1,5 @@
+> Historical record. Current setup and audit: [README](../README.md) and [repository audit](repository_audit.md). Bundle paths below refer to retained local files or historical Git commits, not current source downloads.
+
 # ThemeScope UI and local-history refinement — 31 October 2026 HKT
 
 Baseline: 88e64c92a320cfed59d995a0356e345ba658d972. Unrelated dirty/untracked files preserved.

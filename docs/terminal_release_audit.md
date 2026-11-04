@@ -1,3 +1,5 @@
+> Historical record. Current setup and audit: [README](../README.md) and [repository audit](repository_audit.md). Bundle paths below refer to retained local files or historical Git commits, not current source downloads.
+
 # ThemeScope quiet research terminal audit
 
 Historical audit of the preceding interface. Export and navigation changes are covered in [the navigation/export audit](navigation_export_release_audit.md).

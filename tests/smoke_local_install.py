@@ -65,6 +65,19 @@ def main():
         output=clone/'output/manual_csv';site=clone/'site'
         first_snapshot=json.loads((output/'latest_snapshot.json').read_text(encoding='utf-8'))
         assert all(t['priority_change']=='N/A' for t in first_snapshot['themes'])
+        assert first_snapshot['data_complete'] is True
+        # A successful build with one absent configured stock is not complete.
+        stock_file=folder/'Daily_Stock.csv'
+        with stock_file.open(encoding='utf-8',newline='') as handle:stock_rows=list(csv.reader(handle))
+        absent=stock_rows[1][0]
+        with stock_file.open('w',encoding='utf-8',newline='') as handle:csv.writer(handle).writerows([stock_rows[0],*stock_rows[2:]])
+        run('refresh',options)
+        partial=json.loads((output/'latest_snapshot.json').read_text(encoding='utf-8'))
+        assert partial['data_complete'] is False
+        assert json.loads((output/'refresh_status.json').read_text(encoding='utf-8'))['data_complete'] is False
+        assert any(s['ticker']==absent and s['metric_status']=='unavailable' for t in partial['themes'] for s in t['selected'])
+        assert [[s['ticker'] for s in t['selected']] for t in partial['themes']]==[[s['ticker'] for s in t['selected']] for t in first_snapshot['themes']]
+        inputs(100);run('refresh',options)
         before=hashes(output);site_before=hashes(site)
         # These are the real production preview handler and completed-file checks.
         dashboard_server,_,dashboard_url=create_server(clone,False,0)
@@ -109,6 +122,12 @@ def main():
         assert hashes(site)==site_before # Refresh is never a site build.
         # Reusing yesterday's exact CSVs under a new session is refused.
         inputs(100,newer_folder);run('refresh',['--session','2024-01-04'],success=False)
+        python=clone/('.venv/Scripts/python.exe' if os.name=='nt' else '.venv/bin/python')
+        direct=[str(python),str(clone/'scripts/generate_dashboard.py'),'--source','tradingview-csv','--as-of','2024-01-04','--output-dir',str(output)]
+        for role,stem in [('stock','Daily_Stock'),('etf','Daily_ETF'),('spy','SPY'),('qqq','QQQ'),('iwm','IWM')]:direct+=['--'+role+'-csv',str(newer_folder/(stem+'.csv'))]
+        refused=subprocess.run(direct,cwd=base,capture_output=True,text=True,encoding='utf-8',timeout=90)
+        assert refused.returncode!=0 and 'Inputs identical' in refused.stderr
+        assert_preview(dashboard_url,output,'2024-01-03')
         inputs(101,newer_folder);run('refresh',['--session','2024-01-04'])
         snapshot=json.loads((output/'latest_snapshot.json').read_text(encoding='utf-8'))
         assert snapshot['local_history']['comparison_session']=='2024-01-03'

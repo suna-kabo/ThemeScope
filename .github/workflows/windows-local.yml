@@ -2,7 +2,7 @@ name: Windows local setup
 
 on:
   push:
-    branches: [download]
+    branches: [main, download]
   pull_request:
 
 jobs:
@@ -20,6 +20,12 @@ jobs:
         run: python -m unittest discover -s tests -p test_local_workflow.py
       - name: Public-site boundary tests
         run: python -m unittest discover -s tests -p test_site_output.py
+      - name: Direct entry-point guards and locked Pages staging
+        run: |
+          python -m unittest discover -s tests -p test_entry_guards.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m unittest discover -s tests -p test_site_staging.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: EMA policy, holiday history and weighted research exports
         run: python -m unittest discover -s tests -p test_research_policy.py
       - name: Weighted filter and grouped export invariants

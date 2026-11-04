@@ -1,3 +1,5 @@
+> Historical record. Current setup and audit: [README](../README.md) and [repository audit](../docs/repository_audit.md). Bundle paths below refer to retained local files or historical Git commits, not current source downloads.
+
 # ThemeScope v7 watchlist migration
 
 ## Watchlist migration

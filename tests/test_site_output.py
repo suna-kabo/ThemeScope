@@ -8,7 +8,7 @@ from unittest.mock import patch
 import zipfile
 import re
 
-from src.themescope.site_output import prepare_site,public_payload,seal_site,validate_site,placeholder_site
+from src.themescope.site_output import prepare_site,public_payload,seal_site,validate_site,placeholder_site,SCHEMA,public_artifact_purposes
 
 ROOT=Path(__file__).resolve().parents[1]
 CANARY='PRIVATE_INPUT_HISTORY_REVIEW_CANARY'
@@ -55,9 +55,12 @@ class SiteBoundaryTests(unittest.TestCase):
         save();self.build()
         research=snapshot['daily_primary_research']
         for name,content in files.items():
-            self.assertEqual((self.destination/name).read_text(encoding='utf-8'),content)
-            self.assertEqual((self.destination/name).read_bytes(),(self.source/name).read_bytes())
-        self.assertTrue((self.destination/research['relationships_file']).is_file())
+            if name==research['combined_file']:
+                self.assertEqual((self.destination/name).read_text(encoding='utf-8'),content)
+                self.assertEqual((self.destination/name).read_bytes(),(self.source/name).read_bytes())
+            else:self.assertFalse((self.destination/name).exists())
+        for field in ('relationships_file','archive_file'):self.assertFalse((self.destination/research[field]).exists())
+        self.assertFalse((self.destination/'primary_watchlists').exists())
         self.assertFalse((self.destination/'daily_primary_audit.json').exists())
         # Same instrument universe/count cannot disguise wrong order or qualification.
         name=research['combined_file'];original=(self.source/name).read_text(encoding='utf-8')
@@ -141,7 +144,43 @@ class SiteBoundaryTests(unittest.TestCase):
         self.assertIsNone(result['session_date'])
         self.assertEqual(set(result['files']),{'index.html','_headers'})
 
+    def test_placeholder_cannot_disguise_unlinked_or_market_files(self):
+        placeholder_site(self.destination)
+        (self.destination/'tradingview_hidden.txt').write_text('NASDAQ:NVDA\n')
+        seal_site(self.destination,'placeholder',None)
+        with self.assertRaisesRegex(ValueError,'Placeholder must contain only'):validate_site(self.destination)
+
     def test_private_payload_key_even_in_a_resealed_site_is_rejected(self):
-        self.build();path=self.destination/'index.html';text=path.read_text(encoding='utf-8');text=text.replace('"schema_version":"themescope-site-2"','"manual_csv_audit":{},"schema_version":"themescope-site-2"');path.write_text(text,encoding='utf-8')
+        self.build();path=self.destination/'index.html';text=path.read_text(encoding='utf-8');needle='"schema_version":"'+SCHEMA+'"';self.assertIn(needle,text);text=text.replace(needle,'"manual_csv_audit":{},'+needle);path.write_text(text,encoding='utf-8')
         seal_site(self.destination,'snapshot','2026-11-02')
         with self.assertRaisesRegex(ValueError,'Private metadata'):validate_site(self.destination)
+
+    def test_hidden_local_exports_are_not_deployment_assets_even_if_resealed(self):
+        self.snapshot['export_manifest'].append({'file':'tradingview_group_old.txt','role':'optional_broad_scan','instrument_count':2,'section_count':0})
+        (self.source/'tradingview_group_old.txt').write_text('NASDAQ:SMH,NASDAQ:NVDA\n')
+        (self.source/'latest_snapshot.json').write_text(json.dumps(self.snapshot))
+        manifest=self.build();payload=public_payload(self.snapshot,ROOT)
+        self.assertEqual(set(manifest['files']),set(public_artifact_purposes(payload)))
+        self.assertFalse((self.destination/'tradingview_group_old.txt').exists())
+        (self.destination/'tradingview_group_old.txt').write_text('NASDAQ:SMH\n')
+        seal_site(self.destination,'snapshot','2026-11-02')
+        with self.assertRaisesRegex(ValueError,'unlinked/obsolete'):validate_site(self.destination)
+
+    def test_resealed_zip_cannot_hide_a_private_member_or_different_watchlist(self):
+        self.build()
+        archive=self.destination/'individual_theme_watchlists.zip'
+        with zipfile.ZipFile(archive,'a') as handle:handle.writestr('run_audit.json',CANARY)
+        seal_site(self.destination,'snapshot','2026-11-02')
+        with self.assertRaisesRegex(ValueError,'unexpected/duplicate'):validate_site(self.destination)
+        with zipfile.ZipFile(archive,'w') as handle:handle.writestr('SMH_Semiconductors.txt','NASDAQ:WRONG')
+        seal_site(self.destination,'snapshot','2026-11-02')
+        with self.assertRaisesRegex(ValueError,'selected downloads differ'):validate_site(self.destination)
+
+    def test_legacy_site_can_migrate_but_cannot_deploy_without_repreparation(self):
+        self.build();path=self.destination/'index.html';path.write_text(path.read_text(encoding='utf-8').replace(SCHEMA,'themescope-site-2'),encoding='utf-8')
+        (self.destination/'tradingview_group_old.txt').write_text('NASDAQ:SMH\n')
+        seal_site(self.destination,'snapshot','2026-11-02')
+        manifest_path=self.destination/'site_manifest.json';value=json.loads(manifest_path.read_text());value['schema']='themescope-site-2';manifest_path.write_text(json.dumps(value))
+        with self.assertRaisesRegex(ValueError,'re-prepared'):validate_site(self.destination)
+        self.build();self.assertFalse((self.destination/'tradingview_group_old.txt').exists())
+        self.assertEqual(validate_site(self.destination)['schema'],SCHEMA)

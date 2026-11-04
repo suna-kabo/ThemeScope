@@ -16,13 +16,16 @@ import tempfile
 from urllib.parse import quote
 import zipfile
 
-SCHEMA='themescope-site-2'
-ROLES={'individual_research','configured_stock_daily_data','optional_broad_scan','configured_etf_daily_data','individual_primary_research','daily_primary_research'}
+SCHEMA='themescope-site-3'
+LEGACY_SCHEMAS={'themescope-site-1','themescope-site-2'}
+ROLES={'individual_research','configured_stock_daily_data','configured_etf_daily_data','daily_primary_research'}
+LOCAL_ONLY_ROLES={'optional_broad_scan','individual_primary_research'}
 SCALARS='ticker exchange instrument_type currency price_close daily_change ema21 ema50 above_ema21 above_ema50 price_state price_vs_ema21_pct price_vs_ema50_pct adv30_usd atr14_pct relative_volume_1d turnover_1d_usd'.split()
 THEME_FIELDS='id name anchor level global_rank rank_current rank_change_daily rank_comparison_session theme_score current_strength_score medium_strength_score priority_change breadth_status_21 breadth_status_50 configured_watchlist_count watchlist_member_count has_watchlist stock_drilldown_status watchlist_status theme_breadth21_pct theme_breadth21_above theme_breadth21_valid theme_breadth50_pct theme_breadth50_above theme_breadth50_valid'.split()
 STOCK_FIELDS='company theme_id theme_name anchor selection_slot market_cap_usd anchor_performance_1m anchor_performance_3m excess21_pp excess63_pp earnings_date weighted_excess_pp weighted_vs_etf metric_status session_date'.split()
 METRIC_FIELDS='value status above_count valid_count eligible_count configured_count ema_period session_date'.split()
 HEADERS="/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: no-referrer\n  X-Frame-Options: DENY\n  Cache-Control: no-cache\n"
+PLACEHOLDER_HTML='''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; connect-src 'none'; base-uri 'none'"><title>ThemeScope — deployment prepared</title></head><body><h1>ThemeScope</h1><p>Deployment is prepared. No market snapshot has been published.</p></body></html>'''
 
 
 def pick(value,keys):
@@ -79,8 +82,7 @@ def public_payload(snapshot,root):
     payload['market_classification']=pick(snapshot['market_classification'],['direction','breadth_consensus','breadth_qualifier','reason','action_summary'])
     payload['display_methodology']=pick(snapshot.get('display_methodology',{}),['maintenance_thresholds','watchlist_capacity','breadth_minimum_coverage','theme_breadth_minimum_valid','liquidity_definition','membership_rules','maintenance_missing_data'])
     research=snapshot['daily_primary_research']
-    payload['daily_primary_research']=pick(research,['session_date','side','theme_ids','combined_file','archive_file','relationships_file','platform_import_tested','sections','theme_order','overlap_policy'])
-    payload['daily_primary_research']['relationships']=[pick(r,['theme_id','theme_name','anchor','symbol','ticker','role','weighted_excess_pp','er1m_pp','er3m_pp']) for r in research['relationships']]
+    payload['daily_primary_research']=pick(research,['session_date','side','theme_ids','combined_file','platform_import_tested'])
     payload['local_history']={'comparison_session':snapshot.get('local_history',{}).get('comparison_session'),'status':'Compared with the immediately preceding US session.' if any(t.get('rank_change_daily') is not None for t in payload['themes']) else 'No comparable previous-session record.'}
     earnings=snapshot['expected_earnings']
     payload['expected_earnings']=pick(earnings,['as_of','through','later_count'])
@@ -94,12 +96,31 @@ def public_payload(snapshot,root):
             payload['expected_earnings'][group].append(clean)
     payload['export_manifest']=[]
     for row in snapshot['export_manifest']:
+        if row['role'] in LOCAL_ONLY_ROLES:continue
         if row['role'] not in ROLES:raise ValueError('Unapproved website export role: '+row['role'])
         safe_name(row['file'])
         if not (re.fullmatch(r'tradingview_[A-Za-z0-9_-]+\.txt',row['file']) or re.fullmatch(r'(?:individual_watchlists|primary_watchlists/\d{4}-\d{2}-\d{2})/[A-Za-z0-9_.-]+\.txt',row['file'])):
             raise ValueError('Unapproved website export name: '+row['file'])
         payload['export_manifest'].append(pick(row,['file','role','theme_id','anchor','group','instrument_count','stock_count','section_count']))
     return payload
+
+
+def public_artifact_purposes(payload):
+    """Every deployed file has a visitor-facing link or an explicit site purpose."""
+    purposes={'index.html':'Website with inline script, CSS, font and display data',
+              '_headers':'Hosting security/cache headers','Inter-LICENSE.txt':'Bundled font license',
+              'themes.csv':'Full ranking CSV link','theme_stocks.csv':'Configured stock CSV link',
+              'snapshot_summary.json':'Snapshot summary links and local preview metadata',
+              'individual_theme_watchlists.zip':'Download Individual Watchlists'}
+    for row in payload['export_manifest']:
+        if row['role'] not in ROLES:raise ValueError('Unapproved website export role: '+row['role'])
+        safe_name(row['file'])
+        if row['file'] in purposes:raise ValueError('Duplicate website artifact: '+row['file'])
+        purposes[row['file']]={'individual_research':'Full selected Watchlist download and ZIP member',
+                              'configured_stock_daily_data':'Download All Stocks',
+                              'configured_etf_daily_data':'Download All Themes',
+                              'daily_primary_research':"Today’s grouped Primary Research Watchlist"}[row['role']]
+    return purposes
 
 
 def render_html(payload,root):
@@ -139,10 +160,11 @@ def seal_site(folder,kind,session):
     write_json(folder/'site_manifest.json',{'schema':SCHEMA,'kind':kind,'session_date':session,'files':files})
 
 
-def validate_site(folder):
+def validate_site(folder,*,allow_legacy=False):
     if folder.is_symlink():raise ValueError('Site folder must not be a symlink')
     manifest=json.loads((folder/'site_manifest.json').read_text(encoding='utf-8'))
-    if manifest.get('schema') not in {SCHEMA,'themescope-site-1'} or manifest.get('kind') not in {'snapshot','placeholder'}:raise ValueError('Unknown site manifest')
+    if manifest.get('schema') not in {SCHEMA,*LEGACY_SCHEMAS} or manifest.get('kind') not in {'snapshot','placeholder'}:raise ValueError('Unknown site manifest')
+    if manifest['schema']!=SCHEMA and not allow_legacy:raise ValueError('Legacy site must be re-prepared with the current allowlist before deployment.')
     files=manifest['files']
     if not isinstance(files,dict):raise ValueError('Invalid site file manifest')
     actual=set()
@@ -159,6 +181,7 @@ def validate_site(folder):
         if hashlib.sha256(path.read_bytes()).hexdigest()!=digest:raise ValueError('Site artifact changed after preparation: '+name)
     if not {'index.html','_headers'}<=set(files):raise ValueError('Site entry point or headers missing')
     text=(folder/'index.html').read_text(encoding='utf-8')
+    if manifest['kind']=='placeholder' and (set(files)!={'index.html','_headers'} or text!=PLACEHOLDER_HTML):raise ValueError('Placeholder must contain only the known empty page and hosting headers')
     if "connect-src 'none'" not in text:raise ValueError('Offline CSP missing')
     # Fail closed even if a modified template reintroduces a private download.
     class Links(HTMLParser):
@@ -175,7 +198,7 @@ def validate_site(folder):
         payload=json.loads(match.group(1))
         if payload.get('schema_version')!=manifest['schema'] or payload.get('session_date')!=manifest['session_date']:raise ValueError('Public payload/manifest session mismatch')
         forbidden={'manual_csv_audit','raw_inputs','inputs','source_matrix','fingerprint','maintenance','reviewed_date','reason_source_url','source_url','membership_rationale','ranking_configuration_fingerprint','candidate_metrics'}
-        if manifest['schema']==SCHEMA:forbidden.update({'theme_state','theme_states','state_threshold','state_boundary','priority_matrix','priority_definitions','guard_failures'})
+        if manifest['schema'] in {SCHEMA,'themescope-site-2'}:forbidden.update({'theme_state','theme_states','state_threshold','state_boundary','priority_matrix','priority_definitions','guard_failures'})
         def check(value):
             if isinstance(value,dict):
                 if forbidden&set(value):raise ValueError('Private metadata found in public payload')
@@ -185,20 +208,38 @@ def validate_site(folder):
         check(payload)
         for row in payload['export_manifest']:
             if row['file'] not in files:raise ValueError('A dynamic website download is missing')
-        if manifest['schema']==SCHEMA:
+        if manifest['schema'] in {SCHEMA,'themescope-site-2'}:
             for field in ('combined_file','archive_file','relationships_file'):
                 name=payload['daily_primary_research'].get(field)
                 if name and name not in files:raise ValueError('A Daily Primary website download is missing')
+        if manifest['schema']==SCHEMA:
+            research=payload['daily_primary_research']
+            if set(research)-{'session_date','side','theme_ids','combined_file','platform_import_tested'}:
+                raise ValueError('Internal Primary relationship/archive metadata found in website payload')
+            purposes=public_artifact_purposes(payload)
+            if set(files)!=set(purposes):raise ValueError('Website includes unlinked/obsolete artifacts or is missing an approved asset')
+            primary=[r['file'] for r in payload['export_manifest'] if r['role']=='daily_primary_research']
+            if primary!=([research['combined_file']] if research.get('combined_file') else []):raise ValueError('Primary link and website manifest disagree')
+            individuals=[r['file'] for r in payload['export_manifest'] if r['role']=='individual_research']
+            expected={Path(name).name:(folder/name).read_bytes() for name in individuals}
+            with zipfile.ZipFile(folder/'individual_theme_watchlists.zip') as archive:
+                if len(archive.namelist())!=len(expected) or set(archive.namelist())!=set(expected):raise ValueError('Individual ZIP contains unexpected/duplicate members')
+                if sum(row.file_size for row in archive.infolist())>25*1024*1024:raise ValueError('Individual ZIP uncompressed content exceeds site limit')
+                if any(archive.read(name)!=content for name,content in expected.items()):raise ValueError('Individual ZIP and selected downloads differ')
     return manifest
 
 
 def replace_site(stage,destination):
     """Replace only a previously sealed generated site, with rollback on failure."""
-    if destination.exists():validate_site(destination)
+    if destination.exists():validate_site(destination,allow_legacy=True)
     from .local_publication import publish_tree
     previous={p.relative_to(destination).as_posix() for p in destination.rglob('*') if p.is_file()} if destination.exists() else set()
     current={p.relative_to(stage).as_posix() for p in stage.rglob('*') if p.is_file()}
     publish_tree(stage,destination,previous-current,validate_site)
+    # Publication retires managed files; remove only now-empty generated folders.
+    for folder in sorted((p for p in destination.rglob('*') if p.is_dir()),key=lambda p:len(p.parts),reverse=True):
+        try:folder.rmdir()
+        except OSError:pass
 
 
 def _prepare_site(root,source,destination,session):
@@ -218,12 +259,12 @@ def _prepare_site(root,source,destination,session):
         stock_symbols={s['tradingview_symbol'] for t in payload['themes'] for s in t['selected']}
         all_symbols=stock_symbols|{t['tradingview_symbol'] for t in payload['themes']+payload['context']}
         from .daily_lists import primary_research
-        expected_research=copy.deepcopy(payload)
+        expected_research=copy.deepcopy(snapshot)
         expected_files,expected_manifest=primary_research(expected_research,snapshot['export_configuration']['instrument_limit'])
-        if payload['daily_primary_research']!= {k:v for k,v in expected_research['daily_primary_research'].items() if k!='evaluations'}:raise ValueError('Primary research relationships differ from current returns/policy')
-        actual_manifest=[r for r in payload['export_manifest'] if r['role'] in {'individual_primary_research','daily_primary_research'}]
-        if actual_manifest!=expected_manifest:raise ValueError('Primary research manifest differs from current qualification')
-        daily_symbols=[]
+        if snapshot['daily_primary_research']!=expected_research['daily_primary_research']:raise ValueError('Primary research relationships differ from current returns/policy')
+        actual_manifest=[r for r in payload['export_manifest'] if r['role']=='daily_primary_research']
+        if actual_manifest!=[r for r in expected_manifest if r['role']=='daily_primary_research']:raise ValueError('Primary research manifest differs from current qualification')
+        daily_symbols=[];etf_symbols=[]
         for item in payload['export_manifest']:
             path=source/item['file']
             if path.is_symlink():raise ValueError('Export source must not be a symlink')
@@ -233,24 +274,17 @@ def _prepare_site(root,source,destination,session):
             if headings and item['role']!='daily_primary_research':raise ValueError('Unexpected section in ordinary export')
             if len(headings)!=item['section_count'] or len(instruments)!=len(set(instruments)) or len(instruments)!=item['instrument_count'] or not set(instruments)<=all_symbols:raise ValueError('Website TXT contains unexpected instruments: '+item['file'])
             if item['role'] in {'individual_primary_research','daily_primary_research'} and content.decode('utf-8').replace('\r\n','\n')!=expected_files[item['file']]:raise ValueError('Primary export differs from weighted per-anchor qualification')
-            if item['role']=='configured_etf_daily_data' and tokens!=list(dict.fromkeys(r['tradingview_symbol'] for r in payload['themes']+payload['context'])):raise ValueError('ETF collection list differs from complete configured universe')
+            if item['role']=='configured_etf_daily_data':etf_symbols+=tokens
             if item['role']=='individual_research':
                 theme=next(t for t in payload['themes'] if t['id']==item['theme_id'])
                 if tokens!=[theme['tradingview_symbol']]+[s['tradingview_symbol'] for s in theme['selected']]:raise ValueError('Individual website export differs from configured membership')
             if item['role']=='configured_stock_daily_data':daily_symbols+=tokens
             target=stage/item['file'];target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(content)
         if any(i['role']=='configured_stock_daily_data' for i in payload['export_manifest']) and daily_symbols!=sorted(stock_symbols):raise ValueError('Daily Data Stocks differs from configured stock universe')
+        if any(i['role']=='configured_etf_daily_data' for i in payload['export_manifest']) and etf_symbols!=list(dict.fromkeys(r['tradingview_symbol'] for r in payload['themes']+payload['context'])):raise ValueError('ETF collection list differs from complete configured universe')
         individuals=[r for r in payload['export_manifest'] if r['role']=='individual_research']
         with zipfile.ZipFile(stage/'individual_theme_watchlists.zip','w',compression=zipfile.ZIP_DEFLATED) as archive:
             for item in individuals:archive.write(stage/item['file'],arcname=Path(item['file']).name)
-        research=payload['daily_primary_research']
-        if research['archive_file']:
-            with zipfile.ZipFile(stage/research['archive_file'],'w',compression=zipfile.ZIP_DEFLATED) as archive:
-                for item in expected_manifest:
-                    if item['role']=='individual_primary_research':archive.write(stage/item['file'],arcname=Path(item['file']).name)
-            rows=research['relationships']
-            with (stage/research['relationships_file']).open('w',encoding='utf-8',newline='') as handle:
-                writer=csv.DictWriter(handle,fieldnames=list(rows[0]));writer.writeheader();writer.writerows(rows)
         write_public_csvs(stage,payload)
         stocks={r['tradingview_symbol']:r for t in payload['themes'] for r in t['selected']}
         write_json(stage/'snapshot_summary.json',{'session_date':session,'generated_at_hkt':payload['dashboard_generated_at_hkt_display'],'source':'User-supplied TradingView CSV exports','configured_themes':len(payload['themes']),'configured_unique_stocks':len(stocks),'missing_daily_stocks':sum(s['metric_status']!='available' for s in stocks.values()),'rank_comparison_session':payload['local_history']['comparison_session']})
@@ -269,7 +303,7 @@ def prepare_site(root,source,destination,session):
 
 def placeholder_site(destination):
     destination.mkdir(parents=True,exist_ok=False)
-    (destination/'index.html').write_text('''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; connect-src 'none'; base-uri 'none'"><title>ThemeScope — deployment prepared</title></head><body><h1>ThemeScope</h1><p>Deployment is prepared. No market snapshot has been published.</p></body></html>''',encoding='utf-8')
+    (destination/'index.html').write_text(PLACEHOLDER_HTML,encoding='utf-8')
     (destination/'_headers').write_text(HEADERS,encoding='utf-8')
     seal_site(destination,'placeholder',None)
     return validate_site(destination)

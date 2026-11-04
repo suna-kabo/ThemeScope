@@ -19,10 +19,10 @@ class RefreshTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp) / 'run'
             with patch('scripts.generate_dashboard.audit_release', return_value={'passed': True, 'summary': {}, 'issues': []}), patch('scripts.generate_dashboard.build_snapshot', return_value=(copy.deepcopy(self.snapshot), self.raw)):
-                self.assertEqual(main(['--output-dir', str(out)]), 0)
+                self.assertEqual(main(['--source','live','--legacy-live','--output-dir', str(out)]), 0)
             before = {p.name: p.read_bytes() for p in out.iterdir() if p.name != 'refresh_status.json'}
             with patch('scripts.generate_dashboard.audit_release', return_value={'passed': True, 'summary': {}, 'issues': []}), patch('scripts.generate_dashboard.build_snapshot', side_effect=RuntimeError('HTTP 429')):
-                self.assertEqual(main(['--output-dir', str(out)]), 1)
+                self.assertEqual(main(['--source','live','--legacy-live','--output-dir', str(out)]), 1)
             for name, content in before.items():
                 self.assertEqual((out / name).read_bytes(), content)
             self.assertEqual(json.loads((out / 'refresh_status.json').read_text())['status'], 'failed')
@@ -32,7 +32,7 @@ class RefreshTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp) / 'run'
             with patch('scripts.generate_dashboard.audit_release', return_value={'passed': True, 'summary': {}, 'issues': []}), patch('scripts.generate_dashboard.build_snapshot', return_value=(copy.deepcopy(self.snapshot), self.raw)):
-                self.assertEqual(main(['--output-dir', str(out)]), 0)
+                self.assertEqual(main(['--source','live','--legacy-live','--output-dir', str(out)]), 0)
             (out / 'personal.txt').write_text('keep me')
             before = (out / 'dashboard.html').read_bytes()
             original_replace = os.replace
@@ -44,7 +44,7 @@ class RefreshTests(unittest.TestCase):
                     raise OSError('simulated publication failure')
                 return original_replace(source, target)
             with patch('scripts.generate_dashboard.audit_release', return_value={'passed': True, 'summary': {}, 'issues': []}), patch('scripts.generate_dashboard.build_snapshot', return_value=(copy.deepcopy(self.snapshot), self.raw)), patch('scripts.generate_dashboard.os.replace', side_effect=fail_once):
-                self.assertEqual(main(['--output-dir', str(out)]), 1)
+                self.assertEqual(main(['--source','live','--legacy-live','--output-dir', str(out)]), 1)
             self.assertEqual((out / 'dashboard.html').read_bytes(), before)
             self.assertEqual((out / 'personal.txt').read_text(), 'keep me')
 
@@ -54,7 +54,7 @@ class RefreshTests(unittest.TestCase):
             out.mkdir()
             (out / 'dashboard.html').write_text('failed empty dashboard')
             with patch('scripts.generate_dashboard.audit_release', return_value={'passed': True, 'summary': {}, 'issues': []}), patch('scripts.generate_dashboard.build_snapshot', return_value=({}, {})):
-                self.assertEqual(main(['--output-dir', str(out)]), 1)
+                self.assertEqual(main(['--source','live','--legacy-live','--output-dir', str(out)]), 1)
             self.assertFalse((out / 'dashboard.html').exists())
             self.assertTrue((out / 'rejected_dashboard.html').exists())
 
@@ -62,7 +62,7 @@ class RefreshTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp) / 'run'
             with patch('scripts.generate_dashboard.audit_release', return_value={'passed': True, 'summary': {}, 'issues': []}), patch('scripts.generate_dashboard.build_snapshot', return_value=({}, {})):
-                self.assertEqual(main(['--output-dir', str(out)]), 1)
+                self.assertEqual(main(['--source','live','--legacy-live','--output-dir', str(out)]), 1)
             self.assertFalse((out / 'dashboard.html').exists())
 
     def test_failed_current_holdings_request_cannot_reuse_retained_payload(self):
@@ -82,7 +82,7 @@ class RefreshTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             first, second = Path(tmp) / 'first', Path(tmp) / 'second'
             with patch('scripts.generate_dashboard.audit_release', return_value={'passed': True, 'summary': {}, 'issues': []}), patch('scripts.generate_dashboard.build_snapshot', return_value=(copy.deepcopy(self.snapshot), self.raw)):
-                self.assertEqual(main(['--output-dir', str(first)]), 0)
+                self.assertEqual(main(['--source','live','--legacy-live','--output-dir', str(first)]), 0)
             with patch('scripts.generate_dashboard.audit_release', return_value={'passed': True, 'summary': {}, 'issues': []}), patch('scripts.generate_dashboard.build_snapshot', side_effect=AssertionError('Must not collect')):
                 self.assertEqual(main(['--import-run',str(first/'run_bundle.zip'),'--output-dir',str(second)]),0)
             snapshot = json.loads((second/'latest_snapshot.json').read_text())
@@ -111,7 +111,7 @@ class RefreshTests(unittest.TestCase):
     def test_incomplete_watchlist_configuration_blocks_collection_before_network(self):
         with tempfile.TemporaryDirectory() as tmp:
             with patch('scripts.generate_dashboard.build_snapshot', side_effect=AssertionError('Collection must not start')):
-                self.assertEqual(main(['--output-dir', str(Path(tmp) / 'run')]), 1)
+                self.assertEqual(main(['--source','live','--legacy-live','--output-dir', str(Path(tmp) / 'run')]), 1)
 
 if __name__ == '__main__':
     unittest.main()

@@ -18,3 +18,8 @@ __pycache__/
 # Local publication recovery stays private, outside the served site.
 /.site-publication.lock
 /.site-publication/
+
+# Generated delivery archives and diagnostic reports stay local.
+/downloads/*.zip
+/reports/latest_run.md
+/reports/v7_browser_verification.json

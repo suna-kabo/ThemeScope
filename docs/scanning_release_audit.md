@@ -1,3 +1,5 @@
+> Historical record. Current setup and audit: [README](../README.md) and [repository audit](repository_audit.md). Bundle paths below refer to retained local files or historical Git commits, not current source downloads.
+
 # ThemeScope focused scanning release — 3 November 2026 HKT
 
 Historical audit of the preceding interface. Its candidate table and Primary export requirements are superseded by [the terminal release audit](terminal_release_audit.md); its counts are not validation of the current interface.

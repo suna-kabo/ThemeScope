@@ -9,6 +9,7 @@ import tempfile
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from src.themescope.site_output import replace_site,validate_site
+from src.themescope.local_publication import output_lock,recover
 
 
 def git(root,*args):
@@ -18,19 +19,21 @@ def git(root,*args):
 
 def stage_site(root,target):
     root,target=root.resolve(),target.resolve()
-    if target==root:raise ValueError('Use the separate pages worktree, not your download source checkout')
+    if target==root:raise ValueError('Use the separate pages worktree, not your source checkout')
     if Path(git(target,'rev-parse','--show-toplevel')).resolve()!=target:raise ValueError('Destination must be the pages worktree root')
     if git(target,'branch','--show-current')!='pages':raise ValueError('Destination branch must be pages')
     if git(root,'rev-parse','--path-format=absolute','--git-common-dir')!=git(target,'rev-parse','--path-format=absolute','--git-common-dir'):raise ValueError('Destination must be a worktree of this same repository')
-    if git(target,'status','--porcelain'):raise ValueError('Pages worktree has uncommitted changes. Commit, back up or resolve them first; nothing was discarded.')
-    source=root/'site';manifest=validate_site(source)
-    if manifest['kind']!='snapshot':raise ValueError('Prepare a dated snapshot with prepare-site.cmd first')
-    with tempfile.TemporaryDirectory(prefix='.themescope-site-',dir=target) as temporary:
-        stage=Path(temporary)/'site';stage.mkdir()
-        for name in [*manifest['files'],'site_manifest.json']:
-            destination=stage/name;destination.parent.mkdir(parents=True,exist_ok=True)
-            shutil.copyfile(source/name,destination)
-        validate_site(stage);replace_site(stage,target/'site')
+    if git(target,'status','--porcelain','--','.',':(exclude).site-publication.lock'):raise ValueError('Pages worktree has uncommitted changes. Commit, back up or resolve them first; nothing was discarded.')
+    source=root/'site'
+    with output_lock(source,timeout=5),output_lock(target/'site',timeout=5):
+        recover(source);recover(target/'site');manifest=validate_site(source)
+        if manifest['kind']!='snapshot':raise ValueError('Prepare a dated snapshot with prepare-site.cmd first')
+        with tempfile.TemporaryDirectory(prefix='.themescope-site-',dir=target) as temporary:
+            stage=Path(temporary)/'site';stage.mkdir()
+            for name in [*manifest['files'],'site_manifest.json']:
+                destination=stage/name;destination.parent.mkdir(parents=True,exist_ok=True)
+                shutil.copyfile(source/name,destination)
+            validate_site(stage);replace_site(stage,target/'site')
     print(f'Staged site files for US session {manifest["session_date"]} in {target}/site. No Git commit or push was made.')
 
 

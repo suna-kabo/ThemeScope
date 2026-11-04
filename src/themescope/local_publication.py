@@ -10,6 +10,7 @@ import json
 import os
 from pathlib import Path,PurePosixPath
 import shutil
+import sys
 import time
 
 
@@ -30,7 +31,7 @@ def digest(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 def relative(name):
     path=PurePosixPath(name)
-    if not name or '\\' in name or path.is_absolute() or '..' in path.parts or str(path)!=name:raise ValueError('Unsafe publication path: '+name)
+    if not name or ':' in name or '\\' in name or path.is_absolute() or '..' in path.parts or str(path)!=name:raise ValueError('Unsafe publication path: '+name)
     return Path(*path.parts)
 
 
@@ -85,6 +86,7 @@ def recover(destination):
         return False
     value=json.loads(journal.read_text(encoding='utf-8'))
     if value.get('schema')!='themescope-publication-1' or Path(value.get('destination','')).name!=destination.name:raise ValueError('Unrecognized publication recovery journal: '+str(journal))
+    if value.get('state') not in {'pending','committed'}:raise ValueError('Unrecognized publication recovery state: '+str(journal))
     if value['state']!='committed':
         for action in reversed(value['actions']):
             target=target_path(destination,action['file'])
@@ -108,6 +110,8 @@ def validate_published_files(destination):
     if not path.exists():return # Backward-compatible pre-update successful output.
     value=json.loads(path.read_text(encoding='utf-8'))
     if value.get('schema')!='themescope-local-publication-1':raise ValueError('Unknown dashboard publication manifest')
+    if not {'dashboard.html','latest_snapshot.json','refresh_status.json'}<=set(value['files']):raise ValueError('Dashboard publication manifest is missing required files')
+    if value.get('session_date')!=json.loads((destination/'latest_snapshot.json').read_text(encoding='utf-8')).get('session_date'):raise ValueError('Dashboard publication manifest/session mismatch')
     for name,sha in value['files'].items():
         if digest(target_path(destination,name))!=sha:raise ValueError('Saved output differs from its successful publication: '+name+'. Recover or refresh before preparing site.')
 
@@ -142,4 +146,8 @@ def publish_tree(stage,destination,obsolete=(),validate=None):
         except (OSError,ValueError) as error:
             raise OSError('Publication interrupted; preview is blocked until recovery succeeds. Close files open in Excel/editors, then run refresh.cmd --recover (and prepare-site.cmd --recover for site). Backups retained at '+str(folder)) from error
         raise
-    recover(destination) # Remove committed backups. A killed process can do this later.
+    try:recover(destination) # Remove committed backups. A killed process can do this later.
+    except OSError:
+        # All files and final validation have committed. Housekeeping failure
+        # must not misreport this completed run as a failed/mixed publication.
+        print('Publication committed. Backup cleanup is pending; close file handles and run the affected --recover command before the next publication.',file=sys.stderr)

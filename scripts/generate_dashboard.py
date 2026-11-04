@@ -1281,7 +1281,7 @@ def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_di
         raise ValueError("Generated dashboard does not block automatic network connections")
     (output_dir / "dashboard.html").write_text(html, encoding="utf-8")
     shutil.copyfile(ROOT / "static/Inter-LICENSE.txt", output_dir / "Inter-LICENSE.txt")
-    _write_json(output_dir / "refresh_status.json", {"status": "success", "source": "tradingview-csv", "data_date": snapshot["session_date"], "data_complete": True})
+    _write_json(output_dir / "refresh_status.json", {"status": "success", "source": "tradingview-csv", "data_date": snapshot["session_date"], "data_complete": snapshot.get('data_complete',False), "data_completeness_scope":snapshot.get('data_completeness_scope')})
     (output_dir / "latest_run.md").write_text(
         "# Manual CSV run\n\nUS session: " + snapshot["session_date"] + "\n\nMarket: " + snapshot["decision"]["market_classification"] +
         "\n\n" + snapshot["decision"]["reason"] + "\n\nDetailed metrics and input hashes: run_audit.json. TradingView platform import has not been performed.\n", encoding="utf-8")
@@ -1292,13 +1292,14 @@ def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_di
 
 
 def _run_manual_csv_unlocked(args: argparse.Namespace, output: Path, launched_at: float) -> int:
-    from src.themescope.manual_csv import build_release
+    from src.themescope.manual_csv import build_release,reject_reused_inputs
     from src.themescope.local_history import apply as apply_history
     paths = {role: getattr(args, role + "_csv") for role in ("stock", "etf", "spy", "qqq", "iwm")}
     attempted = datetime.now(timezone.utc).isoformat(timespec="seconds")
     try:
         build_started = time.perf_counter()
         snapshot, raw = build_release(ROOT, paths, args.as_of)
+        reject_reused_inputs(paths,output/'latest_snapshot.json',snapshot['session_date'])
         history_record = apply_history(snapshot, output / "local_history", ROOT / "config/calendars/xnys_2020_2035_v1.json")
         # An older rerun may replace the displayed dashboard, but it must not
         # rewrite evidence already used by later-session comparisons.
@@ -1399,14 +1400,18 @@ def _run_manual_csv(args,output,launched_at):
 def main(argv: list[str] | None = None) -> int:
     launched_at = time.perf_counter()
     entered_collection = False
-    parser = argparse.ArgumentParser(description="Collect live ThemeScope data after approved-source preflight, or import a dated run offline.")
+    parser = argparse.ArgumentParser(description="Build ThemeScope from five manual TradingView CSVs; historical import is diagnostic only.")
     parser.add_argument('--output-dir', default='output')
-    parser.add_argument('--source', choices=('live', 'tradingview-csv'), default='live')
+    parser.add_argument('--source', choices=('live', 'tradingview-csv'))
+    parser.add_argument('--legacy-live', action='store_true', help='Explicit opt-in for unsupported legacy provider collection, never the normal refresh workflow')
     parser.add_argument('--import-run', type=Path, help='Import a dated real run directory or run_bundle.zip; no network requests')
-    parser.add_argument('--as-of', help='Resolve the latest verified completed common US session on or before YYYY-MM-DD')
+    parser.add_argument('--as-of', help='Declared completed US session in manual CSV mode; target session for legacy diagnostics')
     for role in ('stock', 'etf', 'spy', 'qqq', 'iwm'):
         parser.add_argument(f'--{role}-csv', type=Path, help=f'Explicit {role.upper()} CSV input for --source tradingview-csv')
     args = parser.parse_args(argv)
+    if args.source is None:args.source='live' if args.import_run else 'tradingview-csv'
+    if args.source=='live' and not args.import_run and not args.legacy_live:
+        parser.error('Legacy live collection is disabled by default. Use refresh.cmd with five CSVs; --source live --legacy-live explicitly opts into the unsupported diagnostic collector.')
     if args.as_of:
         try:
             datetime.strptime(args.as_of, '%Y-%m-%d')

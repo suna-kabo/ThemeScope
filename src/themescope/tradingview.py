@@ -9,7 +9,7 @@ from urllib.parse import quote
 
 
 def load_mapping(root: Path) -> dict:
-    return json.loads((root / 'config/tradingview_symbols.json').read_text())['symbols']
+    return json.loads((root / 'config/tradingview_symbols.json').read_text(encoding='utf-8'))['symbols']
 
 
 def resolve(ticker: str, mapping: dict) -> str:

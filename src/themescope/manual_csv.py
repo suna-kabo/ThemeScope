@@ -248,20 +248,31 @@ def _row_fields(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _session_valid(root: Path, session: str) -> bool:
-    try:
-        datetime.strptime(session, "%Y-%m-%d")
-    except ValueError:
-        return False
-    calendar = json.loads((root / "config/calendars/xnys_2020_2035_v1.json").read_text(encoding="utf-8"))
-    return session in {row["session"] for row in calendar.get("sessions", [])}
+def require_completed_session(root: Path, session: str, now=None) -> None:
+    """Shared entry-point guard using the versioned close, including DST/half days."""
+    try:day=datetime.strptime(session,'%Y-%m-%d').date()
+    except (ValueError,TypeError):raise CSVValidationError('Use a US session in YYYY-MM-DD form.') from None
+    if day.isoformat()!=session:raise CSVValidationError('Session must use YYYY-MM-DD form.')
+    sessions=json.loads((root/'config/calendars/xnys_2020_2035_v1.json').read_text(encoding='utf-8'))['sessions']
+    record=next((row for row in sessions if row['session']==session),None)
+    if not record:raise CSVValidationError(f'{session} is not a configured US trading session (weekend/holiday or outside calendar range).')
+    if datetime.fromisoformat(record['close'])>(now or datetime.now(timezone.utc)):
+        raise CSVValidationError(f'{session} has not closed yet. Export after the US close; no future session will be labeled current.')
+
+
+def reject_reused_inputs(paths,previous,session):
+    if previous.exists():
+        saved=json.loads(previous.read_text(encoding='utf-8'))
+        if saved['session_date']<session:
+            old=saved.get('manual_csv_audit',{}).get('inputs',{})
+            reused=[role for role,p in paths.items() if hashlib.sha256(p.read_bytes()).hexdigest()==old.get(role,{}).get('sha256')]
+            if reused:raise CSVValidationError('Inputs identical to the previous successful session: '+', '.join(reused)+'. Export fresh CSVs; old files were not reused.')
 
 
 def build_release(root: Path, paths: dict[str, Path], session: str) -> tuple[dict[str, Any], dict[str, Any]]:
     if set(paths) != set(ROLES):
         raise CSVValidationError("All five explicit roles are required: stock, etf, spy, qqq and iwm")
-    if not _session_valid(root, session):
-        raise CSVValidationError(f"{session!r} is not a valid configured US market session")
+    require_completed_session(root,session)
     active = json.loads((root / "config/active_anchors.json").read_text(encoding="utf-8"))["anchors"]
     required_etfs = {symbol.upper().replace(".", "-") for symbol in [*active.values(), "SPY", "QQQ", "IWM"]}
     parsed = {role: parse_csv(paths[role], role, required_symbols=required_etfs if role == "etf" else None) for role in ROLES}
@@ -352,6 +363,8 @@ def build_release(root: Path, paths: dict[str, Path], session: str) -> tuple[dic
         "unmatched_configured_members": unmatched,
         "unmatched_unique_symbols": sorted({row["ticker"] for row in unmatched}),
         "stock_metric_availability": {"matched": matched_memberships, "unmatched": len(unmatched)},
+        "configured_instruments_complete": not unmatched,
+        "data_completeness_scope": "Configured stocks, anchors and context identities only; constituent roster identity and per-row session timestamps are not independently verified.",
         "theme_breadth_available": sum(row["breadth_status_21"] == row["breadth_status_50"] == "valid" for row in themes),
         "publication_pass": False,
         "runtime_stages": {},
@@ -376,7 +389,8 @@ def build_release(root: Path, paths: dict[str, Path], session: str) -> tuple[dic
         "themes": themes,
         "ui_configuration": {"score_bands": [{"min": 0, "max": 25, "class": "score-q1"}, {"min": 25, "max": 50, "class": "score-q2"}, {"min": 50, "max": 75, "class": "score-q3"}, {"min": 75, "max": 100, "class": "score-q4"}]},
         "source_status": {"theme_watchlists": {"status": "complete"}},
-        "data_complete": True,
+        "data_complete": not unmatched,
+        "data_completeness_scope": audit['data_completeness_scope'],
         "publication_scope": "local_only",
         "manual_csv_audit": audit,
     }

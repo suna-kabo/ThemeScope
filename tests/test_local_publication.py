@@ -70,4 +70,12 @@ with output_lock(output):publish_tree(stage,output,{'stale.txt'})
         with self.assertRaisesRegex(ValueError,'Unrecognized'):recover(self.output)
         self.assertTrue(pending(self.output));self.assertTrue(folder.exists())
 
+    def test_post_commit_backup_cleanup_failure_is_not_a_failed_publication(self):
+        with output_lock(self.output),patch('src.themescope.local_publication.shutil.rmtree',side_effect=PermissionError('backup held open')):
+            publish_tree(self.stage,self.output,{'stale.txt'})
+        self.assertEqual(self.contents(),{'dashboard.html':b'new','data.csv':b'new data','extra.txt':b'new export'})
+        self.assertFalse(pending(self.output));self.assertTrue(transaction_dir(self.output).exists())
+        with output_lock(self.output):self.assertFalse(recover(self.output))
+        self.assertFalse(transaction_dir(self.output).exists())
+
 if __name__=='__main__':unittest.main()
