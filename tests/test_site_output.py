@@ -12,12 +12,16 @@ from src.themescope.site_output import prepare_site,public_payload,seal_site,val
 
 ROOT=Path(__file__).resolve().parents[1]
 CANARY='PRIVATE_INPUT_HISTORY_REVIEW_CANARY'
+from src.themescope.daily_stock_policy import load_policy,evaluate,CURRENT_SCHEMA
 
 
 def sample():
     stock={'ticker':'NVDA','company':'NVIDIA','tradingview_symbol':'NASDAQ:NVDA','price_close':100,'ema21':90,'ema50':80,'daily_change':.01,'returns':{'21':{'value':.1,'status':'valid'}},'selection_slot':1,'metric_status':'available','membership_rationale':CANARY,'maintenance':{'private':CANARY},'source_url':CANARY,'excess21_pp':3}
     theme={'id':'theme-semiconductors','name':'Semiconductors','anchor':'SMH','tradingview_symbol':'NASDAQ:SMH','theme_score':50,'global_rank':1,'rank_current':1,'rank_change_daily':0,'rank_comparison_session':'2026-10-30','returns':{'21':{'value':.07,'status':'valid'}},'selected':[stock],'research_priority':{'category':'watch','label':'Watch'},'private_review':CANARY}
     snapshot={'session_date':'2026-11-02','generated_at':'2026-11-03T00:00:00+00:00','dashboard_generated_at':'2026-11-03T00:00:00+00:00','dashboard_generated_at_hkt_display':'3 Nov 2026, 08:00 AM HKT','run_kind':'manual_csv','manual_csv_audit':{'publication_pass':True,'inputs':{'stock':{'path':CANARY}}},'raw_inputs':CANARY,'local_history':{'comparison_session':'2026-10-30','fingerprint':CANARY,'status':CANARY},'score_methodology':{'theme_score_weights':{'current_strength':.6,'medium_strength':.4}},'ui_configuration':{'score_bands':[]},'context':[],'themes':[theme],'decision':{},'market_classification':{},'expected_earnings':{'as_of':'2026-11-02','through':'2026-11-09','later_count':0,'upcoming':[],'unknown':[]},'export_manifest':[{'file':'individual_watchlists/SMH_Semiconductors.txt','role':'individual_research','theme_id':theme['id'],'anchor':'SMH','instrument_count':2,'stock_count':1,'section_count':0}]}
+    snapshot.update(daily_stock_policy=load_policy(ROOT),stock_csv_schema=CURRENT_SCHEMA)
+    stock.update(turnover_1d_usd=30000000,average_volume_10d_shares=600000)
+    stock['daily_stock_eligibility']=evaluate(stock,snapshot['daily_stock_policy'])
     snapshot['export_configuration']={'instrument_limit':1000}
     from src.themescope.daily_lists import primary_research
     primary_research(snapshot,1000)
@@ -184,3 +188,26 @@ class SiteBoundaryTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'re-prepared'):validate_site(self.destination)
         self.build();self.assertFalse((self.destination/'tradingview_group_old.txt').exists())
         self.assertEqual(validate_site(self.destination)['schema'],SCHEMA)
+
+    def test_current_source_requires_measured_daily_stock_eligibility(self):
+        self.snapshot['themes'][0]['selected'][0]['turnover_1d_usd']=1
+        with self.assertRaisesRegex(ValueError,'eligibility differs'):public_payload(self.snapshot,ROOT)
+        self.snapshot.pop('daily_stock_policy')
+        with self.assertRaisesRegex(ValueError,'Saved run predates'):public_payload(self.snapshot,ROOT)
+
+    def test_resealed_primary_cannot_add_an_ineligible_measured_stock(self):
+        from src.themescope.daily_lists import primary_research
+        snapshot=self.snapshot;theme=snapshot['themes'][0];stock=theme['selected'][0]
+        snapshot['market_classification']={'direction':'Long bias'}
+        theme['research_priority']={'category':'primary','label':'Primary long','side':'long','group':0}
+        theme['returns']['63']={'value':.1};stock['returns']['63']={'value':.2}
+        stock['turnover_1d_usd']=1;stock['daily_stock_eligibility']=evaluate(stock,snapshot['daily_stock_policy'])
+        files,manifest=primary_research(snapshot,1000);snapshot['export_manifest']+=manifest
+        for name,content in files.items():
+            target=self.source/name;target.parent.mkdir(parents=True,exist_ok=True);target.write_text(content,encoding='utf-8')
+        (self.source/'latest_snapshot.json').write_text(json.dumps(snapshot))
+        self.build();name=snapshot['daily_primary_research']['combined_file'];target=self.destination/name
+        self.assertNotIn('NASDAQ:NVDA',target.read_text(encoding='utf-8'))
+        target.write_text(target.read_text(encoding='utf-8').strip()+',NASDAQ:NVDA\n',encoding='utf-8')
+        seal_site(self.destination,'snapshot','2026-11-02')
+        with self.assertRaisesRegex(ValueError,'Primary instruments differ'):validate_site(self.destination)

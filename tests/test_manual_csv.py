@@ -15,7 +15,7 @@ HEADER = (
     '"Performance %, 1 week","Performance %, 1 month","Performance %, 3 months",'
     'Industry,Sector,Exchange,"Exponential moving average, 21, 1 day",'
     '"Exponential moving average, 50, 1 day","Average true range %, 14, 1 day",'
-    '"Price × volume (turnover), 1 day","Price × average volume, 30 days",'
+    '"Price × volume (turnover), 1 day","Average volume, 10 days",'
     '"Relative volume, 1 day",Upcoming earnings date,Unused column\n'
 )
 ROW = 'AAA,Alpha,20,1,3000000000,2,3,4,Software,Technology,NASDAQ,19,18,2,30000000,25000000,1.2,,ignored\n'

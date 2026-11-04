@@ -8,11 +8,12 @@ from pathlib import Path
 from src.themescope.research_policy import *
 from src.themescope.local_history import apply,record
 from src.themescope.daily_lists import primary_research,build
+from src.themescope.daily_stock_policy import load_policy,CURRENT_SCHEMA
 
 ROOT=Path(__file__).resolve().parents[1]
 
 def snapshot(session='2026-07-06', price=11, score=20):
-    return {'run_kind':'manual_csv','methodology_version':'manual-csv-1','session_date':session,'generated_at':'date',
+    return {'stock_csv_schema':CURRENT_SCHEMA,'daily_stock_policy':load_policy(ROOT),'run_kind':'manual_csv','methodology_version':'manual-csv-1','session_date':session,'generated_at':'date',
         'score_methodology':{'theme_score_weights':{'current_strength':.6,'medium_strength':.4}},'ranking_configuration':{},'manual_csv_audit':{'percentile_method':'average'},
         'market_classification':{'direction':'Long bias'},'context':[{'ticker':i,'tradingview_symbol':'AMEX:'+i,'price_state':'Bullish','breadth_state':'Positive'} for i in ('SPY','QQQ','IWM')],
         'themes':[{'id':'a','name':'Alpha','anchor':'ETF','tradingview_symbol':'AMEX:ETF','price_close':price,'ema21':10,'ema50':10,'theme_score':score,'global_rank':1,'returns':{'21':{'value':.1},'63':{'value':.2}},'selected':[]}]}
@@ -116,7 +117,7 @@ class WeightedExportTests(unittest.TestCase):
     def sample(self,side='long'):
         s=snapshot();s['market_classification']={'direction':'Long bias' if side=='long' else 'Short bias'}
         t=s['themes'][0];t['research_priority']=theme_priority(s['market_classification']['direction'],80 if side=='long' else 20,'Mixed')
-        def stock(ticker,a,b):return {'ticker':ticker,'tradingview_symbol':'NASDAQ:'+ticker,'returns':{'21':{'value':a},'63':{'value':b}}}
+        def stock(ticker,a,b):return {'ticker':ticker,'tradingview_symbol':'NASDAQ:'+ticker,'turnover_1d_usd':30000000,'average_volume_10d_shares':600000,'returns':{'21':{'value':a},'63':{'value':b}}}
         t['selected']=[stock('BEST',.3,.4),stock('TIE_Z',.2,.3),stock('TIE_A',.2,.3),stock('ZERO',.1,.2),stock('NEG',0,0),stock('MISS',None,.2)]
         return s
     def test_exact_pp_sign_sort_anchor_first_overlap_dedup_and_unchanged_collections(self):
@@ -137,7 +138,7 @@ class WeightedExportTests(unittest.TestCase):
     def test_cross_horizon_exact_cancellation_and_independent_overlap(self):
         s=self.sample();t=s['themes'][0]
         t['returns']={'21':{'value':.1},'63':{'value':.2}}
-        t['selected']=[{'ticker':'SHARED','tradingview_symbol':'NYSE:SHARED','returns':{'21':{'value':.12},'63':{'value':.17}}}]
+        t['selected']=[{'ticker':'SHARED','tradingview_symbol':'NYSE:SHARED','turnover_1d_usd':30000000,'average_volume_10d_shares':600000,'returns':{'21':{'value':.12},'63':{'value':.17}}}]
         other=copy.deepcopy(t);other.update(id='b',anchor='OTHER',tradingview_symbol='AMEX:OTHER');other['returns']['63']['value']=.1
         s['themes'].append(other);files,manifest=primary_research(s,1000)
         self.assertEqual(s['daily_primary_research']['evaluations'][0]['reason'],'zero_weighted_excess')
@@ -149,7 +150,7 @@ class WeightedExportTests(unittest.TestCase):
         files,manifest=primary_research(s,1000);r=s['daily_primary_research']
         self.assertEqual(sum(row['symbol']=='NASDAQ:BEST' for row in r['relationships']),2)
         self.assertEqual(files[r['combined_file']].count('NASDAQ:BEST'),1)
-        s=self.sample('short');s['themes'][0]['selected']=[{'ticker':t,'tradingview_symbol':'NYSE:'+t,'returns':{'21':{'value':v},'63':{'value':v}}} for t,v in [('LESS',.05),('MOST',-.2),('TIE',-.2)]]
+        s=self.sample('short');s['themes'][0]['selected']=[{'ticker':t,'tradingview_symbol':'NYSE:'+t,'turnover_1d_usd':30000000,'average_volume_10d_shares':600000,'returns':{'21':{'value':v},'63':{'value':v}}} for t,v in [('LESS',.05),('MOST',-.2),('TIE',-.2)]]
         files,manifest=primary_research(s,1000)
         self.assertEqual(files[manifest[0]['file']],'AMEX:ETF,NYSE:MOST,NYSE:TIE,NYSE:LESS\n')
 
@@ -158,7 +159,7 @@ class WeightedExportTests(unittest.TestCase):
         item=next(r for r in manifest if r['role']=='individual_primary_research');self.assertEqual(files[item['file']],'AMEX:ETF,NASDAQ:NEG\n')
         s['market_classification']['direction']='Neutral';files,manifest=primary_research(s,1000)
         self.assertEqual(files,{});self.assertEqual(manifest,[]);self.assertIsNone(s['daily_primary_research']['combined_file'])
-        s=self.sample();s['themes'][0]['selected']=[{'ticker':f'S{i:02}','tradingview_symbol':f'NYSE:S{i:02}','returns':{'21':{'value':.5},'63':{'value':.5}}} for i in range(20)]
+        s=self.sample();s['themes'][0]['selected']=[{'ticker':f'S{i:02}','tradingview_symbol':f'NYSE:S{i:02}','turnover_1d_usd':30000000,'average_volume_10d_shares':600000,'returns':{'21':{'value':.5},'63':{'value':.5}}} for i in range(20)]
         files,manifest=primary_research(s,1000);self.assertEqual(manifest[0]['instrument_count'],21)
         s['themes'][0]['returns']['21']['value']=float('nan');primary_research(s,1000)
         self.assertTrue(all(r['reason']=='missing_or_invalid:etf_1m' for r in s['daily_primary_research']['evaluations']))

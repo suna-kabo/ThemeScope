@@ -1,6 +1,13 @@
 const assert = require("node:assert/strict");
 const ui = require("../static/dashboard.js");
 
+// Relative browsing must remain independent of daily scanner eligibility.
+const measuredIneligible={weighted_vs_etf:"Outperforming",daily_stock_eligibility:{status:"ineligible",eligible:false,policy_version:"daily-stock-liquidity-2",reasons:["turnover_1d_usd:threshold_failed"]}};
+assert.equal(ui.rsMatches(measuredIneligible,"Outperforming"),true);
+assert.equal(ui.rsMatches(measuredIneligible,"Underperforming"),false);
+assert.match(ui.dailyStockEligibilityText(measuredIneligible),/ineligible/);
+assert.match(ui.dailyStockEligibilityText({}),/legacy\/unverified/);
+
 // Grouping changes presentation only: preserve every original cell and its order.
 const resultOrder=["Long bias","Selective long","Neutral","Selective short","Short bias","Unclassified"];
 const matrixCells=[...resultOrder.slice().reverse(),"Neutral","Long bias"].map((direction,i)=>({direction,spy:i,qqq:null,breadth:null}));

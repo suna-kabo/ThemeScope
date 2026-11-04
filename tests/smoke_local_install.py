@@ -13,6 +13,7 @@ import threading
 from urllib.parse import urlsplit,quote
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -22,7 +23,7 @@ import zipfile
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from scripts.serve_local import create_server
-HEADER=['Symbol','Description','Price','Price change %, 1 day','Market capitalization','Performance %, 1 week','Performance %, 1 month','Performance %, 3 months','Industry','Sector','Exchange','Exponential moving average, 21, 1 day','Exponential moving average, 50, 1 day','Average true range %, 14, 1 day','Price × volume (turnover), 1 day','Price × average volume, 30 days','Relative volume, 1 day','Upcoming earnings date']
+HEADER=['Symbol','Description','Price','Price change %, 1 day','Market capitalization','Performance %, 1 week','Performance %, 1 month','Performance %, 3 months','Industry','Sector','Exchange','Exponential moving average, 21, 1 day','Exponential moving average, 50, 1 day','Average true range %, 14, 1 day','Price × volume (turnover), 1 day','Average volume, 10 days','Relative volume, 1 day','Upcoming earnings date']
 
 
 def hashes(folder):
@@ -58,7 +59,7 @@ def main():
             for stem,tickers in symbols.items():
                 with (target/(stem+'.csv')).open('w',encoding='utf-8',newline='') as handle:
                     writer=csv.writer(handle);writer.writerow(HEADER)
-                    for ticker in tickers:writer.writerow([ticker,'Synthetic test only',price,1,3e9,2,3,4,'Test','Test','NASDAQ',90,80,2,3e7,3e7,1,None])
+                    for ticker in tickers:writer.writerow([ticker,'Synthetic test only',price,1,3e9,2,3,4,'Test','Test','NASDAQ',90,80,2,3e7,600000,1,None])
         inputs(100)
         options=['--session','2024-01-03']
         run('refresh',options);run('prepare-site',['--session','2024-01-03'])
@@ -75,9 +76,46 @@ def main():
         partial=json.loads((output/'latest_snapshot.json').read_text(encoding='utf-8'))
         assert partial['data_complete'] is False
         assert json.loads((output/'refresh_status.json').read_text(encoding='utf-8'))['data_complete'] is False
-        assert any(s['ticker']==absent and s['metric_status']=='unavailable' for t in partial['themes'] for s in t['selected'])
+        assert any(s['ticker']==absent and s['metric_status']=='unavailable' and s['price_close'] is None and s['daily_stock_eligibility']['status']=='unavailable' for t in partial['themes'] for s in t['selected'])
         assert [[s['ticker'] for s in t['selected']] for t in partial['themes']]==[[s['ticker'] for s in t['selected']] for t in first_snapshot['themes']]
         inputs(100);run('refresh',options)
+        # An ineligible row stays measured and in breadth, but not Primary stocks.
+        with stock_file.open(encoding='utf-8',newline='') as handle:liquidity_rows=list(csv.reader(handle))
+        low=liquidity_rows[1];low[14]='9999999.99';low[6]='30';low[7]='40'
+        with stock_file.open('w',encoding='utf-8',newline='') as handle:csv.writer(handle).writerows(liquidity_rows)
+        run('refresh',options)
+        measured=json.loads((output/'latest_snapshot.json').read_text(encoding='utf-8'))
+        affected=[s for t in measured['themes'] for s in t['selected'] if s['ticker']==low[0]]
+        assert affected and all(s['metric_status']=='available' and s['daily_stock_eligibility']['status']=='ineligible' and s['weighted_vs_etf']=='Outperforming' for s in affected)
+        assert all(r['ticker']!=low[0] or r['role']=='anchor' for r in measured['daily_primary_research']['relationships'])
+        assert [t['theme_watchlist_breadth'] for t in measured['themes']]==[t['theme_watchlist_breadth'] for t in first_snapshot['themes']]
+        run('prepare-site',['--session','2024-01-03'])
+        public=json.loads(re.search(r'<script id="snapshot-data"[^>]*>(.*?)</script>',(site/'index.html').read_text(encoding='utf-8'),re.S)[1])
+        assert [s['daily_stock_eligibility'] for t in public['themes'] for s in t['selected'] if s['ticker']==low[0]]==[s['daily_stock_eligibility'] for s in affected]
+        if args.browser:subprocess.run([sys.executable,str(ROOT/'tests/browser_check_stock_policy.py'),str(output/'dashboard.html'),str(site/'index.html')],cwd=ROOT,check=True,timeout=90)
+        # Old CSVs are explicit and readable, never new-policy eligible.
+        liquidity_rows[0][15]='Price × average volume, 30 days'
+        with stock_file.open('w',encoding='utf-8',newline='') as handle:csv.writer(handle).writerows(liquidity_rows)
+        saved_history=(output/'local_history/2024-01-03.json').read_bytes()
+        run('refresh',[*options,'--stock-csv-schema','legacy-v1'])
+        legacy=json.loads((output/'latest_snapshot.json').read_text(encoding='utf-8'))
+        assert legacy['stock_csv_schema']=='daily-stock-csv-1'
+        assert all(s['daily_stock_eligibility']['status']=='legacy_unverified' for t in legacy['themes'] for s in t['selected'])
+        assert not any(r['role']=='stock' for r in legacy['daily_primary_research']['relationships'])
+        assert (output/'local_history/2024-01-03.json').read_bytes()==saved_history
+        run('prepare-site',['--session','2024-01-03'])
+        inputs(100);run('refresh',options);run('prepare-site',['--session','2024-01-03'])
+        # Extra eligible rows are evaluated/audited, never adopted as members.
+        with stock_file.open(encoding='utf-8',newline='') as handle:with_extra=list(csv.reader(handle))
+        extra=list(with_extra[1]);extra[0]='EXTRA_VALID_STOCK';with_extra.append(extra)
+        with stock_file.open('w',encoding='utf-8',newline='') as handle:csv.writer(handle).writerows(with_extra)
+        run('refresh',options)
+        extra_snapshot=json.loads((output/'latest_snapshot.json').read_text(encoding='utf-8'))
+        assert extra_snapshot['manual_csv_audit']['extra_csv_stock_count']==1
+        assert extra_snapshot['manual_csv_audit']['parsed_csv_eligibility_counts']['eligible']==extra_snapshot['manual_csv_audit']['daily_stock_eligibility_counts']['eligible']+1
+        assert all(s['ticker']!='EXTRA_VALID_STOCK' for t in extra_snapshot['themes'] for s in t['selected'])
+        assert 'EXTRA_VALID_STOCK' not in (output/'tradingview_configured_stocks.txt').read_text(encoding='utf-8')
+        inputs(100);run('refresh',options);run('prepare-site',['--session','2024-01-03'])
         before=hashes(output);site_before=hashes(site)
         # These are the real production preview handler and completed-file checks.
         dashboard_server,_,dashboard_url=create_server(clone,False,0)
@@ -112,6 +150,13 @@ def main():
 
         # A real invalid CSV must preserve every existing successful output/history.
         stock=folder/'Daily_Stock.csv'
+        with stock.open(encoding='utf-8',newline='') as handle:missing_header=list(csv.reader(handle))
+        for row in missing_header:del row[15]
+        with stock.open('w',encoding='utf-8',newline='') as handle:csv.writer(handle).writerows(missing_header)
+        rejected=run('refresh',options,success=False)
+        assert 'accepted 10-day shares headers' in rejected.stderr
+        for name,digest in before.items():assert hashes(output)[name]==digest,name
+        inputs(100)
         with stock.open(encoding='utf-8',newline='') as f:rows=list(csv.reader(f))
         with stock.open('w',encoding='utf-8',newline='') as f:writer=csv.writer(f);writer.writerows(rows+[rows[1]])
         run('refresh',options,success=False)

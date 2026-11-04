@@ -1,5 +1,11 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
+  "daily_stock_policy": {
+    "version": "daily-stock-liquidity-2",
+    "csv_schema": "daily-stock-csv-2",
+    "turnover_1d_usd": {"operator": ">=", "threshold": 10000000, "unit": "USD"},
+    "average_volume_10d_shares": {"operator": ">", "threshold": 500000, "unit": "shares per trading session"}
+  },
   "breadth_universe_sanity": {
     "spy": {
       "minimum_rows": 350,

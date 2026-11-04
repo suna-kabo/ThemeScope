@@ -43,6 +43,7 @@ def main():
     parser.add_argument('--session',help='Declared completed US session, YYYY-MM-DD; never inferred from filenames')
     parser.add_argument('--recover',action='store_true',help='Restore an interrupted local publication without reading CSVs')
     parser.add_argument('--input-dir',help='Defaults to inputs/SESSION; relative paths are based on the repository, not the shell')
+    parser.add_argument('--stock-csv-schema',choices=('current-v2','legacy-v1'),default='current-v2',help='Default current-v2 needs Average Volume 10D; legacy-v1 is historical/unverified and cannot qualify Primary stocks')
     args=parser.parse_args()
     from src.themescope.local_publication import output_lock,recover
     with output_lock(ROOT/'output/manual_csv',timeout=5):
@@ -56,7 +57,7 @@ def main():
         session=input('US session date you exported (YYYY-MM-DD; HK filenames may be the next day): ').strip()
     paths=input_paths(ROOT,session,args.input_dir)
     print(f'Declared US session: {session}. CSV rows have no reliable session timestamp: confirm you exported after that close.',flush=True)
-    command=[sys.executable,str(ROOT/'scripts/generate_dashboard.py'),'--source','tradingview-csv','--as-of',session,'--output-dir',str(ROOT/'output/manual_csv')]
+    command=[sys.executable,str(ROOT/'scripts/generate_dashboard.py'),'--source','tradingview-csv','--as-of',session,'--stock-csv-schema',args.stock_csv_schema,'--output-dir',str(ROOT/'output/manual_csv')]
     for role,path in paths.items():command+=['--'+role+'-csv',str(path)]
     result=subprocess.run(command,cwd=ROOT)
     if result.returncode:return result.returncode

@@ -1195,6 +1195,7 @@ def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_di
     _write_json(output_dir / "run_audit.json", audit)
     _write_json(output_dir / "canonical_dashboard_data.json", {
         "session_date": snapshot["session_date"],
+        "daily_stock_policy":snapshot.get('daily_stock_policy'),"stock_csv_schema":snapshot.get('stock_csv_schema'),
         "market_classification": snapshot["market_classification"],
         "context": snapshot["context"],
         "themes": snapshot["themes"],
@@ -1239,6 +1240,7 @@ def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_di
                 "performance_1m_pct": stock.get("returns", {}).get("21", {}).get("value") * 100 if stock.get("returns", {}).get("21", {}).get("value") is not None else None,
                 "performance_3m_pct": stock.get("returns", {}).get("63", {}).get("value") * 100 if stock.get("returns", {}).get("63", {}).get("value") is not None else None,
                 "ema21": stock.get("ema21"), "ema50": stock.get("ema50"), "atr14_pct": stock.get("atr14_pct"), "adv30_usd": stock.get("adv30_usd"),
+                "average_volume_10d_shares":stock.get('average_volume_10d_shares'),"daily_stock_eligibility":stock.get('daily_stock_eligibility',{}).get('status'),"daily_stock_policy_version":stock.get('daily_stock_eligibility',{}).get('policy_version'),"stock_csv_schema":snapshot.get('stock_csv_schema'),
                 "turnover_1d_usd": stock.get("turnover_1d_usd"), "relative_volume_1d": stock.get("relative_volume_1d"), "sector": stock.get("sector"),
                 "industry": stock.get("industry"), "upcoming_earnings_date": stock.get("earnings_date"), "session_date": snapshot["session_date"],
             })
@@ -1281,7 +1283,7 @@ def _manual_csv_outputs(snapshot: dict[str, Any], raw: dict[str, Any], output_di
         raise ValueError("Generated dashboard does not block automatic network connections")
     (output_dir / "dashboard.html").write_text(html, encoding="utf-8")
     shutil.copyfile(ROOT / "static/Inter-LICENSE.txt", output_dir / "Inter-LICENSE.txt")
-    _write_json(output_dir / "refresh_status.json", {"status": "success", "source": "tradingview-csv", "data_date": snapshot["session_date"], "data_complete": snapshot.get('data_complete',False), "data_completeness_scope":snapshot.get('data_completeness_scope')})
+    _write_json(output_dir / "refresh_status.json", {"status": "success", "source": "tradingview-csv", "data_date": snapshot["session_date"], "data_complete": snapshot.get('data_complete',False), "data_completeness_scope":snapshot.get('data_completeness_scope'),"stock_csv_schema":snapshot.get('stock_csv_schema'),"daily_stock_policy_version":snapshot.get('daily_stock_policy',{}).get('version')})
     (output_dir / "latest_run.md").write_text(
         "# Manual CSV run\n\nUS session: " + snapshot["session_date"] + "\n\nMarket: " + snapshot["decision"]["market_classification"] +
         "\n\n" + snapshot["decision"]["reason"] + "\n\nDetailed metrics and input hashes: run_audit.json. TradingView platform import has not been performed.\n", encoding="utf-8")
@@ -1298,7 +1300,7 @@ def _run_manual_csv_unlocked(args: argparse.Namespace, output: Path, launched_at
     attempted = datetime.now(timezone.utc).isoformat(timespec="seconds")
     try:
         build_started = time.perf_counter()
-        snapshot, raw = build_release(ROOT, paths, args.as_of)
+        snapshot, raw = build_release(ROOT, paths, args.as_of,stock_schema=getattr(args,'stock_csv_schema','current-v2'))
         reject_reused_inputs(paths,output/'latest_snapshot.json',snapshot['session_date'])
         history_record = apply_history(snapshot, output / "local_history", ROOT / "config/calendars/xnys_2020_2035_v1.json")
         # An older rerun may replace the displayed dashboard, but it must not
@@ -1403,6 +1405,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Build ThemeScope from five manual TradingView CSVs; historical import is diagnostic only.")
     parser.add_argument('--output-dir', default='output')
     parser.add_argument('--source', choices=('live', 'tradingview-csv'))
+    parser.add_argument('--stock-csv-schema',choices=('current-v2','legacy-v1'),default='current-v2',help='Daily Stock input policy; legacy-v1 is explicit historical/unverified eligibility, with no qualifying Primary stocks')
     parser.add_argument('--legacy-live', action='store_true', help='Explicit opt-in for unsupported legacy provider collection, never the normal refresh workflow')
     parser.add_argument('--import-run', type=Path, help='Import a dated real run directory or run_bundle.zip; no network requests')
     parser.add_argument('--as-of', help='Declared completed US session in manual CSV mode; target session for legacy diagnostics')
