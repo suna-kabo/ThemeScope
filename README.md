@@ -104,9 +104,9 @@ Use TradingView's native headers. Supported aliases are in
 - Optional: `Upcoming earnings date` as `YYYY-MM-DD`, currency and other recognized
   fields. Use USD quotes; no FX conversion is performed.
 
-The exact new native TradingView export header has **not been observed in the
-supplied old CSVs**. The accepted, case-insensitive contract is `Average volume,
-10 days`; deliberate aliases are `Average Volume 10D` and
+The native header **`Average volume, 10 days`** is confirmed in the supplied
+`Daily_Stock_2026-11-04 (1).csv`. Matching is case-insensitive;
+deliberate aliases are `Average Volume 10D` and
 `average_volume_10d_shares`. Today's volume, relative volume, 30-day average volume
 and dollar volume cannot substitute. A missing header reports this exact list.
 Do not rename a different metric or derive shares from turnover/price.
@@ -120,6 +120,9 @@ new eligibility result. ETF thresholds and breadth input schemas are unchanged.
 Percent values are normalized once. Duplicate symbols and malformed required
 numbers fail validation. Missing market cap is N/A with an audit warning. Blank
 numeric fields on unrelated ETFs do not enter required-anchor calculations.
+Blank unused metrics on extra, unconfigured stock rows are also audited and
+left unavailable without blocking configured stocks. Both liquidity fields stay
+required on every stock row; configured stock metrics remain strictly validated.
 Missing breadth Price/EMA values stay in the denominator and reduce coverage.
 Sanity ranges check likely swapped/truncated breadth files; they do not prove
 constituent identity, licensing or complete current-session observations.

@@ -151,12 +151,15 @@ def parse_csv(path: Path, role: str, *, required_symbols: set[str] | None = None
                     # excluded from the shared valid set during calculation.
                     required_numeric = key in required and role in {"stock", "etf"} and key != "market_cap"
                     unused_etf = role == "etf" and required_symbols is not None and symbol not in required_symbols
-                    row[key] = _number(raw, required=required_numeric and not unused_etf, positive=key in POSITIVE)
+                    unused_stock_metric = role == 'stock' and required_symbols is not None and symbol not in required_symbols and key not in {'turnover_1d','average_volume_10d_shares'}
+                    row[key] = _number(raw, required=required_numeric and not unused_etf and not unused_stock_metric, positive=key in POSITIVE)
                     if role=='stock' and key in {'turnover_1d','average_volume_10d_shares'}:
                         if '%' in raw or key=='average_volume_10d_shares' and '$' in raw:raise CSVValidationError('expected '+('shares per trading session' if key=='average_volume_10d_shares' else 'USD')+', not a percent/different unit')
                         if row[key] is not None and row[key]<0:raise CSVValidationError('liquidity value must be non-negative')
                     if required_numeric and unused_etf and not raw:
                         numeric_warnings.append({"symbol":symbol,"line":line_number,"field":key,"reason":"Blank on an unused ETF; excluded from the required anchor/benchmark universe, not filled."})
+                    if required_numeric and unused_stock_metric and not raw:
+                        numeric_warnings.append({'symbol':symbol,'line':line_number,'field':key,'reason':'Blank on an unconfigured stock; excluded from configured metrics, breadth and Primary exports, not filled.'})
                     if key == "market_cap" and row[key] is not None and row[key] <= 0:
                         row[key] = None
                         numeric_warnings.append({"symbol":symbol,"line":line_number,"field":key,"reason":"Non-positive market capitalization; displayed as N/A."})
@@ -290,15 +293,16 @@ def build_release(root: Path, paths: dict[str, Path], session: str, *, stock_sch
         raise CSVValidationError("All five explicit roles are required: stock, etf, spy, qqq and iwm")
     require_completed_session(root,session)
     active = json.loads((root / "config/active_anchors.json").read_text(encoding="utf-8"))["anchors"]
+    watchlists = json.loads((root / "config/theme_watchlists.json").read_text(encoding="utf-8"))
+    watch_by_id = {row["theme_id"]: row for row in watchlists["watchlists"]}
+    configured_symbols={m['ticker'] for theme_id in active for m in watch_by_id.get(theme_id,{}).get('members',[])}
     required_etfs = {symbol.upper().replace(".", "-") for symbol in [*active.values(), "SPY", "QQQ", "IWM"]}
     policy=load_policy(root)
-    parsed = {role: parse_csv(paths[role], role, required_symbols=required_etfs if role == "etf" else None,stock_schema=stock_schema) for role in ROLES}
+    parsed = {role: parse_csv(paths[role], role, required_symbols=required_etfs if role == "etf" else configured_symbols if role=='stock' else None,stock_schema=stock_schema) for role in ROLES}
     rows = {role: value[0] for role, value in parsed.items()}
     audits = {role: value[1] for role, value in parsed.items()}
     registry = json.loads((root / "config/themes.json").read_text(encoding="utf-8"))
-    watchlists = json.loads((root / "config/theme_watchlists.json").read_text(encoding="utf-8"))
     config_themes = {row["id"]: row for row in registry["themes"]}
-    watch_by_id = {row["theme_id"]: row for row in watchlists["watchlists"]}
     etfs = {row["symbol"]: row for row in rows["etf"]}
     required_etfs = set(active.values()) | {"SPY", "QQQ", "IWM"}
     missing_etfs = sorted(required_etfs - set(etfs))
@@ -315,7 +319,6 @@ def build_release(root: Path, paths: dict[str, Path], session: str, *, stock_sch
     current = percentile({theme_id: eligible.get(theme_id, {}).get("performance_1m_pct") for theme_id in active}, score_minimum)
     medium = percentile({theme_id: eligible.get(theme_id, {}).get("performance_3m_pct") for theme_id in active}, score_minimum)
     stock_rows = {row["symbol"]: row for row in rows["stock"]}
-    configured_symbols={m['ticker'] for theme_id in active for m in watch_by_id.get(theme_id,{}).get('members',[])}
     parsed_eligibility={symbol:evaluate({'turnover_1d_usd':row.get('turnover_1d'),'average_volume_10d_shares':row.get('average_volume_10d_shares')},policy,schema=SCHEMA_MODES[stock_schema]) for symbol,row in stock_rows.items()}
     daily_eligibility={symbol:parsed_eligibility[symbol] if symbol in parsed_eligibility else evaluate({},policy,schema=SCHEMA_MODES[stock_schema],present=False) for symbol in configured_symbols}
     themes: list[dict[str, Any]] = []

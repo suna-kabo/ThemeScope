@@ -50,10 +50,36 @@ class ManualCSVTests(unittest.TestCase):
         self.assertEqual(audit['numeric_warnings'][0]['symbol'], 'UNUSED')
         with self.assertRaisesRegex(CSVValidationError, 'required numeric value is blank'):
             parse_csv(path, 'etf', required_symbols={'AAA', 'UNUSED'})
+        stocks, stock_audit = parse_csv(path, 'stock', required_symbols={'AAA'})
+        self.assertIsNone(stocks[1]['performance_1w_pct'])
+        self.assertEqual(stock_audit['numeric_warnings'][0]['symbol'],'UNUSED')
         with self.assertRaisesRegex(CSVValidationError, 'required numeric value is blank'):
-            parse_csv(path, 'stock', required_symbols={'AAA'})
+            parse_csv(path, 'stock', required_symbols={'AAA','UNUSED'})
         with self.assertRaisesRegex(CSVValidationError, 'invalid numeric value'):
             parse_csv(self._csv(HEADER + unused.replace(',,3,4,', ',bad,3,4,')), 'etf', required_symbols={'AAA'})
+
+    def test_unconfigured_ema50_blank_is_audited_without_relaxing_required_inputs(self):
+        import csv,io
+        table=list(csv.reader(io.StringIO(HEADER+ROW)))
+        extra=table[1].copy();extra[0]='EXTRA_IPO';extra[12]='';table.append(extra)
+        def source():
+            text=io.StringIO();csv.writer(text).writerows(table);return self._csv(text.getvalue())
+        rows,audit=parse_csv(source(),'stock',required_symbols={'AAA'})
+        self.assertEqual(len(rows),2);self.assertIsNone(rows[1]['ema50'])
+        self.assertEqual([(w['symbol'],w['line'],w['field']) for w in audit['numeric_warnings']],[('EXTRA_IPO',3,'ema50')])
+        with self.assertRaisesRegex(CSVValidationError,'ema50: required numeric value is blank'):
+            parse_csv(source(),'stock',required_symbols={'AAA','EXTRA_IPO'})
+        with self.assertRaisesRegex(CSVValidationError,'ema50: required numeric value is blank'):
+            parse_csv(source(),'stock')
+        extra[12]='invalid'
+        with self.assertRaisesRegex(CSVValidationError,'ema50: invalid numeric value'):
+            parse_csv(source(),'stock',required_symbols={'AAA'})
+        extra[12]=''
+        for field in (14,15):
+            previous=extra[field];extra[field]=''
+            with self.assertRaisesRegex(CSVValidationError,'required numeric value is blank'):
+                parse_csv(source(),'stock',required_symbols={'AAA'})
+            extra[field]=previous
 
     def test_missing_invalid_market_cap_retains_stock(self):
         for value in ("", "NaN", "-1"):
