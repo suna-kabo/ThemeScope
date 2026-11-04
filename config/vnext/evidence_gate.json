@@ -1,0 +1,27 @@
+{
+  "status": "cutover_blocked",
+  "findings": [
+    {
+      "ticker": "AMZN",
+      "theme_id": "cloud-platforms",
+      "reason": "Inherited repository evidence explicitly Unresolved; new-charter qualification needs review."
+    },
+    {
+      "ticker": "AMZN",
+      "theme_id": "internet-commerce",
+      "reason": "Inherited repository evidence explicitly Unresolved; new-charter qualification needs review."
+    },
+    {
+      "ticker": "GOOGL",
+      "theme_id": "cloud-platforms",
+      "reason": "Inherited repository evidence explicitly Unresolved; new-charter qualification needs review."
+    },
+    {
+      "ticker": "GOOGL",
+      "theme_id": "internet-commerce",
+      "reason": "Inherited repository evidence explicitly Unresolved; new-charter qualification needs review."
+    }
+  ],
+  "industry_rule_registry_status": "pending_documented_rules",
+  "source_evidence_queue_count": 335
+}

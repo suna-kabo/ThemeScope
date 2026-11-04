@@ -1,4 +1,4 @@
-"""Exercise the publication boundary with real retained inputs and simulated failures."""
+"""Exercise legacy publication with synthetic retained inputs and injected failures."""
 import copy
 import json
 from pathlib import Path

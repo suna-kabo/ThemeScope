@@ -1,0 +1,18 @@
+{
+  "methodology": "themescope-vnext-1",
+  "active_themes": 44,
+  "watch_only_themes": 8,
+  "proposed_relationships": 729,
+  "unique_tickers": 671,
+  "review_universe_tickers": 1525,
+  "launch_effective_dates": "pending",
+  "production_blockers": [
+    "335 primary-source reviews pending",
+    "4 inherited-evidence findings pending",
+    "Deterministic industry-rule registry is not documented/approved",
+    "Launch effective dates pending",
+    "Launch rebalance session not approved",
+    "Production cutover not enabled"
+  ],
+  "data_kind": "configuration and synthetic fixtures only"
+}

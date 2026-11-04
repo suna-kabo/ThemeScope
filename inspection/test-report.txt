@@ -1,0 +1,41 @@
+ThemeScope vNext — Gate A domain checkpoint
+Data: configuration metadata and explicitly synthetic test fixtures only.
+Base main: cf4fdb1e4784ff6fbc7183d5e709ffae044ec2fe
+Phase 0 baseline: 8764575
+
+Validation:
+python scripts/bootstrap_dev.py: passed; isolated Python 3.12 runtime imports verified.
+python -m unittest discover -s tests -v
+222 tests run; 221 passed; 1 Windows-only skip.
+python -m compileall -q src scripts tests: passed.
+node --check static/dashboard.js: passed.
+node tests/test_dashboard.js: passed.
+python tests/smoke_local_install.py --browser: passed on Linux.
+
+Smoke coverage: isolated clean source install, setup/refresh/site preparation,
+non-ASCII paths, two-session history, older replay, failed-publication preservation,
+actual local HTTP previews/downloads, light/dark browser checks, 64 Market Matrix
+cases, stock eligibility/filter and methodology navigation. No deployment.
+Native Windows CMD and Windows locked-file semantics were not run locally.
+
+Full v2 review CSV: 1,525 rows, no duplicate symbols; all measurable filters pass.
+Exact source hash and instrument manifest match; all 671 proposed launch tickers
+and 21 Watch-only candidate relationships are represented in the source universe.
+Common-stock status is explicitly user-attested from scanner settings.
+44 Active / 8 Watch-only themes; 729 Core/Enabler relationships / 671 tickers.
+All 729 launch effective dates remain pending. Production remains disabled.
+
+Domain coverage: duplicate/overlapping relationships, invalid intervals, outside-
+universe symbols, Active >=5 minimum, Related exclusion, Watch-only exclusion,
+no IWM roster, and old/new membership at Friday/Monday approval boundaries.
+The numerical synthetic-index boundary test belongs to Phase 3 and is pending.
+
+Inspection rejection tests: .env, secrets, SQLite including renamed payload,
+raw provider payloads, absolute personal paths, symlinks and unrelated junk.
+Old provider fixture payloads were replaced by reproducible synthetic fixtures;
+legacy runtime source, readers and genuine user history were not modified.
+
+Production blockers remain: 335 evidence refreshes; four additional inherited-
+evidence findings; documented industry rules; approved launch date; later roster
+inputs and local SIP/Windows checks. Gate A does not certify production cutover.
+Next work: Phase 2 — storage and pure calculation engine, leading to Gate B.

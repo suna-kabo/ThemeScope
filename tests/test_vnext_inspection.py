@@ -1,0 +1,74 @@
+import json
+from pathlib import Path
+import shutil
+import tempfile
+import unittest
+from scripts.build_inspection_bundle import build, safe_file
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+class InspectionTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+
+    def test_reject_private_assets_and_secrets(self):
+        for name, content in [('.env', 'x'), ('data.sqlite3', 'x'),
+                              ('raw_inputs.json', '{}'), ('cache.json', '{}'),
+                              ('secret.txt', 'api_key=synthetic_secret_canary_123456'),
+                              ('header.json', '{"APCA-API-KEY-ID":"synthetic_canary_123456"}'),
+                              ('renamed.txt', 'SQLite format 3\x00not_a_real_database'),
+                              ('private.txt', '-----BEGIN RSA PRIVATE KEY-----'),
+                              ('path.txt', '/Users/synthetic-person/project'),
+                              ('junk.bin', 'x'), ('provider.json', '{"observations":[]}'),
+                              ('snapshot.json', '{"bars":{}}')]:
+            with self.subTest(name=name):
+                path = self.root / name
+                path.write_text(content)
+                with self.assertRaises(ValueError):
+                    safe_file(path)
+
+    def test_build_contains_config_and_no_live_data(self):
+        shutil.copytree(ROOT / 'config/vnext', self.root / 'config/vnext')
+        shutil.copytree(ROOT / 'docs', self.root / 'docs')
+        report_path = self.root / 'passed.txt'
+        report_path.write_text('Synthetic inspection test; not a certification of a real gate.\n')
+        report = build(self.root, test_report=report_path)
+        self.assertEqual(report['active_themes'], 44)
+        self.assertEqual(report['unique_tickers'], 671)
+        self.assertTrue(report['production_blockers'])
+        paths = list((self.root / 'inspection').iterdir())
+        self.assertEqual(len(paths), 5)
+        for path in paths:
+            safe_file(path)
+        before = (self.root / 'inspection/index.html').read_bytes()
+        (self.root / 'inspection/unrelated.txt').write_text('Preserve me')
+        with self.assertRaisesRegex(ValueError, 'unrelated'):
+            build(self.root)
+        self.assertEqual((self.root / 'inspection/index.html').read_bytes(), before)
+
+    def test_symlink_asset_rejected(self):
+        target = self.root / 'target.txt'
+        target.write_text('Synthetic safe content')
+        link = self.root / 'linked.txt'
+        try:
+            link.symlink_to(target)
+        except OSError:
+            self.skipTest('Symlink creation not supported on this platform')
+        with self.assertRaisesRegex(ValueError, 'Symlinks'):
+            safe_file(link)
+
+    def test_legacy_archive_fixtures_are_synthetic(self):
+        raw = json.loads((ROOT / 'tests/fixtures/v1/raw_inputs.json').read_text())
+        snapshot = json.loads((ROOT / 'tests/fixtures/v1/latest_snapshot.json').read_text())
+        self.assertTrue(raw['synthetic'])
+        self.assertTrue(snapshot['synthetic'])
+        for symbol, chart in raw['charts'].items():
+            self.assertTrue(chart['synthetic'])
+            self.assertTrue(chart['url'].startswith('fixture://'))
+            self.assertTrue(all(r['volume'] == 2000000 for r in chart['observations']))
+        for quote in raw['quotes'].values():
+            self.assertTrue(quote['synthetic'])
+            self.assertEqual(quote['market_cap_usd'], 3000000000)
