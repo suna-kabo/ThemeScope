@@ -81,7 +81,7 @@ class PreviewTests(unittest.TestCase):
         stage=self.base/'staging';fixture(self.old,'2026-11-03',marker='new publication',destination=stage)
         with output_lock(folder):publish_tree(stage,folder)
         status,headers,html=self.get(url,{'If-Modified-Since':'Wed, 04 Nov 2037 00:00:00 GMT','If-None-Match':'anything'})
-        self.assertEqual(status,200);self.assertEqual(html,(folder/'dashboard.html').read_bytes());self.assertIn(b'2026-11-03',html)
+        self.assertEqual(status,200,html);self.assertEqual(html,(folder/'dashboard.html').read_bytes());self.assertIn(b'2026-11-03',html)
         self.assertIn('no-store',headers['Cache-Control']);self.assertEqual(headers['X-ThemeScope-Session'],'2026-11-03')
         meta=self.get('http://'+urlsplit(url).netloc+'/latest_snapshot.json');self.assertEqual(json.loads(meta[2])['session_date'],'2026-11-03')
         self.assertIn('no-store',meta[1]['Cache-Control'])
@@ -90,7 +90,7 @@ class PreviewTests(unittest.TestCase):
         self.assertEqual(self.get(base+'/download.txt')[2],b'one')
         stage=self.base/'staging';fixture(self.old,'2026-11-03',marker='new download',destination=stage)
         with output_lock(info['directory']):publish_tree(stage,info['directory'])
-        self.assertEqual(self.get(base+'/download.txt')[0],409)
+        stale=self.get(base+'/download.txt');self.assertEqual(stale[0],409,stale[2])
         current=self.get(url)
         self.assertIn(b'2026-11-03',current[2])
         new_base='http://'+urlsplit(url).netloc+'/_preview/'+current[1]['X-ThemeScope-Run']
@@ -127,6 +127,14 @@ class PreviewTests(unittest.TestCase):
         from io import StringIO
         with patch('scripts.serve_local.ROOT',self.new),patch('scripts.serve_local.webbrowser.open') as opened,patch.object(http.server.ThreadingHTTPServer,'serve_forever',side_effect=KeyboardInterrupt),patch('sys.stdout',new_callable=StringIO) as output:
             self.assertEqual(main(['--port','0']),0);opened.assert_called_once()
-            text=output.getvalue();self.assertIn(str(self.new/'output/manual_csv'),text);self.assertIn('Actual snapshot session: 2026-11-03',text);self.assertIn(opened.call_args.args[0],text)
+            text=output.getvalue();self.assertIn(str((self.new/'output/manual_csv').resolve()),text);self.assertIn('Actual snapshot session: 2026-11-03',text);self.assertIn(opened.call_args.args[0],text)
+    def test_regeneration_survives_redirected_ascii_console(self):
+        import io
+        _,info,url=self.start(self.old);folder=Path(info['directory'])
+        stage=self.base/'staging';fixture(self.old,'2026-11-03',destination=stage)
+        with output_lock(folder):publish_tree(stage,folder)
+        with io.TextIOWrapper(io.BytesIO(),encoding='ascii') as stream,patch('sys.stdout',stream):
+            status,_,html=self.get(url)
+        self.assertEqual(status,200,html);self.assertIn(b'2026-11-03',html)
 
 if __name__=='__main__':unittest.main()

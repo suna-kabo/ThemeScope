@@ -18,6 +18,14 @@ sys.path.insert(0,str(ROOT))
 from src.themescope.local_publication import digest,output_lock,pending
 
 
+def console(message):
+    """A redirected Windows console may not encode every project-folder name."""
+    try:print(message,flush=True)
+    except UnicodeEncodeError:
+        encoding=getattr(sys.stdout,'encoding',None) or 'utf-8'
+        print(message.encode(encoding,errors='backslashreplace').decode(encoding),flush=True)
+
+
 def snapshot_info(directory,site=False):
     directory=Path(directory).resolve()
     if pending(directory):raise ValueError('Publication is incomplete. Close locked files and run '+('prepare-site.cmd --recover' if site else 'refresh.cmd --recover')+' before previewing.')
@@ -83,7 +91,7 @@ def preview_handler(directory,site=False):
                     if getattr(self.server,'preview_signature',None)!=signature:
                         self.server.preview_signature=signature
                         current_url=f'http://127.0.0.1:{self.server.server_port}/_preview/{info["html_sha256"]}/{info["entry"]}?preview={identity}'
-                        print('Preview updated: '+info['type']+'; session '+info['session']+'; directory '+str(directory)+'\nCurrent exact URL: '+current_url,flush=True)
+                        console('Preview updated: '+info['type']+'; session '+info['session']+'; directory '+str(directory)+'\nCurrent exact URL: '+current_url)
                     if name==info['entry'] and pinned!=info['html_sha256']:
                         self.send_response(307);self.send_header('Location','/_preview/'+info['html_sha256']+'/'+info['entry']+'?preview='+identity);self.send_header('Cache-Control','no-store');self.send_header('Content-Length','0');self.end_headers();return
                     if pinned and pinned!=info['html_sha256']:
@@ -145,7 +153,7 @@ def main(argv=None):
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--site',action='store_true');parser.add_argument('--port',type=int,default=None);parser.add_argument('--no-browser',action='store_true');args=parser.parse_args(argv)
     server,info,url=create_server(ROOT,args.site,args.port)
     with server:
-        print('Preview type: '+info['type']+'\nServing directory: '+info['directory']+'\nActual snapshot session: '+info['session']+'\nGenerated: '+info['generated']+'\nHTML SHA256: '+info['html_sha256']+'\nExact URL: '+url+'\nLatest metadata URL: http://127.0.0.1:'+str(server.server_port)+'/'+info['metadata']+'?preview='+root_identity(info['directory'],args.site),flush=True)
+        console('Preview type: '+info['type']+'\nServing directory: '+info['directory']+'\nActual snapshot session: '+info['session']+'\nGenerated: '+info['generated']+'\nHTML SHA256: '+info['html_sha256']+'\nExact URL: '+url+'\nLatest metadata URL: http://127.0.0.1:'+str(server.server_port)+'/'+info['metadata']+'?preview='+root_identity(info['directory'],args.site))
         print('Server bound successfully on loopback. Leave this console open; Ctrl+C stops it. Refresh and prepare-site are separate; reload this exact URL after updates. Old tabs/other project copies and Cloudflare do not update automatically.',flush=True)
         if not args.no_browser:
             try:
