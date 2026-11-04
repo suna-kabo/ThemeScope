@@ -6,6 +6,7 @@ from .tradingview import individual_filenames, theme_symbols
 from .research_policy import market_side, priority_sort_key
 from .relative_performance import weighted_excess
 from .tradingview import section_heading
+from .daily_stock_policy import verified_eligibility
 
 
 def earnings_window(candidates, session):
@@ -34,6 +35,7 @@ def flat_chunks(symbols, limit):
 def primary_research(snapshot, limit):
     """Evaluate each membership against its own anchor; never refill membership."""
     side=market_side(snapshot.get('market_classification',{}).get('direction'))
+    policy=snapshot.get('daily_stock_policy');stock_schema=snapshot.get('stock_csv_schema')
     themes=sorted((t for t in snapshot['themes'] if side and t.get('research_priority',{}).get('label')=='Primary '+side),key=priority_sort_key)
     session=snapshot['session_date'];files={};manifest=[];relationships=[];evaluations=[];combined=[]
     reserved_anchors={theme_symbols(t)[0] for t in themes};distributed=set();sections=[]
@@ -44,10 +46,11 @@ def primary_research(snapshot, limit):
         qualifying=[]
         for stock in theme.get('selected',[]):
             calculation=weighted_excess(stock,theme)
+            eligibility=verified_eligibility(stock,policy,stock_schema)
             classification=calculation['weighted_vs_etf']
-            included=classification==('Outperforming' if side=='long' else 'Underperforming')
-            row={'theme_id':theme['id'],'anchor':theme['anchor'],'ticker':stock['ticker'],'symbol':stock['tradingview_symbol'],**calculation,'included':included}
-            row['reason']=calculation['reason'] or ('included' if included else 'zero_weighted_excess' if classification=='Flat' else 'opposite_sign')
+            included=eligibility['eligible'] is True and classification==('Outperforming' if side=='long' else 'Underperforming')
+            row={'theme_id':theme['id'],'anchor':theme['anchor'],'ticker':stock['ticker'],'symbol':stock['tradingview_symbol'],**calculation,'daily_eligibility_status':eligibility['status'],'eligibility_policy_version':eligibility['policy_version'],'stock_csv_schema':stock_schema,'included':included}
+            row['reason']=('daily_stock_'+eligibility['status']+':'+','.join(eligibility['reasons'])) if eligibility['eligible'] is not True else calculation['reason'] or ('included' if included else 'zero_weighted_excess' if classification=='Flat' else 'opposite_sign')
             if included:qualifying.append(row)
             evaluations.append(row)
         qualifying.sort(key=lambda r:((-r['weighted_excess_pp'] if side=='long' else r['weighted_excess_pp']),r['symbol']))
@@ -55,9 +58,9 @@ def primary_research(snapshot, limit):
         if len(tokens)>limit:raise ValueError('Primary theme exceeds TradingView instrument limit: '+theme['id'])
         name='primary_watchlists/'+session+'/'+filenames[theme['id']][:-4]+'_Primary_'+side+'.txt'
         files[name]=','.join(tokens)+'\n'
-        manifest.append({'file':name,'role':'individual_primary_research','theme_id':theme['id'],'anchor':theme['anchor'],'instrument_count':len(tokens),'stock_count':len(qualifying),'section_count':0})
-        relationships.append({'theme_id':theme['id'],'theme_name':theme['name'],'anchor':theme['anchor'],'symbol':anchor,'ticker':theme['anchor'],'role':'anchor','weighted_excess_pp':None,'er1m_pp':None,'er3m_pp':None})
-        relationships.extend({key:r.get(key) for key in ('theme_id','anchor','symbol','ticker','weighted_excess_pp','er1m_pp','er3m_pp')}|{'theme_name':theme['name'],'role':'stock'} for r in qualifying)
+        manifest.append({'file':name,'role':'individual_primary_research','theme_id':theme['id'],'anchor':theme['anchor'],'instrument_count':len(tokens),'stock_count':len(qualifying),'section_count':0,'eligibility_policy_version':policy.get('version') if policy else None,'stock_csv_schema':stock_schema})
+        relationships.append({'theme_id':theme['id'],'theme_name':theme['name'],'anchor':theme['anchor'],'symbol':anchor,'ticker':theme['anchor'],'role':'anchor','weighted_excess_pp':None,'er1m_pp':None,'er3m_pp':None,'daily_eligibility_status':'not_applicable_anchor','eligibility_policy_version':policy.get('version') if policy else None,'stock_csv_schema':stock_schema})
+        relationships.extend({key:r.get(key) for key in ('theme_id','anchor','symbol','ticker','weighted_excess_pp','er1m_pp','er3m_pp','daily_eligibility_status','eligibility_policy_version','stock_csv_schema')}|{'theme_name':theme['name'],'role':'stock'} for r in qualifying)
         # Anchors belong to their own rows, even when selected as a stock elsewhere.
         distributed_stocks=[r['symbol'] for r in qualifying if r['symbol'] not in reserved_anchors and r['symbol'] not in distributed]
         distributed.update(distributed_stocks)
@@ -69,8 +72,8 @@ def primary_research(snapshot, limit):
     if combined_name:
         if instrument_count>limit:raise ValueError('Combined Daily Primary exceeds TradingView instrument limit; no list was truncated')
         files[combined_name]=','.join(combined)+'\n'
-        manifest.append({'file':combined_name,'role':'daily_primary_research','instrument_count':instrument_count,'section_count':len(sections)})
-    snapshot['daily_primary_research']={'session_date':session,'side':side,'theme_ids':[t['id'] for t in themes],'combined_file':combined_name,
+        manifest.append({'file':combined_name,'role':'daily_primary_research','instrument_count':instrument_count,'section_count':len(sections),'eligibility_policy_version':policy.get('version') if policy else None,'stock_csv_schema':stock_schema})
+    snapshot['daily_primary_research']={'session_date':session,'side':side,'theme_ids':[t['id'] for t in themes],'combined_file':combined_name,'eligibility_policy_version':policy.get('version') if policy else None,'stock_csv_schema':stock_schema,
         'archive_file':'daily_primary_watchlists_'+session+'.zip' if themes else None,'relationships_file':'daily_primary_relationships_'+session+'.csv' if themes else None,
         'relationships':relationships,'evaluations':evaluations,'sections':sections,'theme_order':'priority_score_direction_then_theme_id','overlap_policy':'Reserve anchors; assign stocks to the first qualifying theme; full per-theme relationships retained separately','platform_import_tested':False}
     snapshot.setdefault('manual_csv_audit',{})['daily_primary_research']={'qualifying_themes':len(themes),'qualifying_stock_memberships':sum(r['included'] for r in evaluations),'excluded_stock_memberships':sum(not r['included'] for r in evaluations),'combined_unique_instruments':instrument_count,'platform_import_tested':False}

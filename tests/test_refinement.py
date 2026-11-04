@@ -13,7 +13,7 @@ from src.themescope.tradingview import section_heading
 
 def returns(a,b):return {'returns':{'21':{'value':a},'63':{'value':b}}}
 
-def stock(ticker,a=.3,b=.4,symbol=None):return {'ticker':ticker,'tradingview_symbol':symbol or 'NASDAQ:'+ticker,**returns(a,b)}
+def stock(ticker,a=.3,b=.4,symbol=None):return {'ticker':ticker,'tradingview_symbol':symbol or 'NASDAQ:'+ticker,'turnover_1d_usd':30000000,'average_volume_10d_shares':600000,**returns(a,b)}
 
 class RefinementTests(unittest.TestCase):
     def test_contributing_inputs_only_and_missing_required_evidence(self):

@@ -7,17 +7,22 @@ chart/entry assessment remains separate.
 
 ## Branches and consolidation status
 
-**Consolidation into `main` is pending deployment verification.** The audited
-candidate is `review/final-repository-audit`, based on approved `download`
-commit `f8b9a8a`, with previous `main` retained through a normal merge. See
-[the repository audit](docs/repository_audit.md) for findings and PR status.
+**`main` is now the authoritative development branch.** The owner merged
+[PR #5](https://github.com/suna-kabo/ThemeScope/pull/5) as `234c462` on 4 November
+2026. This Daily Stock change builds on that merged audit; it does not restore an
+old downloaded bundle. [Current scanner/schema details](docs/daily_stock_policy.md).
 
 | Branch | Purpose |
 |---|---|
-| `main` | Intended single normal development branch after the reviewed PR merges; currently older. |
-| `review/final-repository-audit` | Temporary reviewed consolidation candidate. Use this branch to test the audit fixes. |
-| `download` | Previous approved implementation; retained for compatibility. |
-| `pages` | Separate, explicit website-publication branch; currently older than the candidate. |
+| `main` | Normal development, setup and local updates. |
+| `review/final-repository-audit` | Merged historical audit reference; not needed for daily use. |
+| `download` | Older compatibility reference; not needed when using main. |
+| `pages` | Optional separate publication worktree; update from main before any later authorized deployment. |
+
+Other historical branches are retained, not deleted. The formerly local-only
+`696e2d7` contained documentation, not missing runtime fixes; its useful trigger
+history and corrected merge status are folded into these docs. Original unrelated
+experimental/provider files remain preserved in their original checkout.
 
 GitHub reports this repository as **public**, checked 4 November 2026. Do not
 commit inputs, history, credentials or run bundles. Previously tracked bundles
@@ -42,7 +47,7 @@ and [Python](https://www.python.org/downloads/windows/) installers, including th
 git --version
 py -3.12 --version
 Set-Location $env:USERPROFILE
-git clone --branch review/final-repository-audit https://github.com/suna-kabo/ThemeScope.git ThemeScope
+git clone --branch main https://github.com/suna-kabo/ThemeScope.git ThemeScope
 Set-Location .\ThemeScope
 .\setup.cmd
 ```
@@ -59,12 +64,21 @@ The `.cmd` launchers use their own folder and keep useful errors visible.
 
 ## Exact daily TradingView exports
 
-Export after the selected **US market session closes**. Do not apply performance,
-price, capitalization or liquidity screener filters to the collection universe.
+Export after the selected **US market session closes**. For Daily Stock, keep
+all other user-approved scanner settings and replace only the liquidity conditions:
+
+- **Price × volume (turnover), 1 day ≥ $10,000,000**, in USD. Exactly $10M passes.
+- **Average volume, 10 days > 500,000 shares per trading session**. Exactly 500,000 fails.
+
+Both must pass. These thresholds are not claimed optimal or equivalent to the old
+30-day proxy. Daily Stock may be filtered and omit configured stocks; membership,
+stock # and ordinary TXT lists stay fixed. Export **all ETF anchors/context ETFs**
+and **unfiltered SPY/QQQ/IWM constituent breadth CSVs**; do not apply these stock
+liquidity conditions to those four exports.
 
 | CSV role | Required universe | Simple filename |
 |---|---|---|
-| Stock | All configured stocks from `inputs\_lists\Daily_Data_Stocks.txt` | `Daily_Stock.csv` |
+| Stock | Configured-stock collection list `inputs\_lists\Daily_Data_Stocks.txt`, using the revised Daily Stock filters | `Daily_Stock.csv` |
 | ETF | All anchors and SPY/QQQ/IWM from `inputs\_lists\Daily_ETFs.txt` | `Daily_ETF.csv` |
 | SPY breadth | Full S&P 500 constituent export | `SPY.csv` |
 | QQQ breadth | Full Nasdaq-100 constituent export | `QQQ.csv` |
@@ -84,10 +98,24 @@ Use TradingView's native headers. Supported aliases are in
   `Exponential moving average, 50, 1 day`, `Average true range %, 14, 1 day`,
   `Price × volume (turnover), 1 day`, `Relative volume, 1 day`.
 - Additional Stock fields: `Market capitalization`, `Industry`, `Sector`,
-  `Price × average volume, 30 days`.
+  **`Average volume, 10 days`**, in shares per trading session. The former
+  `Price × average volume, 30 days` column is no longer required; it may be removed.
 - Breadth CSVs: `Symbol`, `Price`, both daily EMA columns above.
 - Optional: `Upcoming earnings date` as `YYYY-MM-DD`, currency and other recognized
   fields. Use USD quotes; no FX conversion is performed.
+
+The exact new native TradingView export header has **not been observed in the
+supplied old CSVs**. The accepted, case-insensitive contract is `Average volume,
+10 days`; deliberate aliases are `Average Volume 10D` and
+`average_volume_10d_shares`. Today's volume, relative volume, 30-day average volume
+and dollar volume cannot substitute. A missing header reports this exact list.
+Do not rename a different metric or derive shares from turnover/price.
+
+One-day turnover is today's price × volume in USD. Average Volume 10D is shares,
+not dollars. Blank/malformed/negative required values fail the import; numerical
+zero is measured but fails the thresholds. An explicit non-USD turnover currency
+is rejected, without conversion. An optional old 30-day value never affects the
+new eligibility result. ETF thresholds and breadth input schemas are unchanged.
 
 Percent values are normalized once. Duplicate symbols and malformed required
 numbers fail validation. Missing market cap is N/A with an audit warning. Blank
@@ -253,25 +281,29 @@ Git users, with no uncommitted source/config edits:
 ```powershell
 git status --short --branch
 git fetch origin
-git switch review/final-repository-audit
-git pull --ff-only origin review/final-repository-audit
+git switch main
+git pull --ff-only origin main
 ```
 
 If source/config edits exist, stop and preserve/review them before updating.
-Never reset hard, force-push or delete the project directory. After the reviewed
-PR is merged and the audit confirms `main` is authoritative, normal development
-uses `git switch main` and `git pull --ff-only origin main`. Do not switch to the
-currently older `main` merely because it is GitHub's default branch.
+Never reset hard, force-push or delete the project directory. Main is now the
+authoritative merged branch. Review any new local/source conflicts rather than
+discarding them; old branches are optional references, not required setup steps.
 
 ZIP users: extract the reviewed branch ZIP into a separate temporary folder.
-For an installation already at `f8b9a8a`, copy only these program files to their
+For an installation already on the merged PR #5 version, copy these program files to their
 matching paths, plus this README and audit document:
 
 - `scripts/generate_dashboard.py`, `scripts/refresh_local.py`,
   `scripts/prepare_site.py`, `scripts/serve_local.py`,
   `scripts/pages_build.py`, `scripts/stage_site.py`.
 - `src/themescope/manual_csv.py`, `src/themescope/local_publication.py`,
-  `src/themescope/site_output.py`, `src/themescope/tradingview.py`.
+  `src/themescope/site_output.py`, `src/themescope/tradingview.py`,
+  **`src/themescope/daily_stock_policy.py` (new)** and `src/themescope/daily_lists.py`.
+- `static/dashboard.js` and **`config/manual_csv.json`**. The latter changes the
+  Daily Stock policy only. Preserve other configuration and all memberships.
+  If you customized this file, merge the new `schema_version` and
+  `daily_stock_policy` block instead of overwriting your other values.
 
 Do not replace the entire folder, `.venv`, configuration, inputs, output/history
 or personal files. Older installations must also carry forward their missing UI
@@ -281,10 +313,14 @@ are unchanged; rerun setup only for first use or an unhealthy environment.
 
 ## Cloudflare Pages: separate, deliberate publication
 
-Cloudflare account settings are **not verified**. No hosting project/settings were
-changed and no deployment was requested. Webhook access is unavailable through
+The earlier Workers integration attempted a source preview and failed because
+Worker `themescope` did not exist in that account. The owner reports removing it
+on 4 November 2026. No Worker or deployment was created by these scripts; verify
+source changes have no external build checks before any later publication.
+Cloudflare Pages account settings remain unverified. No hosting settings were
+changed and no deployment command is part of this update. Webhook access is unavailable through
 the current GitHub integration. Confirm production and preview branch behavior
-before merging the consolidation PR or enabling publishing.
+before enabling publishing.
 
 When you later authorize website publication, intended settings are:
 
@@ -323,6 +359,30 @@ read every deployed file, linked or not. A private source repository would not
 make published quote data private. Changing repository visibility or removing old
 data from Git history requires a separate deliberate action; no such change is
 silently made here.
+
+## Historical Daily Stock CSV compatibility
+
+New imports default to `--stock-csv-schema current-v2`, which requires Average
+Volume 10D. Old CSVs are never inferred to pass. For a deliberate historical
+replay with the old 30-day field, use:
+
+```powershell
+.\refresh.cmd --session 2026-11-02 --stock-csv-schema legacy-v1
+```
+
+This is labelled `daily-stock-csv-1` with `legacy_unverified` stock eligibility.
+Prices/performance can be shown; Primary themes still contribute anchors, but
+unverified legacy stocks cannot enter a new-policy Primary export. Historical
+HTML and genuine history remain readable; a new site must be prepared from an
+explicitly refreshed, versioned run. Theme Score/rank/EMA-priority history remains
+compatible because stock liquidity versioning is separate.
+
+Current Primary stock inclusion requires verified Daily Stock eligibility **and**
+the existing weighted relative result (long > 0; short < 0; zero/missing excluded).
+The visible vs ETF filter still uses the weighted result alone, including for
+measured ineligible rows. Present valid EMA rows still enter theme breadth even
+if liquidity fails; missing members remain in the full configured coverage
+denominator. No missing stock's filter-exclusion cause is inferred or old data reused.
 
 ## Developer checks and legacy diagnostics
 

@@ -1,3 +1,8 @@
+> Historical PR #5 audit. The owner merged it into main as `234c462` on 4 November
+> 2026; main is now authoritative. See [Daily Stock policy](daily_stock_policy.md)
+> for the later liquidity/schema update. Pre-merge decisions below are retained
+> as historical evidence, not current instructions.
+
 # Repository consolidation audit — 4 November 2026 (Hong Kong)
 
 Review branch: `review/final-repository-audit`, based on approved `download`
@@ -181,3 +186,13 @@ No GitHub deployment/environment records or external checks were found for
 Cloudflare account branch/build settings remain unverified. Do not merge into
 `main` until its deployment behavior is confirmed; no hosting settings are
 silently changed here.
+
+## Post-merge follow-up
+
+PR #5 merged all runtime audit fixes. The only unpushed prior commit, `696e2d7`,
+contained README/audit notes recording the observed Workers preview failure
+(“This Worker does not exist on your account”). Those facts are retained here;
+no runtime change from that commit was missing from main. The owner now reports
+removing that trigger. Source/CI checks will be inspected on the next source
+update; no deployment is authorized or performed by this work. Old branches remain
+optional references and have not been deleted.

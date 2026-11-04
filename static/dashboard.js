@@ -167,6 +167,17 @@
     return "$" + (value/unit[0]).toLocaleString("en-US",{maximumFractionDigits:1}) + unit[1];
   }
   function rsMatches(row, filter) { return !filter || filter === "All" || row.weighted_vs_etf === filter; }
+  function dailyStockPolicyText(policy,schema) {
+    if(!policy)return 'Historical snapshot: current Daily Stock liquidity eligibility is unverified.';
+    var turnover=policy.turnover_1d_usd,volume=policy.average_volume_10d_shares;
+    return 'Daily Stock requires BOTH: one-day turnover '+turnover.operator+' $'+turnover.threshold.toLocaleString('en-US')+' USD AND Average Volume 10D '+volume.operator+' '+volume.threshold.toLocaleString('en-US')+' shares per trading session. Turnover is today’s price × volume in USD; 10-day average volume is shares, never dollars or derived from turnover/price. '+(schema===policy.csv_schema?'':'Legacy input: current eligibility remains unverified; no stocks qualify for a new-policy Primary export. ')+ 'The optional 30-day dollar-volume field is not a current Daily Stock requirement.';
+  }
+  function dailyStockEligibilityText(row) {
+    var eligibility=row.daily_stock_eligibility;
+    if(!eligibility || eligibility.status==='legacy_unverified')return 'Daily Stock eligibility: legacy/unverified under the current policy.';
+    if(eligibility.status==='unavailable')return 'Daily Stock eligibility: unavailable. A stock absent from the filtered CSV remains configured; its exclusion cause is unknown.';
+    return 'Daily Stock eligibility: '+eligibility.status+' ('+eligibility.policy_version+'). '+(eligibility.reasons || []).join(', ');
+  }
   function emaRelationship(price,average) {
     if(!finiteNumber(price) || !finiteNumber(average) || price<=0 || average<=0)return 'N/A';
     return price>average?'Above':price<average?'Below':'At';
@@ -260,6 +271,11 @@
       "ema21",
       "ema50",
       "adv30_usd",
+      "turnover_1d_usd",
+      "average_volume_10d_shares",
+      "daily_stock_eligibility",
+      "daily_stock_policy_version",
+      "stock_csv_schema",
       "return21_pct",
       "return63_pct",
       "excess21_pp",
@@ -306,6 +322,11 @@
         ema21: row.ema21,
         ema50: row.ema50,
         adv30_usd: row.adv30_usd,
+        turnover_1d_usd:row.turnover_1d_usd,
+        average_volume_10d_shares:row.average_volume_10d_shares,
+        daily_stock_eligibility:row.daily_stock_eligibility?.status || 'legacy_unverified',
+        daily_stock_policy_version:row.daily_stock_eligibility?.policy_version,
+        stock_csv_schema:row.daily_stock_eligibility?.csv_schema,
         return21_pct: valueAt(row, "return21") === null || valueAt(row, "return21") === undefined ? null : valueAt(row, "return21") * 100,
         return63_pct: valueAt(row, "return63") === null || valueAt(row, "return63") === undefined ? null : valueAt(row, "return63") * 100,
         excess21_pp:
@@ -846,17 +867,18 @@
       var definitions=data.display_methodology || {},maintenance=definitions.maintenance_thresholds || {};
       function table(title,rows){return '<section class="method-section"><h2>'+title+'</h2><div class="table-wrap"><table class="method-definition-table"><colgroup><col class="definition-label"><col></colgroup><tbody>'+rows.map(function(row){return '<tr><th scope="row">'+esc(row[0])+'</th><td>'+esc(row[1])+'</td></tr>';}).join('')+'</tbody></table></div></section>';}
       var weights=policy.weights || {};
+      var dailyStockExplanation='<p>'+esc(dailyStockPolicyText(data.daily_stock_policy,data.stock_csv_schema))+'</p><p>Configured membership, current daily eligibility and relative-performance qualification are separate. Only verified eligible stocks can enter the Daily Primary stock export. A present ineligible row keeps measured performance and valid EMA data for breadth. Missing rows remain configured, reduce coverage and have no reused old prices. ETF anchors and unfiltered index breadth exports do not use these stock filters. The visible vs ETF filter still uses weighted relative performance, including on measured ineligible rows.</p>';
       var example=Number((weights.current*4+weights.medium*-3).toFixed(10));
       var primaryGuide='<section class="method-section primary-research-method" aria-labelledby="primary-research-watchlist"><h2 id="primary-research-watchlist" tabindex="-1">How Today\'s Primary Research Watchlist Is Built</h2>'+
         '<p>Primary identifies research priorities; each chart still needs a separate entry/setup assessment.</p><h3>1. Select Primary themes</h3><p>Long bias and Selective long share the same rules; Short bias and Selective short share the same rules.</p><ul><li><strong>Primary long:</strong> '+esc(policy.long_rule)+'</li><li><strong>Primary short:</strong> '+esc(policy.short_rule)+'</li></ul><p>Bullish: ETF price above EMA21 and EMA50. Bearish: below both. Mixed: other valid combinations, including equality.</p><p>'+esc(policy.transition_rule)+' Missing or incompatible preceding-session history disables the transition exception. Neutral and Unclassified produce no directional Primary list.</p>'+
-        '<h3>2. Select stocks within each Primary theme</h3><p>Start with the existing configured membership, not a new market-wide scan. ER1M = Stock 1M performance − selected ETF 1M performance; ER3M = Stock 3M performance − selected ETF 3M performance.</p><p class="method-formula">Weighted Excess Return = '+esc(Number(weights.current).toFixed(2))+' × ER1M + '+esc(Number(weights.medium).toFixed(2))+' × ER3M</p><p>Units are percentage points (pp). Primary long includes results &gt; 0; Primary short includes results &lt; 0. Exactly zero and missing required returns are excluded. The two horizons do not need the same sign. A multi-theme stock is evaluated separately against each anchor. This differs from Theme Score, which uses cross-sectional ETF percentiles.</p><p>Example: ER1M = +4 pp and ER3M = −3 pp → '+esc(Number(weights.current).toFixed(2))+' × 4 + '+esc(Number(weights.medium).toFixed(2))+' × (−3) = +'+esc(example)+' pp: outperforming.</p>'+
+        '<h3>2. Select stocks within each Primary theme</h3>'+dailyStockExplanation+'<p>Start with the existing configured membership, not a new market-wide scan. ER1M = Stock 1M performance − selected ETF 1M performance; ER3M = Stock 3M performance − selected ETF 3M performance.</p><p class="method-formula">Weighted Excess Return = '+esc(Number(weights.current).toFixed(2))+' × ER1M + '+esc(Number(weights.medium).toFixed(2))+' × ER3M</p><p>Units are percentage points (pp). Eligible Primary long includes results &gt; 0; eligible Primary short includes results &lt; 0. Exactly zero and missing required returns are excluded. The two horizons do not need the same sign. A multi-theme stock is evaluated separately against each anchor. This differs from Theme Score, which uses cross-sectional ETF percentiles.</p><p>Example: ER1M = +4 pp and ER3M = −3 pp → '+esc(Number(weights.current).toFixed(2))+' × 4 + '+esc(Number(weights.medium).toFixed(2))+' × (−3) = +'+esc(example)+' pp: outperforming.</p>'+
         '<h3>3. Assemble the TradingView export</h3><p>One section per qualifying Primary theme, with the ETF ticker then readable theme name in its heading and the anchor ETF as its first instrument. Long stocks sort by weighted excess return descending; short stocks sort ascending, with identifier tie-breaks. Identifiers are resolved exchange-prefixed symbols.</p><p>Sections follow Theme Score descending for long or ascending for short, then theme ID. All anchors are reserved first; an overlapping stock appears once in the combined list, assigned to its first qualifying section in that order. An ETF-only qualifying theme still contributes its anchor. Full ordinary individual-theme exports preserve complete configured membership.</p><p>No Primary result means no current directional download, never a stale previous list. Browser search and filters do not alter this export. It does not change configured membership or replace complete data-collection watchlists.</p></section>';
       $("methodology-content").innerHTML=
         table('Market classification',[["Current matched rule",(decision.decision_path || []).map(function(row){return row.label+': '+row.value;}).join(' · ')],["Price classifications","Bullish: Price > EMA21 and EMA50. Bearish: Price < both. Mixed: other valid combinations, including equality. Invalid or missing inputs: Unavailable."],["Price consensus","Both Bullish → Long bias; both Bearish → Short bias, regardless of breadth. Otherwise use the matched cell below. IWM is context only."]])+
         table('Breadth calculation and validity',[["Index breadth","Percent of eligible index-export rows above each EMA, using a shared set with valid Price, EMA21 and EMA50. Missing rows remain in the denominator."],["Validity",(definitions.breadth_minimum_coverage*100)+'% coverage required. Theme breadth additionally requires '+definitions.theme_breadth_minimum_valid+' valid configured members. No influence on Theme Score or Priority.'],["SPY/QQQ Breadth Consensus","Each index is Positive when both EMA breadth readings are ≥50%, Negative when both are <50%, otherwise Mixed. Consensus is Positive/Negative only when both agree; other valid combinations are Mixed. Either unavailable index makes consensus Unavailable. This is not merged-constituent breadth."]])+
         table('Theme Score',[["Current",infoText.current_strength_score],["Medium",infoText.medium_strength_score],["Score",infoText.theme_score],["Ranks",infoText.rank_current]])+
         primaryGuide+
-        table('Configured-stock selection',(definitions.membership_rules || []).map(function(rule,i){return [i===0?'Stable membership':'Membership',rule];}).concat([["Maintenance thresholds",'Price floor $'+maintenance.raw_close_floor_usd+'; market-cap floor $'+(maintenance.market_cap_floor_usd/1e9)+' billion; liquidity proxy $'+(maintenance.adv30_floor_usd/1e6)+' million; minimum history '+maintenance.minimum_history_sessions+' sessions; maximum '+definitions.watchlist_capacity+' stocks per theme. Maintenance only, not new daily gates.'],["Missing maintenance facts",definitions.maintenance_missing_data],["Liquidity",definitions.liquidity_definition]]))+
+        table('Historical configured-membership maintenance',(definitions.membership_rules || []).map(function(rule,i){return [i===0?'Stable membership':'Membership',rule];}).concat([["Historical maintenance thresholds",'Price floor $'+maintenance.raw_close_floor_usd+'; market-cap floor $'+(maintenance.market_cap_floor_usd/1e9)+' billion; historical liquidity proxy $'+(maintenance.adv30_floor_usd/1e6)+' million; minimum history '+maintenance.minimum_history_sessions+' sessions; maximum '+definitions.watchlist_capacity+' stocks per theme. Historical membership maintenance only; not the current Daily Stock scanner policy.'],["Missing maintenance facts",definitions.maintenance_missing_data],["Historical proxy",definitions.liquidity_definition]]))+
         table('Watchlist browsing and import',[["vs ETF filter","Outperforming: W > 0; Underperforming: W < 0; Flat: W = 0; Unavailable: any missing endpoint. Uses underlying decimal values without a trading deadband. Search, EMA and relative filters combine with AND; they do not change membership, breadth or exports."],["Import validation","Local syntax and identifier consistency are tested. Actual TradingView platform import remains unverified for this grouped file."]])+
         table('History and missing data',[["Priority Change","New long/New short includes direction switches; Removed means Primary became Watch; — means unchanged. N/A means incompatible or missing immediately preceding-session priority. It is a workflow change, not a confirmed breakdown."],["History","Same-session reruns compare against the preceding US session, never an earlier same-day run. Versioned EMA and priority compatibility is independent of rank compatibility. Preserve historical records and migration backups."],["Unavailable inputs","No zero substitution or replacement members. Earnings countdown uses calendar days from the selected US session, not browser today; past dates remain Past date. Refresh failure preserves the last successful dashboard, exports, history and prepared site."]])+
         '<section class="method-section"><h2>Complete Market Matrix</h2>'+marketGroups+'</section>';
@@ -1144,7 +1166,7 @@
       return row["theme_breadth" + period + "_pct"].toFixed(1) + "% (" + metric.above_count + "/" + metric.valid_count + ")";
     }
     function pp(value){return finite(value) ? '<span class="'+(value>0?"positive":value<0?"negative":"muted")+'">'+(value>0?"+":"")+value.toFixed(2)+' pp</span>' : "N/A";}
-    function tickerCell(row){return '<span class="ticker-content"><a href="'+esc(row.chart_url || "#watchlist")+'" target="_blank" rel="noopener noreferrer">'+esc(row.ticker)+'</a> '+customInfo([row.company,row.exchange,row.membership_rationale].filter(Boolean).join(" · "),"Information for "+row.ticker)+'</span>';}
+    function tickerCell(row){return '<span class="ticker-content"><a href="'+esc(row.chart_url || "#watchlist")+'" target="_blank" rel="noopener noreferrer">'+esc(row.ticker)+'</a> '+customInfo([row.company,row.exchange,row.membership_rationale,dailyStockEligibilityText(row)].filter(Boolean).join(" · "),"Information for "+row.ticker)+'</span>';}
     function earnings(value) {
       return '<span>'+esc(earningsCountdown(value,data.session_date))+'</span>';
     }
@@ -1347,5 +1369,6 @@
     marketCap:marketCap, rsMatches:rsMatches, earningsCountdown:earningsCountdown,
     directionClass: directionClass, statusClass: statusClass, priorityCategory: priorityCategory, emaRelationship: emaRelationship, labels: LABELS,
     groupMarketMatrix:groupMarketMatrix,
+    dailyStockPolicyText:dailyStockPolicyText,dailyStockEligibilityText:dailyStockEligibilityText,
   };
 });

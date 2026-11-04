@@ -16,13 +16,13 @@ import tempfile
 from urllib.parse import quote
 import zipfile
 
-SCHEMA='themescope-site-3'
-LEGACY_SCHEMAS={'themescope-site-1','themescope-site-2'}
+SCHEMA='themescope-site-4'
+LEGACY_SCHEMAS={'themescope-site-1','themescope-site-2','themescope-site-3'}
 ROLES={'individual_research','configured_stock_daily_data','configured_etf_daily_data','daily_primary_research'}
 LOCAL_ONLY_ROLES={'optional_broad_scan','individual_primary_research'}
 SCALARS='ticker exchange instrument_type currency price_close daily_change ema21 ema50 above_ema21 above_ema50 price_state price_vs_ema21_pct price_vs_ema50_pct adv30_usd atr14_pct relative_volume_1d turnover_1d_usd'.split()
 THEME_FIELDS='id name anchor level global_rank rank_current rank_change_daily rank_comparison_session theme_score current_strength_score medium_strength_score priority_change breadth_status_21 breadth_status_50 configured_watchlist_count watchlist_member_count has_watchlist stock_drilldown_status watchlist_status theme_breadth21_pct theme_breadth21_above theme_breadth21_valid theme_breadth50_pct theme_breadth50_above theme_breadth50_valid'.split()
-STOCK_FIELDS='company theme_id theme_name anchor selection_slot market_cap_usd anchor_performance_1m anchor_performance_3m excess21_pp excess63_pp earnings_date weighted_excess_pp weighted_vs_etf metric_status session_date'.split()
+STOCK_FIELDS='company theme_id theme_name anchor selection_slot market_cap_usd anchor_performance_1m anchor_performance_3m excess21_pp excess63_pp earnings_date weighted_excess_pp weighted_vs_etf metric_status session_date average_volume_10d_shares'.split()
 METRIC_FIELDS='value status above_count valid_count eligible_count configured_count ema_period session_date'.split()
 HEADERS="/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: no-referrer\n  X-Frame-Options: DENY\n  Cache-Control: no-cache\n"
 PLACEHOLDER_HTML='''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; connect-src 'none'; base-uri 'none'"><title>ThemeScope — deployment prepared</title></head><body><h1>ThemeScope</h1><p>Deployment is prepared. No market snapshot has been published.</p></body></html>'''
@@ -45,6 +45,10 @@ def safe_name(name):
 
 def public_payload(snapshot,root):
     from .tradingview import load_mapping,resolve
+    from .daily_stock_policy import load_policy,verified_eligibility,SCHEMA_MODES
+    policy=load_policy(root)
+    if snapshot.get('daily_stock_policy')!=policy or snapshot.get('stock_csv_schema') not in SCHEMA_MODES.values():
+        raise ValueError('Saved run predates or differs from the current Daily Stock policy. Existing historical HTML remains readable. Refresh with the new 10-day shares column, or explicitly use --stock-csv-schema legacy-v1 for unverified historical eligibility, before preparing a new site.')
     mapping=load_mapping(root)
     def instrument(row,ticker):
         result=pick(row,SCALARS)
@@ -55,6 +59,7 @@ def public_payload(snapshot,root):
         result['returns']=metric_periods(row.get('returns',{}))
         return result
     payload=pick(snapshot,['session_date','generated_at','dashboard_generated_at','dashboard_generated_at_hkt_display'])
+    payload.update(daily_stock_policy=copy.deepcopy(policy),stock_csv_schema=snapshot['stock_csv_schema'])
     payload.update(schema_version=SCHEMA,run_kind='manual_csv',volatility_context=[])
     payload['score_methodology']=pick(snapshot['score_methodology'],['current','medium','method'])
     payload['score_methodology']['theme_score_weights']=pick(snapshot['score_methodology']['theme_score_weights'],['current_strength','medium_strength'])
@@ -71,6 +76,9 @@ def public_payload(snapshot,root):
         clean['selected']=[]
         for stock in row.get('selected',[]):
             member=instrument(stock,stock['ticker']);member.update(pick(stock,STOCK_FIELDS))
+            expected=verified_eligibility(stock,policy,snapshot['stock_csv_schema'])
+            if stock.get('daily_stock_eligibility')!=expected:raise ValueError('Daily Stock eligibility differs from measured policy inputs: '+stock['ticker'])
+            member['daily_stock_eligibility']=copy.deepcopy(expected)
             member['excess_returns']=metric_periods(stock.get('excess_returns',{}))
             clean['selected'].append(member)
         payload['themes'].append(clean)
@@ -82,7 +90,7 @@ def public_payload(snapshot,root):
     payload['market_classification']=pick(snapshot['market_classification'],['direction','breadth_consensus','breadth_qualifier','reason','action_summary'])
     payload['display_methodology']=pick(snapshot.get('display_methodology',{}),['maintenance_thresholds','watchlist_capacity','breadth_minimum_coverage','theme_breadth_minimum_valid','liquidity_definition','membership_rules','maintenance_missing_data'])
     research=snapshot['daily_primary_research']
-    payload['daily_primary_research']=pick(research,['session_date','side','theme_ids','combined_file','platform_import_tested'])
+    payload['daily_primary_research']=pick(research,['session_date','side','theme_ids','combined_file','platform_import_tested','eligibility_policy_version','stock_csv_schema'])
     payload['local_history']={'comparison_session':snapshot.get('local_history',{}).get('comparison_session'),'status':'Compared with the immediately preceding US session.' if any(t.get('rank_change_daily') is not None for t in payload['themes']) else 'No comparable previous-session record.'}
     earnings=snapshot['expected_earnings']
     payload['expected_earnings']=pick(earnings,['as_of','through','later_count'])
@@ -101,7 +109,7 @@ def public_payload(snapshot,root):
         safe_name(row['file'])
         if not (re.fullmatch(r'tradingview_[A-Za-z0-9_-]+\.txt',row['file']) or re.fullmatch(r'(?:individual_watchlists|primary_watchlists/\d{4}-\d{2}-\d{2})/[A-Za-z0-9_.-]+\.txt',row['file'])):
             raise ValueError('Unapproved website export name: '+row['file'])
-        payload['export_manifest'].append(pick(row,['file','role','theme_id','anchor','group','instrument_count','stock_count','section_count']))
+        payload['export_manifest'].append(pick(row,['file','role','theme_id','anchor','group','instrument_count','stock_count','section_count','eligibility_policy_version','stock_csv_schema']))
     return payload
 
 
@@ -148,7 +156,7 @@ def write_public_csvs(folder,payload):
     for theme in sorted(payload['themes'],key=lambda t:(t.get('global_rank') is None,t.get('global_rank') or float('inf'),t['id'])):
         themes.append({'rank':theme.get('global_rank'),'type':theme.get('level'),'theme_id':theme['id'],'name':theme['name'],'anchor':theme['anchor'],'change_1d_pct':percent(theme.get('daily_change')),'rank_change_daily':theme.get('rank_change_daily'),'rank_comparison_session':theme.get('rank_comparison_session'),'priority_change':theme.get('priority_change'),'vs_ema21':ema_relationship(theme.get('price_close'),theme.get('ema21')),'vs_ema50':ema_relationship(theme.get('price_close'),theme.get('ema50')),'research_priority':theme['research_priority'].get('label'),'theme_score':theme.get('theme_score'),'current':theme.get('current_strength_score'),'medium':theme.get('medium_strength_score'),**returns(theme),'price':theme.get('price_close'),'ema21':theme.get('ema21'),'ema50':theme.get('ema50'),'theme_breadth21_pct':theme.get('theme_breadth21_pct'),'theme_breadth50_pct':theme.get('theme_breadth50_pct'),'configured_stock_count':len(theme['selected']),'session_date':payload['session_date']})
         for stock in theme['selected']:
-            stocks.append({'theme_id':theme['id'],'theme':theme['name'],'anchor':theme['anchor'],**pick(stock,['ticker','company','exchange','market_cap_usd','metric_status','ema21','ema50','atr14_pct','adv30_usd','turnover_1d_usd','relative_volume_1d']),'excess_1m_pp':stock.get('excess21_pp'),'excess_3m_pp':stock.get('excess63_pp'),'price':stock.get('price_close'),'change_1d_pct':percent(stock.get('daily_change')),**returns(stock),'upcoming_earnings_date':stock.get('earnings_date'),'session_date':payload['session_date']})
+            stocks.append({'theme_id':theme['id'],'theme':theme['name'],'anchor':theme['anchor'],**pick(stock,['ticker','company','exchange','market_cap_usd','metric_status','ema21','ema50','atr14_pct','adv30_usd','turnover_1d_usd','average_volume_10d_shares','relative_volume_1d']),'daily_stock_eligibility':stock['daily_stock_eligibility']['status'],'daily_stock_policy_version':stock['daily_stock_eligibility']['policy_version'],'stock_csv_schema':payload['stock_csv_schema'],'excess_1m_pp':stock.get('excess21_pp'),'excess_3m_pp':stock.get('excess63_pp'),'price':stock.get('price_close'),'change_1d_pct':percent(stock.get('daily_change')),**returns(stock),'upcoming_earnings_date':stock.get('earnings_date'),'session_date':payload['session_date']})
     for name,rows in [('themes.csv',themes),('theme_stocks.csv',stocks)]:
         fields=list(dict.fromkeys(key for row in rows for key in row)) or ['theme_id','ticker','metric_status']
         with (folder/name).open('w',encoding='utf-8',newline='') as handle:
@@ -198,7 +206,7 @@ def validate_site(folder,*,allow_legacy=False):
         payload=json.loads(match.group(1))
         if payload.get('schema_version')!=manifest['schema'] or payload.get('session_date')!=manifest['session_date']:raise ValueError('Public payload/manifest session mismatch')
         forbidden={'manual_csv_audit','raw_inputs','inputs','source_matrix','fingerprint','maintenance','reviewed_date','reason_source_url','source_url','membership_rationale','ranking_configuration_fingerprint','candidate_metrics'}
-        if manifest['schema'] in {SCHEMA,'themescope-site-2'}:forbidden.update({'theme_state','theme_states','state_threshold','state_boundary','priority_matrix','priority_definitions','guard_failures'})
+        if manifest['schema'] in {SCHEMA,'themescope-site-2','themescope-site-3'}:forbidden.update({'theme_state','theme_states','state_threshold','state_boundary','priority_matrix','priority_definitions','guard_failures'})
         def check(value):
             if isinstance(value,dict):
                 if forbidden&set(value):raise ValueError('Private metadata found in public payload')
@@ -208,14 +216,28 @@ def validate_site(folder,*,allow_legacy=False):
         check(payload)
         for row in payload['export_manifest']:
             if row['file'] not in files:raise ValueError('A dynamic website download is missing')
-        if manifest['schema'] in {SCHEMA,'themescope-site-2'}:
+        if manifest['schema'] in {SCHEMA,'themescope-site-2','themescope-site-3'}:
             for field in ('combined_file','archive_file','relationships_file'):
                 name=payload['daily_primary_research'].get(field)
                 if name and name not in files:raise ValueError('A Daily Primary website download is missing')
         if manifest['schema']==SCHEMA:
             research=payload['daily_primary_research']
-            if set(research)-{'session_date','side','theme_ids','combined_file','platform_import_tested'}:
+            if set(research)-{'session_date','side','theme_ids','combined_file','platform_import_tested','eligibility_policy_version','stock_csv_schema'}:
                 raise ValueError('Internal Primary relationship/archive metadata found in website payload')
+            from .daily_stock_policy import load_policy,verified_eligibility,SCHEMA_MODES
+            policy=load_policy(Path(__file__).resolve().parents[2]);schema=payload.get('stock_csv_schema')
+            if payload.get('daily_stock_policy')!=policy or schema not in SCHEMA_MODES.values():raise ValueError('Website Daily Stock schema/policy is missing or incompatible')
+            for theme in payload['themes']:
+                for stock in theme['selected']:
+                    if stock.get('daily_stock_eligibility')!=verified_eligibility(stock,policy,schema):raise ValueError('Website daily eligibility disagrees with measured inputs')
+            if research.get('eligibility_policy_version')!=policy['version'] or research.get('stock_csv_schema')!=schema:raise ValueError('Primary eligibility policy version mismatch')
+            from .daily_lists import primary_research
+            proof=copy.deepcopy(payload)
+            export_limit=json.loads((Path(__file__).resolve().parents[2]/'config/watchlist_exports.json').read_text(encoding='utf-8'))['instrument_limit']
+            expected_primary,_=primary_research(proof,export_limit)
+            name=research.get('combined_file')
+            if name!=proof['daily_primary_research']['combined_file']:raise ValueError('Primary file presence differs from current qualification')
+            if name and (folder/name).read_text(encoding='utf-8').replace('\r\n','\n')!=expected_primary[name]:raise ValueError('Website Primary instruments differ from daily eligibility and weighted qualification')
             purposes=public_artifact_purposes(payload)
             if set(files)!=set(purposes):raise ValueError('Website includes unlinked/obsolete artifacts or is missing an approved asset')
             primary=[r['file'] for r in payload['export_manifest'] if r['role']=='daily_primary_research']
@@ -287,7 +309,7 @@ def _prepare_site(root,source,destination,session):
             for item in individuals:archive.write(stage/item['file'],arcname=Path(item['file']).name)
         write_public_csvs(stage,payload)
         stocks={r['tradingview_symbol']:r for t in payload['themes'] for r in t['selected']}
-        write_json(stage/'snapshot_summary.json',{'session_date':session,'generated_at_hkt':payload['dashboard_generated_at_hkt_display'],'source':'User-supplied TradingView CSV exports','configured_themes':len(payload['themes']),'configured_unique_stocks':len(stocks),'missing_daily_stocks':sum(s['metric_status']!='available' for s in stocks.values()),'rank_comparison_session':payload['local_history']['comparison_session']})
+        write_json(stage/'snapshot_summary.json',{'session_date':session,'generated_at_hkt':payload['dashboard_generated_at_hkt_display'],'source':'User-supplied TradingView CSV exports','configured_themes':len(payload['themes']),'configured_unique_stocks':len(stocks),'missing_daily_stocks':sum(s['metric_status']!='available' for s in stocks.values()),'rank_comparison_session':payload['local_history']['comparison_session'],'stock_csv_schema':payload['stock_csv_schema'],'daily_stock_policy_version':payload['daily_stock_policy']['version'],'daily_stock_eligibility_counts':{status:sum(s['daily_stock_eligibility']['status']==status for s in stocks.values()) for status in ('eligible','ineligible','unavailable','legacy_unverified')}})
         seal_site(stage,'snapshot',session);validate_site(stage);replace_site(stage,destination)
     return validate_site(destination)
 

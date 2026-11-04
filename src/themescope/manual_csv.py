@@ -15,6 +15,7 @@ from zoneinfo import ZoneInfo
 
 from .research_policy import (breadth_classification, breadth_consensus, market_direction, ema_classification, apply_policy, CURRENT_WEIGHT, MEDIUM_WEIGHT)
 from .ranking import average_ranks
+from .daily_stock_policy import load_policy,evaluate,SCHEMA_MODES
 
 
 ROLES = ("stock", "etf", "spy", "qqq", "iwm")
@@ -43,7 +44,9 @@ ALIASES = {
     "ema50": ("ema50 daily", "ema 50 daily", "exponential moving average (50) 1 day", "exponential moving average, 50, 1 day", "ema50"),
     "atr14_pct": ("atr%14 daily", "atr % 14 daily", "average true range % (14) 1 day", "average true range %, 14, 1 day", "atr%14"),
     "turnover_1d": ("price x volume turnover 1d", "price x volume 1 day", "price x volume", "volume x price", "price x volume (turnover), 1 day"),
+    "turnover_1d_currency": ("price x volume (turnover), 1 day - currency", "turnover_1d_currency"),
     "adv30": ("price x average volume 30 days", "price x average volume, 30 days", "price x average volume over 30 days", "price x average volume 30 day", "price x average volume, 30 days"),
+    "average_volume_10d_shares": ("average volume, 10 days", "average volume 10d", "average_volume_10d_shares"),
     "relative_volume_1d": ("relative volume 1d", "relative volume 1 day", "relative volume at time", "relative volume, 1 day"),
     "earnings_date": ("upcoming earnings date", "earnings date"),
     "currency": ("price - currency", "currency"),
@@ -56,14 +59,14 @@ ALIASES = {
 }
 
 REQUIRED = {
-    "stock": ("symbol", "description", "price", "change_1d_pct", "market_cap", "performance_1w_pct", "performance_1m_pct", "performance_3m_pct", "industry", "sector", "exchange", "ema21", "ema50", "atr14_pct", "turnover_1d", "adv30", "relative_volume_1d"),
+    "stock": ("symbol", "description", "price", "change_1d_pct", "market_cap", "performance_1w_pct", "performance_1m_pct", "performance_3m_pct", "industry", "sector", "exchange", "ema21", "ema50", "atr14_pct", "turnover_1d", "average_volume_10d_shares", "relative_volume_1d"),
     "etf": ("symbol", "description", "price", "change_1d_pct", "performance_1w_pct", "performance_1m_pct", "performance_3m_pct", "exchange", "ema21", "ema50", "atr14_pct", "turnover_1d", "relative_volume_1d"),
     "spy": ("symbol", "price", "ema21", "ema50"),
     "qqq": ("symbol", "price", "ema21", "ema50"),
     "iwm": ("symbol", "price", "ema21", "ema50"),
 }
 
-NUMERIC = {"price", "change_1d_pct", "market_cap", "performance_1w_pct", "performance_1m_pct", "performance_3m_pct", "ema21", "ema50", "atr14_pct", "turnover_1d", "adv30", "relative_volume_1d", "aum", "expense_ratio"}
+NUMERIC = {"price", "change_1d_pct", "market_cap", "performance_1w_pct", "performance_1m_pct", "performance_3m_pct", "ema21", "ema50", "atr14_pct", "turnover_1d", "adv30", "average_volume_10d_shares", "relative_volume_1d", "aum", "expense_ratio"}
 POSITIVE = {"price", "ema21", "ema50"}
 OPTIONAL = tuple(key for key in ALIASES if key not in {"symbol"})
 
@@ -88,9 +91,12 @@ def _number(value: Any, *, required: bool = False, positive: bool = False) -> fl
     return value
 
 
-def parse_csv(path: Path, role: str, *, required_symbols: set[str] | None = None) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+def parse_csv(path: Path, role: str, *, required_symbols: set[str] | None = None, stock_schema='current-v2') -> tuple[list[dict[str, Any]], dict[str, Any]]:
     if role not in ROLES:
         raise ValueError(f"Unknown CSV role {role!r}")
+    if stock_schema not in SCHEMA_MODES:raise CSVValidationError('Unknown Daily Stock CSV schema: '+str(stock_schema))
+    required=REQUIRED[role]
+    if role=='stock' and stock_schema=='legacy-v1':required=tuple(k for k in required if k!='average_volume_10d_shares')+('adv30',)
     source = path.expanduser().resolve()
     if not source.is_file():
         raise CSVValidationError(f"{role}: file does not exist: {source}")
@@ -112,9 +118,11 @@ def parse_csv(path: Path, role: str, *, required_symbols: set[str] | None = None
             for i in matches:
                 if i != chosen:
                     ignored_duplicates.append({"canonical": canonical, "header": headers[i], "index": i})
-    missing = [key for key in REQUIRED[role] if key not in mapping]
+    missing = [key for key in required if key not in mapping]
     if missing:
-        raise CSVValidationError(f"{role}: missing required columns: {', '.join(missing)}")
+        detail=''
+        if 'average_volume_10d_shares' in missing:detail='; accepted 10-day shares headers: '+', '.join(ALIASES['average_volume_10d_shares'])+'. Other volume/dollar-volume columns cannot substitute. For an explicit historical import only, use --stock-csv-schema legacy-v1 (eligibility remains unverified).'
+        raise CSVValidationError(f"{role}: missing required columns: {', '.join(missing)}"+detail)
     rows: list[dict[str, Any]] = []
     symbols: set[str] = set()
     numeric_warnings = []
@@ -134,35 +142,43 @@ def parse_csv(path: Path, role: str, *, required_symbols: set[str] | None = None
         for key in ALIASES:
             if key == "symbol" or key not in mapping:
                 continue
+            if key=='average_volume_10d_shares' and role!='stock':continue
             raw = cell(key)
             if key in NUMERIC:
                 try:
                     # Breadth universes deliberately retain rows with blank
                     # Price/EMA cells in the denominator; those rows are
                     # excluded from the shared valid set during calculation.
-                    required_numeric = key in REQUIRED[role] and role in {"stock", "etf"} and key != "market_cap"
+                    required_numeric = key in required and role in {"stock", "etf"} and key != "market_cap"
                     unused_etf = role == "etf" and required_symbols is not None and symbol not in required_symbols
                     row[key] = _number(raw, required=required_numeric and not unused_etf, positive=key in POSITIVE)
+                    if role=='stock' and key in {'turnover_1d','average_volume_10d_shares'}:
+                        if '%' in raw or key=='average_volume_10d_shares' and '$' in raw:raise CSVValidationError('expected '+('shares per trading session' if key=='average_volume_10d_shares' else 'USD')+', not a percent/different unit')
+                        if row[key] is not None and row[key]<0:raise CSVValidationError('liquidity value must be non-negative')
                     if required_numeric and unused_etf and not raw:
                         numeric_warnings.append({"symbol":symbol,"line":line_number,"field":key,"reason":"Blank on an unused ETF; excluded from the required anchor/benchmark universe, not filled."})
                     if key == "market_cap" and row[key] is not None and row[key] <= 0:
                         row[key] = None
                         numeric_warnings.append({"symbol":symbol,"line":line_number,"field":key,"reason":"Non-positive market capitalization; displayed as N/A."})
                 except CSVValidationError as exc:
+                    if role=='stock' and key=='adv30' and stock_schema=='current-v2':
+                        row[key]=None;numeric_warnings.append({'symbol':symbol,'line':line_number,'field':key,'reason':'Invalid optional legacy 30-day field ignored; not used by current eligibility.'});continue
                     if key == "market_cap":
                         row[key] = None
                         numeric_warnings.append({"symbol":symbol,"line":line_number,"field":key,"reason":"Invalid market capitalization; displayed as N/A."})
                         continue
                     raise CSVValidationError(f"{role}: line {line_number}, {key}: {exc}") from exc
             else:
-                if key in REQUIRED[role] and not raw:
+                if key in required and not raw:
                     raise CSVValidationError(f"{role}: blank required {key} on line {line_number}")
                 row[key] = raw or None
+                if role=='stock' and key=='turnover_1d_currency' and raw and raw.upper()!='USD':raise CSVValidationError(f'stock: line {line_number}, turnover_1d_currency: expected USD; no FX conversion is performed')
         rows.append(row)
     if not rows:
         raise CSVValidationError(f"{role}: CSV has no data rows")
     audit = {
         "role": role,
+        "stock_csv_schema": SCHEMA_MODES[stock_schema] if role=='stock' else None,
         "path": str(source),
         "filename": source.name,
         "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
@@ -269,13 +285,14 @@ def reject_reused_inputs(paths,previous,session):
             if reused:raise CSVValidationError('Inputs identical to the previous successful session: '+', '.join(reused)+'. Export fresh CSVs; old files were not reused.')
 
 
-def build_release(root: Path, paths: dict[str, Path], session: str) -> tuple[dict[str, Any], dict[str, Any]]:
+def build_release(root: Path, paths: dict[str, Path], session: str, *, stock_schema='current-v2') -> tuple[dict[str, Any], dict[str, Any]]:
     if set(paths) != set(ROLES):
         raise CSVValidationError("All five explicit roles are required: stock, etf, spy, qqq and iwm")
     require_completed_session(root,session)
     active = json.loads((root / "config/active_anchors.json").read_text(encoding="utf-8"))["anchors"]
     required_etfs = {symbol.upper().replace(".", "-") for symbol in [*active.values(), "SPY", "QQQ", "IWM"]}
-    parsed = {role: parse_csv(paths[role], role, required_symbols=required_etfs if role == "etf" else None) for role in ROLES}
+    policy=load_policy(root)
+    parsed = {role: parse_csv(paths[role], role, required_symbols=required_etfs if role == "etf" else None,stock_schema=stock_schema) for role in ROLES}
     rows = {role: value[0] for role, value in parsed.items()}
     audits = {role: value[1] for role, value in parsed.items()}
     registry = json.loads((root / "config/themes.json").read_text(encoding="utf-8"))
@@ -298,6 +315,9 @@ def build_release(root: Path, paths: dict[str, Path], session: str) -> tuple[dic
     current = percentile({theme_id: eligible.get(theme_id, {}).get("performance_1m_pct") for theme_id in active}, score_minimum)
     medium = percentile({theme_id: eligible.get(theme_id, {}).get("performance_3m_pct") for theme_id in active}, score_minimum)
     stock_rows = {row["symbol"]: row for row in rows["stock"]}
+    configured_symbols={m['ticker'] for theme_id in active for m in watch_by_id.get(theme_id,{}).get('members',[])}
+    parsed_eligibility={symbol:evaluate({'turnover_1d_usd':row.get('turnover_1d'),'average_volume_10d_shares':row.get('average_volume_10d_shares')},policy,schema=SCHEMA_MODES[stock_schema]) for symbol,row in stock_rows.items()}
+    daily_eligibility={symbol:parsed_eligibility[symbol] if symbol in parsed_eligibility else evaluate({},policy,schema=SCHEMA_MODES[stock_schema],present=False) for symbol in configured_symbols}
     themes: list[dict[str, Any]] = []
     for theme_id, anchor in active.items():
         source = etfs[anchor]
@@ -311,6 +331,9 @@ def build_release(root: Path, paths: dict[str, Path], session: str) -> tuple[dic
             fields = _row_fields(daily) if daily else {"price_close": None, "ema21": None, "ema50": None, "above_ema21": None, "above_ema50": None, "returns": {key: {"value": None, "status": "unavailable"} for key in ("5", "21", "63")}, "adv30_usd": None}
             selected.append({**member, **fields, "ticker": member["ticker"], "company": member.get("company") or member["ticker"], "theme_id": theme_id, "theme_name": config_themes.get(theme_id, {}).get("name", theme_id), "anchor": anchor, "membership_tag": member.get("relationship"), "membership_rationale": member.get("reason"), "membership_source": "Configured theme watchlist", "selection_slot": slot, "selection_queue": member.get("relationship"), "session_date": session, "sector": daily.get("sector") if daily else None, "industry": daily.get("industry") if daily else None, "market_cap_usd": daily.get("market_cap") if daily else None, "turnover_1d_usd": daily.get("turnover_1d") if daily else None, "relative_volume_1d": daily.get("relative_volume_1d") if daily else None, "atr14_pct": daily.get("atr14_pct") if daily else None, "earnings_date": daily.get("earnings_date") if daily else None, "metric_status": "available" if daily else "unavailable"})
         for stock in selected:
+            daily=stock_rows.get(stock['ticker'])
+            stock['average_volume_10d_shares']=daily.get('average_volume_10d_shares') if daily else None
+            stock['daily_stock_eligibility']=daily_eligibility[stock['ticker']]
             stock["excess_returns"] = {key: {"value": stock["returns"][key]["value"] - _returns(source)[key]["value"] if stock["returns"][key]["value"] is not None and _returns(source)[key]["value"] is not None else None} for key in ("5", "21", "63")}
         theme_breadth = breadth(breadth_inputs, minimum=int(manual_config["theme_breadth_minimum_valid"]), coverage_floor=float(manual_config["breadth_minimum_coverage"]))
         fields = _row_fields(source)
@@ -341,7 +364,13 @@ def build_release(root: Path, paths: dict[str, Path], session: str) -> tuple[dic
     configured_memberships = sum(len(record.get("members", [])) for record in watchlists["watchlists"])
     matched_memberships = configured_memberships - len(unmatched)
     audit = {
-        "schema_version": "manual-csv-1",
+        "schema_version": "manual-csv-2",
+        "stock_csv_schema":SCHEMA_MODES[stock_schema],
+        "daily_stock_policy":policy,
+        "daily_stock_eligibility_counts":{status:sum(r['status']==status for r in daily_eligibility.values()) for status in ('eligible','ineligible','legacy_unverified','unavailable')},
+        "daily_stock_eligibility_count_scope":"unique configured stocks",
+        "parsed_csv_eligibility_counts":{status:sum(r['status']==status for r in parsed_eligibility.values()) for status in ('eligible','ineligible','legacy_unverified','unavailable')},
+        "extra_csv_stock_count":len(set(stock_rows)-configured_symbols),
         "declared_us_session": session,
         "generation_timestamp_utc": generated,
         "inputs": audits,
@@ -372,7 +401,9 @@ def build_release(root: Path, paths: dict[str, Path], session: str) -> tuple[dic
     }
     generated_hkt = datetime.fromisoformat(generated).astimezone(ZoneInfo("Asia/Hong_Kong"))
     snapshot = {
-        "schema_version": "manual-csv-1",
+        "schema_version": "manual-csv-2",
+        "stock_csv_schema":SCHEMA_MODES[stock_schema],
+        "daily_stock_policy":policy,
         "methodology_version": "manual-csv-1",
         "ranking_configuration": {"minimum_coverage": manual_config["theme_score_minimum_coverage"]},
         "run_kind": "manual_csv",
@@ -396,13 +427,13 @@ def build_release(root: Path, paths: dict[str, Path], session: str) -> tuple[dic
     }
     snapshot['display_methodology']={'maintenance_thresholds':{key:registry['settings']['watchlist_stock_filters'][key] for key in ('raw_close_floor_usd','market_cap_floor_usd','market_cap_required_when_available','adv30_floor_usd','minimum_history_sessions')},
         'watchlist_capacity':int(manual_config['watchlist_capacity']),'breadth_minimum_coverage':float(manual_config['breadth_minimum_coverage']),'theme_breadth_minimum_valid':int(manual_config['theme_breadth_minimum_valid']),
-        'liquidity_definition':'TradingView Price × average volume, 30 days is a liquidity proxy, not the exact mean of daily Price × Volume.',
-        'membership_rules':['Material business relevance and US-tradeable identity. ETF holdings membership is not mandatory.','Direct exposure preferred; meaningful multi-theme membership allowed.','Up to the configured capacity, without unrelated filler. Explicit maintenance, not daily performance-driven replacement.','Missing daily rows do not delete members. Existing members were not freshly reselected or revalidated by this presentation update.'],
-        'maintenance_missing_data':'The existing missing-market-cap treatment is retained: missing optional facts remain review notes. No new single-day turnover gate.'}
+        'liquidity_definition':'Historical membership maintenance used TradingView Price × average volume, 30 days as a proxy, not the exact mean of daily Price × Volume. It is optional and unused by current Daily Stock liquidity eligibility.',
+        'membership_rules':['Material business relevance and US-tradeable identity. ETF holdings membership is not mandatory.','Direct exposure preferred; meaningful multi-theme membership allowed.','Up to the configured capacity, without unrelated filler. Explicit maintenance, not daily performance-driven replacement.','Missing daily rows do not delete members. Daily Stock eligibility does not reselect or retrospectively re-review configured membership.'],
+        'maintenance_missing_data':'Historical membership missing-fact treatment is unchanged; missing optional facts remain review notes. Current Daily Stock eligibility is evaluated separately and does not rewrite historical reviews.'}
     apply_policy(snapshot)
     from .tradingview import attach, load_mapping
     attach(snapshot, load_mapping(root))
     from .daily_lists import build as build_daily_lists
     build_daily_lists(snapshot, json.loads((root / "config/watchlist_exports.json").read_text()))
-    raw = {"source": "tradingview-csv", "input_audit": audits, "watchlists": watchlists, "network_requests": 0}
+    raw = {"source": "tradingview-csv", "input_audit": audits, "watchlists": watchlists, "network_requests": 0,"stock_csv_schema":SCHEMA_MODES[stock_schema],"daily_stock_policy_version":policy['version']}
     return snapshot, raw
