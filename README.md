@@ -1,4 +1,4 @@
-# ThemeScope: local CSV refresh and optional Cloudflare Pages
+# ThemeScope (WIP): local CSV refresh and optional Cloudflare Pages
 
 ThemeScope is an offline end-of-day research dashboard. **Use branch `download`, not the older `main`.** Daily use needs Python and five TradingView CSVs. It needs no market-data API, credentials, Node, database, backend or scheduler. The Cloudflare deployment branch is `pages`; publishing is a separate, deliberate operation.
 
