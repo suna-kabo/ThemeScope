@@ -87,6 +87,14 @@ class Store:
                        (session, methodology, config_hash, 'incomplete', type(error).__name__))
             raise
 
+    def theme_at(self, theme_id, session, methodology):
+        """Exact session only; no stale or legacy fallback for transition history."""
+        row = self.connection.execute(
+            "SELECT t.payload FROM theme_snapshot t JOIN refresh_run r ON r.id=t.run_id "
+            "WHERE t.theme_id=? AND r.session=? AND r.methodology=? AND r.status='success' "
+            "ORDER BY r.id DESC LIMIT 1", (theme_id, session, methodology)).fetchone()
+        return json.loads(row[0]) if row else None
+
     def active(self):
         row = self.connection.execute('SELECT payload FROM publication WHERE id=1').fetchone()
         return json.loads(row[0]) if row else None

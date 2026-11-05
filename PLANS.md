@@ -7,7 +7,7 @@ Base main: `cf4fdb1e4784ff6fbc7183d5e709ffae044ec2fe` (includes PR #7).
 Phase 0 commit: `8764575` — baseline and workflow/spec documentation.
 Phase 1: domain/configuration work validated for **Gate A**.
 Checkpoint: `inspection/vnext-a-domain`, pointing at the Phase 1 commit.
-Current work: **Phase 2**, followed by Phases 3–4 and Gate B (explicitly approved).
+Phase 2 complete: `61fe259`. Phase 3 validated; next Phase 4, then Gate B.
 Do not restart the baseline or reimport/reclassify the proposed launch ledger.
 
 Gate A at `359572c` was independently checked and approved. Do not redo it.
@@ -52,9 +52,8 @@ new membership first earns the next US session's return. Never infer L from the
 November 5 export filename or splice legacy ETF returns into a vNext series.
 
 The methodology is amended. Phase 1 tests prove old/new membership assignment
-across a Friday approval and Monday effective session. **Phase 3 still must add
-the numerical synthetic-index rebalance-boundary test** showing old holdings earn
-t and new holdings earn t+1. Bootstrap initializes indicators only and must never
+across a Friday approval and Monday effective session. **Phase 3 now includes the numerical synthetic-index rebalance-boundary test**:
+100 -> 110 on approval Friday (old holdings +10%), then 132 Monday (new +20%). Bootstrap initializes indicators only and must never
 produce apparent live signal history.
 
 ## Production blockers (not Gate A implementation blockers)
@@ -131,3 +130,24 @@ Validation: full unittest suite 233 cases, one Windows-only skip; JavaScript
 checks and Python compilation pass. Exact boundaries, missing endpoints, split/
 spin-off/dividend fixtures, independent memberships, rollback and locks tested.
 Next: Phase 3 synthetic index and compatible history. Production blockers unchanged.
+
+## Phase 3 — index and compatible history
+
+Implemented chain-linked price index with equal weight only at initialization,
+effective membership changes or explicitly supplied formal rebalances. Holdings
+drift between rebalances. Missing held/new constituent prices fail closed; the
+80% cross-sectional threshold never silently reweights the synthetic portfolio.
+Related and Watch-only cannot contribute; pending live membership cannot initialize.
+
+SMA-seeded EMA21/50, strict trend boundaries and explicit bootstrap provenance are
+implemented. Bootstrap is scaled to the live initialization level for indicators
+only, never returned as live signals. History requires matching methodology,
+series, theme and history schema plus adjacent completed sessions; migration,
+bootstrap, gaps and missing prior data yield unavailable transitions.
+SQLite schema remains 1; index rows and exact-session theme history round-trip.
+
+Validation: full suite 240 tests, one Windows-only skip; compilation and JS checks
+pass. Numerical t/t+1 fixture, natural drift versus daily equal weight, chain-link
+continuity, split/spin-off price continuity, missing data, EMA boundaries and
+bootstrap/legacy/gap incompatibility pass. No launch date selected or activated.
+Next: Phase 4 eligibility, Primary relationships and deterministic exports.

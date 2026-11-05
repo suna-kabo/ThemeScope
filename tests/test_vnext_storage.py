@@ -68,3 +68,22 @@ class StorageTests(unittest.TestCase):
             with self.store.refresh('2024-01-03','manual-csv-2','fixture'):pass
         self.store.connection.execute('PRAGMA user_version=999')
         with self.assertRaises(ValueError):Store(self.path)
+
+    def test_index_and_history_roundtrip_exact_session_namespace(self):
+        from dataclasses import asdict
+        from src.themescope.themes.history import ThemeHistory, transitions
+        from src.themescope.themes.index import build_index
+        from test_vnext_index import config, prices
+        from test_vnext_calculations import SESSIONS
+        points=build_index(config(),'test',prices(),SESSIONS,SESSIONS[0],SESSIONS[2])
+        history=ThemeHistory(SESSIONS[2],'test','themescope-vnext-1','fixture','Mixed','Watch')
+        with self.store.refresh(SESSIONS[2],'themescope-vnext-1','fixture') as run:
+            run.bars([bar('A',SESSIONS[2])])
+            for point in points:run.index('test',point.session,point)
+            run.theme('test',{'history':asdict(history)})
+            run.publish({'fixture':True},required_symbols=['A'])
+        read=self.store.theme_at('test',SESSIONS[2],'themescope-vnext-1')
+        self.assertEqual(ThemeHistory(**read['history']),history)
+        self.assertIsNone(self.store.theme_at('test',SESSIONS[3],'themescope-vnext-1'))
+        self.assertIsNone(self.store.theme_at('test',SESSIONS[2],'manual-csv-2'))
+        self.assertEqual(self.store.connection.execute('SELECT count(*) FROM theme_index').fetchone()[0],3)
