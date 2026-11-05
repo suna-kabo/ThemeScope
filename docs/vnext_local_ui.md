@@ -41,9 +41,12 @@ python scripts/bootstrap_dev.py
 
 ## Manual roster workflow
 
-Initial SPY/QQQ rosters are deliberately empty: no approved constituents were
-supplied. Provide a periodic manual CSV with a ticker header, uppercase symbols
-and no duplicates. Import each benchmark separately, using its actual approved
+User-approved TradingView snapshots are now recorded effective 2026-11-05:
+SPY has 501 configured symbols and QQQ has 101. Earlier sessions have no backfilled
+roster. Source hashes and import audit are in config/market_universes. These are
+constituent identities only; Alpaca SIP still supplies all runtime price/volume data.
+For later manual updates, provide a CSV with a ticker header, uppercase symbols
+and no duplicates (or explicitly choose --symbol-column Symbol for TradingView). Import each benchmark separately, using its actual approved
 roster effective date and a source description:
 
 ```powershell
@@ -130,7 +133,7 @@ actual large-universe cold/warm SIP timings still require local validation.
 
 All 729 launch effective dates remain pending; no launch session has been chosen.
 335 evidence refreshes, four inherited-evidence findings and documented industry
-rules remain unresolved. Approved SPY/QQQ roster inputs are still required. Native
+rules remain unresolved. SPY/QQQ inputs are supplied effective 2026-11-05; earlier sessions still lack them. Native
 Windows and full-universe performance validation remain pending. No bootstrap
 observations are presented as live signals, no evidence is auto-approved, no
 Market Matrix formula changed, and no main merge, legacy retirement or deployment
@@ -195,3 +198,36 @@ The original inspection/vnext-d-ui branch stays at 02e7d63. Phase 9 has not star
 Windows-status hardening validation: 285 full-suite cases, 283 passed and two
 Windows-only skips. Focused local: 14 passed. Focused market/lock: four passed
 and one native-Windows skip. Compilation passed. Native Windows retest pending.
+
+## Approved TradingView roster import — 2026-11-05
+
+SPY_2026-11-05.csv supplied 501 rows/unique symbols; QQQ_2026-11-05.csv supplied
+101 rows/unique symbols. Only Symbol was read for configuration. No duplicates,
+blank or invalid tickers were found. BF.B and BRK.B are preserved exactly in SPY.
+The two effective rosters remain separate; IWM has none. All other scanner columns,
+including price, EMA, performance, turnover, earnings and market cap, were ignored.
+Full source CSV payloads are not committed. Audit metadata records source filenames,
+SHA256 hashes, dates/counts and a hash of each exact ordered ticker list.
+
+All tickers pass the existing Alpaca adapter's static symbol grammar. This does
+not prove live retrieval. Codex has no Alpaca credentials for this import. To check
+all configured symbols locally, retain APCA_API_KEY_ID/APCA_API_SECRET_KEY and run:
+
+```powershell
+.\.venv-vnext\Scripts\python.exe scripts/check_roster_symbols.py --roster-date 2026-11-05
+```
+
+The optional --session YYYY-MM-DD chooses a safely completed test session. By
+default the check uses the latest safely completed session, which can precede the
+snapshot date: this is a compatibility diagnostic, not a backdated roster import
+or historical breadth calculation. Output shows both dates. Requests use the
+existing historical SIP adapter (1Day, split/spin-off plus raw), in batches up to
+100 symbols, with no cache writes, roster changes, IEX fallback or trading calls.
+Shared symbols may be fetched once but retain their independent roster memberships.
+Missing/unusable symbols are reported per benchmark and exit nonzero; request
+errors report the affected requested symbols instead of silently dropping them.
+No actual retrieval failure is currently established; live compatibility is pending.
+
+Staleness remains advisory; Market Matrix logic and all frozen cells are unchanged.
+The roster effective date does not set the vNext theme launch session. Theme launch
+and evidence blockers remain unchanged, and Phase 9 has not started.

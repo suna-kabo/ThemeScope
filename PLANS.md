@@ -11,7 +11,7 @@ Phase 2 complete: `61fe259`. Phase 3 complete: `1c10c5c`.
 Phase 4 validated for Gate B; checkpoint branch `inspection/vnext-b-engine`.
 Gate C 7d3bf2e is approved; the real local SIP PoC passed (user-reported).
 Phase 6: a8958f3. Phase 7: 9080337. Phase 8 validated for Gate D.
-Gate D hardening e3450ff accepted. Current scope: one Windows-status hardening fix only.
+Gate D is closed; c60ae07 accepted. Current scope: approved SPY/QQQ roster import only.
 Preserve inspection/vnext-d-ui at 02e7d63; Phase 9 must not start. SQLite schema remains 2.
 Do not restart the baseline or reimport/reclassify the proposed launch ledger.
 
@@ -321,3 +321,30 @@ Native Windows retest remains pending; cloud tests simulate the reported failure
 Windows-status hardening validation: 285 full-suite cases, 283 passed and two
 Windows-only skips. Focused local: 14 passed. Focused market/lock: four passed
 and one native-Windows skip. Compilation passed. Native Windows retest pending.
+
+## User-approved constituent import after c60ae07 — Phase 9 not authorized
+
+Imported only Symbol from user-supplied TradingView SPY_2026-11-05.csv (501/501)
+and QQQ_2026-11-05.csv (101/101), each effective/snapshot date 2026-11-05 and with
+the exact requested source description. No duplicates/blanks/invalids. BF.B/BRK.B
+remain dotted. No constituents were added, removed or normalized. The full scanner
+payloads stay outside Git; minimal audit hashes/counts accompany the roster ledger.
+
+Both effective rosters resolve on 2026-11-05; neither is backdated. SPY/QQQ remain
+separate, IWM has no roster, stale warnings and Market Matrix code unchanged.
+All symbols pass the existing adapter grammar, but credentials are unavailable
+in Codex. Local compatibility command: scripts/check_roster_symbols.py
+--roster-date 2026-11-05. It uses SIP through the existing adapter and reports exact
+missing/unusable symbols per benchmark; no automatic substitutions/drops or cache
+writes. Real live retrieval remains pending; no real incompatibility is asserted.
+
+Import CLI now supports explicit --symbol-column Symbol while keeping ticker as
+the default. Tests validate exact roster hashes/counts, source/effectivity/dotted
+symbols, strict invalid/duplicate rejection, ignored scanner columns, and local
+diagnostic success/missing-symbol/no-credential paths with mocked market data.
+All 729 theme dates and evidence remain unchanged; roster date is not a theme
+launch approval. No Phase 9, main changes, inspection-ref moves or deployment.
+
+Roster import validation: 288 full-suite cases, 286 passed/two Windows-only skips.
+Three focused import/compatibility tests pass; market/lock four pass/one skip;
+two frozen migration cases pass (all 64 Market Matrix cells). Compilation passes.
