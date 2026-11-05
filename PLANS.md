@@ -9,7 +9,7 @@ Phase 1: domain/configuration work validated for **Gate A**.
 Checkpoint: `inspection/vnext-a-domain`, pointing at the Phase 1 commit.
 Phase 2 complete: `61fe259`. Phase 3 complete: `1c10c5c`.
 Phase 4 validated for Gate B; checkpoint branch `inspection/vnext-b-engine`.
-Next unfinished phase: Phase 5 provider abstraction (not authorized in this gate).
+Phase 5 implemented for Gate C; SQLite schema 2. Next: Phase 6, only after Gate C review.
 Do not restart the baseline or reimport/reclassify the proposed launch ledger.
 
 Gate A at `359572c` was independently checked and approved. Do not redo it.
@@ -186,3 +186,25 @@ SQLite schema remains 1; snapshot schema is themescope-vnext-snapshot-1 and live
 history is themescope-vnext-history-1. No runtime database or source market bars
 are included. Stop at Gate B; no provider/live SIP, launch choice, evidence
 clearance, legacy retirement, main merge or deployment was performed.
+
+## Phase 5 — Gate C provider and incremental cache
+
+Gate B 0c0cff5 is independently approved. Added formula-independent protocol,
+FixtureProvider and historical-only Alpaca SIP adapter with paired adjusted/raw
+requests, pagination, explicit permanent errors and bounded transient retries.
+All testing uses injected transports/fixtures; no real account credentials used.
+
+SQLite explicitly migrates 1 -> 2: immutable observation versions, current cache
+pointers and run input references replace duplicated run-scoped payloads. Cold
+seed, grouped warm missing/repair ranges, anchor-driven corporate-action reseed,
+explicit full repair and atomic cache/publication rollback are tested. Old runs
+remain reproducible. Missing fresh target bars cannot be replaced by stale cache.
+Details and exact local commands: docs/vnext_provider.md.
+
+Real SIP access and throughput remain local validation items. Production blockers
+are unchanged: pending launch/evidence, manual Phase 6 rosters, Windows validation.
+No launch choice, evidence resolution, IEX fallback, Market Matrix modification,
+legacy retirement, main merge or deployment. Stop at inspection/vnext-c-provider.
+
+Phase 5 validation: 263 tests run, 262 pass, one Windows-only skip. Eleven focused
+provider/cache/PoC tests pass; compilation and JS syntax/helper checks pass.

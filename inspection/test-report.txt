@@ -1,54 +1,30 @@
-ThemeScope vNext — Gate B engine checkpoint
-Data: configuration metadata and deterministic synthetic examples only.
-Gate A approved: 359572c
-Phase 2: 61fe259 — SQLite storage and pure calculations.
-Phase 3: 1c10c5c — synthetic index and compatible live history.
-Phase 4: this Gate B checkpoint — eligibility, Primary, multi-theme exports.
+ThemeScope vNext — Gate C provider checkpoint
+Approved Gate B: 0c0cff5. Phase 5 only; Phase 6 has not started.
+Full suite: 263 tests run; 262 passed; one Windows-only skip.
+Focused provider/cache/PoC suite: 11 passed. All cloud tests use fixtures/mocks.
+Python compilation and JavaScript syntax/helper checks passed.
 
-Full suite after each phase:
-Phase 2: 233 tests; 232 passed; 1 Windows-only skip.
-Phase 3: 240 tests; 239 passed; 1 Windows-only skip.
-Phase 4: 252 tests; 251 passed; 1 Windows-only skip.
-Final focused vNext suite: 45 tests passed.
-Python compilation, JavaScript syntax and dashboard helper tests passed.
-Gate B does not claim native Windows execution or live SIP validation.
+Validated:
+Fixed historical Market Data host/path; explicit SIP, 1Day, split/spin-off adjustment.
+Separate raw SIP request preserves real close/volume for liquidity.
+Multi-symbol pagination; exact raw/adjusted observation alignment.
+Permanent 401/403/422 fail immediately with safe diagnostics.
+429/503 retries and Retry-After; exhausted rate/network failures fail safely.
+Malformed, nonfinite, duplicate, unexpected-symbol and repeated-token rejection.
+Safely delayed session/request end, weekend and half-day boundaries.
+Local PoC success/failure paths mocked; absent credentials fail nonzero.
 
-Calculation validation:
-Exact 21/63-session endpoints; gaps do not compress session calendars.
-Odd/even medians, average-rank ties, single-theme unavailable percentile.
-Exactly five valid members; four LOO peers; exact 80% and below-boundary coverage.
-Per-horizon missingness; zero/negative/positive W; duplicate rejection.
-Independent Fraction oracle for synthetic AAA/Alpha weighted LOO result.
-Split and spin-off adjusted prices; dividend price drop remains a price drop.
-Decimal output independent of caller precision, rounding and traps.
-Breadth is context only; daily liquidity never changes benchmark membership.
-Theme Priority matches 360 existing-policy combinations; Market Matrix unchanged.
+Schema 1 -> 2 migration retains active publication and all run input references.
+Observation payloads deduplicate; repairs create immutable new versions.
+Cold seed then warm missing/repair fetches plus historical adjustment anchor.
+Two-symbol fixture: cold six observations, warm four transferred, eight stored total.
+Repeat refresh adds no duplicate payloads. Anchor revision reseeds affected history.
+Missing fresh target data fails; stale cache cannot mask incomplete provider response.
+Atomic cache/publication rollback and older-replay protection pass.
 
-Synthetic index numerical boundary:
-Thursday close starts 100. Old holdings earn +10% on approval Friday -> 110.
-Rebalance Friday close. New holdings earn +20% Monday -> 132.
-New holdings' Friday +100% and old holdings' Monday -50% are excluded.
-Drift test: natural holdings reach 160; explicit daily rebalance would reach 144.
-Membership replacement and split/spin-off continuity produce no false jump.
-Bootstrap only seeds indicators; no bootstrap/legacy/nonadjacent transitions.
-
-Primary/export validation:
-Close >=5; AvgVol10 strictly >500000; turnover >=10000000; exact boundaries.
-Latest ten completed regular-session volume bars, including target session.
-AAA and BBB independently qualify in Alpha and Beta; each appears once combined.
-Core before Enabler, directional W, lexical theme tie-break, both long and short.
-Input-order independence, invalid/unverified identifiers rejected, no 20-stock cap.
-
-Persistence:
-SQLite schema 1; vNext snapshot/history schemas 1 in separate namespaces.
-Exact-session history, same-day replay, older replay protection, single-writer lock.
-Incomplete data, duplicate writes and injected failures roll back publication.
-Failure after pointer update also preserves the prior successful snapshot.
-
-Safety/blockers:
-All 729 proposed launch effective dates remain pending; no launch session chosen.
-335 evidence refreshes, four inherited findings and documented industry rules pending.
-Full review universe remains 1525 symbols; launch ledger 729 relationships/671 tickers.
-No live Alpaca credentials, IEX fallback, main changes, deployment or legacy retirement.
-Safe inspection contains no runtime database, credentials or provider-derived bars.
-Next unfinished phase: Phase 5 provider abstraction. Stop here at Gate B.
+Gate B formula and index regression suite remains passing, including 100 -> 110 -> 132.
+Production configuration/evidence/launch dates remain untouched.
+Real SIP access, volume/pagination on the user's account and real latency remain pending.
+No real Alpaca credentials, IEX fallback, Market Matrix edits, main changes or deployment.
+See provider-report.md for cache limitations, local commands and environment variable names.
+Engine report retains the earlier Gate B synthetic formula examples; runtime schema is now 2.

@@ -83,8 +83,8 @@ class InspectionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'Raw provider'):build(self.root,engine_report=report)
         from scripts.vnext_fixture_report import report as fixture_report
         report.write_text(json.dumps(fixture_report()))
-        build(self.root,engine_report=report)
-        self.assertEqual(len(list((self.root/'inspection').iterdir())),6)
+        build(self.root,engine_report=report,provider_report=ROOT/'docs/vnext_provider.md')
+        self.assertEqual(len(list((self.root/'inspection').iterdir())),7)
         preview=(self.root/'inspection/index.html').read_text()
         self.assertIn('NASDAQ:AAA',preview)
         self.assertIn('also qualifies in:',preview)

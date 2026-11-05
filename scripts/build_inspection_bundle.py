@@ -41,7 +41,7 @@ def safe_file(path):
     return text
 
 
-def build(root=ROOT, *, test_report=None, engine_report=None):
+def build(root=ROOT, *, test_report=None, engine_report=None, provider_report=None):
     root = Path(root)
     config = load_configuration(root)
     report = {'methodology': config.methodology['version'],
@@ -76,6 +76,9 @@ def build(root=ROOT, *, test_report=None, engine_report=None):
                 engine_preview += '</table><h4>Combined TXT</h4><pre>'+html.escape(scenario['exports']['combined'])+'</pre>'
                 for ticker, assignment in scenario['exports']['assignments'].items():
                     engine_preview += '<p>'+html.escape(ticker+' → '+assignment['assigned_section']+'; also qualifies in: '+', '.join(assignment['also_qualifies_in']))+'</p>'
+        if provider_report:
+            (stage / 'provider-report.md').write_text(safe_file(Path(provider_report)), encoding='utf-8')
+            engine_preview += '<h2>Gate C provider</h2><p><a href="provider-report.md">Provider, cache migration and local SIP command</a></p>'
         (stage / 'index.html').write_text('<!doctype html><meta charset="utf-8"><title>ThemeScope vNext inspection</title>'
             '<style>body{font:16px system-ui;max-width:1000px;margin:3rem auto;padding:0 1rem}table{border-collapse:collapse}td,th{padding:.5rem;border:1px solid #aaa;text-align:left}pre{white-space:pre-wrap;background:#eee;padding:1rem}a{color:#1463b8}</style><h1>ThemeScope vNext — provisional configuration</h1><p>No live market data. Production cutover is blocked.</p>'
             '<pre>'+html.escape(json.dumps(report, indent=2))+'</pre>'
@@ -101,5 +104,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--test-report', type=Path)
     parser.add_argument('--engine-report', type=Path)
+    parser.add_argument('--provider-report', type=Path)
     args = parser.parse_args()
-    print(json.dumps(build(test_report=args.test_report, engine_report=args.engine_report), indent=2))
+    print(json.dumps(build(test_report=args.test_report, engine_report=args.engine_report, provider_report=args.provider_report), indent=2))

@@ -7,7 +7,7 @@ import sqlite3
 from ..domain import iso_date
 from ..themes.calculations import usable
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 
 def canonical(value):
@@ -28,7 +28,7 @@ class Store:
         self.connection.row_factory = sqlite3.Row
         self.connection.execute('PRAGMA foreign_keys=ON')
         version = self.connection.execute('PRAGMA user_version').fetchone()[0]
-        if version not in (0, SCHEMA_VERSION):
+        if version not in (0, 1, SCHEMA_VERSION):
             self.connection.close()
             raise ValueError('Unsupported vNext SQLite schema')
         if version == 0:
@@ -61,6 +61,10 @@ class Store:
             PRAGMA user_version=1;
             COMMIT;
             ''')
+
+        if self.connection.execute('PRAGMA user_version').fetchone()[0] == 1:
+            from .observations import migrate
+            migrate(self.connection, canonical)
 
     def close(self):
         self.connection.close()
@@ -106,9 +110,11 @@ class Refresh:
         self.target_symbols = set()
         self.published = False
 
-    def bars(self, bars):
+    def bars(self, bars, identity="synthetic:gate-b"):
+        from .observations import put
         for bar in bars:
-            self.db.execute('INSERT INTO daily_bars VALUES(?,?,?,?)', (self.run, bar.ticker, bar.session, canonical(bar)))
+            oid=put(self.db,identity,bar.ticker,bar.session,canonical(bar))
+            self.db.execute('INSERT INTO daily_bars VALUES(?,?,?,?)', (self.run, bar.ticker, bar.session, oid))
             if bar.session == self.session and usable(bar):
                 self.target_symbols.add(bar.ticker)
 
