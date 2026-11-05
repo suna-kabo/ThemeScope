@@ -7,11 +7,11 @@ Base main: `cf4fdb1e4784ff6fbc7183d5e709ffae044ec2fe` (includes PR #7).
 Phase 0 commit: `8764575` — baseline and workflow/spec documentation.
 Phase 1: domain/configuration work validated for **Gate A**.
 Checkpoint: `inspection/vnext-a-domain`, pointing at the Phase 1 commit.
-Next unfinished phase: **Phase 2, SQLite and pure calculation functions**.
+Current work: **Phase 2**, followed by Phases 3–4 and Gate B (explicitly approved).
 Do not restart the baseline or reimport/reclassify the proposed launch ledger.
 
-The user's latest continuation request ends at the next meaningful gate. Gate A
-is the current checkpoint; no Phase 2+ runtime has been implemented yet.
+Gate A at `359572c` was independently checked and approved. Do not redo it.
+The user authorizes Phases 2–4 with separate tested commits, then stop at Gate B.
 
 ## Completed work
 
@@ -90,7 +90,7 @@ were not executed here. Local HTTP tests require loopback socket access.
 Legacy identifiers remain `manual-csv-2`, `manual-csv-1`,
 `themescope-ranking-history-1`, `tradingview-daily-price-ema21-ema50-1`,
 `ema-score-priority-2`. New config has schema 1 / `themescope-vnext-1` methodology;
-the runtime SQLite schema is not implemented yet.
+the new isolated runtime SQLite schema is version 1.
 
 Only source and synthetic inspection artifacts may be pushed to the implementation
 and prescribed checkpoint branches. No main merge, deployment, trading endpoint,
@@ -113,3 +113,21 @@ live Alpaca credentials, IEX fallback or runtime DB is part of this gate.
    requirements permit cutover; retain legacy history readers.
 7. Phase 10: independent review passes, E2E/failure/replay/corporate-action/provider
    tests, secret/data scan; **Gate E**, then PR to main. No self-merge/deployment.
+
+## Phase 2 — storage and pure calculations
+
+Implemented endpoint-based 21/63-session adjusted returns; per-horizon member
+medians and coverage; tied percentiles; 60/40 scores; LOO W; context-only breadth.
+Decimal arithmetic uses a fixed local 34-digit context. Raw close/volume remain
+separate from split/spin-off adjusted prices. Missing dates never compress sessions.
+
+SQLite schema 1 adds the eleven suggested tables plus schema_version and a
+publication pointer. All results are run-scoped; configuration stays in Git.
+BEGIN IMMEDIATE serializes writers; errors roll back data and record an incomplete
+run without replacing the successful publication. Older replay cannot supersede
+a newer active session. Runtime databases exist only in temporary test folders.
+
+Validation: full unittest suite 233 cases, one Windows-only skip; JavaScript
+checks and Python compilation pass. Exact boundaries, missing endpoints, split/
+spin-off/dividend fixtures, independent memberships, rollback and locks tested.
+Next: Phase 3 synthetic index and compatible history. Production blockers unchanged.
