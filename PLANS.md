@@ -208,3 +208,22 @@ legacy retirement, main merge or deployment. Stop at inspection/vnext-c-provider
 
 Phase 5 validation: 263 tests run, 262 pass, one Windows-only skip. Eleven focused
 provider/cache/PoC tests pass; compilation and JS syntax/helper checks pass.
+
+## Phase 6 — Market layer and approved Gate C
+
+User approved Gate C 7d3bf2e and reported the real SIP PoC passed for 2026-11-04:
+three symbols, positive raw volume, six pages, SIP 1Day split/spin-off plus raw,
+no IEX fallback. No need to repeat that check in cloud.
+
+Separate effective-dated SPY/QQQ roster ledger and manual CSV import command added.
+No constituents invented: initial ledger is empty pending approved manual inputs.
+90-calendar-day roster age warning is advisory only. Same valid constituent set
+serves both EMA breadth values, >=80% coverage uses the full configured denominator.
+IWM has price context only. Existing market_rule/breadth_consensus functions and
+all 64 frozen Market Matrix cases remain unchanged.
+
+Added an OS-held cross-process refresh lock (also used for manual roster updates).
+Phase 8 must hold this across preparation, calculation and atomic publication.
+Phase 6 validation: 266 full tests, 265 passed/one Windows skip; three focused market/
+lock tests passed. Next Phase 7 optional earnings; then Phase 8/Gate D. All launch
+and evidence blockers remain; legacy runtime and main untouched.
