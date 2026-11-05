@@ -51,7 +51,7 @@ def calculate_session(configuration, bars, sessions, target, market_direction, i
         label=priority(market_direction,score,observation['trend'],transition,configuration.methodology) if theme.status=='active' else 'Watch'
         current=replace(current,priority=label)
         transition=transitions(previous.get(theme.theme_id),current,sessions)
-        themes.append({'theme_id':theme.theme_id,'status':theme.status,'score':score,
+        themes.append({'theme_id':theme.theme_id,'name':theme.name,'family':theme.family,'status':theme.status,'score':score,
                        'returns':metrics.get(theme.theme_id),'index':observation,'priority':label,
                        'transition':transition,'history':asdict(current),
                        'breadth':tuple(breadth(names,closes,{s:stock_emas[s][i] for s in names},configuration.methodology)

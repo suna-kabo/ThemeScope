@@ -41,7 +41,7 @@ def safe_file(path):
     return text
 
 
-def build(root=ROOT, *, test_report=None, engine_report=None, provider_report=None):
+def build(root=ROOT, *, test_report=None, engine_report=None, provider_report=None, ui_snapshot=None):
     root = Path(root)
     config = load_configuration(root)
     report = {'methodology': config.methodology['version'],
@@ -79,24 +79,40 @@ def build(root=ROOT, *, test_report=None, engine_report=None, provider_report=No
         if provider_report:
             (stage / 'provider-report.md').write_text(safe_file(Path(provider_report)), encoding='utf-8')
             engine_preview += '<h2>Gate C provider</h2><p><a href="provider-report.md">Provider, cache migration and local SIP command</a></p>'
+        if ui_snapshot:
+            snapshot_text = safe_file(Path(ui_snapshot))
+            snapshot = json.loads(snapshot_text)
+            if snapshot.get('synthetic_fixture') is not True:
+                raise ValueError('UI inspection must be synthetic')
+            (stage/'ui-report.md').write_text(safe_file(root/'docs/vnext_local_ui.md'), encoding='utf-8')
+            ui = stage / 'ui'
+            ui.mkdir()
+            for name in ('index.html', 'app.js', 'app.css'):
+                (ui/name).write_text(safe_file(root/'static/vnext'/name), encoding='utf-8')
+            (ui/'preview.js').write_text('window.FIXTURE_SNAPSHOT='+snapshot_text+';', encoding='utf-8')
+            engine_preview += '<h2>Gate D local UI</h2><p><a href="ui/index.html">Open synthetic interactive UI preview</a> · <a href="ui-report.md">Local launch and validation report</a></p>'
         (stage / 'index.html').write_text('<!doctype html><meta charset="utf-8"><title>ThemeScope vNext inspection</title>'
             '<style>body{font:16px system-ui;max-width:1000px;margin:3rem auto;padding:0 1rem}table{border-collapse:collapse}td,th{padding:.5rem;border:1px solid #aaa;text-align:left}pre{white-space:pre-wrap;background:#eee;padding:1rem}a{color:#1463b8}</style><h1>ThemeScope vNext — provisional configuration</h1><p>No live market data. Production cutover is blocked.</p>'
             '<pre>'+html.escape(json.dumps(report, indent=2))+'</pre>'
             '<p><a href="methodology.md">Methodology</a> · <a href="migration-report.md">Migration comparison</a>'
             ' · <a href="test-report.txt">Tests</a></p>'+engine_preview, encoding='utf-8')
-        for path in stage.iterdir():
-            safe_file(path)
+        for path in stage.rglob('*'):
+            if path.is_file(): safe_file(path)
         destination = root / 'inspection'
         if destination.is_symlink():
             raise ValueError('Inspection destination must not be a symlink')
         if destination.exists():
             # Only the generated allowlist is replaced; do not sweep unrelated work.
             allowed = {p.name for p in stage.iterdir()}
-            if any(p.name not in allowed or not p.is_file() or p.is_symlink() for p in destination.iterdir()):
+            if any(p.name not in allowed or p.is_symlink() or (not p.is_file() and p.name != 'ui') for p in destination.iterdir()):
                 raise ValueError('Inspection destination contains unrelated files')
+        if (destination/'ui').exists():
+            if any(p.name not in {'index.html','app.js','app.css','preview.js'} or not p.is_file() or p.is_symlink() for p in (destination/'ui').iterdir()):
+                raise ValueError('Inspection UI contains unrelated files')
         destination.mkdir(exist_ok=True)
         for path in stage.iterdir():
-            shutil.copyfile(path, destination / path.name)
+            if path.is_dir(): shutil.copytree(path, destination/path.name, dirs_exist_ok=True)
+            else: shutil.copyfile(path, destination / path.name)
     return report
 
 
@@ -105,5 +121,6 @@ if __name__ == '__main__':
     parser.add_argument('--test-report', type=Path)
     parser.add_argument('--engine-report', type=Path)
     parser.add_argument('--provider-report', type=Path)
+    parser.add_argument('--ui-snapshot', type=Path)
     args = parser.parse_args()
-    print(json.dumps(build(test_report=args.test_report, engine_report=args.engine_report, provider_report=args.provider_report), indent=2))
+    print(json.dumps(build(test_report=args.test_report, engine_report=args.engine_report, provider_report=args.provider_report, ui_snapshot=args.ui_snapshot), indent=2))

@@ -35,3 +35,6 @@ __pycache__/
 *.db
 *.db-*
 /work/
+
+# Playwright/screenshots and local vNext state stay outside inspection unless synthetic.
+/playwright-report/

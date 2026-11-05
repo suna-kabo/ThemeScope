@@ -89,3 +89,19 @@ class InspectionTests(unittest.TestCase):
         self.assertIn('NASDAQ:AAA',preview)
         self.assertIn('also qualifies in:',preview)
         for path in (self.root/'inspection').iterdir():safe_file(path)
+
+    def test_ui_preview_is_synthetic_and_rejects_unrelated_assets(self):
+        shutil.copytree(ROOT/'config/vnext',self.root/'config/vnext')
+        shutil.copytree(ROOT/'docs',self.root/'docs')
+        shutil.copytree(ROOT/'static/vnext',self.root/'static/vnext')
+        snapshot=self.root/'snapshot.json'
+        snapshot.write_text('{"synthetic_fixture":false}')
+        with self.assertRaisesRegex(ValueError,'must be synthetic'):build(self.root,ui_snapshot=snapshot)
+        snapshot.write_text('{"synthetic_fixture":true}')
+        build(self.root,ui_snapshot=snapshot)
+        self.assertTrue((self.root/'inspection/ui/index.html').is_file())
+        self.assertIn('FIXTURE_SNAPSHOT',(self.root/'inspection/ui/preview.js').read_text())
+        for path in (self.root/'inspection').rglob('*'):
+            if path.is_file():safe_file(path)
+        (self.root/'inspection/ui/unrelated.txt').write_text('preserve this')
+        with self.assertRaisesRegex(ValueError,'unrelated'):build(self.root,ui_snapshot=snapshot)

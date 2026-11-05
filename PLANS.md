@@ -9,7 +9,9 @@ Phase 1: domain/configuration work validated for **Gate A**.
 Checkpoint: `inspection/vnext-a-domain`, pointing at the Phase 1 commit.
 Phase 2 complete: `61fe259`. Phase 3 complete: `1c10c5c`.
 Phase 4 validated for Gate B; checkpoint branch `inspection/vnext-b-engine`.
-Phase 5 implemented for Gate C; SQLite schema 2. Next: Phase 6, only after Gate C review.
+Gate C 7d3bf2e is approved; the real local SIP PoC passed (user-reported).
+Phase 6: a8958f3. Phase 7: 9080337. Phase 8 validated for Gate D.
+Stop at inspection/vnext-d-ui; Phase 9 has not started. SQLite schema remains 2.
 Do not restart the baseline or reimport/reclassify the proposed launch ledger.
 
 Gate A at `359572c` was independently checked and approved. Do not redo it.
@@ -235,3 +237,39 @@ Only reported calendar dates are returned. Missing key/event, quota JSON, malfor
 CSV/date or provider exception returns Earnings Unavailable and cannot fail market
 refresh. Credentials stay in the local environment. Validation: 268 full tests,
 267 pass/one Windows skip; two focused earnings tests pass. Next Phase 8/Gate D.
+
+## Phase 8 — local UI and Gate D
+
+Implemented a private FastAPI application, background refresh status/progress,
+loopback launcher ThemeScope.cmd, and zero-daily-CSV workflow using Gate C cache.
+The OS refresh lock spans configuration/provider preparation -> calculations ->
+optional earnings -> transaction/publication. Competing threads/processes cannot
+prepare or publish; another SQLite connection can write during the network wait.
+Dashboard and TXT downloads read one committed snapshot. Failures preserve both.
+
+Production with unresolved blockers cannot activate theme membership. It can show
+market context, roster warnings, target/completeness/provider health and explicit
+activation blockers. Fixture mode uses a separate DB and fictional data. History
+requires compatible adjacent live sessions; bootstrap never supplies transitions.
+Snapshot hashes include exact roster configuration; market snapshots retain rosters.
+
+New UI flow: Market, Daily Plan, Theme Research, Watchlist, Methodology. Includes
+Today's Plan, decision path, Primary themes/comparison state, independent stock
+qualifications, assigned/other sections, optional earnings and combined download.
+Watchlist is local browser storage. No external browser requests. Same-origin POST,
+loopback Host checks and CSP protect the local application. Legacy UI/runtime intact.
+
+Phase 8 validation: 275 full tests; 274 pass/one Windows-only skip. Six focused local
+API/refresh tests, three market/lock tests and two earnings tests pass. Frozen
+64-case Market Matrix and migration/legacy suites pass. Python compilation and both
+JS syntax/helper checks pass. Real Chromium/loopback smoke passes Refresh Data,
+TXT download, Watchlist, Methodology navigation and mobile layout, with no external
+requests/page errors. Native Windows checks remain local.
+
+Measured small synthetic fixture: 16 symbols/64 sessions, cold 1024 observations
+in 0.027s; warm 48 observations in 0.029s. These are functional fixture timings,
+not full-universe live SIP throughput. No launch session chosen, all 729 dates
+pending, evidence unchanged, approved actual SPY/QQQ roster inputs still required.
+Documentation/local launch: docs/vnext_local_ui.md. Safe static UI under inspection/ui
+is explicitly synthetic; no provider data, credentials or runtime DB included.
+Stop at Gate D and wait for independent review before Phase 9.
