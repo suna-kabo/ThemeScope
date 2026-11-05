@@ -35,7 +35,7 @@ class StorageTests(unittest.TestCase):
 
     def test_incomplete_duplicate_and_exception_rollback_keep_prior_snapshot(self):
         self.save('2024-01-03',{'old':True})
-        for failure in ('missing','duplicate','exception','unpublished'):
+        for failure in ('missing','duplicate','exception','unpublished','after_publish'):
             with self.subTest(failure=failure), self.assertRaises((ValueError,sqlite3.IntegrityError,RuntimeError)):
                 with self.store.refresh('2024-01-04','themescope-vnext-1','fixture') as run:
                     run.bars([bar('A','2024-01-04')])
@@ -43,10 +43,13 @@ class StorageTests(unittest.TestCase):
                     if failure=='duplicate':run.bars([bar('A','2024-01-04')])
                     if failure=='exception':raise RuntimeError('fixture failure')
                     if failure=='missing':run.publish({},required_symbols=['A','B'])
+                    if failure=='after_publish':
+                        run.publish({'must_rollback':True},required_symbols=['A'])
+                        raise RuntimeError('failure after pointer write')
             self.assertEqual(self.store.active(),{'old':True})
         db=self.store.connection
         self.assertEqual(db.execute('SELECT count(*) FROM theme_snapshot').fetchone()[0],1)
-        self.assertEqual(db.execute("SELECT count(*) FROM refresh_run WHERE status='incomplete'").fetchone()[0],4)
+        self.assertEqual(db.execute("SELECT count(*) FROM refresh_run WHERE status='incomplete'").fetchone()[0],5)
 
     def test_replay_idempotence_and_writer_lock(self):
         self.save('2024-01-04',{'new':True})

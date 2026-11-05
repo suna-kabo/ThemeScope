@@ -4,7 +4,7 @@ The caller supplies the authoritative completed US-session calendar. Missing bar
 never compress that calendar. No provider access or legacy ETF inputs live here.
 """
 from dataclasses import dataclass
-from decimal import Decimal, InvalidOperation, localcontext
+from decimal import Decimal, InvalidOperation, localcontext, Context, ROUND_HALF_EVEN
 from functools import wraps
 from pathlib import Path
 import json
@@ -16,9 +16,7 @@ D = Decimal
 def deterministic(function):
     @wraps(function)
     def wrapped(*args, **kwargs):
-        with localcontext() as context:
-            context.prec = 34
-            context.rounding = 'ROUND_HALF_EVEN'
+        with localcontext(Context(prec=34, rounding=ROUND_HALF_EVEN)):
             return function(*args, **kwargs)
     return wrapped
 

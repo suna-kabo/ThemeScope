@@ -1,7 +1,7 @@
 import unittest
 from dataclasses import replace
 from datetime import date, timedelta
-from decimal import Decimal as D, localcontext
+from decimal import Decimal as D, localcontext, Inexact, ROUND_DOWN
 from pathlib import Path
 from src.themescope.domain import load_configuration
 from src.themescope.themes.calculations import (Bar, bar_map, price_return, aggregate, median,
@@ -92,6 +92,8 @@ class CalculationTests(unittest.TestCase):
         expected=percentiles(values)
         with localcontext() as context:
             context.prec=6
+            context.rounding=ROUND_DOWN
+            context.traps[Inexact]=True
             self.assertEqual(percentiles(values),expected)
         self.assertEqual(breadth('ABCDE',dict.fromkeys('ABCDE',100),dict.fromkeys('ABCDE',99)).value,100)
         self.assertIsNone(breadth('ABCDEF',dict.fromkeys('ABCD',100),dict.fromkeys('ABCD',99)).value)

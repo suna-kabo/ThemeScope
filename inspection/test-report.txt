@@ -1,41 +1,54 @@
-ThemeScope vNext — Gate A domain checkpoint
-Data: configuration metadata and explicitly synthetic test fixtures only.
-Base main: cf4fdb1e4784ff6fbc7183d5e709ffae044ec2fe
-Phase 0 baseline: 8764575
+ThemeScope vNext — Gate B engine checkpoint
+Data: configuration metadata and deterministic synthetic examples only.
+Gate A approved: 359572c
+Phase 2: 61fe259 — SQLite storage and pure calculations.
+Phase 3: 1c10c5c — synthetic index and compatible live history.
+Phase 4: this Gate B checkpoint — eligibility, Primary, multi-theme exports.
 
-Validation:
-python scripts/bootstrap_dev.py: passed; isolated Python 3.12 runtime imports verified.
-python -m unittest discover -s tests -v
-222 tests run; 221 passed; 1 Windows-only skip.
-python -m compileall -q src scripts tests: passed.
-node --check static/dashboard.js: passed.
-node tests/test_dashboard.js: passed.
-python tests/smoke_local_install.py --browser: passed on Linux.
+Full suite after each phase:
+Phase 2: 233 tests; 232 passed; 1 Windows-only skip.
+Phase 3: 240 tests; 239 passed; 1 Windows-only skip.
+Phase 4: 252 tests; 251 passed; 1 Windows-only skip.
+Final focused vNext suite: 45 tests passed.
+Python compilation, JavaScript syntax and dashboard helper tests passed.
+Gate B does not claim native Windows execution or live SIP validation.
 
-Smoke coverage: isolated clean source install, setup/refresh/site preparation,
-non-ASCII paths, two-session history, older replay, failed-publication preservation,
-actual local HTTP previews/downloads, light/dark browser checks, 64 Market Matrix
-cases, stock eligibility/filter and methodology navigation. No deployment.
-Native Windows CMD and Windows locked-file semantics were not run locally.
+Calculation validation:
+Exact 21/63-session endpoints; gaps do not compress session calendars.
+Odd/even medians, average-rank ties, single-theme unavailable percentile.
+Exactly five valid members; four LOO peers; exact 80% and below-boundary coverage.
+Per-horizon missingness; zero/negative/positive W; duplicate rejection.
+Independent Fraction oracle for synthetic AAA/Alpha weighted LOO result.
+Split and spin-off adjusted prices; dividend price drop remains a price drop.
+Decimal output independent of caller precision, rounding and traps.
+Breadth is context only; daily liquidity never changes benchmark membership.
+Theme Priority matches 360 existing-policy combinations; Market Matrix unchanged.
 
-Full v2 review CSV: 1,525 rows, no duplicate symbols; all measurable filters pass.
-Exact source hash and instrument manifest match; all 671 proposed launch tickers
-and 21 Watch-only candidate relationships are represented in the source universe.
-Common-stock status is explicitly user-attested from scanner settings.
-44 Active / 8 Watch-only themes; 729 Core/Enabler relationships / 671 tickers.
-All 729 launch effective dates remain pending. Production remains disabled.
+Synthetic index numerical boundary:
+Thursday close starts 100. Old holdings earn +10% on approval Friday -> 110.
+Rebalance Friday close. New holdings earn +20% Monday -> 132.
+New holdings' Friday +100% and old holdings' Monday -50% are excluded.
+Drift test: natural holdings reach 160; explicit daily rebalance would reach 144.
+Membership replacement and split/spin-off continuity produce no false jump.
+Bootstrap only seeds indicators; no bootstrap/legacy/nonadjacent transitions.
 
-Domain coverage: duplicate/overlapping relationships, invalid intervals, outside-
-universe symbols, Active >=5 minimum, Related exclusion, Watch-only exclusion,
-no IWM roster, and old/new membership at Friday/Monday approval boundaries.
-The numerical synthetic-index boundary test belongs to Phase 3 and is pending.
+Primary/export validation:
+Close >=5; AvgVol10 strictly >500000; turnover >=10000000; exact boundaries.
+Latest ten completed regular-session volume bars, including target session.
+AAA and BBB independently qualify in Alpha and Beta; each appears once combined.
+Core before Enabler, directional W, lexical theme tie-break, both long and short.
+Input-order independence, invalid/unverified identifiers rejected, no 20-stock cap.
 
-Inspection rejection tests: .env, secrets, SQLite including renamed payload,
-raw provider payloads, absolute personal paths, symlinks and unrelated junk.
-Old provider fixture payloads were replaced by reproducible synthetic fixtures;
-legacy runtime source, readers and genuine user history were not modified.
+Persistence:
+SQLite schema 1; vNext snapshot/history schemas 1 in separate namespaces.
+Exact-session history, same-day replay, older replay protection, single-writer lock.
+Incomplete data, duplicate writes and injected failures roll back publication.
+Failure after pointer update also preserves the prior successful snapshot.
 
-Production blockers remain: 335 evidence refreshes; four additional inherited-
-evidence findings; documented industry rules; approved launch date; later roster
-inputs and local SIP/Windows checks. Gate A does not certify production cutover.
-Next work: Phase 2 — storage and pure calculation engine, leading to Gate B.
+Safety/blockers:
+All 729 proposed launch effective dates remain pending; no launch session chosen.
+335 evidence refreshes, four inherited findings and documented industry rules pending.
+Full review universe remains 1525 symbols; launch ledger 729 relationships/671 tickers.
+No live Alpaca credentials, IEX fallback, main changes, deployment or legacy retirement.
+Safe inspection contains no runtime database, credentials or provider-derived bars.
+Next unfinished phase: Phase 5 provider abstraction. Stop here at Gate B.

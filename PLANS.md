@@ -7,7 +7,9 @@ Base main: `cf4fdb1e4784ff6fbc7183d5e709ffae044ec2fe` (includes PR #7).
 Phase 0 commit: `8764575` — baseline and workflow/spec documentation.
 Phase 1: domain/configuration work validated for **Gate A**.
 Checkpoint: `inspection/vnext-a-domain`, pointing at the Phase 1 commit.
-Phase 2 complete: `61fe259`. Phase 3 validated; next Phase 4, then Gate B.
+Phase 2 complete: `61fe259`. Phase 3 complete: `1c10c5c`.
+Phase 4 validated for Gate B; checkpoint branch `inspection/vnext-b-engine`.
+Next unfinished phase: Phase 5 provider abstraction (not authorized in this gate).
 Do not restart the baseline or reimport/reclassify the proposed launch ledger.
 
 Gate A at `359572c` was independently checked and approved. Do not redo it.
@@ -56,7 +58,7 @@ across a Friday approval and Monday effective session. **Phase 3 now includes th
 100 -> 110 on approval Friday (old holdings +10%), then 132 Monday (new +20%). Bootstrap initializes indicators only and must never
 produce apparent live signal history.
 
-## Production blockers (not Gate A implementation blockers)
+## Production blockers (not Gate B fixture implementation blockers)
 
 - 335 primary-source refresh relationships remain pending, preserved in status
   and in a sanitized review queue.
@@ -79,7 +81,8 @@ The 151-row delta is not the authoritative review universe.
 
 Unchanged-main baseline: 207 unittest cases, one Windows-only skip; JS checks,
 compilation and clean-install/browser smoke passed. Phase 0: 209 cases, same skip.
-Phase 1's final test report is in `inspection/test-report.txt`.
+Current Gate B test report is in `inspection/test-report.txt`; Gate A retains its
+original report on `inspection/vnext-a-domain`.
 
 Tests use fixtures/mocks. Linux smoke checks cover clean setup, two sessions,
 failure preservation, older replay, HTTP previews/downloads, all 64 Market Matrix
@@ -95,13 +98,13 @@ Only source and synthetic inspection artifacts may be pushed to the implementati
 and prescribed checkpoint branches. No main merge, deployment, trading endpoint,
 live Alpaca credentials, IEX fallback or runtime DB is part of this gate.
 
-## Remaining handoff sequence
+## Handoff sequence — resume at Phase 5 after Gate B approval
 
-1. Phase 2: pure 21/63-session returns, member medians/coverage, tied percentiles,
+1. Completed Phase 2: pure 21/63-session returns, member medians/coverage, tied percentiles,
    60/40 score, LOO W and SQLite storage; boundary/missing/corporate-action tests.
-2. Phase 3: chain-linked drifting index, approved timing, explicit bootstrap and
+2. Completed Phase 3: chain-linked drifting index, approved timing, explicit bootstrap and
    compatible adjacent-session history.
-3. Phase 4: daily liquidity, independent qualifying relationships and deterministic
+3. Completed Phase 4: daily liquidity, independent qualifying relationships and deterministic
    combined placement; safe fixture report and **Gate B**.
 4. Phase 5: FixtureProvider/Alpaca SIP adapters; paging, retries, auth/subscription
    failures, split/spin-off handling and local access PoC; **Gate C**. Live SIP may
@@ -120,7 +123,7 @@ medians and coverage; tied percentiles; 60/40 scores; LOO W; context-only breadt
 Decimal arithmetic uses a fixed local 34-digit context. Raw close/volume remain
 separate from split/spin-off adjusted prices. Missing dates never compress sessions.
 
-SQLite schema 1 adds the eleven suggested tables plus schema_version and a
+SQLite schema 1 adds the eleven suggested tables (including schema_version) and a
 publication pointer. All results are run-scoped; configuration stays in Git.
 BEGIN IMMEDIATE serializes writers; errors roll back data and record an incomplete
 run without replacing the successful publication. Older replay cannot supersede
@@ -151,3 +154,35 @@ pass. Numerical t/t+1 fixture, natural drift versus daily equal weight, chain-li
 continuity, split/spin-off price continuity, missing data, EMA boundaries and
 bootstrap/legacy/gap incompatibility pass. No launch date selected or activated.
 Next: Phase 4 eligibility, Primary relationships and deterministic exports.
+
+## Phase 4 / Gate B — independent Primary engine and exports
+
+Implemented exact daily liquidity checks on raw regular-session values; target
+session is included in AvgVol10. Missing/incomplete bars are unavailable. Daily
+liquidity never deletes membership or changes benchmark/peer coverage.
+
+The offline session engine composes theme returns/scores, synthetic trends,
+context-only breadth, compatible transitions and LOO W. Theme Priority matches
+360 combinations of the existing policy; the Market Matrix implementation is
+untouched. Every independently qualifying Core/Enabler relationship remains in
+dashboard and individual exports. Combined placement uses role, directional W,
+then lexical theme ID; ticker order and TXT sections are deterministic. Verified
+TradingView mappings are required; no symbol guesses or 20-stock cap.
+
+End-to-end synthetic fixture persistence exercises SQLite rollback, replay and
+multi-theme history. It cannot publish an unlabeled production snapshot. A final
+review strengthened fixed Decimal contexts (including traps) and rollback after
+a publication-pointer update; no formula or threshold changed.
+
+Validation: 252 full-suite tests, 251 pass and one Windows-only skip; 45 focused
+vNext cases pass. Python compilation and JavaScript checks pass. Independent
+rational oracle matches LOO W; formula report has expected/actual medians and
+scores, long/short qualifications and TXT examples. Numerical index boundary
+remains 100 -> 110 (old Friday) -> 132 (new Monday).
+
+Inspection is configuration plus synthetic summaries only. Download the Gate B
+branch ZIP and open inspection/index.html. Details: docs/vnext_engine.md.
+SQLite schema remains 1; snapshot schema is themescope-vnext-snapshot-1 and live
+history is themescope-vnext-history-1. No runtime database or source market bars
+are included. Stop at Gate B; no provider/live SIP, launch choice, evidence
+clearance, legacy retirement, main merge or deployment was performed.

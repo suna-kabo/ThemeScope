@@ -41,7 +41,7 @@ def safe_file(path):
     return text
 
 
-def build(root=ROOT, *, test_report=None):
+def build(root=ROOT, *, test_report=None, engine_report=None):
     root = Path(root)
     config = load_configuration(root)
     report = {'methodology': config.methodology['version'],
@@ -61,11 +61,26 @@ def build(root=ROOT, *, test_report=None):
             (stage / name).write_text('\n'.join(line.rstrip() for line in safe_file(source).splitlines()) + '\n', encoding='utf-8')
         (stage / 'test-report.txt').write_text(safe_file(Path(test_report)) if test_report else
             'No test report supplied; checkpoint is not certified.\n', encoding='utf-8')
+        engine_preview = ''
+        if engine_report:
+            engine_text = safe_file(Path(engine_report))
+            engine = json.loads(engine_text)
+            if engine.get('synthetic_fixture') is not True:
+                raise ValueError('Engine inspection must be explicitly synthetic')
+            (stage / 'engine-report.json').write_text(engine_text, encoding='utf-8')
+            engine_preview = '<h2>Synthetic calculation fixture</h2><p><a href="engine-report.json">Full formulas, peer results and exports</a></p>'
+            for direction, scenario in engine.get('scenarios', {}).items():
+                engine_preview += '<h3>'+html.escape(direction)+'</h3><table><tr><th>Theme</th><th>Score</th><th>Trend</th><th>Priority</th></tr>'
+                for theme in scenario['themes']:
+                    engine_preview += '<tr>'+''.join('<td>'+html.escape(str(theme[key]))+'</td>' for key in ('theme_id','score','trend','priority'))+'</tr>'
+                engine_preview += '</table><h4>Combined TXT</h4><pre>'+html.escape(scenario['exports']['combined'])+'</pre>'
+                for ticker, assignment in scenario['exports']['assignments'].items():
+                    engine_preview += '<p>'+html.escape(ticker+' → '+assignment['assigned_section']+'; also qualifies in: '+', '.join(assignment['also_qualifies_in']))+'</p>'
         (stage / 'index.html').write_text('<!doctype html><meta charset="utf-8"><title>ThemeScope vNext inspection</title>'
-            '<h1>ThemeScope vNext — provisional configuration</h1><p>No live market data. Production cutover is blocked.</p>'
+            '<style>body{font:16px system-ui;max-width:1000px;margin:3rem auto;padding:0 1rem}table{border-collapse:collapse}td,th{padding:.5rem;border:1px solid #aaa;text-align:left}pre{white-space:pre-wrap;background:#eee;padding:1rem}a{color:#1463b8}</style><h1>ThemeScope vNext — provisional configuration</h1><p>No live market data. Production cutover is blocked.</p>'
             '<pre>'+html.escape(json.dumps(report, indent=2))+'</pre>'
             '<p><a href="methodology.md">Methodology</a> · <a href="migration-report.md">Migration comparison</a>'
-            ' · <a href="test-report.txt">Tests</a></p>', encoding='utf-8')
+            ' · <a href="test-report.txt">Tests</a></p>'+engine_preview, encoding='utf-8')
         for path in stage.iterdir():
             safe_file(path)
         destination = root / 'inspection'
@@ -73,7 +88,7 @@ def build(root=ROOT, *, test_report=None):
             raise ValueError('Inspection destination must not be a symlink')
         if destination.exists():
             # Only the generated allowlist is replaced; do not sweep unrelated work.
-            allowed = {'configuration.json', 'migration-report.md', 'methodology.md', 'test-report.txt', 'index.html'}
+            allowed = {p.name for p in stage.iterdir()}
             if any(p.name not in allowed or not p.is_file() or p.is_symlink() for p in destination.iterdir()):
                 raise ValueError('Inspection destination contains unrelated files')
         destination.mkdir(exist_ok=True)
@@ -85,5 +100,6 @@ def build(root=ROOT, *, test_report=None):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--test-report', type=Path)
+    parser.add_argument('--engine-report', type=Path)
     args = parser.parse_args()
-    print(json.dumps(build(test_report=args.test_report), indent=2))
+    print(json.dumps(build(test_report=args.test_report, engine_report=args.engine_report), indent=2))
