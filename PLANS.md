@@ -227,3 +227,11 @@ Phase 8 must hold this across preparation, calculation and atomic publication.
 Phase 6 validation: 266 full tests, 265 passed/one Windows skip; three focused market/
 lock tests passed. Next Phase 7 optional earnings; then Phase 8/Gate D. All launch
 and evidence blockers remain; legacy runtime and main untouched.
+
+## Phase 7 — optional earnings
+
+Added EarningsProvider protocol and Alpha Vantage EARNINGS_CALENDAR adapter.
+Only reported calendar dates are returned. Missing key/event, quota JSON, malformed
+CSV/date or provider exception returns Earnings Unavailable and cannot fail market
+refresh. Credentials stay in the local environment. Validation: 268 full tests,
+267 pass/one Windows skip; two focused earnings tests pass. Next Phase 8/Gate D.
