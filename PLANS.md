@@ -11,7 +11,8 @@ Phase 2 complete: `61fe259`. Phase 3 complete: `1c10c5c`.
 Phase 4 validated for Gate B; checkpoint branch `inspection/vnext-b-engine`.
 Gate C 7d3bf2e is approved; the real local SIP PoC passed (user-reported).
 Phase 6: a8958f3. Phase 7: 9080337. Phase 8 validated for Gate D.
-Stop at inspection/vnext-d-ui; Phase 9 has not started. SQLite schema remains 2.
+Gate D 02e7d63 approved subject to one focused hardening commit.
+Preserve inspection/vnext-d-ui at 02e7d63; Phase 9 must not start. SQLite schema remains 2.
 Do not restart the baseline or reimport/reclassify the proposed launch ledger.
 
 Gate A at `359572c` was independently checked and approved. Do not redo it.
@@ -273,3 +274,24 @@ pending, evidence unchanged, approved actual SPY/QQQ roster inputs still require
 Documentation/local launch: docs/vnext_local_ui.md. Safe static UI under inspection/ui
 is explicitly synthetic; no provider data, credentials or runtime DB included.
 Stop at Gate D and wait for independent review before Phase 9.
+
+## Gate D hardening — roster activation gate and Windows lock-file size
+
+User approved Gate D subject to these two fixes only. Runtime blockers now include
+missing effective SPY/QQQ rosters for the target session before live memberships
+can calculate. Missing/future/expired roster cases are covered using otherwise
+production-ready synthetic configuration; Primary outputs stay empty. Both stale
+but effective rosters permit activation with advisory warnings. No IWM roster gate
+or Market Matrix changes. Original production config/evidence/launch dates unchanged.
+
+RefreshLock now opens without append/truncate and initializes Windows byte 0 only
+when empty. Repeated/contended acquisitions preserve one-byte size; existing larger
+files are preserved. Mocked Windows regression runs on Linux, with an additional
+native Windows regression that is skipped here. Linux process exclusion unchanged.
+
+One hardening commit on refactor/themescope-vnext only; do not move/recreate the
+original Gate D checkpoint. No Phase 9, main changes, live credentials or deployment.
+
+Hardening validation: 279 full-suite cases; 277 pass and two Windows-only skips.
+Focused market/lock: four pass/one native-Windows skip; focused local: eight pass.
+Python compilation and diff whitespace checks pass. Frozen Market Matrix unchanged.

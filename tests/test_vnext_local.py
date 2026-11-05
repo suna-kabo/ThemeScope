@@ -111,3 +111,52 @@ class LocalTests(unittest.TestCase):
         while self.service.running and time.monotonic()<deadline:time.sleep(.01)
         self.assertFalse(self.service.running)
         self.assertEqual(client.get('/api/status').json()['state'],'success')
+
+    def ready_live_configuration(self):
+        from dataclasses import replace
+        from scripts.vnext_fixture_report import fixture
+        config,_,sessions,_,_,mapping=fixture()
+        # Synthetic dates only; no launch/evidence fields in repository config change.
+        config=replace(config,methodology=dict(config.methodology,production_enabled=True,
+                        launch_rebalance_session=sessions[0]),
+                       evidence_gate={'industry_rule_registry_status':'approved'})
+        self.assertEqual(config.production_blockers(),[])
+        self.service.mode='live';self.service.config_factory=lambda:config
+        folder=Path(self.temp.name)/'config';folder.mkdir()
+        (folder/'tradingview_symbols.json').write_text(json.dumps({'symbols':mapping}))
+        return config
+
+    def test_ready_live_configuration_requires_each_effective_spy_qqq_roster(self):
+        from dataclasses import replace
+        config=self.ready_live_configuration()
+        spy,qqq=self.service.rosters_factory()
+        for rosters,missing in (((),('SPY','QQQ')),((spy,),('QQQ',)),((qqq,),('SPY',)),
+                                ((replace(spy,effective_from='2025-01-01'),qqq),('SPY',)),
+                                ((spy,replace(qqq,effective_to='2024-02-01')),('QQQ',))):
+            with self.subTest(missing=missing,rosters=rosters):
+                self.service.rosters_factory=lambda:rosters
+                snapshot=self.service.refresh()
+                self.assertIsNotNone(snapshot)
+                expected=[f'Effective {s} constituent roster missing for {snapshot["session"]}' for s in missing]
+                self.assertEqual(snapshot['production_blockers'],expected)
+                self.assertEqual(self.service.snapshot()['production_blockers'],expected)
+                self.assertEqual(snapshot['relationships'],[])
+                self.assertTrue(all(t['priority']=='Watch' for t in snapshot['themes']))
+                self.assertEqual(snapshot['exports']['combined'],'')
+                self.assertEqual(snapshot['exports']['individual'],{})
+                self.assertEqual(config.production_blockers(),[])
+                self.assertEqual(len(config.memberships),15)
+
+    def test_stale_effective_rosters_advisory_and_iwm_roster_never_required(self):
+        from dataclasses import replace
+        self.ready_live_configuration()
+        rosters=tuple(replace(r,effective_from='2023-01-01') for r in self.service.rosters_factory())
+        self.service.rosters_factory=lambda:rosters
+        snapshot=self.service.refresh()
+        self.assertIsNotNone(snapshot)
+        self.assertEqual(snapshot['production_blockers'],[])
+        self.assertTrue(snapshot['relationships'])
+        self.assertTrue(snapshot['exports']['combined'])
+        for benchmark in ('SPY','QQQ'):
+            self.assertTrue(snapshot['market']['context'][benchmark]['roster_warnings'])
+        self.assertNotIn('breadth',snapshot['market']['context']['IWM'])

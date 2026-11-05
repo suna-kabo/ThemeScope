@@ -92,6 +92,9 @@ class RefreshService:
             if launch and launch in days and launch<=target:start=min(start,max(0,days.index(launch)-config.methodology['bootstrap_sessions']))
             sessions=tuple(days[start:end+1]);calendar=tuple(days[start:])
             rosters=self.rosters_factory()
+            for benchmark in ('SPY','QQQ'):
+                if effective(rosters,benchmark,target) is None:
+                    blockers.append(f'Effective {benchmark} constituent roster missing for {target}')
             # Blocked production membership is never activated by this application.
             working=config if self.mode=='fixture' or not blockers else replace(config,memberships=())
             names={m.ticker for t in working.themes for m in working.members_on(t.theme_id,target)}

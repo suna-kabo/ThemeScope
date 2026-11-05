@@ -79,7 +79,8 @@ Reported dates are highlighted beside stock candidates. No dates are inferred.
 The OS-held refresh lock covers configuration read, provider/cache preparation,
 calculation, optional earnings and transactional persistence/publication. Another
 thread/process cannot begin preparation or publish concurrently. The lock is
-released by the OS on process death; its persistent empty file is never unlinked.
+released by the OS on process death; its persistent file is never unlinked. On Windows, byte 0 is initialized only
+when the file is empty; repeated acquisitions neither append nor truncate it.
 There is no SQLite write transaction during network waits. SQLite's original
 single-writer transaction/rollback, immutable input versions and replay protection
 are preserved. Snapshot configuration hashes now include the exact roster ledger;
@@ -134,3 +135,27 @@ Windows and full-universe performance validation remain pending. No bootstrap
 observations are presented as live signals, no evidence is auto-approved, no
 Market Matrix formula changed, and no main merge, legacy retirement or deployment
 occurred. Gate D stops before Phase 9.
+
+## Gate D hardening after independent review
+
+The runtime activation gate now combines configuration blockers with target-session
+roster checks. Both an effective SPY roster and an effective QQQ roster are required.
+A missing, future-only or expired roster adds an explicit benchmark/session blocker
+to the dashboard's activation list. Live theme membership and all Primary exports
+remain disabled until both required rosters and all configuration gates pass.
+IWM never requires a roster. Stale effective rosters still produce only advisory
+warnings. The frozen Market Matrix and its Unavailable behavior are unchanged.
+
+Windows refresh locking keeps the persistent-file/byte-0 design, using a non-append
+open and writing the initialization byte only for an empty file. Existing file
+contents are preserved; successful and rejected acquisitions do not grow the file.
+Regression coverage exercises this branch with a mocked Windows lock API on Linux;
+a native Windows repeated-acquisition test is included for local Windows execution.
+Linux cross-process exclusion and full-refresh concurrency coverage remain passing.
+
+This is one focused Gate D hardening change. The original inspection/vnext-d-ui
+checkpoint remains at 02e7d63. Phase 9 has not started.
+
+Hardening validation: full suite 277 passed / two Windows-only skips; focused
+market/lock four passed / one skipped; focused local eight passed. Python
+compilation passed. No native Windows execution is claimed by the Linux run.

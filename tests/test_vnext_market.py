@@ -44,3 +44,46 @@ class MarketTests(unittest.TestCase):
                 result=subprocess.run([sys.executable,'-c',code,str(path)])
                 self.assertEqual(result.returncode,9)
             with RefreshLock(path):pass
+
+    def test_windows_byte_zero_lock_initialization_does_not_grow_file(self):
+        import os
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from src.themescope import local_refresh_lock as module
+        held=set();calls=[]
+        def locking(fd,operation,length):
+            self.assertEqual(os.lseek(fd,0,os.SEEK_CUR),0)
+            self.assertEqual(length,1)
+            calls.append(operation)
+            if operation==1:
+                if held:raise OSError('busy')
+                held.add(fd)
+            else:held.remove(fd)
+        windows=SimpleNamespace(name='nt',open=os.open,fdopen=os.fdopen,
+                                O_RDWR=os.O_RDWR,O_CREAT=os.O_CREAT,fstat=os.fstat)
+        msvcrt=SimpleNamespace(locking=locking,LK_NBLCK=1,LK_UNLCK=2)
+        with tempfile.TemporaryDirectory() as folder:
+            path=Path(folder)/'refresh.lock'
+            with patch.object(module,'os',windows),patch.dict(sys.modules,{'msvcrt':msvcrt}):
+                for _ in range(20):
+                    with RefreshLock(path):
+                        self.assertEqual(path.stat().st_size,1)
+                        with self.assertRaises(RefreshBusy):
+                            with RefreshLock(path):pass
+                    self.assertEqual(path.stat().st_size,1)
+                # Preserve an existing file; do not append or truncate it.
+                path.write_bytes(b'previous')
+                with RefreshLock(path):pass
+                self.assertEqual(path.read_bytes(),b'previous')
+        self.assertFalse(held)
+        self.assertEqual(calls.count(1),41)
+        self.assertEqual(calls.count(2),21)
+
+    @unittest.skipUnless(sys.platform=='win32','Native Windows byte-lock regression')
+    def test_native_windows_repeated_acquisition_keeps_one_byte(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path=Path(folder)/'refresh.lock'
+            for _ in range(20):
+                with RefreshLock(path):
+                    self.assertEqual(path.stat().st_size,1)
+                self.assertEqual(path.stat().st_size,1)

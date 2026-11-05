@@ -1,6 +1,6 @@
 """Nonblocking OS-held refresh lock, shared across threads/processes and imports.
 
-The OS releases it on process death. The persistent empty file is never unlinked:
+The OS releases it on process death. The persistent lock file is never unlinked:
 unlinking would allow two processes to lock different inodes at the same path.
 """
 from pathlib import Path
@@ -12,11 +12,13 @@ class RefreshLock:
     def __init__(self,path):self.path=Path(path);self.handle=None
     def __enter__(self):
         self.path.parent.mkdir(parents=True,exist_ok=True)
-        self.handle=self.path.open('a+b')
+        self.handle=os.fdopen(os.open(self.path,os.O_RDWR|os.O_CREAT,0o600),'r+b')
         try:
             if os.name=='nt':
                 import msvcrt
-                self.handle.seek(0);self.handle.write(b'0');self.handle.flush();self.handle.seek(0)
+                if os.fstat(self.handle.fileno()).st_size==0:
+                    self.handle.seek(0);self.handle.write(b'0');self.handle.flush()
+                self.handle.seek(0)
                 msvcrt.locking(self.handle.fileno(),msvcrt.LK_NBLCK,1)
             else:
                 import fcntl
