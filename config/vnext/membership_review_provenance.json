@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "package_id": "themescope-membership-master-review-2026-11-06",
+  "package_sha256": "4ec4deb69a67fcd02aa4be3f7a9333bf9dbd078182c5e79629e544459e8e471b",
+  "source_files_sha256": {
+    "themescope_membership_material_corrections_2026-11-06.csv": "9ae8f137b2b8ae53a135e6503249c624d1ad8062621f7adb6b828b1f82df2727",
+    "themescope_industry_rule_registry_2026-11-06.json": "e3c436863a9e1452a0067d6987db1af3eaa833e389a7efe53706d69e6b0f7581",
+    "themescope_membership_master_review_2026-11-06.json": "547703e1c82a60ab135d1adc84a2b20660e3636dad811772d718c9052d6b57f6",
+    "themescope_primary_source_attachment_tasks_2026-11-06.json": "75a26aeb4e2983b7ba8dc232b87fc006859e5233725a810b1855db904c4e4d47",
+    "themescope_membership_review_summary_2026-11-06.md": "7e7ada6a18884b8978d5394412c6758990309e8c9306213965f20aa8606a2c0a"
+  },
+  "baseline_commit": "94050ac",
+  "baseline_membership_sha256": "103b981ef854cbab2cf198c4ac6648642ffbe4d371f4e8c466445ff0b713eabb",
+  "normalization": "Master review retains decisions, summary, counts and inherited resolutions; duplicated registry/tasks kept in separate unchanged source files. Raw source HTML/PDF and scanner volume notes are excluded.",
+  "supplemental_attachment": {
+    "ticker": "YOU",
+    "theme_id": "cybersecurity",
+    "reason": "Master attach_latest_official_source decision omitted from 167-task list; annual URL identified in package highlights."
+  },
+  "research_method": "SEC company submissions identify latest suitable annual filings. Official issuer material or later SEC quarters used where annual reports are unavailable or less directly useful. Supporting business descriptions inspected; review notes paraphrased.",
+  "removed_relationships": [
+    {
+      "ticker": "EXC",
+      "company": "Exelon Corporation",
+      "theme_id": "nuclear-energy",
+      "theme_name": "Nuclear Energy",
+      "original_role": "Enabler",
+      "final_role": "",
+      "decision": "remove",
+      "original_evidence_status": "primary_source_refresh_required",
+      "target_evidence_status": "removed",
+      "evidence_url": "https://www.sec.gov/Archives/edgar/data/78100/000110935726000018/exc-20251231.htm",
+      "industry_rule_id": "",
+      "industry_snapshot": "Electric utilities",
+      "sector_snapshot": "Utilities",
+      "decision_reason": "Exelon is now a transmission and distribution utility holding company and no longer owns the nuclear generation business spun out to Constellation.",
+      "source_action": "reviewed_primary_source_or_snapshot"
+    },
+    {
+      "ticker": "SMG",
+      "company": "Scotts Miracle-Gro Company (The)",
+      "theme_id": "agribusiness",
+      "theme_name": "Agribusiness",
+      "original_role": "Core",
+      "final_role": "",
+      "decision": "remove",
+      "original_evidence_status": "primary_source_refresh_required",
+      "target_evidence_status": "removed",
+      "evidence_url": "https://www.sec.gov/Archives/edgar/data/825542/000082554226000041/smg-20260627.htm",
+      "industry_rule_id": "",
+      "industry_snapshot": "Chemicals: agricultural",
+      "sector_snapshot": "Process industries",
+      "decision_reason": "Scotts Miracle-Gro is principally consumer lawn and garden; Hawthorne indoor/hydroponic operations were divested, so the company no longer fits the agribusiness charter.",
+      "source_action": "reviewed_primary_source_or_snapshot"
+    },
+    {
+      "ticker": "ZG",
+      "company": "Zillow Group, Inc.",
+      "theme_id": "internet-commerce",
+      "theme_name": "Internet Platforms & Digital Commerce",
+      "original_role": "Core",
+      "final_role": "",
+      "decision": "remove_duplicate",
+      "original_evidence_status": "primary_source_refresh_required",
+      "target_evidence_status": "removed",
+      "evidence_url": "",
+      "industry_rule_id": "",
+      "industry_snapshot": "Internet software/Services",
+      "sector_snapshot": "Technology services",
+      "decision_reason": "Z and ZG are two share classes of the same Zillow issuer in the same theme. Keep Z as the higher-10D-volume representative at the review snapshot to avoid double-weighting one issuer.",
+      "source_action": "reviewed_primary_source_or_snapshot"
+    }
+  ],
+  "normalized_master_sha256": "6af2c7fe8d72bd28a6375fbe2c50912d44325f5d3b589723429178529012cc34",
+  "baseline_keys_and_original_roles_match": true
+}

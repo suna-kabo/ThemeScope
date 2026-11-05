@@ -14,8 +14,8 @@ class DomainTests(unittest.TestCase):
         c = self.config
         self.assertEqual(sum(t.status == ThemeStatus.ACTIVE for t in c.themes), 44)
         self.assertEqual(sum(t.status == ThemeStatus.WATCH for t in c.themes), 8)
-        self.assertEqual(len(c.memberships), 729)
-        self.assertEqual(len({m.ticker for m in c.memberships}), 671)
+        self.assertEqual(len(c.memberships), 726)
+        self.assertEqual(len({m.ticker for m in c.memberships}), 668)
         self.assertEqual(len(c.universe['instruments']), 1525)
         self.assertTrue(all(m.effective_from is None for m in c.memberships))
         self.assertEqual(c.members_on('semiconductors', '2026-11-05'), ())

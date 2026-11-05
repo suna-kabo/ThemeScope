@@ -1,102 +1,102 @@
 ticker,company,theme_id,role,effective_from,effective_to,review_snapshot,evidence_status,evidence_url
-CAG,"ConAgra Brands, Inc.",food-beverage,Core,,,2026-11-05,primary_source_refresh_required,
-CCEP,Coca-Cola Europacific Partners plc,food-beverage,Core,,,2026-11-05,primary_source_refresh_required,
-CELH,"Celsius Holdings, Inc.",food-beverage,Core,,,2026-11-05,primary_source_refresh_required,
-CHEF,"The Chefs' Warehouse, Inc.",food-beverage,Core,,,2026-11-05,primary_source_refresh_required,
-COKE,"Coca-Cola Consolidated, Inc.",food-beverage,Core,,,2026-11-05,primary_source_refresh_required,
-CPB,The Campbell's Company,food-beverage,Core,,,2026-11-05,primary_source_refresh_required,
-GIS,"General Mills, Inc.",food-beverage,Core,,,2026-11-05,primary_source_refresh_required,
-HRL,Hormel Foods Corporation,food-beverage,Core,,,2026-11-05,primary_source_refresh_required,
-HSY,The Hershey Company,food-beverage,Core,,,2026-11-05,primary_source_refresh_required,
-JBS,JBS N.V.,food-beverage,Core,,,2026-11-05,primary_source_refresh_required,
-KDP,Keurig Dr Pepper Inc.,food-beverage,Core,,,2026-11-05,primary_source_refresh_required,
-KHC,The Kraft Heinz Company,food-beverage,Core,,,2026-11-05,primary_source_refresh_required,
-KO,Coca-Cola Company (The),food-beverage,Core,,,2026-11-05,primary_source_refresh_required,
-LW,"Lamb Weston Holdings, Inc.",food-beverage,Core,,,2026-11-05,primary_source_refresh_required,
-MDLZ,"Mondelez International, Inc.",food-beverage,Core,,,2026-11-05,primary_source_refresh_required,
-MKC,"McCormick & Company, Incorporated",food-beverage,Core,,,2026-11-05,primary_source_refresh_required,
-MNST,Monster Beverage Corporation,food-beverage,Core,,,2026-11-05,primary_source_refresh_required,
-PEP,"PepsiCo, Inc.",food-beverage,Core,,,2026-11-05,primary_source_refresh_required,
-SFD,"Smithfield Foods, Inc.",food-beverage,Core,,,2026-11-05,primary_source_refresh_required,
-SJM,The J.M. Smucker Company,food-beverage,Core,,,2026-11-05,primary_source_refresh_required,
-SYY,Sysco Corporation,food-beverage,Core,,,2026-11-05,primary_source_refresh_required,
-TSN,"Tyson Foods, Inc.",food-beverage,Core,,,2026-11-05,primary_source_refresh_required,
-USFD,US Foods Holding Corp.,food-beverage,Core,,,2026-11-05,primary_source_refresh_required,
+CAG,"ConAgra Brands, Inc.",food-beverage,Core,,,2026-11-05,primary_source_verified_2026,https://www.conagrabrands.com/who-we-are
+CCEP,Coca-Cola Europacific Partners plc,food-beverage,Core,,,2026-11-05,primary_source_verified_2026,https://www.cocacolaep.com/who-we-are/what-we-do/
+CELH,"Celsius Holdings, Inc.",food-beverage,Core,,,2026-11-05,primary_source_verified_2026,https://ir.celsiusholdingsinc.com/news/news-details/2026/Celsius-Holdings-Reports-Full-Year-2025-and-Fourth-Quarter-Financial-Results/default.aspx
+CHEF,"The Chefs' Warehouse, Inc.",food-beverage,Core,,,2026-11-05,primary_source_verified_2026,https://investors.chefswarehouse.com/investor-relations
+COKE,"Coca-Cola Consolidated, Inc.",food-beverage,Core,,,2026-11-05,primary_source_verified_2026,https://www.cokeconsolidated.com/about-us/
+CPB,The Campbell's Company,food-beverage,Core,,,2026-11-05,primary_source_verified_2026,https://www.thecampbellscompany.com/about-us/
+GIS,"General Mills, Inc.",food-beverage,Core,,,2026-11-05,primary_source_verified_2026,https://www.generalmills.com/about
+HRL,Hormel Foods Corporation,food-beverage,Core,,,2026-11-05,primary_source_verified_2026,https://investor.hormelfoods.com/ir-home/default.aspx
+HSY,The Hershey Company,food-beverage,Core,,,2026-11-05,primary_source_verified_2026,https://investors.thehersheycompany.com/
+JBS,JBS N.V.,food-beverage,Core,,,2026-11-05,primary_source_verified_2026,https://www.jbs.com.br/en/about/
+KDP,Keurig Dr Pepper Inc.,food-beverage,Core,,,2026-11-05,primary_source_verified_2026,https://www.keurigdrpepper.com/about-us/
+KHC,The Kraft Heinz Company,food-beverage,Core,,,2026-11-05,primary_source_verified_2026,https://ir.kraftheinzcompany.com/
+KO,Coca-Cola Company (The),food-beverage,Core,,,2026-11-05,primary_source_verified_2026,https://investors.coca-colacompany.com/filings-reports/all-sec-filings/content/0001628280-26-010047/ko-20251231.htm
+LW,"Lamb Weston Holdings, Inc.",food-beverage,Core,,,2026-11-05,primary_source_verified_2026,https://investors.lambweston.com/why-lamb-weston
+MDLZ,"Mondelez International, Inc.",food-beverage,Core,,,2026-11-05,primary_source_verified_2026,https://www.mondelezinternational.com/about-us/index.html
+MKC,"McCormick & Company, Incorporated",food-beverage,Core,,,2026-11-05,primary_source_verified_2026,https://ir.mccormick.com/investors
+MNST,Monster Beverage Corporation,food-beverage,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/865752/000110465926020831/mnst-20251231x10k.htm
+PEP,"PepsiCo, Inc.",food-beverage,Core,,,2026-11-05,primary_source_verified_2026,https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/pepsico-2025-annual-report.pdf
+SFD,"Smithfield Foods, Inc.",food-beverage,Core,,,2026-11-05,primary_source_verified_2026,https://investors.smithfieldfoods.com/sec-filings/sec-filings/content/0000091388-26-000014/smf-20251228.htm
+SJM,The J.M. Smucker Company,food-beverage,Core,,,2026-11-05,primary_source_verified_2026,https://www.jmsmucker.com/about
+SYY,Sysco Corporation,food-beverage,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/96021/000009602126000033/syy-20260627.htm
+TSN,"Tyson Foods, Inc.",food-beverage,Core,,,2026-11-05,primary_source_verified_2026,https://ir.tyson.com/about-tyson/facts/
+USFD,US Foods Holding Corp.,food-beverage,Core,,,2026-11-05,primary_source_verified_2026,https://ir.usfoods.com/overview/default.aspx
 DHI,"D.R. Horton, Inc.",homebuilders,Core,,,2026-11-05,industry_rule_accepted,
 KBH,KB Home,homebuilders,Core,,,2026-11-05,industry_rule_accepted,
 LEN,Lennar Corporation,homebuilders,Core,,,2026-11-05,industry_rule_accepted,
-MTH,Meritage Homes Corporation,homebuilders,Core,,,2026-11-05,primary_source_refresh_required,
+MTH,Meritage Homes Corporation,homebuilders,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/833079/000083307926000010/mth-20251231.htm
 PHM,"PulteGroup, Inc.",homebuilders,Core,,,2026-11-05,industry_rule_accepted,
 SKY,"Champion Homes, Inc.",homebuilders,Core,,,2026-11-05,industry_rule_accepted,
 TOL,"Toll Brothers, Inc.",homebuilders,Core,,,2026-11-05,industry_rule_accepted,
-CCL,Carnival Corporation Ltd.,leisure-entertainment,Core,,,2026-11-05,primary_source_refresh_required,
-CNK,"Cinemark Holdings, Inc.",leisure-entertainment,Core,,,2026-11-05,primary_source_refresh_required,
-DIS,Walt Disney Company (The),leisure-entertainment,Core,,,2026-11-05,primary_source_refresh_required,
-H,Hyatt Hotels Corporation,leisure-entertainment,Core,,,2026-11-05,primary_source_refresh_required,
-HLT,Hilton Worldwide Holdings Inc.,leisure-entertainment,Core,,,2026-11-05,primary_source_refresh_required,
-LYV,"Live Nation Entertainment, Inc.",leisure-entertainment,Core,,,2026-11-05,primary_source_refresh_required,
-MAR,Marriott International,leisure-entertainment,Core,,,2026-11-05,primary_source_refresh_required,
-MTN,"Vail Resorts, Inc.",leisure-entertainment,Core,,,2026-11-05,primary_source_refresh_required,
-NCLH,Norwegian Cruise Line Holdings Ltd.,leisure-entertainment,Core,,,2026-11-05,primary_source_refresh_required,
-PLNT,"Planet Fitness, Inc.",leisure-entertainment,Core,,,2026-11-05,primary_source_refresh_required,
-PTON,"Peloton Interactive, Inc.",leisure-entertainment,Core,,,2026-11-05,primary_source_refresh_required,
-RCL,Royal Caribbean Cruises Ltd.,leisure-entertainment,Core,,,2026-11-05,primary_source_refresh_required,
-TKO,"TKO Group Holdings, Inc.",leisure-entertainment,Core,,,2026-11-05,primary_source_refresh_required,
-TNL,Travel Leisure Co.,leisure-entertainment,Core,,,2026-11-05,primary_source_refresh_required,
-VIK,Viking Holdings Ltd,leisure-entertainment,Core,,,2026-11-05,primary_source_refresh_required,
-ASO,"Academy Sports and Outdoors, Inc.",retail,Core,,,2026-11-05,primary_source_refresh_required,
-BBY,"Best Buy Co., Inc.",retail,Core,,,2026-11-05,primary_source_refresh_required,
-BOOT,"Boot Barn Holdings, Inc.",retail,Core,,,2026-11-05,primary_source_refresh_required,
-BURL,"Burlington Stores, Inc.",retail,Core,,,2026-11-05,primary_source_refresh_required,
-COST,Costco Wholesale Corporation,retail,Core,,,2026-11-05,primary_source_refresh_required,
-DG,Dollar General Corporation,retail,Core,,,2026-11-05,primary_source_refresh_required,
-DKS,Dick's Sporting Goods Inc,retail,Core,,,2026-11-05,primary_source_refresh_required,
-DLTR,"Dollar Tree, Inc.",retail,Core,,,2026-11-05,primary_source_refresh_required,
-FIVE,"Five Below, Inc.",retail,Core,,,2026-11-05,primary_source_refresh_required,
-HD,"Home Depot, Inc. (The)",retail,Core,,,2026-11-05,primary_source_refresh_required,
-KR,Kroger Company (The),retail,Core,,,2026-11-05,primary_source_refresh_required,
-KSS,Kohl's Corporation,retail,Core,,,2026-11-05,primary_source_refresh_required,
-LOW,"Lowe's Companies, Inc.",retail,Core,,,2026-11-05,primary_source_refresh_required,
-ORLY,"O'Reilly Automotive, Inc.",retail,Core,,,2026-11-05,primary_source_refresh_required,
-ROST,"Ross Stores, Inc.",retail,Core,,,2026-11-05,primary_source_refresh_required,
-TGT,Target Corporation,retail,Core,,,2026-11-05,primary_source_refresh_required,
-TJX,"TJX Companies, Inc. (The)",retail,Core,,,2026-11-05,primary_source_refresh_required,
-TSCO,Tractor Supply Company,retail,Core,,,2026-11-05,primary_source_refresh_required,
-ULTA,"Ulta Beauty, Inc.",retail,Core,,,2026-11-05,primary_source_refresh_required,
-WMT,Walmart Inc.,retail,Core,,,2026-11-05,primary_source_refresh_required,
-BE,Bloom Energy Corporation,clean-energy,Core,,,2026-11-05,primary_source_refresh_required,
-CWEN,"Clearway Energy, Inc.",clean-energy,Core,,,2026-11-05,primary_source_refresh_required,
+CCL,Carnival Corporation Ltd.,leisure-entertainment,Core,,,2026-11-05,industry_rule_accepted,
+CNK,"Cinemark Holdings, Inc.",leisure-entertainment,Core,,,2026-11-05,industry_rule_accepted,
+DIS,Walt Disney Company (The),leisure-entertainment,Core,,,2026-11-05,industry_rule_accepted,
+H,Hyatt Hotels Corporation,leisure-entertainment,Core,,,2026-11-05,industry_rule_accepted,
+HLT,Hilton Worldwide Holdings Inc.,leisure-entertainment,Core,,,2026-11-05,industry_rule_accepted,
+LYV,"Live Nation Entertainment, Inc.",leisure-entertainment,Core,,,2026-11-05,industry_rule_accepted,
+MAR,Marriott International,leisure-entertainment,Core,,,2026-11-05,industry_rule_accepted,
+MTN,"Vail Resorts, Inc.",leisure-entertainment,Core,,,2026-11-05,industry_rule_accepted,
+NCLH,Norwegian Cruise Line Holdings Ltd.,leisure-entertainment,Core,,,2026-11-05,industry_rule_accepted,
+PLNT,"Planet Fitness, Inc.",leisure-entertainment,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1637207/000163720726000011/plnt-20251231.htm
+PTON,"Peloton Interactive, Inc.",leisure-entertainment,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1639825/000163982526000038/pton-20260630.htm
+RCL,Royal Caribbean Cruises Ltd.,leisure-entertainment,Core,,,2026-11-05,industry_rule_accepted,
+TKO,"TKO Group Holdings, Inc.",leisure-entertainment,Core,,,2026-11-05,industry_rule_accepted,
+TNL,Travel Leisure Co.,leisure-entertainment,Core,,,2026-11-05,industry_rule_accepted,
+VIK,Viking Holdings Ltd,leisure-entertainment,Core,,,2026-11-05,industry_rule_accepted,
+ASO,"Academy Sports and Outdoors, Inc.",retail,Core,,,2026-11-05,industry_rule_accepted,
+BBY,"Best Buy Co., Inc.",retail,Core,,,2026-11-05,industry_rule_accepted,
+BOOT,"Boot Barn Holdings, Inc.",retail,Core,,,2026-11-05,industry_rule_accepted,
+BURL,"Burlington Stores, Inc.",retail,Core,,,2026-11-05,industry_rule_accepted,
+COST,Costco Wholesale Corporation,retail,Core,,,2026-11-05,industry_rule_accepted,
+DG,Dollar General Corporation,retail,Core,,,2026-11-05,industry_rule_accepted,
+DKS,Dick's Sporting Goods Inc,retail,Core,,,2026-11-05,industry_rule_accepted,
+DLTR,"Dollar Tree, Inc.",retail,Core,,,2026-11-05,industry_rule_accepted,
+FIVE,"Five Below, Inc.",retail,Core,,,2026-11-05,industry_rule_accepted,
+HD,"Home Depot, Inc. (The)",retail,Core,,,2026-11-05,industry_rule_accepted,
+KR,Kroger Company (The),retail,Core,,,2026-11-05,industry_rule_accepted,
+KSS,Kohl's Corporation,retail,Core,,,2026-11-05,industry_rule_accepted,
+LOW,"Lowe's Companies, Inc.",retail,Core,,,2026-11-05,industry_rule_accepted,
+ORLY,"O'Reilly Automotive, Inc.",retail,Core,,,2026-11-05,industry_rule_accepted,
+ROST,"Ross Stores, Inc.",retail,Core,,,2026-11-05,industry_rule_accepted,
+TGT,Target Corporation,retail,Core,,,2026-11-05,industry_rule_accepted,
+TJX,"TJX Companies, Inc. (The)",retail,Core,,,2026-11-05,industry_rule_accepted,
+TSCO,Tractor Supply Company,retail,Core,,,2026-11-05,industry_rule_accepted,
+ULTA,"Ulta Beauty, Inc.",retail,Core,,,2026-11-05,industry_rule_accepted,
+WMT,Walmart Inc.,retail,Core,,,2026-11-05,industry_rule_accepted,
+BE,Bloom Energy Corporation,clean-energy,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1664703/000162828026006516/be-20251231.htm
+CWEN,"Clearway Energy, Inc.",clean-energy,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1567683/000162828026010952/cwen-20251231.htm
 ENPH,"Enphase Energy, Inc.",clean-energy,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1463101/000146310126000013/enph-20251231.htm
-FRVO,Fervo Energy Company,clean-energy,Core,,,2026-11-05,primary_source_refresh_required,
+FRVO,Fervo Energy Company,clean-energy,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1853868/000162828026056457/frvo-20260630.htm
 FSLR,"First Solar, Inc.",clean-energy,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1274494/000127449426000021/fslr-20251231.htm
 NXT,Nextpower Inc.,clean-energy,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1852131/000185213126000017/nxt-20260331.htm
 ORA,"Ormat Technologies, Inc.",clean-energy,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1296445/000129644526000006/ora-20251231.htm
-RNW,ReNew Energy Global plc,clean-energy,Core,,,2026-11-05,primary_source_refresh_required,
+RNW,ReNew Energy Global plc,clean-energy,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1848763/000119312526325073/rnw-20260331.htm
 RUN,Sunrun Inc.,clean-energy,Core,,,2026-11-05,industry_rule_accepted,
-AES,The AES Corporation,clean-energy,Enabler,,,2026-11-05,primary_source_refresh_required,
-AQN,Algonquin Power & Utilities Corp.,clean-energy,Enabler,,,2026-11-05,primary_source_refresh_required,
-ETN,"Eaton Corporation, PLC",clean-energy,Enabler,,,2026-11-05,primary_source_refresh_required,
-GEV,GE Vernova Inc.,clean-energy,Enabler,,,2026-11-05,primary_source_refresh_required,
-HUBB,Hubbell Inc,clean-energy,Enabler,,,2026-11-05,primary_source_refresh_required,
-NEE,"NextEra Energy, Inc.",clean-energy,Enabler,,,2026-11-05,primary_source_refresh_required,
-PWR,"Quanta Services, Inc.",clean-energy,Enabler,,,2026-11-05,primary_source_refresh_required,
-DTM,"DT Midstream, Inc.",midstream-lng,Core,,,2026-11-05,primary_source_refresh_required,
-ENB,Enbridge Inc,midstream-lng,Core,,,2026-11-05,primary_source_refresh_required,
-EPD,Enterprise Products Partners L.P.,midstream-lng,Core,,,2026-11-05,primary_source_refresh_required,
-GLNG,Golar LNG Limited,midstream-lng,Core,,,2026-11-05,primary_source_refresh_required,
-KMI,"Kinder Morgan, Inc.",midstream-lng,Core,,,2026-11-05,primary_source_refresh_required,
-KNTK,Kinetik Holdings Inc.,midstream-lng,Core,,,2026-11-05,primary_source_refresh_required,
-LNG,"Cheniere Energy, Inc.",midstream-lng,Core,,,2026-11-05,primary_source_refresh_required,
-MPLX,MPLX LP,midstream-lng,Core,,,2026-11-05,primary_source_refresh_required,
+AES,The AES Corporation,clean-energy,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/874761/000087476126000063/aes-20251231.htm
+AQN,Algonquin Power & Utilities Corp.,clean-energy,Related,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1174169/000117416926000015/aqunf-20251231.htm
+ETN,"Eaton Corporation, PLC",clean-energy,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1551182/000155118226000007/etn-20251231.htm
+GEV,GE Vernova Inc.,clean-energy,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1996810/000199681026000015/gev-20251231.htm
+HUBB,Hubbell Inc,clean-energy,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/48898/000162828026007500/hubb-20251231.htm
+NEE,"NextEra Energy, Inc.",clean-energy,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/753308/000075330826000015/nee-20251231.htm
+PWR,"Quanta Services, Inc.",clean-energy,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1050915/000105091526000006/pwr-20251231.htm
+DTM,"DT Midstream, Inc.",midstream-lng,Core,,,2026-11-05,industry_rule_accepted,
+ENB,Enbridge Inc,midstream-lng,Core,,,2026-11-05,industry_rule_accepted,
+EPD,Enterprise Products Partners L.P.,midstream-lng,Core,,,2026-11-05,industry_rule_accepted,
+GLNG,Golar LNG Limited,midstream-lng,Core,,,2026-11-05,industry_rule_accepted,
+KMI,"Kinder Morgan, Inc.",midstream-lng,Core,,,2026-11-05,industry_rule_accepted,
+KNTK,Kinetik Holdings Inc.,midstream-lng,Core,,,2026-11-05,industry_rule_accepted,
+LNG,"Cheniere Energy, Inc.",midstream-lng,Core,,,2026-11-05,industry_rule_accepted,
+MPLX,MPLX LP,midstream-lng,Core,,,2026-11-05,industry_rule_accepted,
 OKE,"ONEOK, Inc.",midstream-lng,Core,,,2026-11-05,industry_rule_accepted,
-PAA,"Plains All American Pipeline, L.P.",midstream-lng,Core,,,2026-11-05,primary_source_refresh_required,
-PAGP,"Plains GP Holdings, L.P.",midstream-lng,Core,,,2026-11-05,primary_source_refresh_required,
-PBA,Pembina Pipeline Corp.,midstream-lng,Core,,,2026-11-05,primary_source_refresh_required,
+PAA,"Plains All American Pipeline, L.P.",midstream-lng,Core,,,2026-11-05,industry_rule_accepted,
+PAGP,"Plains GP Holdings, L.P.",midstream-lng,Core,,,2026-11-05,industry_rule_accepted,
+PBA,Pembina Pipeline Corp.,midstream-lng,Core,,,2026-11-05,industry_rule_accepted,
 TRGP,"Targa Resources, Inc.",midstream-lng,Core,,,2026-11-05,industry_rule_accepted,
-TRP,TC Energy Corporation,midstream-lng,Core,,,2026-11-05,primary_source_refresh_required,
-VG,"Venture Global, Inc.",midstream-lng,Core,,,2026-11-05,primary_source_refresh_required,
-WES,"Western Midstream Partners, LP",midstream-lng,Core,,,2026-11-05,primary_source_refresh_required,
-WMB,"Williams Companies, Inc. (The)",midstream-lng,Core,,,2026-11-05,primary_source_refresh_required,
+TRP,TC Energy Corporation,midstream-lng,Core,,,2026-11-05,industry_rule_accepted,
+VG,"Venture Global, Inc.",midstream-lng,Core,,,2026-11-05,industry_rule_accepted,
+WES,"Western Midstream Partners, LP",midstream-lng,Core,,,2026-11-05,industry_rule_accepted,
+WMB,"Williams Companies, Inc. (The)",midstream-lng,Core,,,2026-11-05,industry_rule_accepted,
 AR,Antero Resources Corporation,natural-gas-producers,Core,,,2026-11-05,industry_rule_accepted,
 CNX,CNX Resources Corporation,natural-gas-producers,Core,,,2026-11-05,industry_rule_accepted,
 CRK,"Comstock Resources, Inc.",natural-gas-producers,Core,,,2026-11-05,industry_rule_accepted,
@@ -105,20 +105,19 @@ EXE,Expand Energy Corporation,natural-gas-producers,Core,,,2026-11-05,industry_r
 RRC,Range Resources Corporation,natural-gas-producers,Core,,,2026-11-05,industry_rule_accepted,
 COP,ConocoPhillips,natural-gas-producers,Enabler,,,2026-11-05,industry_rule_accepted,
 EOG,"EOG Resources, Inc.",natural-gas-producers,Enabler,,,2026-11-05,industry_rule_accepted,
-BWXT,"BWX Technologies, Inc.",nuclear-energy,Core,,,2026-11-05,primary_source_refresh_required,
+BWXT,"BWX Technologies, Inc.",nuclear-energy,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1486957/000148695726000007/bwxt-20251231.htm
 CCJ,Cameco Corporation,nuclear-energy,Core,,,2026-11-05,industry_rule_accepted,
-CEG,Constellation Energy Corporation,nuclear-energy,Core,,,2026-11-05,primary_source_refresh_required,
+CEG,Constellation Energy Corporation,nuclear-energy,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1868275/000186827526000032/ceg-20251231.htm
 NXE,Nexgen Energy Ltd.,nuclear-energy,Core,,,2026-11-05,industry_rule_accepted,
-OKLO,Oklo Inc.,nuclear-energy,Core,,,2026-11-05,primary_source_refresh_required,
-SMR,NuScale Power Corporation,nuclear-energy,Core,,,2026-11-05,primary_source_refresh_required,
-XE,"X-Energy, Inc.",nuclear-energy,Core,,,2026-11-05,primary_source_refresh_required,
-DUK,Duke Energy Corporation (Holding Company),nuclear-energy,Enabler,,,2026-11-05,primary_source_refresh_required,
-ETR,Entergy Corporation,nuclear-energy,Enabler,,,2026-11-05,primary_source_refresh_required,
-EXC,Exelon Corporation,nuclear-energy,Enabler,,,2026-11-05,primary_source_refresh_required,
-GEV,GE Vernova Inc.,nuclear-energy,Enabler,,,2026-11-05,primary_source_refresh_required,
-PEG,Public Service Enterprise Group Incorporated,nuclear-energy,Enabler,,,2026-11-05,primary_source_refresh_required,
-SO,Southern Company (The),nuclear-energy,Enabler,,,2026-11-05,primary_source_refresh_required,
-VST,Vistra Corp.,nuclear-energy,Enabler,,,2026-11-05,primary_source_refresh_required,
+OKLO,Oklo Inc.,nuclear-energy,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1849056/000162828026018698/oklo-20251231.htm
+SMR,NuScale Power Corporation,nuclear-energy,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1822966/000182296626000018/smr-20251231.htm
+XE,"X-Energy, Inc.",nuclear-energy,Core,,,2026-11-05,primary_source_verified_2026,https://x-energy.com/xe-100/
+DUK,Duke Energy Corporation (Holding Company),nuclear-energy,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1326160/000132616026000014/duk-20251231.htm
+ETR,Entergy Corporation,nuclear-energy,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/65984/000006598426000174/etr-20251231.htm
+GEV,GE Vernova Inc.,nuclear-energy,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1996810/000199681026000015/gev-20251231.htm
+PEG,Public Service Enterprise Group Incorporated,nuclear-energy,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/788784/000119312526077446/peg-20251231.htm
+SO,Southern Company (The),nuclear-energy,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/92122/000009212226000006/so-20251231.htm
+VST,Vistra Corp.,nuclear-energy,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1692819/000169281926000006/vistra-20251231.htm
 APA,APA Corporation,oil-gas-producers,Core,,,2026-11-05,industry_rule_accepted,
 AR,Antero Resources Corporation,oil-gas-producers,Core,,,2026-11-05,industry_rule_accepted,
 CNQ,Canadian Natural Resources Limited,oil-gas-producers,Core,,,2026-11-05,industry_rule_accepted,
@@ -143,82 +142,82 @@ SU,Suncor Energy Inc.,oil-gas-producers,Core,,,2026-11-05,industry_rule_accepted
 TALO,"Talos Energy, Inc.",oil-gas-producers,Core,,,2026-11-05,industry_rule_accepted,
 XOM,ExxonMobil Holdings Corporation,oil-gas-producers,Core,,,2026-11-05,industry_rule_accepted,
 AROC,"Archrock, Inc.",oil-services,Core,,,2026-11-05,industry_rule_accepted,
-BKR,Baker Hughes Company,oil-services,Core,,,2026-11-05,primary_source_refresh_required,
+BKR,Baker Hughes Company,oil-services,Core,,,2026-11-05,industry_rule_accepted,
 FTI,TechnipFMC plc,oil-services,Core,,,2026-11-05,industry_rule_accepted,
 HAL,Halliburton Company,oil-services,Core,,,2026-11-05,industry_rule_accepted,
-HP,"Helmerich & Payne, Inc.",oil-services,Core,,,2026-11-05,primary_source_refresh_required,
+HP,"Helmerich & Payne, Inc.",oil-services,Core,,,2026-11-05,industry_rule_accepted,
 KGS,"Kodiak Gas Services, Inc.",oil-services,Core,,,2026-11-05,industry_rule_accepted,
 LBRT,Liberty Energy Inc.,oil-services,Core,,,2026-11-05,industry_rule_accepted,
-NE,Noble Corporation plc A,oil-services,Core,,,2026-11-05,primary_source_refresh_required,
+NE,Noble Corporation plc A,oil-services,Core,,,2026-11-05,industry_rule_accepted,
 NESR,National Energy Services Reunited Corp,oil-services,Core,,,2026-11-05,industry_rule_accepted,
 NOV,NOV Inc.,oil-services,Core,,,2026-11-05,industry_rule_accepted,
 PTEN,"Patterson-UTI Energy, Inc.",oil-services,Core,,,2026-11-05,industry_rule_accepted,
-RIG,Transocean Ltd (Switzerland),oil-services,Core,,,2026-11-05,primary_source_refresh_required,
-SDRL,Seadrill Limited,oil-services,Core,,,2026-11-05,primary_source_refresh_required,
+RIG,Transocean Ltd (Switzerland),oil-services,Core,,,2026-11-05,industry_rule_accepted,
+SDRL,Seadrill Limited,oil-services,Core,,,2026-11-05,industry_rule_accepted,
 SEI,"Solaris Energy Infrastructure, Inc.",oil-services,Core,,,2026-11-05,industry_rule_accepted,
-SLB,SLB Limited,oil-services,Core,,,2026-11-05,primary_source_refresh_required,
-VAL,Valaris Limited,oil-services,Core,,,2026-11-05,primary_source_refresh_required,
+SLB,SLB Limited,oil-services,Core,,,2026-11-05,industry_rule_accepted,
+VAL,Valaris Limited,oil-services,Core,,,2026-11-05,industry_rule_accepted,
 WBI,WaterBridge Infrastructure LLC,oil-services,Core,,,2026-11-05,industry_rule_accepted,
 WFRD,Weatherford International plc,oil-services,Core,,,2026-11-05,industry_rule_accepted,
 WHD,"Cactus, Inc. Class A Common Stock",oil-services,Core,,,2026-11-05,industry_rule_accepted,
 ENPH,"Enphase Energy, Inc.",solar,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1463101/000146310126000013/enph-20251231.htm
 FSLR,"First Solar, Inc.",solar,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1274494/000127449426000021/fslr-20251231.htm
-MWH,"SOLV Energy, Inc.",solar,Core,,,2026-11-05,primary_source_refresh_required,
+MWH,"SOLV Energy, Inc.",solar,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/2065636/000119312526124117/d31834d10k.htm
 NXT,Nextpower Inc.,solar,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1852131/000185213126000017/nxt-20260331.htm
 RUN,Sunrun Inc.,solar,Core,,,2026-11-05,industry_rule_accepted,
-AWK,"American Water Works Company, Inc.",water,Core,,,2026-11-05,primary_source_refresh_required,
-BMI,"Badger Meter, Inc.",water,Core,,,2026-11-05,primary_source_refresh_required,
-HTO,H2O America,water,Core,,,2026-11-05,primary_source_refresh_required,
-MWA,MUELLER WATER PRODUCTS,water,Core,,,2026-11-05,primary_source_refresh_required,
-PNR,Pentair plc.,water,Core,,,2026-11-05,primary_source_refresh_required,
-WTRG,"Essential Utilities, Inc.",water,Core,,,2026-11-05,primary_source_refresh_required,
-XYL,Xylem Inc.,water,Core,,,2026-11-05,primary_source_refresh_required,
-ECL,Ecolab Inc.,water,Enabler,,,2026-11-05,primary_source_refresh_required,
-AMP,"Ameriprise Financial, Inc.",capital-markets,Core,,,2026-11-05,primary_source_refresh_required,
-APO,"Apollo Global Management, Inc. (New)",capital-markets,Core,,,2026-11-05,primary_source_refresh_required,
-ARES,Ares Management Corporation,capital-markets,Core,,,2026-11-05,primary_source_refresh_required,
-BLK,"BlackRock, Inc.",capital-markets,Core,,,2026-11-05,primary_source_refresh_required,
-BX,Blackstone Inc.,capital-markets,Core,,,2026-11-05,primary_source_refresh_required,
-CG,The Carlyle Group Inc.,capital-markets,Core,,,2026-11-05,primary_source_refresh_required,
-CME,CME Group Inc.,capital-markets,Core,,,2026-11-05,primary_source_refresh_required,
-COIN,"Coinbase Global, Inc.",capital-markets,Core,,,2026-11-05,primary_source_refresh_required,
-GLXY,Galaxy Digital Inc.,capital-markets,Core,,,2026-11-05,primary_source_refresh_required,
-GS,"Goldman Sachs Group, Inc. (The)",capital-markets,Core,,,2026-11-05,primary_source_refresh_required,
-HOOD,"Robinhood Markets, Inc.",capital-markets,Core,,,2026-11-05,primary_source_refresh_required,
-IBKR,"Interactive Brokers Group, Inc.",capital-markets,Core,,,2026-11-05,primary_source_refresh_required,
-ICE,Intercontinental Exchange Inc.,capital-markets,Core,,,2026-11-05,primary_source_refresh_required,
-KKR,KKR & Co. Inc.,capital-markets,Core,,,2026-11-05,primary_source_refresh_required,
-LPLA,LPL Financial Holdings Inc.,capital-markets,Core,,,2026-11-05,primary_source_refresh_required,
-MCO,Moody's Corporation,capital-markets,Core,,,2026-11-05,primary_source_refresh_required,
-MS,Morgan Stanley,capital-markets,Core,,,2026-11-05,primary_source_refresh_required,
-MSCI,MSCI Inc.,capital-markets,Core,,,2026-11-05,primary_source_refresh_required,
-NDAQ,"Nasdaq, Inc.",capital-markets,Core,,,2026-11-05,primary_source_refresh_required,
-OWL,Blue Owl Capital Inc.,capital-markets,Core,,,2026-11-05,primary_source_refresh_required,
-RJF,"Raymond James Financial, Inc.",capital-markets,Core,,,2026-11-05,primary_source_refresh_required,
-SCHW,Charles Schwab Corporation (The),capital-markets,Core,,,2026-11-05,primary_source_refresh_required,
-SPGI,S&P Global Inc.,capital-markets,Core,,,2026-11-05,primary_source_refresh_required,
-TROW,"T. Rowe Price Group, Inc.",capital-markets,Core,,,2026-11-05,primary_source_refresh_required,
-TW,Tradeweb Markets Inc.,capital-markets,Core,,,2026-11-05,primary_source_refresh_required,
-ACIW,"ACI Worldwide, Inc.",fintech-payments,Core,,,2026-11-05,primary_source_refresh_required,
-AFRM,"Affirm Holdings, Inc.",fintech-payments,Core,,,2026-11-05,primary_source_refresh_required,
-BILL,"BILL Holdings, Inc.",fintech-payments,Core,,,2026-11-05,primary_source_refresh_required,
-CHYM,"Chime Financial, Inc.",fintech-payments,Core,,,2026-11-05,primary_source_refresh_required,
-DLO,DLocal Limited,fintech-payments,Core,,,2026-11-05,primary_source_refresh_required,
-FIS,"Fidelity National Information Services, Inc.",fintech-payments,Core,,,2026-11-05,primary_source_refresh_required,
-FISV,"Fiserv, Inc.",fintech-payments,Core,,,2026-11-05,primary_source_refresh_required,
-GPN,Global Payments Inc.,fintech-payments,Core,,,2026-11-05,primary_source_refresh_required,
-MA,Mastercard Incorporated,fintech-payments,Core,,,2026-11-05,primary_source_refresh_required,
+AWK,"American Water Works Company, Inc.",water,Core,,,2026-11-05,industry_rule_accepted,
+BMI,"Badger Meter, Inc.",water,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/9092/000119312526054739/bmi-20251231.htm
+HTO,H2O America,water,Core,,,2026-11-05,industry_rule_accepted,
+MWA,MUELLER WATER PRODUCTS,water,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1350593/000135059325000066/mwa-20250930.htm
+PNR,Pentair plc.,water,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/77360/000007736026000007/pnr-20251231.htm
+WTRG,"Essential Utilities, Inc.",water,Core,,,2026-11-05,industry_rule_accepted,
+XYL,Xylem Inc.,water,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1524472/000152447226000012/xyl-20251231.htm
+ECL,Ecolab Inc.,water,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/31462/000110465926018357/ecl-20251231x10k.htm
+AMP,"Ameriprise Financial, Inc.",capital-markets,Core,,,2026-11-05,industry_rule_accepted,
+APO,"Apollo Global Management, Inc. (New)",capital-markets,Core,,,2026-11-05,industry_rule_accepted,
+ARES,Ares Management Corporation,capital-markets,Core,,,2026-11-05,industry_rule_accepted,
+BLK,"BlackRock, Inc.",capital-markets,Core,,,2026-11-05,industry_rule_accepted,
+BX,Blackstone Inc.,capital-markets,Core,,,2026-11-05,industry_rule_accepted,
+CG,The Carlyle Group Inc.,capital-markets,Core,,,2026-11-05,industry_rule_accepted,
+CME,CME Group Inc.,capital-markets,Core,,,2026-11-05,industry_rule_accepted,
+COIN,"Coinbase Global, Inc.",capital-markets,Core,,,2026-11-05,industry_rule_accepted,
+GLXY,Galaxy Digital Inc.,capital-markets,Core,,,2026-11-05,industry_rule_accepted,
+GS,"Goldman Sachs Group, Inc. (The)",capital-markets,Core,,,2026-11-05,industry_rule_accepted,
+HOOD,"Robinhood Markets, Inc.",capital-markets,Core,,,2026-11-05,industry_rule_accepted,
+IBKR,"Interactive Brokers Group, Inc.",capital-markets,Core,,,2026-11-05,industry_rule_accepted,
+ICE,Intercontinental Exchange Inc.,capital-markets,Core,,,2026-11-05,industry_rule_accepted,
+KKR,KKR & Co. Inc.,capital-markets,Core,,,2026-11-05,industry_rule_accepted,
+LPLA,LPL Financial Holdings Inc.,capital-markets,Core,,,2026-11-05,industry_rule_accepted,
+MCO,Moody's Corporation,capital-markets,Core,,,2026-11-05,industry_rule_accepted,
+MS,Morgan Stanley,capital-markets,Core,,,2026-11-05,industry_rule_accepted,
+MSCI,MSCI Inc.,capital-markets,Core,,,2026-11-05,industry_rule_accepted,
+NDAQ,"Nasdaq, Inc.",capital-markets,Core,,,2026-11-05,industry_rule_accepted,
+OWL,Blue Owl Capital Inc.,capital-markets,Core,,,2026-11-05,industry_rule_accepted,
+RJF,"Raymond James Financial, Inc.",capital-markets,Core,,,2026-11-05,industry_rule_accepted,
+SCHW,Charles Schwab Corporation (The),capital-markets,Core,,,2026-11-05,industry_rule_accepted,
+SPGI,S&P Global Inc.,capital-markets,Core,,,2026-11-05,industry_rule_accepted,
+TROW,"T. Rowe Price Group, Inc.",capital-markets,Core,,,2026-11-05,industry_rule_accepted,
+TW,Tradeweb Markets Inc.,capital-markets,Core,,,2026-11-05,industry_rule_accepted,
+ACIW,"ACI Worldwide, Inc.",fintech-payments,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/935036/000093503626000011/aciw-20251231.htm
+AFRM,"Affirm Holdings, Inc.",fintech-payments,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1820953/000162828026059279/afrm-20260630.htm
+BILL,"BILL Holdings, Inc.",fintech-payments,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1786352/000162828026058238/bill-20260630.htm
+CHYM,"Chime Financial, Inc.",fintech-payments,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1795586/000179558626000013/chym-20251231.htm
+DLO,DLocal Limited,fintech-payments,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1846832/000207097926000113/dlo-20251231.htm
+FIS,"Fidelity National Information Services, Inc.",fintech-payments,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1136893/000113689326000013/fis-20251231.htm
+FISV,"Fiserv, Inc.",fintech-payments,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/798354/000079835426000009/fi-20251231.htm
+GPN,Global Payments Inc.,fintech-payments,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1123360/000112336026000008/gpn-20251231.htm
+MA,Mastercard Incorporated,fintech-payments,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1141391/000114139126000013/ma-20251231.htm
 NU,Nu Holdings Ltd.,fintech-payments,Core,,,2026-11-05,industry_rule_accepted,
-PAGS,PagSeguro Digital Ltd.,fintech-payments,Core,,,2026-11-05,primary_source_refresh_required,
-PAYO,Payoneer Global Inc.,fintech-payments,Core,,,2026-11-05,primary_source_refresh_required,
-PYPL,"PayPal Holdings, Inc.",fintech-payments,Core,,,2026-11-05,primary_source_refresh_required,
-RELY,"Remitly Global, Inc.",fintech-payments,Core,,,2026-11-05,primary_source_refresh_required,
-SEZL,Sezzle Inc.,fintech-payments,Core,,,2026-11-05,primary_source_refresh_required,
-SOFI,"SoFi Technologies, Inc.",fintech-payments,Core,,,2026-11-05,primary_source_refresh_required,
-UPST,"Upstart Holdings, Inc.",fintech-payments,Core,,,2026-11-05,primary_source_refresh_required,
-V,Visa Inc.,fintech-payments,Core,,,2026-11-05,primary_source_refresh_required,
-XYZ,"Block, Inc.",fintech-payments,Core,,,2026-11-05,primary_source_refresh_required,
-HOOD,"Robinhood Markets, Inc.",fintech-payments,Enabler,,,2026-11-05,primary_source_refresh_required,
+PAGS,PagSeguro Digital Ltd.,fintech-payments,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1712807/000155485526000826/pags-20251231.htm
+PAYO,Payoneer Global Inc.,fintech-payments,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1845815/000110465926020487/payo-20251231x10k.htm
+PYPL,"PayPal Holdings, Inc.",fintech-payments,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1633917/000163391726000024/pypl-20251231.htm
+RELY,"Remitly Global, Inc.",fintech-payments,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1782170/000162828026009038/rely-20251231.htm
+SEZL,Sezzle Inc.,fintech-payments,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1662991/000166299126000016/szl-20251231.htm
+SOFI,"SoFi Technologies, Inc.",fintech-payments,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1818874/000181887426000013/sofi-20251231.htm
+UPST,"Upstart Holdings, Inc.",fintech-payments,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1647639/000164763926000027/upst-20251231.htm
+V,Visa Inc.,fintech-payments,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1403161/000140316125000089/v-20250930.htm
+XYZ,"Block, Inc.",fintech-payments,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1512673/000162828026012254/xyz-20251231.htm
+HOOD,"Robinhood Markets, Inc.",fintech-payments,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm
 ACGL,Arch Capital Group Ltd.,insurance,Core,,,2026-11-05,industry_rule_accepted,
 AFL,AFLAC Incorporated,insurance,Core,,,2026-11-05,industry_rule_accepted,
 AIG,"American International Group, Inc. New",insurance,Core,,,2026-11-05,industry_rule_accepted,
@@ -340,7 +339,7 @@ GH,"Guardant Health, Inc.",genomics,Core,,,2026-11-05,industry_rule_accepted,
 ILMN,"Illumina, Inc.",genomics,Core,,,2026-11-05,industry_rule_accepted,
 NEO,"NeoGenomics, Inc.",genomics,Core,,,2026-11-05,industry_rule_accepted,
 NTRA,"Natera, Inc.",genomics,Core,,,2026-11-05,industry_rule_accepted,
-TEM,"Tempus AI, Inc.",genomics,Core,,,2026-11-05,primary_source_refresh_required,
+TEM,"Tempus AI, Inc.",genomics,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1717115/000119312526066961/tem-20251231.htm
 TWST,Twist Bioscience Corporation,genomics,Core,,,2026-11-05,industry_rule_accepted,
 TXG,"10x Genomics, Inc.",genomics,Core,,,2026-11-05,industry_rule_accepted,
 VCYT,"Veracyte, Inc.",genomics,Core,,,2026-11-05,industry_rule_accepted,
@@ -348,31 +347,31 @@ WGS,GeneDx Holdings Corp.,genomics,Core,,,2026-11-05,industry_rule_accepted,
 DHR,Danaher Corporation,genomics,Enabler,,,2026-11-05,industry_rule_accepted,
 TMO,Thermo Fisher Scientific Inc,genomics,Enabler,,,2026-11-05,industry_rule_accepted,
 ACHC,"Acadia Healthcare Company, Inc.",healthcare-providers,Core,,,2026-11-05,industry_rule_accepted,
-BKD,Brookdale Senior Living Inc.,healthcare-providers,Core,,,2026-11-05,primary_source_refresh_required,
+BKD,Brookdale Senior Living Inc.,healthcare-providers,Core,,,2026-11-05,industry_rule_accepted,
 BTSG,"BrightSpring Health Services, Inc.",healthcare-providers,Core,,,2026-11-05,industry_rule_accepted,
-CI,The Cigna Group,healthcare-providers,Core,,,2026-11-05,primary_source_refresh_required,
-CNC,Centene Corporation,healthcare-providers,Core,,,2026-11-05,primary_source_refresh_required,
+CI,The Cigna Group,healthcare-providers,Core,,,2026-11-05,industry_rule_accepted,
+CNC,Centene Corporation,healthcare-providers,Core,,,2026-11-05,industry_rule_accepted,
 CON,"Concentra Group Holdings Parent, Inc.",healthcare-providers,Core,,,2026-11-05,industry_rule_accepted,
-CVS,CVS Health Corporation,healthcare-providers,Core,,,2026-11-05,primary_source_refresh_required,
-DGX,Quest Diagnostics Incorporated,healthcare-providers,Core,,,2026-11-05,primary_source_refresh_required,
+CVS,CVS Health Corporation,healthcare-providers,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/64803/000006480326000010/cvs-20251231.htm
+DGX,Quest Diagnostics Incorporated,healthcare-providers,Core,,,2026-11-05,industry_rule_accepted,
 DVA,DaVita Inc.,healthcare-providers,Core,,,2026-11-05,industry_rule_accepted,
 EHC,Encompass Health Corporation,healthcare-providers,Core,,,2026-11-05,industry_rule_accepted,
-ELV,"Elevance Health, Inc.",healthcare-providers,Core,,,2026-11-05,primary_source_refresh_required,
-HCA,"HCA Healthcare, Inc.",healthcare-providers,Core,,,2026-11-05,primary_source_refresh_required,
+ELV,"Elevance Health, Inc.",healthcare-providers,Core,,,2026-11-05,industry_rule_accepted,
+HCA,"HCA Healthcare, Inc.",healthcare-providers,Core,,,2026-11-05,industry_rule_accepted,
 HIMS,"Hims & Hers Health, Inc.",healthcare-providers,Core,,,2026-11-05,industry_rule_accepted,
-HUM,Humana Inc.,healthcare-providers,Core,,,2026-11-05,primary_source_refresh_required,
+HUM,Humana Inc.,healthcare-providers,Core,,,2026-11-05,industry_rule_accepted,
 LFST,"LifeStance Health Group, Inc.",healthcare-providers,Core,,,2026-11-05,industry_rule_accepted,
 LH,Labcorp Holdings Inc.,healthcare-providers,Core,,,2026-11-05,industry_rule_accepted,
-MOH,Molina Healthcare Inc,healthcare-providers,Core,,,2026-11-05,primary_source_refresh_required,
+MOH,Molina Healthcare Inc,healthcare-providers,Core,,,2026-11-05,industry_rule_accepted,
 OPCH,"Option Care Health, Inc.",healthcare-providers,Core,,,2026-11-05,industry_rule_accepted,
-OSCR,"Oscar Health, Inc.",healthcare-providers,Core,,,2026-11-05,primary_source_refresh_required,
-PACS,"PACS Group, Inc.",healthcare-providers,Core,,,2026-11-05,primary_source_refresh_required,
+OSCR,"Oscar Health, Inc.",healthcare-providers,Core,,,2026-11-05,industry_rule_accepted,
+PACS,"PACS Group, Inc.",healthcare-providers,Core,,,2026-11-05,industry_rule_accepted,
 RDNT,"RadNet, Inc.",healthcare-providers,Core,,,2026-11-05,industry_rule_accepted,
-SGRY,"Surgery Partners, Inc.",healthcare-providers,Core,,,2026-11-05,primary_source_refresh_required,
+SGRY,"Surgery Partners, Inc.",healthcare-providers,Core,,,2026-11-05,industry_rule_accepted,
 SOLV,Solventum Corporation,healthcare-providers,Core,,,2026-11-05,industry_rule_accepted,
-THC,Tenet Healthcare Corporation,healthcare-providers,Core,,,2026-11-05,primary_source_refresh_required,
-UHS,"Universal Health Services, Inc.",healthcare-providers,Core,,,2026-11-05,primary_source_refresh_required,
-UNH,UnitedHealth Group Incorporated,healthcare-providers,Core,,,2026-11-05,primary_source_refresh_required,
+THC,Tenet Healthcare Corporation,healthcare-providers,Core,,,2026-11-05,industry_rule_accepted,
+UHS,"Universal Health Services, Inc.",healthcare-providers,Core,,,2026-11-05,industry_rule_accepted,
+UNH,UnitedHealth Group Incorporated,healthcare-providers,Core,,,2026-11-05,industry_rule_accepted,
 ABT,Abbott Laboratories,medical-devices,Core,,,2026-11-05,industry_rule_accepted,
 ALGN,"Align Technology, Inc.",medical-devices,Core,,,2026-11-05,industry_rule_accepted,
 BAX,Baxter International Inc.,medical-devices,Core,,,2026-11-05,industry_rule_accepted,
@@ -413,25 +412,25 @@ TEVA,Teva Pharmaceutical Industries Limited,pharmaceuticals,Core,,,2026-11-05,in
 VRTX,Vertex Pharmaceuticals Incorporated,pharmaceuticals,Core,,,2026-11-05,industry_rule_accepted,
 VTRS,Viatris Inc.,pharmaceuticals,Core,,,2026-11-05,industry_rule_accepted,
 ZTS,Zoetis Inc.,pharmaceuticals,Core,,,2026-11-05,industry_rule_accepted,
-AVAV,"AeroVironment, Inc.",aerospace-defense,Core,,,2026-11-05,primary_source_refresh_required,
-BA,Boeing Company (The),aerospace-defense,Core,,,2026-11-05,primary_source_refresh_required,
-BWXT,"BWX Technologies, Inc.",aerospace-defense,Core,,,2026-11-05,primary_source_refresh_required,
-FTAI,FTAI Aviation Ltd.,aerospace-defense,Core,,,2026-11-05,primary_source_refresh_required,
+AVAV,"AeroVironment, Inc.",aerospace-defense,Core,,,2026-11-05,industry_rule_accepted,
+BA,Boeing Company (The),aerospace-defense,Core,,,2026-11-05,industry_rule_accepted,
+BWXT,"BWX Technologies, Inc.",aerospace-defense,Core,,,2026-11-05,industry_rule_accepted,
+FTAI,FTAI Aviation Ltd.,aerospace-defense,Core,,,2026-11-05,industry_rule_accepted,
 GD,General Dynamics Corporation,aerospace-defense,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/40533/000004053326000006/gd-20251231.htm
-GE,GE Aerospace,aerospace-defense,Core,,,2026-11-05,primary_source_refresh_required,
+GE,GE Aerospace,aerospace-defense,Core,,,2026-11-05,industry_rule_accepted,
 HEI,Heico Corporation,aerospace-defense,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/46619/000004661925000082/hei-20251031.htm
 HII,"Huntington Ingalls Industries, Inc.",aerospace-defense,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1501585/000150158526000006/hii-20251231.htm
-HONA,Honeywell Aerospace Inc.,aerospace-defense,Core,,,2026-11-05,primary_source_refresh_required,
-HWM,Howmet Aerospace Inc.,aerospace-defense,Core,,,2026-11-05,primary_source_refresh_required,
-JOBY,"Joby Aviation, Inc.",aerospace-defense,Core,,,2026-11-05,primary_source_refresh_required,
-KRMN,Karman Holdings Inc.,aerospace-defense,Core,,,2026-11-05,primary_source_refresh_required,
-KTOS,"Kratos Defense & Security Solutions, Inc.",aerospace-defense,Core,,,2026-11-05,primary_source_refresh_required,
+HONA,Honeywell Aerospace Inc.,aerospace-defense,Core,,,2026-11-05,industry_rule_accepted,
+HWM,Howmet Aerospace Inc.,aerospace-defense,Core,,,2026-11-05,industry_rule_accepted,
+JOBY,"Joby Aviation, Inc.",aerospace-defense,Core,,,2026-11-05,industry_rule_accepted,
+KRMN,Karman Holdings Inc.,aerospace-defense,Core,,,2026-11-05,industry_rule_accepted,
+KTOS,"Kratos Defense & Security Solutions, Inc.",aerospace-defense,Core,,,2026-11-05,industry_rule_accepted,
 LHX,"L3Harris Technologies, Inc.",aerospace-defense,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/202058/000020205826000015/hrs-20260102.htm
 LMT,Lockheed Martin Corporation,aerospace-defense,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/936468/000162828026004195/lmt-20251231.htm
 NOC,Northrop Grumman Corporation,aerospace-defense,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1133421/000113342126000003/noc-20251231.htm
-RKLB,Rocket Lab Corporation,aerospace-defense,Core,,,2026-11-05,primary_source_refresh_required,
+RKLB,Rocket Lab Corporation,aerospace-defense,Core,,,2026-11-05,industry_rule_accepted,
 RTX,RTX Corporation,aerospace-defense,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/101829/000010182926000006/rtx-20251231.htm
-SARO,"StandardAero, Inc.",aerospace-defense,Core,,,2026-11-05,primary_source_refresh_required,
+SARO,"StandardAero, Inc.",aerospace-defense,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/2025410/000119312526072618/saro-20251231.htm
 TXT,Textron Inc.,aerospace-defense,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/217346/000021734626000006/txt-20260103.htm
 WWD,"Woodward, Inc.",aerospace-defense,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/108312/000119312525296204/wwd-20250930.htm
 AAL,"American Airlines Group, Inc.",airlines,Core,,,2026-11-05,industry_rule_accepted,
@@ -439,39 +438,39 @@ ALK,"Alaska Air Group, Inc.",airlines,Core,,,2026-11-05,industry_rule_accepted,
 DAL,"Delta Air Lines, Inc.",airlines,Core,,,2026-11-05,industry_rule_accepted,
 LUV,Southwest Airlines Company,airlines,Core,,,2026-11-05,industry_rule_accepted,
 UAL,"United Airlines Holdings, Inc.",airlines,Core,,,2026-11-05,industry_rule_accepted,
-AMRZ,Amrize Ltd,construction-infrastructure,Core,,,2026-11-05,primary_source_refresh_required,
-APG,APi Group Corporation,construction-infrastructure,Core,,,2026-11-05,primary_source_refresh_required,
-CAT,"Caterpillar, Inc.",construction-infrastructure,Core,,,2026-11-05,primary_source_refresh_required,
-CRH,CRH PLC,construction-infrastructure,Core,,,2026-11-05,primary_source_refresh_required,
-DY,"Dycom Industries, Inc.",construction-infrastructure,Core,,,2026-11-05,primary_source_refresh_required,
-EME,"EMCOR Group, Inc.",construction-infrastructure,Core,,,2026-11-05,primary_source_refresh_required,
-FIX,"Comfort Systems USA, Inc.",construction-infrastructure,Core,,,2026-11-05,primary_source_refresh_required,
-FLR,Fluor Corporation,construction-infrastructure,Core,,,2026-11-05,primary_source_refresh_required,
-IESC,"IES Holdings, Inc.",construction-infrastructure,Core,,,2026-11-05,primary_source_refresh_required,
-JHX,James Hardie Industries plc.,construction-infrastructure,Core,,,2026-11-05,primary_source_refresh_required,
-KNF,Knife Riv Holding Co.,construction-infrastructure,Core,,,2026-11-05,primary_source_refresh_required,
-MLM,"Martin Marietta Materials, Inc.",construction-infrastructure,Core,,,2026-11-05,primary_source_refresh_required,
-MTZ,"MasTec, Inc.",construction-infrastructure,Core,,,2026-11-05,primary_source_refresh_required,
-OTIS,Otis Worldwide Corporation,construction-infrastructure,Core,,,2026-11-05,primary_source_refresh_required,
-PRIM,Primoris Services Corporation,construction-infrastructure,Core,,,2026-11-05,primary_source_refresh_required,
-PWR,"Quanta Services, Inc.",construction-infrastructure,Core,,,2026-11-05,primary_source_refresh_required,
-STRL,"Sterling Infrastructure, Inc.",construction-infrastructure,Core,,,2026-11-05,primary_source_refresh_required,
-URI,"United Rentals, Inc.",construction-infrastructure,Core,,,2026-11-05,primary_source_refresh_required,
-VMC,Vulcan Materials Company (Holding Company),construction-infrastructure,Core,,,2026-11-05,primary_source_refresh_required,
-ETN,"Eaton Corporation, PLC",construction-infrastructure,Enabler,,,2026-11-05,primary_source_refresh_required,
-HUBB,Hubbell Inc,construction-infrastructure,Enabler,,,2026-11-05,primary_source_refresh_required,
-MBLY,Mobileye Global Inc.,ev-autonomy,Core,,,2026-11-05,primary_source_refresh_required,
+AMRZ,Amrize Ltd,construction-infrastructure,Core,,,2026-11-05,industry_rule_accepted,
+APG,APi Group Corporation,construction-infrastructure,Core,,,2026-11-05,industry_rule_accepted,
+CAT,"Caterpillar, Inc.",construction-infrastructure,Core,,,2026-11-05,industry_rule_accepted,
+CRH,CRH PLC,construction-infrastructure,Core,,,2026-11-05,industry_rule_accepted,
+DY,"Dycom Industries, Inc.",construction-infrastructure,Core,,,2026-11-05,industry_rule_accepted,
+EME,"EMCOR Group, Inc.",construction-infrastructure,Core,,,2026-11-05,industry_rule_accepted,
+FIX,"Comfort Systems USA, Inc.",construction-infrastructure,Core,,,2026-11-05,industry_rule_accepted,
+FLR,Fluor Corporation,construction-infrastructure,Core,,,2026-11-05,industry_rule_accepted,
+IESC,"IES Holdings, Inc.",construction-infrastructure,Core,,,2026-11-05,industry_rule_accepted,
+JHX,James Hardie Industries plc.,construction-infrastructure,Core,,,2026-11-05,industry_rule_accepted,
+KNF,Knife Riv Holding Co.,construction-infrastructure,Core,,,2026-11-05,industry_rule_accepted,
+MLM,"Martin Marietta Materials, Inc.",construction-infrastructure,Core,,,2026-11-05,industry_rule_accepted,
+MTZ,"MasTec, Inc.",construction-infrastructure,Core,,,2026-11-05,industry_rule_accepted,
+OTIS,Otis Worldwide Corporation,construction-infrastructure,Core,,,2026-11-05,industry_rule_accepted,
+PRIM,Primoris Services Corporation,construction-infrastructure,Core,,,2026-11-05,industry_rule_accepted,
+PWR,"Quanta Services, Inc.",construction-infrastructure,Core,,,2026-11-05,industry_rule_accepted,
+STRL,"Sterling Infrastructure, Inc.",construction-infrastructure,Core,,,2026-11-05,industry_rule_accepted,
+URI,"United Rentals, Inc.",construction-infrastructure,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1067701/000106770126000007/uri-20251231.htm
+VMC,Vulcan Materials Company (Holding Company),construction-infrastructure,Core,,,2026-11-05,industry_rule_accepted,
+ETN,"Eaton Corporation, PLC",construction-infrastructure,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1551182/000155118226000007/etn-20251231.htm
+HUBB,Hubbell Inc,construction-infrastructure,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/48898/000162828026007500/hubb-20251231.htm
+MBLY,Mobileye Global Inc.,ev-autonomy,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1910139/000110465926014300/mbly-20251227x10k.htm
 OUST,"Ouster, Inc.",ev-autonomy,Core,,,2026-11-05,industry_rule_accepted,
-RIVN,"Rivian Automotive, Inc.",ev-autonomy,Core,,,2026-11-05,primary_source_refresh_required,
-TSLA,"Tesla, Inc.",ev-autonomy,Core,,,2026-11-05,primary_source_refresh_required,
-APTV,Aptiv PLC,ev-autonomy,Enabler,,,2026-11-05,primary_source_refresh_required,
-F,Ford Motor Company,ev-autonomy,Enabler,,,2026-11-05,primary_source_refresh_required,
-GM,General Motors Company,ev-autonomy,Enabler,,,2026-11-05,primary_source_refresh_required,
-GNTX,Gentex Corporation,ev-autonomy,Enabler,,,2026-11-05,primary_source_refresh_required,
+RIVN,"Rivian Automotive, Inc.",ev-autonomy,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1874178/000187417826000008/rivn-20251231.htm
+TSLA,"Tesla, Inc.",ev-autonomy,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1318605/000162828026003952/tsla-20251231.htm
+APTV,Aptiv PLC,ev-autonomy,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1521332/000152133226000009/aptv-20251231.htm
+F,Ford Motor Company,ev-autonomy,Related,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/37996/000003799626000191/f-20260930.htm
+GM,General Motors Company,ev-autonomy,Related,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1467858/000146785826000059/gm-20260930.htm
+GNTX,Gentex Corporation,ev-autonomy,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/355811/000035581126000048/gntx-20260630.htm
 NXPI,NXP Semiconductors N.V.,ev-autonomy,Enabler,,,2026-11-05,industry_rule_accepted,
 ON,ON Semiconductor Corporation,ev-autonomy,Enabler,,,2026-11-05,industry_rule_accepted,
 QCOM,QUALCOMM Incorporated,ev-autonomy,Enabler,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/804328/000080432825000085/qcom-20250928.htm
-UBER,"Uber Technologies, Inc.",ev-autonomy,Enabler,,,2026-11-05,primary_source_refresh_required,
+UBER,"Uber Technologies, Inc.",ev-autonomy,Enabler,,,2026-11-05,primary_source_verified_2026,https://investor.uber.com/news-events/news/press-release-details/2026/Uber-Unveils-Uber-Autonomous-Solutions-to-Accelerate-Autonomous-Mobility--Delivery-Worldwide/
 CMBT,CMB.TECH NV,marine-shipping,Core,,,2026-11-05,industry_rule_accepted,
 DHT,"DHT Holdings, Inc.",marine-shipping,Core,,,2026-11-05,industry_rule_accepted,
 ECO,Okeanis Eco Tankers Corp.,marine-shipping,Core,,,2026-11-05,industry_rule_accepted,
@@ -483,32 +482,31 @@ SBLK,Star Bulk Carriers Corp.,marine-shipping,Core,,,2026-11-05,industry_rule_ac
 STNG,Scorpio Tankers Inc.,marine-shipping,Core,,,2026-11-05,industry_rule_accepted,
 TRMD,TORM plc,marine-shipping,Core,,,2026-11-05,industry_rule_accepted,
 ZIM,ZIM Integrated Shipping Services Ltd.,marine-shipping,Core,,,2026-11-05,industry_rule_accepted,
-ASTS,"AST SpaceMobile, Inc.",space-economy,Core,,,2026-11-05,primary_source_refresh_required,
-ECHO,EchoStar Corporation,space-economy,Core,,,2026-11-05,primary_source_refresh_required,
-GSAT,"Globalstar, Inc.",space-economy,Core,,,2026-11-05,primary_source_refresh_required,
-IRDM,Iridium Communications Inc,space-economy,Core,,,2026-11-05,primary_source_refresh_required,
-LUNR,"Intuitive Machines, Inc.",space-economy,Core,,,2026-11-05,primary_source_refresh_required,
-MDA,MDA Space Ltd.,space-economy,Core,,,2026-11-05,primary_source_refresh_required,
-PL,Planet Labs PBC,space-economy,Core,,,2026-11-05,primary_source_refresh_required,
-RKLB,Rocket Lab Corporation,space-economy,Core,,,2026-11-05,primary_source_refresh_required,
-VSAT,"ViaSat, Inc.",space-economy,Core,,,2026-11-05,primary_source_refresh_required,
+ASTS,"AST SpaceMobile, Inc.",space-economy,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1780312/000178031226000006/asts-20251231.htm
+ECHO,EchoStar Corporation,space-economy,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1415404/000110465926021817/tmb-20251231x10k.htm
+GSAT,"Globalstar, Inc.",space-economy,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1366868/000136686826000012/gsat-20251231.htm
+IRDM,Iridium Communications Inc,space-economy,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1418819/000141881926000009/irdm-20251231.htm
+LUNR,"Intuitive Machines, Inc.",space-economy,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1844452/000162828026019865/lunr-20251231.htm
+MDA,MDA Space Ltd.,space-economy,Core,,,2026-11-05,primary_source_verified_2026,https://filecache.investorroom.com/mr5ircnw_mda/682/MDA_Space_Ltd_Q4_2025_Annual_Report.pdf
+PL,Planet Labs PBC,space-economy,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1836833/000119312526119957/pl-20260131.htm
+RKLB,Rocket Lab Corporation,space-economy,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1819994/000181999426000013/rklb-20251231.htm
+VSAT,"ViaSat, Inc.",space-economy,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/797721/000119312526248290/vsat-20260331.htm
 LHX,"L3Harris Technologies, Inc.",space-economy,Enabler,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/202058/000020205826000015/hrs-20260102.htm
 LMT,Lockheed Martin Corporation,space-economy,Enabler,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/936468/000162828026004195/lmt-20251231.htm
 NOC,Northrop Grumman Corporation,space-economy,Enabler,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1133421/000113342126000003/noc-20251231.htm
 ADM,Archer-Daniels-Midland Company,agribusiness,Core,,,2026-11-05,industry_rule_accepted,
-AGCO,AGCO Corporation,agribusiness,Core,,,2026-11-05,primary_source_refresh_required,
+AGCO,AGCO Corporation,agribusiness,Core,,,2026-11-05,industry_rule_accepted,
 BG,Bunge Limited,agribusiness,Core,,,2026-11-05,industry_rule_accepted,
 CALM,"Cal-Maine Foods, Inc.",agribusiness,Core,,,2026-11-05,industry_rule_accepted,
-CF,"CF Industries Holdings, Inc.",agribusiness,Core,,,2026-11-05,primary_source_refresh_required,
-CNH,CNH Industrial N.V.,agribusiness,Core,,,2026-11-05,primary_source_refresh_required,
+CF,"CF Industries Holdings, Inc.",agribusiness,Core,,,2026-11-05,industry_rule_accepted,
+CNH,CNH Industrial N.V.,agribusiness,Core,,,2026-11-05,industry_rule_accepted,
 CTVA,"Corteva, Inc.",agribusiness,Core,,,2026-11-05,industry_rule_accepted,
-DE,Deere & Company,agribusiness,Core,,,2026-11-05,primary_source_refresh_required,
-MOS,Mosaic Company (The),agribusiness,Core,,,2026-11-05,primary_source_refresh_required,
-NTR,Nutrien Ltd.,agribusiness,Core,,,2026-11-05,primary_source_refresh_required,
+DE,Deere & Company,agribusiness,Core,,,2026-11-05,industry_rule_accepted,
+MOS,Mosaic Company (The),agribusiness,Core,,,2026-11-05,industry_rule_accepted,
+NTR,Nutrien Ltd.,agribusiness,Core,,,2026-11-05,industry_rule_accepted,
 PPC,Pilgrim's Pride Corporation,agribusiness,Core,,,2026-11-05,industry_rule_accepted,
-SMG,Scotts Miracle-Gro Company (The),agribusiness,Core,,,2026-11-05,primary_source_refresh_required,
-TTC,Toro Company (The),agribusiness,Core,,,2026-11-05,primary_source_refresh_required,
-DAR,Darling Ingredients Inc.,agribusiness,Enabler,,,2026-11-05,primary_source_refresh_required,
+TTC,Toro Company (The),agribusiness,Related,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/737758/000073775826000043/ttc-20260731.htm
+DAR,Darling Ingredients Inc.,agribusiness,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/916540/000091654026000008/dar-20260103.htm
 ERO,Ero Copper Corp.,copper-miners,Core,,,2026-11-05,industry_rule_accepted,
 FCX,"Freeport-McMoRan, Inc.",copper-miners,Core,,,2026-11-05,industry_rule_accepted,
 HBM,Hudbay Minerals Inc.,copper-miners,Core,,,2026-11-05,industry_rule_accepted,
@@ -534,160 +532,159 @@ EXK,Endeavour Silver Corporation,silver-miners,Core,,,2026-11-05,industry_rule_a
 FSM,Fortuna Mining Corp.,silver-miners,Core,,,2026-11-05,industry_rule_accepted,
 HL,Hecla Mining Company,silver-miners,Core,,,2026-11-05,industry_rule_accepted,
 PAAS,Pan American Silver Corp.,silver-miners,Core,,,2026-11-05,industry_rule_accepted,
-IP,International Paper Company,timber-forestry,Core,,,2026-11-05,primary_source_refresh_required,
+IP,International Paper Company,timber-forestry,Core,,,2026-11-05,industry_rule_accepted,
 LPX,Louisiana-Pacific Corporation,timber-forestry,Core,,,2026-11-05,industry_rule_accepted,
 RYN,Rayonier Inc. REIT,timber-forestry,Core,,,2026-11-05,industry_rule_accepted,
 UFPI,"UFP Industries, Inc.",timber-forestry,Core,,,2026-11-05,industry_rule_accepted,
 WY,Weyerhaeuser Company,timber-forestry,Core,,,2026-11-05,industry_rule_accepted,
-APP,Applovin Corporation,ai-applications,Core,,,2026-11-05,primary_source_refresh_required,
-PATH,"UiPath, Inc.",ai-applications,Core,,,2026-11-05,primary_source_refresh_required,
-PLTR,Palantir Technologies Inc.,ai-applications,Core,,,2026-11-05,primary_source_refresh_required,
-TEM,"Tempus AI, Inc.",ai-applications,Core,,,2026-11-05,primary_source_refresh_required,
-UPST,"Upstart Holdings, Inc.",ai-applications,Core,,,2026-11-05,primary_source_refresh_required,
-ZETA,Zeta Global Holdings Corp.,ai-applications,Enabler,,,2026-11-05,primary_source_refresh_required,
+APP,Applovin Corporation,ai-applications,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1751008/000175100826000010/app-20251231.htm
+PATH,"UiPath, Inc.",ai-applications,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1734722/000173472226000012/path-20260131.htm
+PLTR,Palantir Technologies Inc.,ai-applications,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1321655/000132165526000011/pltr-20251231.htm
+TEM,"Tempus AI, Inc.",ai-applications,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1717115/000119312526066961/tem-20251231.htm
+UPST,"Upstart Holdings, Inc.",ai-applications,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1647639/000164763926000027/upst-20251231.htm
+ZETA,Zeta Global Holdings Corp.,ai-applications,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1851003/000119312526068598/zeta-20251231.htm
 AAOI,"Applied Optoelectronics, Inc.",ai-infrastructure,Core,,,2026-11-05,primary_source_verified_2026,https://investors.ao-inc.com/
 ALAB,"Astera Labs, Inc.",ai-infrastructure,Core,,,2026-11-05,primary_source_verified_2026,https://ir.asteralabs.com/
-APLD,Applied Digital Corporation,ai-infrastructure,Core,,,2026-11-05,primary_source_refresh_required,
+APLD,Applied Digital Corporation,ai-infrastructure,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1144879/000114487926000048/apld-20260531.htm
 CRDO,Credo Technology Group Holding Ltd,ai-infrastructure,Core,,,2026-11-05,primary_source_verified_2026,https://credosemi.com/solutions/ai-infrastructure/
 CRWV,"CoreWeave, Inc.",ai-infrastructure,Core,,,2026-11-05,primary_source_verified_2026,https://www.coreweave.com/platform
 IREN,IREN Limited,ai-infrastructure,Core,,,2026-11-05,primary_source_verified_2026,https://www.iren.com/
 NBIS,Nebius Group N.V.,ai-infrastructure,Core,,,2026-11-05,primary_source_verified_2026,https://nebius.com/about
 VRT,"Vertiv Holdings, LLC",ai-infrastructure,Core,,,2026-11-05,primary_source_verified_2026,https://investors.vertiv.com/news/news-details/2026/Vertiv-Simplifies-High-Density-AI-Infrastructure-Deployment-Across-Data-Center-Environments/default.aspx
 AMD,"Advanced Micro Devices, Inc.",ai-infrastructure,Enabler,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm
-ANET,"Arista Networks, Inc.",ai-infrastructure,Enabler,,,2026-11-05,primary_source_refresh_required,
-APH,Amphenol Corporation,ai-infrastructure,Enabler,,,2026-11-05,primary_source_refresh_required,
+ANET,"Arista Networks, Inc.",ai-infrastructure,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1596532/000159653226000013/anet-20251231.htm
+APH,Amphenol Corporation,ai-infrastructure,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/820313/000110465926013549/aph-20251231x10k.htm
 AVGO,Broadcom Inc.,ai-infrastructure,Enabler,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1730168/000173016825000121/avgo-20251102.htm
-CIEN,Ciena Corporation,ai-infrastructure,Enabler,,,2026-11-05,primary_source_refresh_required,
-CLS,"Celestica, Inc.",ai-infrastructure,Enabler,,,2026-11-05,primary_source_refresh_required,
+CIEN,Ciena Corporation,ai-infrastructure,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/936395/000162828025056698/cien-20251101.htm
+CLS,"Celestica, Inc.",ai-infrastructure,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1030894/000103089426000011/cls-20251231.htm
 COHR,Coherent Corp.,ai-infrastructure,Enabler,,,2026-11-05,industry_rule_accepted,
-DELL,Dell Technologies Inc.,ai-infrastructure,Enabler,,,2026-11-05,primary_source_refresh_required,
-FLEX,Flex Ltd.,ai-infrastructure,Enabler,,,2026-11-05,primary_source_refresh_required,
-GLW,Corning Incorporated,ai-infrastructure,Enabler,,,2026-11-05,primary_source_refresh_required,
-HPE,Hewlett Packard Enterprise Company,ai-infrastructure,Enabler,,,2026-11-05,primary_source_refresh_required,
-LITE,Lumentum Holdings Inc.,ai-infrastructure,Enabler,,,2026-11-05,primary_source_refresh_required,
+DELL,Dell Technologies Inc.,ai-infrastructure,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1571996/000157199626000008/dell-20260130.htm
+FLEX,Flex Ltd.,ai-infrastructure,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/866374/000086637426000012/flex-20260331.htm
+GLW,Corning Incorporated,ai-infrastructure,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/24741/000002474126000124/glw-20251231.htm
+HPE,Hewlett Packard Enterprise Company,ai-infrastructure,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1645590/000164559025000130/hpe-20251031.htm
+LITE,Lumentum Holdings Inc.,ai-infrastructure,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1633978/000162828026057358/lite-20260627.htm
 MRVL,"Marvell Technology, Inc.",ai-infrastructure,Enabler,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm
 MU,"Micron Technology, Inc.",ai-infrastructure,Enabler,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/723125/000072312526000023/mu-20260903.htm
 NVDA,NVIDIA Corporation,ai-infrastructure,Enabler,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1045810/000104581026000021/nvda-20260125.htm
 PENG,"Penguin Solutions, Inc.",ai-infrastructure,Enabler,,,2026-11-05,industry_rule_accepted,
-SMCI,"Super Micro Computer, Inc.",ai-infrastructure,Enabler,,,2026-11-05,primary_source_refresh_required,
-AKAM,"Akamai Technologies, Inc.",cloud-platforms,Core,,,2026-11-05,primary_source_refresh_required,
+SMCI,"Super Micro Computer, Inc.",ai-infrastructure,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1375365/000137536526000022/smci-20260630.htm
+AKAM,"Akamai Technologies, Inc.",cloud-platforms,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1086222/000108622226000022/akam-20251231.htm
 AMZN,"Amazon.com, Inc.",cloud-platforms,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm
 CRWV,"CoreWeave, Inc.",cloud-platforms,Core,,,2026-11-05,primary_source_verified_2026,https://www.coreweave.com/platform
 DOCN,"DigitalOcean Holdings, Inc.",cloud-platforms,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1582961/000158296126000019/docn-20251231.htm
 GOOGL,Alphabet Inc.,cloud-platforms,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1652044/000165204426000018/goog-20251231.htm
-IBM,International Business Machines Corporation,cloud-platforms,Core,,,2026-11-05,primary_source_refresh_required,
+IBM,International Business Machines Corporation,cloud-platforms,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/51143/000005114326000010/ibm-20251231.htm
 MDB,"MongoDB, Inc.",cloud-platforms,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1441816/000162828026016799/mdb-20260131.htm
-MSFT,Microsoft Corporation,cloud-platforms,Core,,,2026-11-05,primary_source_refresh_required,
+MSFT,Microsoft Corporation,cloud-platforms,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/789019/000119312526323660/msft-20260630.htm
 NBIS,Nebius Group N.V.,cloud-platforms,Core,,,2026-11-05,primary_source_verified_2026,https://nebius.com/about
 NET,"Cloudflare, Inc.",cloud-platforms,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1477333/000147733326000016/cloud-20251231.htm
 NTNX,"Nutanix, Inc.",cloud-platforms,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1618732/000119312526394793/ntnx-20260731.htm
 ORCL,Oracle Corporation,cloud-platforms,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1341439/000119312526277521/orcl-20260531.htm
 SNOW,Snowflake Inc.,cloud-platforms,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1640147/000164014726000008/snow-20260131.htm
-ANET,"Arista Networks, Inc.",cloud-platforms,Enabler,,,2026-11-05,primary_source_refresh_required,
+ANET,"Arista Networks, Inc.",cloud-platforms,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1596532/000159653226000013/anet-20251231.htm
 DDOG,"Datadog, Inc.",cloud-platforms,Enabler,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm
-HPE,Hewlett Packard Enterprise Company,cloud-platforms,Enabler,,,2026-11-05,primary_source_refresh_required,
-CHKP,Check Point Software Technologies Ltd.,cybersecurity,Core,,,2026-11-05,primary_source_refresh_required,
+HPE,Hewlett Packard Enterprise Company,cloud-platforms,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1645590/000164559025000130/hpe-20251031.htm
+CHKP,Check Point Software Technologies Ltd.,cybersecurity,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1015922/000117891326001932/zk2634942.htm
 CRWD,"CrowdStrike Holdings, Inc.",cybersecurity,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1535527/000153552726000010/crwd-20260131.htm
 FTNT,"Fortinet, Inc.",cybersecurity,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1262039/000126203926000007/ftnt-20251231.htm
-GEN,Gen Digital Inc.,cybersecurity,Core,,,2026-11-05,primary_source_refresh_required,
-NTSK,"Netskope, Inc.",cybersecurity,Core,,,2026-11-05,primary_source_refresh_required,
+GEN,Gen Digital Inc.,cybersecurity,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/849399/000084939926000017/gen-20260403.htm
+NTSK,"Netskope, Inc.",cybersecurity,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/2063196/000119312526135011/ck0002063196-20260131.htm
 OKTA,"Okta, Inc.",cybersecurity,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1660134/000166013426000020/okta-20260131.htm
 PANW,"Palo Alto Networks, Inc.",cybersecurity,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1327567/000132756726000023/panw-20260731.htm
 QLYS,"Qualys, Inc.",cybersecurity,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1107843/000110784326000008/qlys-20251231.htm
 RBRK,"Rubrik, Inc.",cybersecurity,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1943896/000194389626000013/rbrk-20260131.htm
 S,"SentinelOne, Inc.",cybersecurity,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1583708/000158370826000020/s-20260131.htm
-SAIL,"SailPoint, Inc.",cybersecurity,Core,,,2026-11-05,primary_source_refresh_required,
+SAIL,"SailPoint, Inc.",cybersecurity,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/2030781/000203078126000003/sail-20260131.htm
 TENB,"Tenable Holdings, Inc.",cybersecurity,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1660280/000166028026000005/tenb-20251231.htm
 VRNS,"Varonis Systems, Inc.",cybersecurity,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1361113/000162828026005450/vrns-20251231.htm
-YOU,"Clear Secure, Inc.",cybersecurity,Core,,,2026-11-05,primary_source_refresh_required,
+YOU,"Clear Secure, Inc.",cybersecurity,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1856314/000185631426000006/you-20251231.htm
 ZS,"Zscaler, Inc.",cybersecurity,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1713683/000171368326000157/zs-20260731.htm
-AKAM,"Akamai Technologies, Inc.",cybersecurity,Enabler,,,2026-11-05,primary_source_refresh_required,
-FFIV,"F5, Inc.",cybersecurity,Enabler,,,2026-11-05,primary_source_refresh_required,
+AKAM,"Akamai Technologies, Inc.",cybersecurity,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1086222/000108622226000022/akam-20251231.htm
+FFIV,"F5, Inc.",cybersecurity,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1048695/000104869525000157/ffiv-20250930.htm
 NET,"Cloudflare, Inc.",cybersecurity,Enabler,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1477333/000147733326000016/cloud-20251231.htm
 AMT,American Tower Corporation (REIT),data-centers,Core,,,2026-11-05,industry_rule_accepted,
-APLD,Applied Digital Corporation,data-centers,Core,,,2026-11-05,primary_source_refresh_required,
+APLD,Applied Digital Corporation,data-centers,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1144879/000114487926000048/apld-20260531.htm
 CCI,Crown Castle Inc.,data-centers,Core,,,2026-11-05,industry_rule_accepted,
 DLR,"Digital Realty Trust, Inc.",data-centers,Core,,,2026-11-05,industry_rule_accepted,
 EQIX,"Equinix, Inc.",data-centers,Core,,,2026-11-05,industry_rule_accepted,
 SBAC,SBA Communications Corporation,data-centers,Core,,,2026-11-05,industry_rule_accepted,
-BMNR,"BitMine Immersion Technologies, Inc.",digital-assets,Core,,,2026-11-05,primary_source_refresh_required,
-CIFR,Cipher Digital Inc.,digital-assets,Core,,,2026-11-05,primary_source_refresh_required,
-COIN,"Coinbase Global, Inc.",digital-assets,Core,,,2026-11-05,primary_source_refresh_required,
-CORZ,"Core Scientific, Inc.",digital-assets,Core,,,2026-11-05,primary_source_refresh_required,
-CRCL,"Circle Internet Group, Inc.",digital-assets,Core,,,2026-11-05,primary_source_refresh_required,
-GLXY,Galaxy Digital Inc.,digital-assets,Core,,,2026-11-05,primary_source_refresh_required,
-HUT,Hut 8 Corp.,digital-assets,Core,,,2026-11-05,primary_source_refresh_required,
+BMNR,"BitMine Immersion Technologies, Inc.",digital-assets,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1829311/000149315225024679/form10-k.htm
+CIFR,Cipher Digital Inc.,digital-assets,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1819989/000181998926000009/cifr-20251231.htm
+COIN,"Coinbase Global, Inc.",digital-assets,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1679788/000167978826000015/coin-20251231.htm
+CORZ,"Core Scientific, Inc.",digital-assets,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1839341/000162828026013305/core-20251231.htm
+CRCL,"Circle Internet Group, Inc.",digital-assets,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1876042/000187604226000062/crcl-20251231.htm
+GLXY,Galaxy Digital Inc.,digital-assets,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1859392/000185939226000016/glxy-20251231.htm
+HUT,Hut 8 Corp.,digital-assets,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1964789/000110465926019392/hut-20251231x10k.htm
 IREN,IREN Limited,digital-assets,Core,,,2026-11-05,primary_source_verified_2026,https://www.iren.com/
-MARA,"MARA Holdings, Inc.",digital-assets,Core,,,2026-11-05,primary_source_refresh_required,
-MSTR,Strategy Inc,digital-assets,Core,,,2026-11-05,primary_source_refresh_required,
-RIOT,"Riot Platforms, Inc.",digital-assets,Core,,,2026-11-05,primary_source_refresh_required,
-WULF,TeraWulf Inc.,digital-assets,Core,,,2026-11-05,primary_source_refresh_required,
-HOOD,"Robinhood Markets, Inc.",digital-assets,Enabler,,,2026-11-05,primary_source_refresh_required,
-ADBE,Adobe Inc.,enterprise-software,Core,,,2026-11-05,primary_source_refresh_required,
-ADSK,"Autodesk, Inc.",enterprise-software,Core,,,2026-11-05,primary_source_refresh_required,
-APPN,Appian Corporation,enterprise-software,Core,,,2026-11-05,primary_source_refresh_required,
-BOX,"Box, Inc.",enterprise-software,Core,,,2026-11-05,primary_source_refresh_required,
+MARA,"MARA Holdings, Inc.",digital-assets,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1507605/000150760526000007/mara-20251231.htm
+MSTR,Strategy Inc,digital-assets,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1050446/000105044626000020/mstr-20251231.htm
+RIOT,"Riot Platforms, Inc.",digital-assets,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1167419/000110465926022322/riot-20251231x10k.htm
+WULF,TeraWulf Inc.,digital-assets,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1083301/000108330126000031/wulf-20251231.htm
+HOOD,"Robinhood Markets, Inc.",digital-assets,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm
+ADBE,Adobe Inc.,enterprise-software,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/796343/000079634326000003/adbe-20251128.htm
+ADSK,"Autodesk, Inc.",enterprise-software,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/769397/000076939726000015/adsk-20260131.htm
+APPN,Appian Corporation,enterprise-software,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1441683/000144168326000013/appn-20251231.htm
+BOX,"Box, Inc.",enterprise-software,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1372612/000119312526098466/box-20260131.htm
 CRM,"Salesforce, Inc.",enterprise-software,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1108524/000110852426000060/crm-20260131.htm
-DBX,"Dropbox, Inc.",enterprise-software,Core,,,2026-11-05,primary_source_refresh_required,
+DBX,"Dropbox, Inc.",enterprise-software,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1467623/000146762326000008/dbx-20251231.htm
 DDOG,"Datadog, Inc.",enterprise-software,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm
-DOCS,"Doximity, Inc.",enterprise-software,Core,,,2026-11-05,primary_source_refresh_required,
-DOCU,"DocuSign, Inc.",enterprise-software,Core,,,2026-11-05,primary_source_refresh_required,
-ESTC,Elastic N.V.,enterprise-software,Core,,,2026-11-05,primary_source_refresh_required,
-FROG,JFrog Ltd.,enterprise-software,Core,,,2026-11-05,primary_source_refresh_required,
-GTLB,GitLab Inc.,enterprise-software,Core,,,2026-11-05,primary_source_refresh_required,
-HUBS,"HubSpot, Inc.",enterprise-software,Core,,,2026-11-05,primary_source_refresh_required,
-INTU,Intuit Inc.,enterprise-software,Core,,,2026-11-05,primary_source_refresh_required,
-MANH,"Manhattan Associates, Inc.",enterprise-software,Core,,,2026-11-05,primary_source_refresh_required,
+DOCS,"Doximity, Inc.",enterprise-software,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1516513/000151651326000025/docs-20260331.htm
+DOCU,"DocuSign, Inc.",enterprise-software,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1261333/000126133326000021/docu-20260131.htm
+ESTC,Elastic N.V.,enterprise-software,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1707753/000170775326000018/estc-20260430.htm
+FROG,JFrog Ltd.,enterprise-software,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1800667/000119312526051382/frog-20251231.htm
+GTLB,GitLab Inc.,enterprise-software,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1653482/000162828026018731/gtlb-20260131.htm
+HUBS,"HubSpot, Inc.",enterprise-software,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1404655/000119312526046646/hubs-20251231.htm
+INTU,Intuit Inc.,enterprise-software,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/896878/000089687826000037/intu-20260731.htm
+MANH,"Manhattan Associates, Inc.",enterprise-software,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1056696/000119312526037138/manh-20251231.htm
 MDB,"MongoDB, Inc.",enterprise-software,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1441816/000162828026016799/mdb-20260131.htm
-MNDY,monday.com Ltd.,enterprise-software,Core,,,2026-11-05,primary_source_refresh_required,
-MSFT,Microsoft Corporation,enterprise-software,Core,,,2026-11-05,primary_source_refresh_required,
+MNDY,monday.com Ltd.,enterprise-software,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1845338/000117891326000870/zk2634436.htm
+MSFT,Microsoft Corporation,enterprise-software,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/789019/000119312526323660/msft-20260630.htm
 NOW,"ServiceNow, Inc.",enterprise-software,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1373715/000137371526000007/now-20251231.htm
 ORCL,Oracle Corporation,enterprise-software,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1341439/000119312526277521/orcl-20260531.htm
-OTEX,Open Text Corporation,enterprise-software,Core,,,2026-11-05,primary_source_refresh_required,
-PAYC,"Paycom Software, Inc.",enterprise-software,Core,,,2026-11-05,primary_source_refresh_required,
-PCOR,"Procore Technologies, Inc.",enterprise-software,Core,,,2026-11-05,primary_source_refresh_required,
-PCTY,Paylocity Holding Corporation,enterprise-software,Core,,,2026-11-05,primary_source_refresh_required,
-PEGA,Pegasystems Inc.,enterprise-software,Core,,,2026-11-05,primary_source_refresh_required,
-PTC,PTC Inc.,enterprise-software,Core,,,2026-11-05,primary_source_refresh_required,
+OTEX,Open Text Corporation,enterprise-software,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1002638/000100263826000068/otex-20260630.htm
+PAYC,"Paycom Software, Inc.",enterprise-software,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1590955/000119312526059372/payc-20251231.htm
+PCOR,"Procore Technologies, Inc.",enterprise-software,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1611052/000162828026011055/pcor-20251231.htm
+PCTY,Paylocity Holding Corporation,enterprise-software,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1591698/000159169826000069/pcty-20260630.htm
+PEGA,Pegasystems Inc.,enterprise-software,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1013857/000101385726000017/pega-20251231.htm
+PTC,PTC Inc.,enterprise-software,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/857005/000119312525291326/ptc-20250930.htm
 TEAM,Atlassian Corporation,enterprise-software,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1650372/000165037226000036/team-20260630.htm
-TTAN,"ServiceTitan, Inc.",enterprise-software,Core,,,2026-11-05,primary_source_refresh_required,
-VEEV,Veeva Systems Inc.,enterprise-software,Core,,,2026-11-05,primary_source_refresh_required,
-WDAY,"Workday, Inc.",enterprise-software,Core,,,2026-11-05,primary_source_refresh_required,
-WK,Workiva Inc.,enterprise-software,Core,,,2026-11-05,primary_source_refresh_required,
-ABNB,"Airbnb, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_refresh_required,
+TTAN,"ServiceTitan, Inc.",enterprise-software,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1638826/000163882626000028/ttan-20260131.htm
+VEEV,Veeva Systems Inc.,enterprise-software,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1393052/000139305226000014/veev-20260131.htm
+WDAY,"Workday, Inc.",enterprise-software,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1327811/000132781126000014/wday-20260131.htm
+WK,Workiva Inc.,enterprise-software,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1445305/000144530526000016/wk-20251231.htm
+ABNB,"Airbnb, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1559720/000155972026000004/abnb-20251231.htm
 AMZN,"Amazon.com, Inc.",internet-commerce,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm
-BKNG,Booking Holdings Inc. Common Stock,internet-commerce,Core,,,2026-11-05,primary_source_refresh_required,
-CARG,"CarGurus, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_refresh_required,
-CPNG,"Coupang, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_refresh_required,
+BKNG,Booking Holdings Inc. Common Stock,internet-commerce,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1075531/000107553126000009/bkng-20251231.htm
+CARG,"CarGurus, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1494259/000119312526059435/carg-20251231.htm
+CPNG,"Coupang, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1834584/000183458426000024/cpng-20251231.htm
 DASH,"DoorDash, Inc.",internet-commerce,Core,,,2026-11-05,industry_rule_accepted,
-EBAY,eBay Inc.,internet-commerce,Core,,,2026-11-05,primary_source_refresh_required,
-ETSY,"Etsy, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_refresh_required,
+EBAY,eBay Inc.,internet-commerce,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1065088/000106508826000027/ebay-20251231.htm
+ETSY,"Etsy, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1370637/000137063726000019/etsy-20251231.htm
 GOOGL,Alphabet Inc.,internet-commerce,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/1652044/000165204426000018/goog-20251231.htm
-GRND,Grindr Inc.,internet-commerce,Core,,,2026-11-05,primary_source_refresh_required,
-MELI,"MercadoLibre, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_refresh_required,
-META,"Meta Platforms, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_refresh_required,
-MMYT,MakeMyTrip Limited,internet-commerce,Core,,,2026-11-05,primary_source_refresh_required,
-MTCH,"Match Group, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_refresh_required,
-NFLX,"Netflix, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_refresh_required,
-PINS,"Pinterest, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_refresh_required,
-RDDT,"Reddit, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_refresh_required,
-ROKU,"Roku, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_refresh_required,
-SHOP,Shopify Inc.,internet-commerce,Core,,,2026-11-05,primary_source_refresh_required,
-SNAP,Snap Inc.,internet-commerce,Core,,,2026-11-05,primary_source_refresh_required,
-SPOT,Spotify Technology S.A.,internet-commerce,Core,,,2026-11-05,primary_source_refresh_required,
-STUB,"StubHub Holdings, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_refresh_required,
-Z,"Zillow Group, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_refresh_required,
-ZG,"Zillow Group, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_refresh_required,
-CGNX,Cognex Corporation,robotics-automation,Core,,,2026-11-05,primary_source_refresh_required,
+GRND,Grindr Inc.,internet-commerce,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1820144/000182014426000007/grnd-20251231.htm
+MELI,"MercadoLibre, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1099590/000109959026000006/meli-20251231.htm
+META,"Meta Platforms, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm
+MMYT,MakeMyTrip Limited,internet-commerce,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1495153/000119312526318134/mmyt-20260331.htm
+MTCH,"Match Group, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/891103/000089110326000025/mtch-20251231.htm
+NFLX,"Netflix, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1065280/000106528026000034/nflx-20251231.htm
+PINS,"Pinterest, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1506293/000150629326000021/pins-20251231.htm
+RDDT,"Reddit, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm
+ROKU,"Roku, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1428439/000162828026008114/roku-20251231.htm
+SHOP,Shopify Inc.,internet-commerce,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1594805/000159480526000007/shop-20251231.htm
+SNAP,Snap Inc.,internet-commerce,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1564408/000156440826000013/snap-20251231.htm
+SPOT,Spotify Technology S.A.,internet-commerce,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1639920/000162828026006874/ck0001639920-20251231.htm
+STUB,"StubHub Holdings, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1337634/000162828026014844/stub-20251231.htm
+Z,"Zillow Group, Inc.",internet-commerce,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1617640/000161764026000015/z-20251231.htm
+CGNX,Cognex Corporation,robotics-automation,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/851205/000085120526000012/cgnx-20251231.htm
 ISRG,"Intuitive Surgical, Inc.",robotics-automation,Core,,,2026-11-05,industry_rule_accepted,
-ROK,"Rockwell Automation, Inc.",robotics-automation,Core,,,2026-11-05,primary_source_refresh_required,
-SYM,Symbotic Inc.,robotics-automation,Core,,,2026-11-05,primary_source_refresh_required,
-DE,Deere & Company,robotics-automation,Enabler,,,2026-11-05,primary_source_refresh_required,
-EMR,Emerson Electric Company,robotics-automation,Enabler,,,2026-11-05,primary_source_refresh_required,
-HON,Honeywell International Inc.,robotics-automation,Enabler,,,2026-11-05,primary_source_refresh_required,
-TER,"Teradyne, Inc.",robotics-automation,Enabler,,,2026-11-05,primary_source_refresh_required,
-TSLA,"Tesla, Inc.",robotics-automation,Enabler,,,2026-11-05,primary_source_refresh_required,
-ZBRA,Zebra Technologies Corporation,robotics-automation,Enabler,,,2026-11-05,primary_source_refresh_required,
+ROK,"Rockwell Automation, Inc.",robotics-automation,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1024478/000102447825000116/rok-20250930.htm
+SYM,Symbotic Inc.,robotics-automation,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1837240/000183724025000278/sym-20250927.htm
+DE,Deere & Company,robotics-automation,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/315189/000110465925122321/de-20251102x10k.htm
+EMR,Emerson Electric Company,robotics-automation,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/32604/000003260425000087/emr-20250930.htm
+HON,Honeywell International Inc.,robotics-automation,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/773840/000077384026000013/hon-20251231.htm
+TER,"Teradyne, Inc.",robotics-automation,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/97210/000119312526059002/ter-20251231.htm
+TSLA,"Tesla, Inc.",robotics-automation,Related,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/1318605/000162828026066775/tsla-20260930.htm
+ZBRA,Zebra Technologies Corporation,robotics-automation,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/877212/000162828026007668/zbra-20251231.htm
 ADI,"Analog Devices, Inc.",semiconductors,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/6281/000000628125000153/adi-20251101.htm
 ALAB,"Astera Labs, Inc.",semiconductors,Core,,,2026-11-05,primary_source_verified_2026,https://ir.asteralabs.com/
 ALGM,"Allegro MicroSystems, Inc.",semiconductors,Core,,,2026-11-05,industry_rule_accepted,
@@ -714,7 +711,7 @@ NVDA,NVIDIA Corporation,semiconductors,Core,,,2026-11-05,existing_repo_primary_s
 NVTS,Navitas Semiconductor Corporation,semiconductors,Core,,,2026-11-05,industry_rule_accepted,
 NXPI,NXP Semiconductors N.V.,semiconductors,Core,,,2026-11-05,industry_rule_accepted,
 ON,ON Semiconductor Corporation,semiconductors,Core,,,2026-11-05,industry_rule_accepted,
-ONTO,Onto Innovation Inc.,semiconductors,Core,,,2026-11-05,primary_source_refresh_required,
+ONTO,Onto Innovation Inc.,semiconductors,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/704532/000119312526066937/onto-20260103.htm
 POWI,"Power Integrations, Inc.",semiconductors,Core,,,2026-11-05,industry_rule_accepted,
 QCOM,QUALCOMM Incorporated,semiconductors,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/804328/000080432825000085/qcom-20250928.htm
 RMBS,"Rambus, Inc.",semiconductors,Core,,,2026-11-05,industry_rule_accepted,
@@ -722,9 +719,9 @@ SITM,SiTime Corporation,semiconductors,Core,,,2026-11-05,industry_rule_accepted,
 SMTC,Semtech Corporation,semiconductors,Core,,,2026-11-05,industry_rule_accepted,
 SWKS,"Skyworks Solutions, Inc.",semiconductors,Core,,,2026-11-05,industry_rule_accepted,
 SYNA,Synaptics Incorporated,semiconductors,Core,,,2026-11-05,industry_rule_accepted,
-TER,"Teradyne, Inc.",semiconductors,Core,,,2026-11-05,primary_source_refresh_required,
+TER,"Teradyne, Inc.",semiconductors,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/97210/000119312526059002/ter-20251231.htm
 TSEM,Tower Semiconductor Ltd.,semiconductors,Core,,,2026-11-05,industry_rule_accepted,
 TXN,Texas Instruments Incorporated,semiconductors,Core,,,2026-11-05,existing_repo_primary_source_evidence,https://www.sec.gov/Archives/edgar/data/97476/000009747626000059/txn-20251231.htm
-VECO,Veeco Instruments Inc.,semiconductors,Core,,,2026-11-05,primary_source_refresh_required,
-CDNS,"Cadence Design Systems, Inc.",semiconductors,Enabler,,,2026-11-05,primary_source_refresh_required,
-SNPS,"Synopsys, Inc.",semiconductors,Enabler,,,2026-11-05,primary_source_refresh_required,
+VECO,Veeco Instruments Inc.,semiconductors,Core,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/103145/000110465926019711/veco-20251231x10k.htm
+CDNS,"Cadence Design Systems, Inc.",semiconductors,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/813672/000081367226000016/cdns-20251231.htm
+SNPS,"Synopsys, Inc.",semiconductors,Enabler,,,2026-11-05,primary_source_verified_2026,https://www.sec.gov/Archives/edgar/data/883241/000088324125000028/snps-20251031.htm

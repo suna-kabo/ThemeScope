@@ -131,9 +131,10 @@ actual large-universe cold/warm SIP timings still require local validation.
 
 ## Remaining production blockers
 
-All 729 launch effective dates remain pending; no launch session has been chosen.
-335 evidence refreshes, four inherited-evidence findings and documented industry
-rules remain unresolved. SPY/QQQ inputs are supplied effective 2026-11-05; earlier sessions still lack them. Native
+All 726 retained launch relationships have blank effective dates; no launch session
+has been chosen. The authoritative 2026-11-06 master review resolves the evidence
+queue and four inherited findings and approves 75 validated industry rules. See
+docs/membership_review_2026-11-06.md for source records and eligible counts. SPY/QQQ inputs are supplied effective 2026-11-05; earlier sessions still lack them. Native
 Windows and full-universe performance validation remain pending. No bootstrap
 observations are presented as live signals, no evidence is auto-approved, no
 Market Matrix formula changed, and no main merge, legacy retirement or deployment

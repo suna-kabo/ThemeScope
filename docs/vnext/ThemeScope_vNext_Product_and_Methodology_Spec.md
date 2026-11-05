@@ -615,3 +615,18 @@ default production membership set until every queued relationship is resolved by
 - an explicitly documented deterministic industry rule approved for that theme.
 
 Codex must never invent evidence URLs or silently mark queued rows as verified.
+
+
+## 29. Reviewed membership-data amendment — 2026-11-06
+
+The preceding proposal/evidence counts describe the original handoff baseline.
+The user-supplied membership master review supersedes that proposed data with
+726 retained relationships: 659 Core, 62 Enabler and 5 Related across 668 tickers.
+EXC/nuclear-energy, ZG/internet-commerce and SMG/agribusiness are removed; Z remains
+Zillow's representative. All other reviewed corrections follow the package exactly.
+Taxonomy and formulas are unchanged. All 44 Active themes retain at least five
+Core+Enabler members. The source queue is resolved, all four inherited findings
+are validated, and 451 relationships are covered by the 75 documented supplied
+industry rules. See config/vnext and docs/membership_review_2026-11-06.md.
+No launch effective dates, end dates or launch session are assigned by this review;
+production remains disabled and Phase 9 is not authorized.

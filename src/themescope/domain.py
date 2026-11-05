@@ -193,6 +193,10 @@ def load_configuration(root):
                             effective_to=r['effective_to'] or None) for r in csv.DictReader(handle))
     universe = json.loads((folder / 'review_universe.json').read_text())
     validate(themes, memberships, universe)
-    return Configuration(themes, memberships, universe,
+    configuration = Configuration(themes, memberships, universe,
                          json.loads((folder / 'methodology.json').read_text()),
                          json.loads((folder / 'evidence_gate.json').read_text()))
+    if configuration.evidence_gate.get('membership_review_package') or (folder / 'membership_master_review.json').exists():
+        from .membership_evidence import validate_evidence
+        validate_evidence(root, configuration)
+    return configuration

@@ -1,0 +1,868 @@
+{
+  "schema": 1,
+  "review_date": "2026-11-06",
+  "purpose": "Deterministic industry-rule registry for ThemeScope vNext membership evidence governance.",
+  "registry": {
+    "schema": 1,
+    "registry_id": "themescope-industry-rules-2026-11-06",
+    "status": "reviewed-approved-for-application",
+    "rules": [
+      {
+        "rule_id": "EXC-ai-infrastructure-semiconductors-enabler",
+        "type": "explicit_allowlist",
+        "theme_id": "ai-infrastructure",
+        "role": "Enabler",
+        "industry_snapshot": "Semiconductors",
+        "tickers": [
+          "COHR",
+          "PENG"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Semiconductors' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-biotechnology-pharmaceuticals-major-core",
+        "type": "explicit_allowlist",
+        "theme_id": "biotechnology",
+        "role": "Core",
+        "industry_snapshot": "Pharmaceuticals: major",
+        "tickers": [
+          "ALKS",
+          "BIIB",
+          "ERAS",
+          "EXEL",
+          "IBRX",
+          "INCY",
+          "IONS",
+          "SRPT",
+          "SYRE",
+          "TGTX"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Pharmaceuticals: major' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-clean-energy-semiconductors-core",
+        "type": "explicit_allowlist",
+        "theme_id": "clean-energy",
+        "role": "Core",
+        "industry_snapshot": "Semiconductors",
+        "tickers": [
+          "RUN"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Semiconductors' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-copper-miners-other-metals-minerals-core",
+        "type": "explicit_allowlist",
+        "theme_id": "copper-miners",
+        "role": "Core",
+        "industry_snapshot": "Other metals/Minerals",
+        "tickers": [
+          "ERO",
+          "FCX",
+          "HBM",
+          "SCCO",
+          "TECK"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Other metals/Minerals' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-data-centers-real-estate-investment-trusts-core",
+        "type": "explicit_allowlist",
+        "theme_id": "data-centers",
+        "role": "Core",
+        "industry_snapshot": "Real estate investment trusts",
+        "tickers": [
+          "AMT",
+          "CCI",
+          "DLR",
+          "EQIX",
+          "SBAC"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Real estate investment trusts' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-ev-autonomy-semiconductors-core",
+        "type": "explicit_allowlist",
+        "theme_id": "ev-autonomy",
+        "role": "Core",
+        "industry_snapshot": "Semiconductors",
+        "tickers": [
+          "OUST"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Semiconductors' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-ev-autonomy-semiconductors-enabler",
+        "type": "explicit_allowlist",
+        "theme_id": "ev-autonomy",
+        "role": "Enabler",
+        "industry_snapshot": "Semiconductors",
+        "tickers": [
+          "NXPI",
+          "ON"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Semiconductors' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-fintech-payments-regional-banks-core",
+        "type": "explicit_allowlist",
+        "theme_id": "fintech-payments",
+        "role": "Core",
+        "industry_snapshot": "Regional banks",
+        "tickers": [
+          "NU"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Regional banks' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-genomics-biotechnology-core",
+        "type": "explicit_allowlist",
+        "theme_id": "genomics",
+        "role": "Core",
+        "industry_snapshot": "Biotechnology",
+        "tickers": [
+          "ADPT",
+          "BEAM",
+          "CAI",
+          "CRSP",
+          "NTRA",
+          "TWST",
+          "TXG"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Biotechnology' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-genomics-medical-nursing-services-core",
+        "type": "explicit_allowlist",
+        "theme_id": "genomics",
+        "role": "Core",
+        "industry_snapshot": "Medical/Nursing services",
+        "tickers": [
+          "NEO",
+          "WGS"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Medical/Nursing services' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-genomics-medical-specialties-core",
+        "type": "explicit_allowlist",
+        "theme_id": "genomics",
+        "role": "Core",
+        "industry_snapshot": "Medical specialties",
+        "tickers": [
+          "CDNA",
+          "GH",
+          "ILMN",
+          "VCYT"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Medical specialties' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-genomics-medical-specialties-enabler",
+        "type": "explicit_allowlist",
+        "theme_id": "genomics",
+        "role": "Enabler",
+        "industry_snapshot": "Medical specialties",
+        "tickers": [
+          "DHR",
+          "TMO"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Medical specialties' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-gold-miners-precious-metals-core",
+        "type": "explicit_allowlist",
+        "theme_id": "gold-miners",
+        "role": "Core",
+        "industry_snapshot": "Precious metals",
+        "tickers": [
+          "AEM",
+          "AGI",
+          "AU",
+          "B",
+          "CGAU",
+          "EGO",
+          "IAG",
+          "KGC",
+          "NEM",
+          "SA"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Precious metals' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-gold-miners-precious-metals-enabler",
+        "type": "explicit_allowlist",
+        "theme_id": "gold-miners",
+        "role": "Enabler",
+        "industry_snapshot": "Precious metals",
+        "tickers": [
+          "FNV",
+          "RGLD",
+          "WPM"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Precious metals' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-internet-commerce-air-freight-couriers-core",
+        "type": "explicit_allowlist",
+        "theme_id": "internet-commerce",
+        "role": "Core",
+        "industry_snapshot": "Air freight/Couriers",
+        "tickers": [
+          "DASH"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Air freight/Couriers' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-medical-devices-medical-specialties-core",
+        "type": "explicit_allowlist",
+        "theme_id": "medical-devices",
+        "role": "Core",
+        "industry_snapshot": "Medical specialties",
+        "tickers": [
+          "ABT",
+          "ALGN",
+          "BAX",
+          "BDX",
+          "BSX",
+          "DXCM",
+          "EW",
+          "GEHC",
+          "GKOS",
+          "IDXX",
+          "ILMN",
+          "ISRG",
+          "MDT",
+          "MMSI",
+          "NEOG",
+          "PODD",
+          "RMD",
+          "STE",
+          "STVN",
+          "SYK",
+          "TMO",
+          "XRAY",
+          "ZBH"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Medical specialties' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-midstream-lng-gas-distributors-core",
+        "type": "explicit_allowlist",
+        "theme_id": "midstream-lng",
+        "role": "Core",
+        "industry_snapshot": "Gas distributors",
+        "tickers": [
+          "OKE",
+          "TRGP"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Gas distributors' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-mortgage-reits-real-estate-investment-trusts-core",
+        "type": "explicit_allowlist",
+        "theme_id": "mortgage-reits",
+        "role": "Core",
+        "industry_snapshot": "Real estate investment trusts",
+        "tickers": [
+          "AGNC",
+          "DX",
+          "NLY",
+          "RITM",
+          "STWD"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Real estate investment trusts' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-natural-gas-producers-integrated-oil-core",
+        "type": "explicit_allowlist",
+        "theme_id": "natural-gas-producers",
+        "role": "Core",
+        "industry_snapshot": "Integrated oil",
+        "tickers": [
+          "EQT",
+          "EXE"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Integrated oil' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-natural-gas-producers-integrated-oil-enabler",
+        "type": "explicit_allowlist",
+        "theme_id": "natural-gas-producers",
+        "role": "Enabler",
+        "industry_snapshot": "Integrated oil",
+        "tickers": [
+          "EOG"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Integrated oil' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-natural-gas-producers-oil-gas-production-core",
+        "type": "explicit_allowlist",
+        "theme_id": "natural-gas-producers",
+        "role": "Core",
+        "industry_snapshot": "Oil & gas production",
+        "tickers": [
+          "AR",
+          "CNX",
+          "CRK",
+          "RRC"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Oil & gas production' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-natural-gas-producers-oil-gas-production-enabler",
+        "type": "explicit_allowlist",
+        "theme_id": "natural-gas-producers",
+        "role": "Enabler",
+        "industry_snapshot": "Oil & gas production",
+        "tickers": [
+          "COP"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Oil & gas production' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-nuclear-energy-other-metals-minerals-core",
+        "type": "explicit_allowlist",
+        "theme_id": "nuclear-energy",
+        "role": "Core",
+        "industry_snapshot": "Other metals/Minerals",
+        "tickers": [
+          "CCJ",
+          "NXE"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Other metals/Minerals' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-oil-services-oil-gas-production-core",
+        "type": "explicit_allowlist",
+        "theme_id": "oil-services",
+        "role": "Core",
+        "industry_snapshot": "Oil & gas production",
+        "tickers": [
+          "PTEN"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Oil & gas production' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-regional-banks-major-banks-core",
+        "type": "explicit_allowlist",
+        "theme_id": "regional-banks",
+        "role": "Core",
+        "industry_snapshot": "Major banks",
+        "tickers": [
+          "FNB",
+          "FULT",
+          "SSB",
+          "VLY"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Major banks' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-residential-reits-real-estate-investment-trusts-core",
+        "type": "explicit_allowlist",
+        "theme_id": "residential-reits",
+        "role": "Core",
+        "industry_snapshot": "Real estate investment trusts",
+        "tickers": [
+          "AMH",
+          "CPT",
+          "ELS",
+          "ESS",
+          "INVH",
+          "IRT",
+          "MAA",
+          "SUI",
+          "UDR"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Real estate investment trusts' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-robotics-automation-medical-specialties-core",
+        "type": "explicit_allowlist",
+        "theme_id": "robotics-automation",
+        "role": "Core",
+        "industry_snapshot": "Medical specialties",
+        "tickers": [
+          "ISRG"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Medical specialties' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-silver-miners-precious-metals-core",
+        "type": "explicit_allowlist",
+        "theme_id": "silver-miners",
+        "role": "Core",
+        "industry_snapshot": "Precious metals",
+        "tickers": [
+          "AG",
+          "AYA",
+          "CDE",
+          "EXK",
+          "FSM",
+          "HL",
+          "PAAS"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Precious metals' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-solar-semiconductors-core",
+        "type": "explicit_allowlist",
+        "theme_id": "solar",
+        "role": "Core",
+        "industry_snapshot": "Semiconductors",
+        "tickers": [
+          "RUN"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Semiconductors' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "EXC-timber-forestry-real-estate-investment-trusts-core",
+        "type": "explicit_allowlist",
+        "theme_id": "timber-forestry",
+        "role": "Core",
+        "industry_snapshot": "Real estate investment trusts",
+        "tickers": [
+          "RYN",
+          "WY"
+        ],
+        "decision": "keep",
+        "rationale": "Industry 'Real estate investment trusts' alone is too broad to qualify the entire industry. These reviewed tickers are explicit charter-specific exceptions/allowlist members."
+      },
+      {
+        "rule_id": "IND-aerospace-defense-aerospace-defense-core",
+        "type": "exact_industry",
+        "theme_id": "aerospace-defense",
+        "role": "Core",
+        "industry_snapshot": "Aerospace & defense",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Aerospace & defense' directly matches the written aerospace-defense charter for this role; rule applies only to the exact theme/role/industry tuple."
+      },
+      {
+        "rule_id": "IND-agribusiness-agricultural-commodities-milling-core",
+        "type": "exact_industry",
+        "theme_id": "agribusiness",
+        "role": "Core",
+        "industry_snapshot": "Agricultural commodities/Milling",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Agricultural commodities/Milling' directly matches the written agribusiness charter for this role."
+      },
+      {
+        "rule_id": "IND-agribusiness-chemicals-agricultural-core",
+        "type": "exact_industry",
+        "theme_id": "agribusiness",
+        "role": "Core",
+        "industry_snapshot": "Chemicals: agricultural",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Chemicals: agricultural' directly matches the written agribusiness charter for this role; rule applies only to the exact theme/role/industry tuple."
+      },
+      {
+        "rule_id": "IND-agribusiness-trucks-construction-farm-machinery-core",
+        "type": "exact_industry",
+        "theme_id": "agribusiness",
+        "role": "Core",
+        "industry_snapshot": "Trucks/Construction/Farm machinery",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Trucks/Construction/Farm machinery' directly matches the written agribusiness charter for this role; rule applies only to the exact theme/role/industry tuple."
+      },
+      {
+        "rule_id": "IND-airlines-airlines-core",
+        "type": "exact_industry",
+        "theme_id": "airlines",
+        "role": "Core",
+        "industry_snapshot": "Airlines",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Airlines' directly matches the written airlines charter for this role."
+      },
+      {
+        "rule_id": "IND-biotechnology-biotechnology-core",
+        "type": "exact_industry",
+        "theme_id": "biotechnology",
+        "role": "Core",
+        "industry_snapshot": "Biotechnology",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Biotechnology' directly matches the written biotechnology charter for this role."
+      },
+      {
+        "rule_id": "IND-capital-markets-financial-publishing-services-core",
+        "type": "exact_industry",
+        "theme_id": "capital-markets",
+        "role": "Core",
+        "industry_snapshot": "Financial publishing/Services",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Financial publishing/Services' directly matches the written capital-markets charter for this role; rule applies only to the exact theme/role/industry tuple."
+      },
+      {
+        "rule_id": "IND-capital-markets-investment-banks-brokers-core",
+        "type": "exact_industry",
+        "theme_id": "capital-markets",
+        "role": "Core",
+        "industry_snapshot": "Investment banks/Brokers",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Investment banks/Brokers' directly matches the written capital-markets charter for this role; rule applies only to the exact theme/role/industry tuple."
+      },
+      {
+        "rule_id": "IND-capital-markets-investment-managers-core",
+        "type": "exact_industry",
+        "theme_id": "capital-markets",
+        "role": "Core",
+        "industry_snapshot": "Investment managers",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Investment managers' directly matches the written capital-markets charter for this role; rule applies only to the exact theme/role/industry tuple."
+      },
+      {
+        "rule_id": "IND-construction-infrastructure-construction-materials-core",
+        "type": "exact_industry",
+        "theme_id": "construction-infrastructure",
+        "role": "Core",
+        "industry_snapshot": "Construction materials",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Construction materials' directly matches the written construction-infrastructure charter for this role; rule applies only to the exact theme/role/industry tuple."
+      },
+      {
+        "rule_id": "IND-construction-infrastructure-engineering-construction-core",
+        "type": "exact_industry",
+        "theme_id": "construction-infrastructure",
+        "role": "Core",
+        "industry_snapshot": "Engineering & construction",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Engineering & construction' directly matches the written construction-infrastructure charter for this role; rule applies only to the exact theme/role/industry tuple."
+      },
+      {
+        "rule_id": "IND-construction-infrastructure-trucks-construction-farm-machinery-core",
+        "type": "exact_industry",
+        "theme_id": "construction-infrastructure",
+        "role": "Core",
+        "industry_snapshot": "Trucks/Construction/Farm machinery",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Trucks/Construction/Farm machinery' directly matches the written construction-infrastructure charter for this role; rule applies only to the exact theme/role/industry tuple."
+      },
+      {
+        "rule_id": "IND-healthcare-providers-hospital-nursing-management-core",
+        "type": "exact_industry",
+        "theme_id": "healthcare-providers",
+        "role": "Core",
+        "industry_snapshot": "Hospital/Nursing management",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Hospital/Nursing management' directly matches the written healthcare-providers charter for this role; rule applies only to the exact theme/role/industry tuple."
+      },
+      {
+        "rule_id": "IND-healthcare-providers-managed-health-care-core",
+        "type": "exact_industry",
+        "theme_id": "healthcare-providers",
+        "role": "Core",
+        "industry_snapshot": "Managed health care",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Managed health care' directly matches the written healthcare-providers charter for this role; rule applies only to the exact theme/role/industry tuple."
+      },
+      {
+        "rule_id": "IND-healthcare-providers-medical-nursing-services-core",
+        "type": "exact_industry",
+        "theme_id": "healthcare-providers",
+        "role": "Core",
+        "industry_snapshot": "Medical/Nursing services",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Medical/Nursing services' directly matches the written healthcare-providers charter for this role."
+      },
+      {
+        "rule_id": "IND-healthcare-providers-services-to-the-health-industry-core",
+        "type": "exact_industry",
+        "theme_id": "healthcare-providers",
+        "role": "Core",
+        "industry_snapshot": "Services to the health industry",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Services to the health industry' directly matches the written healthcare-providers charter for this role; rule applies only to the exact theme/role/industry tuple."
+      },
+      {
+        "rule_id": "IND-homebuilders-homebuilding-core",
+        "type": "exact_industry",
+        "theme_id": "homebuilders",
+        "role": "Core",
+        "industry_snapshot": "Homebuilding",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Homebuilding' directly matches the written homebuilders charter for this role."
+      },
+      {
+        "rule_id": "IND-insurance-insurance-brokers-services-core",
+        "type": "exact_industry",
+        "theme_id": "insurance",
+        "role": "Core",
+        "industry_snapshot": "Insurance brokers/Services",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Insurance brokers/Services' directly matches the written insurance charter for this role."
+      },
+      {
+        "rule_id": "IND-insurance-life-health-insurance-core",
+        "type": "exact_industry",
+        "theme_id": "insurance",
+        "role": "Core",
+        "industry_snapshot": "Life/Health insurance",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Life/Health insurance' directly matches the written insurance charter for this role."
+      },
+      {
+        "rule_id": "IND-insurance-multi-line-insurance-core",
+        "type": "exact_industry",
+        "theme_id": "insurance",
+        "role": "Core",
+        "industry_snapshot": "Multi-line insurance",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Multi-line insurance' directly matches the written insurance charter for this role."
+      },
+      {
+        "rule_id": "IND-insurance-property-casualty-insurance-core",
+        "type": "exact_industry",
+        "theme_id": "insurance",
+        "role": "Core",
+        "industry_snapshot": "Property/Casualty insurance",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Property/Casualty insurance' directly matches the written insurance charter for this role."
+      },
+      {
+        "rule_id": "IND-leisure-entertainment-hotels-resorts-cruise-lines-core",
+        "type": "exact_industry",
+        "theme_id": "leisure-entertainment",
+        "role": "Core",
+        "industry_snapshot": "Hotels/Resorts/Cruise lines",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Hotels/Resorts/Cruise lines' directly matches the written leisure-entertainment charter for this role; rule applies only to the exact theme/role/industry tuple."
+      },
+      {
+        "rule_id": "IND-leisure-entertainment-movies-entertainment-core",
+        "type": "exact_industry",
+        "theme_id": "leisure-entertainment",
+        "role": "Core",
+        "industry_snapshot": "Movies/Entertainment",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Movies/Entertainment' directly matches the written leisure-entertainment charter for this role; rule applies only to the exact theme/role/industry tuple."
+      },
+      {
+        "rule_id": "IND-marine-shipping-marine-shipping-core",
+        "type": "exact_industry",
+        "theme_id": "marine-shipping",
+        "role": "Core",
+        "industry_snapshot": "Marine shipping",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Marine shipping' directly matches the written marine-shipping charter for this role."
+      },
+      {
+        "rule_id": "IND-midstream-lng-oil-gas-pipelines-core",
+        "type": "exact_industry",
+        "theme_id": "midstream-lng",
+        "role": "Core",
+        "industry_snapshot": "Oil & gas pipelines",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Oil & gas pipelines' directly matches the written midstream-lng charter for this role; rule applies only to the exact theme/role/industry tuple."
+      },
+      {
+        "rule_id": "IND-oil-gas-producers-integrated-oil-core",
+        "type": "exact_industry",
+        "theme_id": "oil-gas-producers",
+        "role": "Core",
+        "industry_snapshot": "Integrated oil",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Integrated oil' directly matches the written oil-gas-producers charter for this role."
+      },
+      {
+        "rule_id": "IND-oil-gas-producers-oil-gas-production-core",
+        "type": "exact_industry",
+        "theme_id": "oil-gas-producers",
+        "role": "Core",
+        "industry_snapshot": "Oil & gas production",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Oil & gas production' directly matches the written oil-gas-producers charter for this role."
+      },
+      {
+        "rule_id": "IND-oil-services-contract-drilling-core",
+        "type": "exact_industry",
+        "theme_id": "oil-services",
+        "role": "Core",
+        "industry_snapshot": "Contract drilling",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Contract drilling' directly matches the written oil-services charter for this role; rule applies only to the exact theme/role/industry tuple."
+      },
+      {
+        "rule_id": "IND-oil-services-oilfield-services-equipment-core",
+        "type": "exact_industry",
+        "theme_id": "oil-services",
+        "role": "Core",
+        "industry_snapshot": "Oilfield services/Equipment",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Oilfield services/Equipment' directly matches the written oil-services charter for this role."
+      },
+      {
+        "rule_id": "IND-pharmaceuticals-pharmaceuticals-generic-core",
+        "type": "exact_industry",
+        "theme_id": "pharmaceuticals",
+        "role": "Core",
+        "industry_snapshot": "Pharmaceuticals: generic",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Pharmaceuticals: generic' directly matches the written pharmaceuticals charter for this role."
+      },
+      {
+        "rule_id": "IND-pharmaceuticals-pharmaceuticals-major-core",
+        "type": "exact_industry",
+        "theme_id": "pharmaceuticals",
+        "role": "Core",
+        "industry_snapshot": "Pharmaceuticals: major",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Pharmaceuticals: major' directly matches the written pharmaceuticals charter for this role."
+      },
+      {
+        "rule_id": "IND-pharmaceuticals-pharmaceuticals-other-core",
+        "type": "exact_industry",
+        "theme_id": "pharmaceuticals",
+        "role": "Core",
+        "industry_snapshot": "Pharmaceuticals: other",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Pharmaceuticals: other' directly matches the written pharmaceuticals charter for this role."
+      },
+      {
+        "rule_id": "IND-regional-banks-regional-banks-core",
+        "type": "exact_industry",
+        "theme_id": "regional-banks",
+        "role": "Core",
+        "industry_snapshot": "Regional banks",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Regional banks' directly matches the written regional-banks charter for this role."
+      },
+      {
+        "rule_id": "IND-regional-banks-savings-banks-core",
+        "type": "exact_industry",
+        "theme_id": "regional-banks",
+        "role": "Core",
+        "industry_snapshot": "Savings banks",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Savings banks' directly matches the written regional-banks charter for this role."
+      },
+      {
+        "rule_id": "IND-retail-apparel-footwear-retail-core",
+        "type": "exact_industry",
+        "theme_id": "retail",
+        "role": "Core",
+        "industry_snapshot": "Apparel/Footwear retail",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Apparel/Footwear retail' directly matches the written retail charter for this role; rule applies only to the exact theme/role/industry tuple."
+      },
+      {
+        "rule_id": "IND-retail-department-stores-core",
+        "type": "exact_industry",
+        "theme_id": "retail",
+        "role": "Core",
+        "industry_snapshot": "Department stores",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Department stores' directly matches the written retail charter for this role; rule applies only to the exact theme/role/industry tuple."
+      },
+      {
+        "rule_id": "IND-retail-discount-stores-core",
+        "type": "exact_industry",
+        "theme_id": "retail",
+        "role": "Core",
+        "industry_snapshot": "Discount stores",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Discount stores' directly matches the written retail charter for this role; rule applies only to the exact theme/role/industry tuple."
+      },
+      {
+        "rule_id": "IND-retail-electronics-appliance-stores-core",
+        "type": "exact_industry",
+        "theme_id": "retail",
+        "role": "Core",
+        "industry_snapshot": "Electronics/Appliance stores",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Electronics/Appliance stores' directly matches the written retail charter for this role; rule applies only to the exact theme/role/industry tuple."
+      },
+      {
+        "rule_id": "IND-retail-food-retail-core",
+        "type": "exact_industry",
+        "theme_id": "retail",
+        "role": "Core",
+        "industry_snapshot": "Food retail",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Food retail' directly matches the written retail charter for this role; rule applies only to the exact theme/role/industry tuple."
+      },
+      {
+        "rule_id": "IND-retail-home-improvement-chains-core",
+        "type": "exact_industry",
+        "theme_id": "retail",
+        "role": "Core",
+        "industry_snapshot": "Home improvement chains",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Home improvement chains' directly matches the written retail charter for this role; rule applies only to the exact theme/role/industry tuple."
+      },
+      {
+        "rule_id": "IND-retail-specialty-stores-core",
+        "type": "exact_industry",
+        "theme_id": "retail",
+        "role": "Core",
+        "industry_snapshot": "Specialty stores",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Specialty stores' directly matches the written retail charter for this role; rule applies only to the exact theme/role/industry tuple."
+      },
+      {
+        "rule_id": "IND-semiconductors-semiconductors-core",
+        "type": "exact_industry",
+        "theme_id": "semiconductors",
+        "role": "Core",
+        "industry_snapshot": "Semiconductors",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Semiconductors' directly matches the written semiconductors charter for this role."
+      },
+      {
+        "rule_id": "IND-timber-forestry-forest-products-core",
+        "type": "exact_industry",
+        "theme_id": "timber-forestry",
+        "role": "Core",
+        "industry_snapshot": "Forest products",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Forest products' directly matches the written timber-forestry charter for this role."
+      },
+      {
+        "rule_id": "IND-timber-forestry-pulp-paper-core",
+        "type": "exact_industry",
+        "theme_id": "timber-forestry",
+        "role": "Core",
+        "industry_snapshot": "Pulp & paper",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Pulp & paper' directly matches the written timber-forestry charter for this role; rule applies only to the exact theme/role/industry tuple."
+      },
+      {
+        "rule_id": "IND-water-water-utilities-core",
+        "type": "exact_industry",
+        "theme_id": "water",
+        "role": "Core",
+        "industry_snapshot": "Water utilities",
+        "decision": "keep",
+        "rationale": "TradingView Industry 'Water utilities' directly matches the written water charter for this role; rule applies only to the exact theme/role/industry tuple."
+      }
+    ]
+  }
+}

@@ -1,27 +1,11 @@
 {
   "status": "cutover_blocked",
-  "findings": [
-    {
-      "ticker": "AMZN",
-      "theme_id": "cloud-platforms",
-      "reason": "Inherited repository evidence explicitly Unresolved; new-charter qualification needs review."
-    },
-    {
-      "ticker": "AMZN",
-      "theme_id": "internet-commerce",
-      "reason": "Inherited repository evidence explicitly Unresolved; new-charter qualification needs review."
-    },
-    {
-      "ticker": "GOOGL",
-      "theme_id": "cloud-platforms",
-      "reason": "Inherited repository evidence explicitly Unresolved; new-charter qualification needs review."
-    },
-    {
-      "ticker": "GOOGL",
-      "theme_id": "internet-commerce",
-      "reason": "Inherited repository evidence explicitly Unresolved; new-charter qualification needs review."
-    }
-  ],
-  "industry_rule_registry_status": "pending_documented_rules",
-  "source_evidence_queue_count": 335
+  "membership_review_package": "themescope-membership-master-review-2026-11-06",
+  "findings": [],
+  "industry_rule_registry_status": "approved",
+  "industry_rule_covered_relationships": 451,
+  "source_evidence_queue_count": 0,
+  "baseline_evidence_queue_count": 335,
+  "launch_effective_dates": "pending",
+  "production_enabled": false
 }

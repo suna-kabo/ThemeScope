@@ -11,7 +11,8 @@ Phase 2 complete: `61fe259`. Phase 3 complete: `1c10c5c`.
 Phase 4 validated for Gate B; checkpoint branch `inspection/vnext-b-engine`.
 Gate C 7d3bf2e is approved; the real local SIP PoC passed (user-reported).
 Phase 6: a8958f3. Phase 7: 9080337. Phase 8 validated for Gate D.
-Gate D is closed; c60ae07 accepted. Current scope: approved SPY/QQQ roster import only.
+Gate D is closed. Roster import 94050ac complete. Current scope: 2026-11-06
+authoritative membership/evidence master review, then stop; no Phase 9.
 Preserve inspection/vnext-d-ui at 02e7d63; Phase 9 must not start. SQLite schema remains 2.
 Do not restart the baseline or reimport/reclassify the proposed launch ledger.
 
@@ -348,3 +349,39 @@ launch approval. No Phase 9, main changes, inspection-ref moves or deployment.
 Roster import validation: 288 full-suite cases, 286 passed/two Windows-only skips.
 Three focused import/compatibility tests pass; market/lock four pass/one skip;
 two frozen migration cases pass (all 64 Market Matrix cells). Compilation passes.
+
+## Membership/evidence master review — 2026-11-06
+
+Supplied master package applied mechanically, preserving taxonomy and all formulas.
+Its 729 original keys/roles exactly match baseline 94050ac. Retained 726 rows across
+668 tickers: 659 Core / 62 Enabler / 5 Related. Removed EXC/nuclear-energy,
+ZG/internet-commerce (Z retained), SMG/agribusiness. Other material corrections
+match the package exactly. Reapplication, including Food & Beverage, is idempotent.
+
+Installed the supplied registry unchanged: 75 rules, 451 exact-covered relationships,
+explicit allowlists retained. Gate approved only after validation. Attached all 167
+tasks plus supplemental YOU/cybersecurity (master attachment decision outside task
+list): 168 records/158 distinct inspected primary/official documents. Latest suitable
+SEC annual reports preferred; five documented source choices use official company/
+IR material, issuer annual report or SEC quarters. No evidence mismatches remain.
+Four AMZN/GOOGL findings verified against their specified annual reports and cleared.
+107 other primary-evidence rows retain the supplied completed-review citations.
+
+Queue now zero; gate values match actual config. Master/rule/task hashes, exact
+source URLs/content hashes, supporting paraphrases, review provenance and removed
+records are versioned. Raw source HTML/PDF and private scanner-volume notes are not.
+Runtime config loading validates rule/task/queue/role consistency fail closed. A
+regression proves an unsupported attachment remains unresolved instead of forcing
+queue zero. No activated history can be overwritten by the application script.
+
+Validation: 295 full cases, 293 passed/two Windows-only skips; 88 focused vNext
+cases, 87 passed/one Windows-only skip; seven evidence tests pass. Config/count/rule
+validation, compilation, JS syntax/helpers and safe inspection generation pass.
+Per-theme eligible counts and reproducibility details: docs/membership_review_2026-11-06.md.
+All 44 Active themes retain >=5 Core+Enabler members. Related excluded from math.
+
+Only configuration blockers left: pending effective dates; unapproved launch
+rebalance session; production disabled. All 726 retained launch dates/end dates
+remain blank. Runtime roster gating remains; Windows/performance validation items
+are separate. No Phase 9, main changes, formula edits, live Alpaca use or deployment.
+Do not move original inspection checkpoint branches for this review application.
