@@ -2,7 +2,7 @@
 from dataclasses import replace,asdict
 from datetime import datetime,timezone
 from pathlib import Path
-import json,os,threading,time
+import json,os,tempfile,threading,time
 from ..local_refresh_lock import RefreshLock,RefreshBusy
 from ..storage import Store,canonical
 from ..domain import load_configuration
@@ -28,6 +28,7 @@ class RefreshService:
         self.guard=threading.Lock();self.running=False
         self.provider_factory=provider_factory;self.config_factory=config_factory or (lambda:load_configuration(self.root))
         self.records=records;self.rosters_factory=rosters_factory or (lambda:load_rosters(self.root))
+        self._status_unpersisted=False
         self.state={'state':'idle','progress':'Ready','target_session':None,'provider_health':'Not checked','error':None}
 
     def snapshot(self):
@@ -36,11 +37,17 @@ class RefreshService:
         finally:store.close()
 
     def status(self):
-        with self.guard:state=dict(self.state)
-        path=self.runtime/'status.json'
-        if path.exists():
-            try:state=json.loads(path.read_text())
-            except (ValueError,OSError):pass
+        with self.guard:
+            state=dict(self.state)
+            # Never let an older recovery file hide an update that failed to persist.
+            if not self._status_unpersisted:
+                try:
+                    persisted=json.loads((self.runtime/'status.json').read_text(encoding='utf-8'))
+                    if (isinstance(persisted,dict) and persisted.get('state') in
+                            ('idle','running','success','failed','interrupted') and
+                            isinstance(persisted.get('progress'),str)):
+                        state=persisted
+                except (OSError,ValueError):pass
         snapshot=self.snapshot()
         state.update({'last_successful_session':snapshot.get('session') if snapshot else None,
                       'last_successful_refresh':snapshot.get('refreshed_at') if snapshot else None,
@@ -53,10 +60,35 @@ class RefreshService:
         return state
 
     def _status(self,**updates):
+        # Operational metadata is best-effort; SQLite publication is authoritative.
+        # Serialize status writers under the guard so old retries cannot overwrite
+        # a newer in-memory update. Retry waits total at most 70 ms per update.
         with self.guard:
             self.state.update(updates)
-            path=self.runtime/'status.tmp'
-            path.write_text(json.dumps(self.state),encoding='utf-8');os.replace(path,self.runtime/'status.json')
+            self._status_unpersisted=True
+            path=None
+            try:
+                with tempfile.NamedTemporaryFile(mode='w',encoding='utf-8',
+                        prefix='status-',suffix='.tmp',dir=self.runtime,delete=False) as handle:
+                    path=Path(handle.name)
+                    json.dump(self.state,handle)
+                # Close the temporary handle before Windows atomic replacement.
+                delays=(.01,.02,.04)
+                for attempt in range(len(delays)+1):
+                    try:
+                        os.replace(path,self.runtime/'status.json')
+                        self._status_unpersisted=False
+                        break
+                    except OSError as error:
+                        transient=isinstance(error,PermissionError) or getattr(error,'winerror',None) in (5,32,33)
+                        if not transient or attempt==len(delays):break
+                        time.sleep(delays[attempt])
+            except (OSError,ValueError,TypeError):
+                pass  # Missing/locked/unwritable metadata must never fail refresh.
+            finally:
+                if path is not None:
+                    try:path.unlink(missing_ok=True)
+                    except OSError:pass  # Sharing violations can also prevent cleanup.
 
     def _reserve(self):
         with self.guard:

@@ -159,3 +159,39 @@ checkpoint remains at 02e7d63. Phase 9 has not started.
 Hardening validation: full suite 277 passed / two Windows-only skips; focused
 market/lock four passed / one skipped; focused local eight passed. Python
 compilation passed. No native Windows execution is claimed by the Linux run.
+
+## Native Windows status-file hardening
+
+Native Windows testing after Gate D successfully launched ThemeScope.cmd --fixture,
+but exposed WinError 5 in status publication at the calculation-progress update.
+A second failure while reporting that error could terminate the background worker.
+The accepted e3450ff roster activation and byte-0 refresh-lock fixes are unchanged.
+
+Status is auxiliary operational metadata. Each update first changes guarded memory,
+then writes a uniquely named status-*.tmp file in the same runtime directory. The
+temporary handle is closed before replacement. PermissionError and Windows access/
+sharing/lock violations (5/32/33) receive up to four replacement attempts with
+10, 20 and 40 ms backoffs (70 ms total). Other filesystem failures do not retry.
+The owned temporary file is removed in finally where possible; a still-locked temp
+file may remain rather than causing another operational failure.
+
+Creation, write, replacement and cleanup failures never abort refresh or recursively
+report another status-write error. Memory retains the current status. While an
+update is unpersisted, status polling uses that guarded memory instead of the stale
+recovery file. Otherwise a valid persisted status remains available for recovery;
+missing, inaccessible, malformed or invalid-shaped files fall back to memory.
+A persisted running state with no active refresh lock still reports Interrupted.
+SQLite remains the authority for successful dashboard/export publication and last
+successful session metadata. A committed snapshot can succeed even if every status
+replacement fails. An actual later refresh failure still preserves the prior snapshot.
+
+Linux regressions simulate transient and permanent Windows-style failures, confirm
+closed unique temp handles and cleanup, capture background thread exceptions, and
+verify successful publication plus safe later error reporting under failed status
+persistence. Native Windows revalidation of this fix remains a local check: run
+ThemeScope.cmd --fixture, refresh repeatedly, and verify success/progress and downloads.
+The original inspection/vnext-d-ui branch stays at 02e7d63. Phase 9 has not started.
+
+Windows-status hardening validation: 285 full-suite cases, 283 passed and two
+Windows-only skips. Focused local: 14 passed. Focused market/lock: four passed
+and one native-Windows skip. Compilation passed. Native Windows retest pending.

@@ -160,3 +160,105 @@ class LocalTests(unittest.TestCase):
         for benchmark in ('SPY','QQQ'):
             self.assertTrue(snapshot['market']['context'][benchmark]['roster_warnings'])
         self.assertNotIn('breadth',snapshot['market']['context']['IWM'])
+
+    def test_status_transient_sharing_failures_retry_closed_unique_temp_files(self):
+        from src.themescope.local import service as module
+        original_replace=module.os.replace
+        original_temp=module.tempfile.NamedTemporaryFile
+        handles=[];sources=[];delays=[]
+        def temporary(*args,**kwargs):
+            handle=original_temp(*args,**kwargs);handles.append(handle);return handle
+        def replace(source,destination):
+            self.assertTrue(handles[-1].closed)
+            self.assertEqual(Path(source).parent,self.service.runtime)
+            self.assertNotEqual(Path(source).name,'status.tmp')
+            sources.append(Path(source))
+            if len(sources)<=2:raise PermissionError('Windows sharing violation')
+            return original_replace(source,destination)
+        with patch.object(module.tempfile,'NamedTemporaryFile',temporary),patch.object(module.os,'replace',replace),patch.object(module.time,'sleep',delays.append):
+            self.service._status(state='running',progress='Calculating market, themes and peer comparisons')
+            self.assertEqual(delays,[.01,.02])
+            self.assertEqual(len(sources),3)
+            self.assertEqual(len(set(sources)),1)
+            self.service._status(state='success',progress='Refresh complete')
+        self.assertEqual(len(set(sources)),2)
+        self.assertEqual(json.loads((self.service.runtime/'status.json').read_text())['state'],'success')
+        self.assertEqual(self.service.status()['state'],'success')
+        self.assertFalse(list(self.service.runtime.glob('status-*.tmp')))
+
+    def test_permanent_status_replace_failure_does_not_abort_background_refresh_or_error_path(self):
+        from src.themescope.local import service as module
+        self.assertIsNotNone(self.service.refresh())
+        old=self.service.snapshot()
+        persisted=(self.service.runtime/'status.json').read_bytes()
+        def finish():
+            deadline=time.monotonic()+3
+            while self.service.running and time.monotonic()<deadline:threading.Event().wait(.01)
+            self.assertFalse(self.service.running)
+        class Broken:
+            def get_latest_completed_session(self):raise ProviderError('test_actual_provider_failure')
+        with patch.object(module.os,'replace',side_effect=PermissionError('WinError 5')) as replace,patch.object(module.time,'sleep') as sleep,patch('threading.excepthook') as uncaught:
+            self.service.start();finish()
+            current=self.service.snapshot()
+            self.assertNotEqual(current['refreshed_at'],old['refreshed_at'])
+            self.assertEqual(self.service.status()['state'],'success')
+            self.assertEqual(self.service.status()['progress'],'Refresh complete')
+            store=Store(self.service.db)
+            try:self.assertEqual(store.connection.execute("SELECT count(*) FROM refresh_run WHERE status='success'").fetchone()[0],2)
+            finally:store.close()
+            self.assertEqual((self.service.runtime/'status.json').read_bytes(),persisted)
+            self.assertFalse(list(self.service.runtime.glob('status-*.tmp')))
+            # A real later refresh failure must still preserve the committed snapshot.
+            self.service.provider_factory=lambda _:Broken()
+            self.service.start();finish()
+            self.assertEqual(self.service.snapshot(),current)
+            self.assertEqual(self.service.snapshot()['exports'],current['exports'])
+            self.assertEqual(self.service.status()['state'],'failed')
+            self.assertEqual(self.service.status()['error'],'test_actual_provider_failure')
+            uncaught.assert_not_called()
+            self.assertGreater(replace.call_count,0)
+            self.assertEqual(replace.call_count%4,0)
+            self.assertLess(replace.call_count,100)
+            self.assertEqual(sleep.call_count,replace.call_count//4*3)
+        self.assertFalse(list(self.service.runtime.glob('status-*.tmp')))
+
+    def test_status_temp_creation_and_write_failures_are_nonfatal(self):
+        from src.themescope.local import service as module
+        with patch.object(module.tempfile,'NamedTemporaryFile',side_effect=PermissionError('directory inaccessible')):
+            self.assertIsNotNone(self.service.refresh())
+            self.assertEqual(self.service.status()['state'],'success')
+        with patch.object(module.json,'dump',side_effect=OSError('disk full')):
+            self.assertIsNotNone(self.service.refresh())
+            self.assertEqual(self.service.status()['state'],'success')
+        self.assertFalse(list(self.service.runtime.glob('status-*.tmp')))
+
+    def test_status_read_falls_back_on_missing_inaccessible_and_malformed_files(self):
+        self.assertEqual(self.service.status()['state'],'idle')
+        path=self.service.runtime/'status.json'
+        for text in ('{','[]','null','42','{}','{"state":"unknown","progress":"invalid"}',
+                     '{"state":"running","progress":[]}'):
+            path.write_text(text)
+            self.assertEqual(self.service.status()['state'],'idle')
+        path.write_text('{"state":"success","progress":"Recovered last refresh"}')
+        self.assertEqual(self.service.status()['progress'],'Recovered last refresh')
+        with patch.object(Path,'read_text',side_effect=PermissionError('sharing violation')):
+            self.assertEqual(self.service.status()['state'],'idle')
+
+    def test_persisted_running_status_recovers_as_interrupted_after_process_exit(self):
+        path=self.service.runtime/'status.json'
+        path.write_text('{"state":"running","progress":"Calculating market, themes and peer comparisons"}')
+        self.assertEqual(self.service.status()['state'],'interrupted')
+        from src.themescope.local_refresh_lock import RefreshLock
+        with RefreshLock(self.service.lock_path):
+            self.assertEqual(self.service.status()['state'],'running')
+
+    def test_status_nontransient_replace_and_cleanup_errors_remain_auxiliary(self):
+        from src.themescope.local import service as module
+        with patch.object(module.os,'replace',side_effect=OSError('disk error')) as replace,patch.object(module.time,'sleep') as sleep:
+            self.service._status(state='failed',progress='Actual refresh failed')
+            self.assertEqual(replace.call_count,1)
+            sleep.assert_not_called()
+        with patch.object(module.os,'replace',side_effect=PermissionError()),patch.object(module.time,'sleep'),patch.object(Path,'unlink',side_effect=PermissionError('temp still locked')):
+            self.service._status(state='success',progress='Snapshot committed')
+        self.assertEqual(self.service.status()['state'],'success')
+        for path in self.service.runtime.glob('status-*.tmp'):path.unlink()

@@ -11,7 +11,7 @@ Phase 2 complete: `61fe259`. Phase 3 complete: `1c10c5c`.
 Phase 4 validated for Gate B; checkpoint branch `inspection/vnext-b-engine`.
 Gate C 7d3bf2e is approved; the real local SIP PoC passed (user-reported).
 Phase 6: a8958f3. Phase 7: 9080337. Phase 8 validated for Gate D.
-Gate D 02e7d63 approved subject to one focused hardening commit.
+Gate D hardening e3450ff accepted. Current scope: one Windows-status hardening fix only.
 Preserve inspection/vnext-d-ui at 02e7d63; Phase 9 must not start. SQLite schema remains 2.
 Do not restart the baseline or reimport/reclassify the proposed launch ledger.
 
@@ -295,3 +295,29 @@ original Gate D checkpoint. No Phase 9, main changes, live credentials or deploy
 Hardening validation: 279 full-suite cases; 277 pass and two Windows-only skips.
 Focused market/lock: four pass/one native-Windows skip; focused local: eight pass.
 Python compilation and diff whitespace checks pass. Frozen Market Matrix unchanged.
+
+## Windows status persistence — native validation finding after e3450ff
+
+User reports native ThemeScope.cmd --fixture launched successfully but background
+refresh hit WinError 5 replacing status.tmp/status.json at the calculation progress
+update; its error-reporting path failed again. Fix only this auxiliary status path.
+Do not redo e3450ff, move the original Gate D inspection ref, modify main or start Phase 9.
+
+Guarded memory is updated first. A unique same-directory temporary file is closed
+before atomic replacement. Four bounded attempts handle transient access/sharing
+errors (10/20/40 ms delays). Creation/write/replacement/cleanup failures are nonfatal;
+owned temporary files are cleaned where possible. Polling uses memory while the
+new update is unpersisted so stale disk status cannot mask real success/failure.
+Valid persisted recovery metadata remains useful otherwise; inaccessible/malformed
+files fall back safely. Existing interrupted-process detection is preserved.
+
+Targeted regressions prove successful background snapshot publication despite
+permanent metadata failure, normal thread completion, safe actual-provider failure
+reporting without recursion, exact previous snapshot/export preservation, transient
+recovery, unique closed handles and best-effort cleanup. No SQLite transaction or
+publication logic, roster gating, refresh-lock semantics or methodology changed.
+Native Windows retest remains pending; cloud tests simulate the reported failure.
+
+Windows-status hardening validation: 285 full-suite cases, 283 passed and two
+Windows-only skips. Focused local: 14 passed. Focused market/lock: four passed
+and one native-Windows skip. Compilation passed. Native Windows retest pending.
