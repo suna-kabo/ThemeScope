@@ -33,20 +33,25 @@ def main():
                 expect(page.locator('#theme-layer')).to_contain_text('2026-11-05')
                 expect(page.locator('#theme-layer')).to_contain_text('2026-11-06 close')
                 expect(page.locator('#fixture-banner')).to_be_hidden()
+                page.locator('[data-nav="themes"]').click()
                 expect(page.locator('#theme-table')).to_contain_text('Pre-launch research trend')
                 expect(page.locator('#theme-table')).to_contain_text('Bullish')
                 expect(page.locator('#theme-table')).to_contain_text('Comparison unavailable')
+                page.locator('[data-nav="candidates"]').click()
                 assert page.locator('#candidates tbody tr').count()>0
-                save=page.locator('[data-save]').first;ticker=save.get_attribute('data-save');save.click()
+                save=page.locator('#candidates [data-save]').first;ticker=save.get_attribute('data-save');save.click()
+                page.locator('[data-nav="saved"]').click()
                 expect(page.locator('#saved')).to_contain_text(ticker)
+                page.locator('[data-nav="candidates"]').click()
                 with page.expect_download() as item:
-                    page.get_by_text('Download combined Primary TXT',exact=True).click()
+                    page.get_by_role('link',name='Export all Primary').click()
                 text=Path(item.value.path()).read_text();assert text and '###' in text
                 identifiers=[line for line in text.splitlines() if not line.startswith('###')]
                 assert len(identifiers)==len(set(identifiers))
                 # Auto cutover uses the same server and never calls research history live.
                 fixture.target='2026-11-06';page.get_by_role('button',name='Refresh Data',exact=True).click()
                 expect(page.locator('#theme-layer')).to_contain_text('Launch close: index initialized at 100',timeout=30000)
+                page.locator('[data-nav="themes"]').click()
                 expect(page.locator('#theme-table')).to_contain_text('Synthetic Theme Trend')
                 assert service.snapshot()['theme_layer']['official_live_history']
                 page.set_viewport_size({'width':390,'height':844})

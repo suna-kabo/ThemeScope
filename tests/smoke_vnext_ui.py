@@ -27,15 +27,20 @@ def main():
                 page.goto(f'http://127.0.0.1:{port}')
                 page.get_by_role('button',name='Refresh Data',exact=True).click()
                 expect(page.locator('#progress')).to_have_text('Refresh complete')
+                page.locator('[data-nav="candidates"]').click()
                 expect(page.locator('#candidates')).to_contain_text('AAA')
+                page.get_by_role('button',name='By theme',exact=True).click()
                 assert page.locator('#candidates tbody tr').count()>=4
-                page.locator('[data-save]').first.click()
-                assert page.locator('#saved').inner_text()!=''
+                page.locator('#candidates [data-save]').first.click()
+                page.locator('[data-nav="saved"]').click()
+                expect(page.locator('#saved')).to_contain_text('AAA')
+                page.locator('[data-nav="candidates"]').click()
                 with page.expect_download() as download:
-                    page.get_by_text('Download combined Primary TXT',exact=True).click()
+                    page.get_by_role('link',name='Export all Primary').click()
                 text=Path(download.value.path()).read_text()
                 assert text.count('NASDAQ:AAA')==1 and text.count('NASDAQ:BBB')==1
                 assert 'Also qualifies in' in page.locator('#candidates').inner_text()
+                page.locator('[data-nav="overview"]').click()
                 page.get_by_text('How this list is built →',exact=True).click()
                 assert page.url.endswith('#methodology')
                 page.set_viewport_size({'width':390,'height':844})

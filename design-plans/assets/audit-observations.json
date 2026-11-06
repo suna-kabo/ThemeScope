@@ -1,0 +1,52 @@
+{
+  "legacy_main": "cf4fdb1e4784ff6fbc7183d5e709ffae044ec2fe",
+  "vnext": {
+    "theme_columns": 6,
+    "theme_rows": 52,
+    "candidate_columns": 8,
+    "candidate_rows": 187,
+    "active_themes": 44,
+    "eligible_relationships": 721,
+    "document_height_1440": 18322,
+    "themes_top_1440": 13530.671875,
+    "table_controls": 0,
+    "focus_before_poll": "AVAV",
+    "focus_after_poll": "BODY",
+    "desktop_widths": {
+      "1440": {
+        "main_width": 1208,
+        "body_width": 1440
+      },
+      "1600": {
+        "main_width": 1368,
+        "body_width": 1600
+      },
+      "1920": {
+        "main_width": 1540,
+        "body_width": 1920
+      }
+    },
+    "mobile_theme_table_scroll_width": 690,
+    "mobile_content_width": 350
+  },
+  "data": "deterministic audit fixtures; not live market observations",
+  "viewports": [
+    1440,
+    1600,
+    1920,
+    390
+  ],
+  "legacy": {
+    "theme_columns": 15,
+    "theme_rows": 53,
+    "theme_table_width": 1422,
+    "theme_viewport_width": 1328,
+    "member_columns": 14,
+    "back_enabled": true,
+    "mode_after_toggle": "light",
+    "back_restores_themes": true
+  },
+  "browser_page_errors": [],
+  "vnext_checkpoint": "ed12ba49e4ea6ce3cfb1998ae6bdc72d11fe0324",
+  "screenshots": "Unchanged application UI; an audit-data watermark was added only to the temporary browser DOM."
+}

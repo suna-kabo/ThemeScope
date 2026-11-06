@@ -13,8 +13,9 @@ Gate C 7d3bf2e is approved; the real local SIP PoC passed (user-reported).
 Phase 6: a8958f3. Phase 7: 9080337. Phase 8 validated for Gate D.
 Gate D is closed; roster import 94050ac and membership/evidence review 150c47c complete.
 Phase 9 is complete at 327fc2375ae0e4981af87d4b5136170ee542b60d.
-SQLite lifecycle fix 0b51a0f is complete. Current scope: one separate Gate E
-pre-launch research fix, then stop with Gate E open pending native Windows validation.
+SQLite lifecycle fix 0b51a0f and pre-launch research fix ed12ba4 are complete.
+Current checkpoint: Lunar Lounge UI implementation; commit/push once, then stop
+for user review. Gate E remains open pending native Windows validation.
 Launch rebalance 2026-11-06 close; all 726 retained relationships effective 2026-11-09.
 Production enabled; zero config blockers. Runtime SPY/QQQ roster gates remain.
 Preserve inspection/vnext-d-ui at 02e7d63 and every original gate ref.
@@ -509,3 +510,35 @@ with zero external requests/page errors. Evidence/config, compilation, JS and
 temporary safe inspection/protected-source/runtime/secret scans pass. Details and
 native retest commands: docs/vnext_prelaunch_research.md. Gate E remains OPEN. No main/deployment/frozen
 inspection changes, credential use, real runtime DB edits or evidence decisions.
+
+
+## Lunar Lounge UI implementation after ed12ba4
+
+The user selected one design direction from the completed exploration and authorized
+HTML/CSS/JavaScript implementation, a tested commit/push and then a stop for review.
+No competing prototype/branch, framework migration, backend/API changes or deployment.
+
+- Dedicated Overview, Themes, Theme Detail, Candidates, Saved and Methodology
+  surfaces with persistent labeled navigation and browser history/context restoration.
+- Matte night/lavender token system, legible sans type, tabular numbers, original
+  outline icons, compact research tables, narrow reflow and reduced motion.
+- Search/filter/sort, separate 44 Active/eight Watch-only browsing, independent
+  qualifications/unique ticker view, current Saved context, canonical TXT downloads.
+- Identical snapshot polls no longer replace focused Save controls. Operational
+  metadata stays compact; failure retains previous committed results and exports.
+- Sequential specialist passes: better-ui, better-typography, better-accessibility.
+  Public UI Craft and brand catalogs inspected without installation or new dependencies.
+- Full suite: 321 run, 319 passed/two Windows skips. Focused vNext: 114 run,
+  113 passed/one Windows skip. Includes pre-launch 8, launch 7, SQLite lifecycle 11
+  and all 64 frozen Market Matrix cases. Three browser scripts, syntax/compilation
+  and configuration validation pass. Chromium 1440/1600/1920 and 800/390/320 widths;
+  200% root text resize; audited axe A/AA views have zero violations.
+- Audit fixes include target sizes, stable focus, native fragment/skip navigation,
+  missing platform glyphs, readable type and mobile breadth/Priority separation.
+
+Detailed behavior, test evidence, limitations and screenshot links:
+[docs/vnext_lunar_lounge.md](docs/vnext_lunar_lounge.md).
+No src/config/financial/provider/storage/export/launch changes. Approved launch
+2026-11-06 close and first earned session 2026-11-09 stay frozen. All original
+inspection refs and main remain unchanged. Gate E is not closed; native Windows,
+screen-reader speech and other browser engines remain local/platform checks.

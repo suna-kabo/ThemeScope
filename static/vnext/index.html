@@ -1,14 +1,90 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ThemeScope · vNext</title><link rel="stylesheet" href="app.css"></head>
-<body><aside><a class="brand" href="#market">ThemeScope<span>vNext · private research</span></a><nav aria-label="Research"><a href="#market">Market</a><a href="#daily-plan">Daily Plan</a><a href="#themes">Sectors &amp; Themes</a><a href="#watchlist">Watchlist</a><a href="#methodology">Methodology</a></nav><p class="aside-note">End-of-day US equity research</p></aside>
-<main><header><div><p class="eyebrow">YOUR RESEARCH WORKSPACE</p><h1>A clear view of theme rotation.</h1><p class="muted">Market context, custom themes and stock comparisons in one place.</p></div><button id="refresh">Refresh Data</button></header>
-<div id="fixture-banner" class="notice" hidden>Synthetic inspection fixture · fictional symbols and results · no live signals.</div>
-<div class="status" aria-live="polite"><strong id="progress">Ready</strong><span id="target">Target session —</span><span id="last-success">Last successful refresh —</span><span id="completeness">Completeness —</span><span id="provider">Provider health —</span></div>
-<p id="theme-layer" class="notice" role="status"></p>
-<div id="error" class="notice" role="alert" hidden></div>
-<section id="market"><p class="eyebrow">01 / CONTEXT</p><h2>Market</h2><div id="market-cards" class="grid"><p class="muted">Refresh to load the latest completed session.</p></div><details><summary>Market decision path</summary><p id="decision-path">Unavailable until a successful refresh.</p></details></section>
-<section id="daily-plan"><p class="eyebrow">02 / FOCUS</p><div class="section-title"><h2>Daily Plan</h2><a id="combined" class="download" href="/api/exports/combined.txt" download="Primary.txt" aria-disabled="true">Download combined Primary TXT</a></div><div class="plan"><span class="pill">TODAY’S PLAN</span><h3 id="today-plan">Your plan will appear after refresh.</h3><p><a href="#methodology">How this list is built →</a></p></div><h3>Primary themes</h3><div id="primary-themes" class="grid"></div><h3>Primary stock candidates</h3><p class="muted">Each relationship qualifies independently. The combined list includes each ticker once.</p><div id="candidates" class="table-wrap"></div></section>
-<section id="themes"><p class="eyebrow">03 / EXPLORE</p><h2>Sectors &amp; Themes / Theme Research</h2><p>Custom Theme Score · Synthetic Theme Trend · vs Theme Peers</p><div id="theme-table" class="table-wrap"></div></section>
-<section id="watchlist"><p class="eyebrow">04 / FOLLOW</p><h2>Watchlist</h2><p class="muted">Use Save beside a candidate to follow it in this browser.</p><div id="saved"></div></section>
-<section id="methodology"><p class="eyebrow">05 / UNDERSTAND</p><h2>Methodology</h2><div class="grid"><article><h3>Custom Theme Score</h3><p>Median Core + Enabler stock returns over 21 and 63 sessions. Score combines cross-theme percentiles at 60% / 40%. At least five valid members and 80% coverage are required.</p></article><article><h3>Synthetic Theme Trend</h3><p>A chain-linked price index with weights that drift between rebalances. Trend compares the index with EMA21 and EMA50. Bootstrap never supplies historical live signals. Before an approved launch, its current trend supports pre-launch research priority.</p></article><article><h3>vs Theme Peers</h3><p>Each stock is compared with the other members of each theme. W combines its excess returns at 60% / 40%. Long requires W &gt; 0; Short requires W &lt; 0.</p></article><article><h3>Multi-theme qualification</h3><p>Individual lists retain every qualification. Combined placement prefers Core, then stronger directional W, then theme ID. Assigned section is a placement for this list.</p></article></div><p>Daily eligibility: close ≥ $5, average volume over 10 completed sessions &gt; 500,000 shares, and daily turnover ≥ $10 million. Earnings is optional; unavailable dates are never inferred.</p><p>Approved launch membership may support current pre-launch research without backdating official returns. New membership first earns the session after approval. Old holdings earn approval session t; rebalance occurs at t close. Missing or incompatible prior history makes comparisons unavailable.</p><h3>Configuration and activation status</h3><ul id="blockers"></ul><p class="muted">ThemeScope supports research. Chart and setup evaluation remain separate.</p></section>
-<footer>ThemeScope vNext · Local research workspace</footer></main><script src="preview.js"></script><script src="app.js"></script></body></html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>Overview · ThemeScope</title><link rel="stylesheet" href="app.css"></head>
+<body>
+<a class="skip-link" href="#workspace">Skip to research</a>
+<aside class="rail">
+  <a class="brand" href="#overview" aria-label="ThemeScope home"><span class="brand-mark" aria-hidden="true">◔</span><span>ThemeScope<small>YOUR RESEARCH DESK</small></span></a>
+  <nav aria-label="Research" class="main-nav">
+    <a href="#overview" data-nav="overview"><span aria-hidden="true" class="nav-icon">◫</span>Overview</a>
+    <a href="#themes" data-nav="themes"><span aria-hidden="true" class="nav-icon">◈</span>Themes</a>
+    <a href="#candidates" data-nav="candidates"><span aria-hidden="true" class="nav-icon">⌕</span>Candidates</a>
+    <a href="#saved" data-nav="saved"><span aria-hidden="true" class="nav-icon">☆</span>Saved<span id="saved-count" class="nav-count">0</span></a>
+    <a href="#methodology" data-nav="methodology" class="secondary-nav"><span aria-hidden="true" class="nav-icon">≡</span>Methodology</a>
+  </nav>
+  <div class="rail-footer"><span class="quiet-orbit" aria-hidden="true">◌</span><p>A little perspective.<br>A clearer next look.</p><small>PRIVATE · END OF DAY</small></div>
+</aside>
+<div class="app-shell">
+  <header class="app-header">
+    <div class="session-label"><span class="status-dot" aria-hidden="true"></span><span id="target">Completed US session —</span></div>
+    <div class="header-actions"><span id="progress" role="status" aria-live="polite">Connecting to your desk…</span><button id="refresh" class="button primary"><span aria-hidden="true">↻</span><span id="refresh-label">Refresh Data</span></button></div>
+  </header>
+  <div class="operational-strip">
+    <span id="completeness">Completeness —</span><span id="provider">Provider —</span>
+    <details class="diagnostics"><summary>Refresh details</summary><div class="diagnostics-body"><p id="last-success">Last successful refresh —</p><p id="target-detail">Target session —</p><p id="read-status"></p><p>Refresh publishes one complete snapshot. Failed refreshes preserve the previous results and exports.</p></div></details>
+  </div>
+  <main id="workspace" tabindex="-1">
+    <div id="fixture-banner" class="notice warning" hidden>Synthetic inspection fixture · fictional symbols and results · no live signals.</div>
+    <p id="theme-layer" class="notice info" hidden></p>
+    <div id="error" class="notice negative" role="alert" hidden></div>
+    <section id="overview-page" class="view" aria-labelledby="overview-title">
+      <div class="page-heading"><div><p class="eyebrow">THE DAILY PICTURE</p><h1 id="overview-title" tabindex="-1">Overview<span class="heading-dot">.</span></h1><p class="subtitle">Find the themes. Follow the strength. Take a closer look.</p></div><a href="#themes" class="button secondary">Explore themes <span aria-hidden="true">↗</span></a></div>
+      <div id="market-direction" class="direction-panel"><p class="eyebrow">MARKET MATRIX</p><h2>One session, a clearer perspective.</h2><p class="muted">Refresh Data to load the latest completed US session.</p></div>
+      <div id="market-cards" class="market-grid"></div>
+      <div class="overview-research">
+        <section class="research-panel" aria-labelledby="top-themes-title"><div class="section-heading"><div><p class="eyebrow">WHERE TO LOOK</p><h2 id="top-themes-title">Themes in focus</h2></div><a href="#themes" class="text-link">All themes <span aria-hidden="true">↗</span></a></div><div id="primary-themes"></div></section>
+        <section class="research-panel" aria-labelledby="preview-candidates-title"><div class="section-heading"><div><p class="eyebrow">YOUR NEXT CHART</p><h2 id="preview-candidates-title">Primary candidates</h2></div><a href="#candidates" class="text-link">All candidates <span aria-hidden="true">↗</span></a></div><div id="candidate-preview"></div></section>
+      </div>
+      <a href="#methodology" class="method-link">How this list is built →</a>
+    </section>
+    <section id="themes-page" class="view" aria-labelledby="themes-title" hidden>
+      <div class="page-heading"><div><p class="eyebrow">THE BIGGER PICTURE</p><h1 id="themes-title" tabindex="-1">Themes<span class="heading-dot">.</span></h1><p class="subtitle">Custom themes, compared on the same terms.</p></div><div class="segmented" role="group" aria-label="Theme universe"><button data-universe="active" aria-pressed="true">Active <span id="active-count">—</span></button><button data-universe="watch_only" aria-pressed="false">Watch-only <span id="watch-count">—</span></button></div></div>
+      <form id="theme-filters" class="filter-bar" role="search" aria-label="Filter themes">
+        <label class="search-field">Search themes<input id="theme-search" type="search" placeholder="Theme or family…" autocomplete="off"></label>
+        <label>Family<select id="theme-family"><option value="">All families</option></select></label>
+        <label>Priority<select id="theme-priority"><option value="">All priorities</option><option>Primary long</option><option>Primary short</option><option>Watch</option></select></label>
+        <label>Trend<select id="theme-trend"><option value="">All trends</option><option>Bullish</option><option>Bearish</option><option>Mixed</option><option>Unavailable</option></select></label>
+        <button type="button" data-reset="themes" class="button quiet">Reset</button>
+      </form>
+      <div class="table-meta"><p id="theme-results" role="status" aria-live="polite">Waiting for a snapshot</p><span># = list position · equal scores share a tie label</span></div>
+      <div id="theme-table" class="table-wrap theme-wrap" role="region" aria-label="Theme research results" tabindex="0"></div>
+    </section>
+    <section id="theme-detail" class="view" aria-labelledby="detail-title" hidden><div id="detail-content"></div></section>
+    <section id="candidate-page" class="view" aria-labelledby="candidates-title" hidden>
+      <div class="page-heading"><div><p class="eyebrow">FROM THEME TO TICKER</p><h1 id="candidates-title" tabindex="-1">Candidates<span class="heading-dot">.</span></h1><p class="subtitle">A shortlist for chart inspection. Each theme qualifies independently.</p></div><a id="combined" class="button primary download" href="/api/exports/combined.txt" download="Primary.txt" aria-disabled="true" tabindex="-1">Export all Primary <span aria-hidden="true">↓</span></a></div>
+      <form id="candidate-filters" class="filter-bar" role="search" aria-label="Filter candidates">
+        <label class="search-field">Search candidates<input id="candidate-search" type="search" placeholder="Ticker or theme…" autocomplete="off"></label>
+        <label>Theme<select id="candidate-theme"><option value="">All themes</option></select></label>
+        <label>Role<select id="candidate-role"><option value="">All roles</option><option>Core</option><option>Enabler</option></select></label>
+        <label>W vs Theme Peers<select id="candidate-w"><option value="">Any W</option><option value="positive">Positive W</option><option value="negative">Negative W</option></select></label>
+        <label>Earnings<select id="candidate-earnings"><option value="">Any earnings state</option><option value="available">Date available</option><option value="unavailable">Unavailable</option></select></label>
+        <button type="button" data-reset="candidates" class="button quiet">Reset</button>
+      </form>
+      <div class="candidate-tools"><div class="segmented" role="group" aria-label="Candidate display"><button data-candidate-mode="unique" aria-pressed="true">Unique tickers</button><button data-candidate-mode="relationships" aria-pressed="false">By theme</button></div><label class="inline-label">Sort<select id="candidate-sort"><option value="ticker">Ticker A–Z</option><option value="w-desc">W high to low</option><option value="w-asc">W low to high</option><option value="theme">Theme A–Z</option></select></label></div>
+      <p class="table-meta" id="candidate-results" role="status" aria-live="polite">Waiting for a snapshot</p><p class="table-note">Unique tickers use W from their assigned export section. Filters change this view only; TXT exports always contain the full published Primary list.</p>
+      <div id="candidates"></div>
+    </section>
+    <section id="saved-page" class="view" aria-labelledby="saved-title" hidden>
+      <div class="page-heading"><div><p class="eyebrow">KEPT FOR A CLOSER LOOK</p><h1 id="saved-title" tabindex="-1">Saved<span class="heading-dot">.</span></h1><p class="subtitle">Your bookmarks, with today's research context. Stored in this browser only.</p></div><a href="#candidates" class="button secondary">Browse candidates <span aria-hidden="true">↗</span></a></div>
+      <div id="saved"></div>
+    </section>
+    <section id="methodology-page" class="view" aria-labelledby="methodology-title" hidden>
+      <div class="page-heading"><div><p class="eyebrow">KNOW WHAT YOU'RE LOOKING AT</p><h1 id="methodology-title" tabindex="-1">Methodology<span class="heading-dot">.</span></h1><p class="subtitle">The rules behind the research. No hidden signals.</p></div></div>
+      <div class="method-intro"><span class="quiet-orbit" aria-hidden="true">◌</span><p>ThemeScope connects market context, custom equity themes and stock comparisons.<br><span class="muted">It supports research. Chart and setup evaluation remain separate.</span></p></div>
+      <div class="method-grid">
+        <details class="method-item"><summary>01 <span>Market Matrix</span></summary><div><p>SPY and QQQ price states and their constituent breadth determine the returned Market Matrix direction. Both prices Bullish or both Bearish establish their unanimous direction; breadth adds context. Other combinations follow the configured frozen matrix.</p><p>IWM is price context only. It never decides direction and has no constituent roster.</p></div></details>
+        <details class="method-item"><summary>02 <span>Custom Theme Score</span></summary><div><p>Theme 1M and 3M are median Core + Enabler stock price returns over 21 and 63 completed trading sessions. At least five valid members and 80% coverage are required.</p><p>Score combines cross-theme percentiles: 60% 1M + 40% 3M. It is a relative ranking measure, not a probability or expected return. Related members and thematic ETFs have no calculation role.</p></div></details>
+        <details class="method-item"><summary>03 <span>Synthetic Theme Trend</span></summary><div><p>A chain-linked index with weights that drift between rebalances. Its current level relative to EMA21 and EMA50 gives Bullish, Bearish or Mixed. EMA equality is Mixed.</p><p>Bootstrap initializes indicators only. It cannot create official live signals or compatible historical transitions.</p></div></details>
+        <details class="method-item"><summary>04 <span>Theme breadth</span></summary><div><p>The share of valid Core + Enabler members above their own EMA21 and EMA50, with coverage shown in Theme Detail. Breadth is context only: it does not enter Theme Score or Primary qualification.</p></div></details>
+        <details class="method-item"><summary>05 <span>W vs Theme Peers</span></summary><div><p>Each stock is compared with the other Core + Enabler members of that theme, leaving itself out. ER1M and ER3M are its excess returns over those peer medians.</p><p>W = 60% ER1M + 40% ER3M. W and excess returns are displayed in percentage points (pp), not as a standalone stock return. A stock can have a different W in each theme.</p></div></details>
+        <details class="method-item"><summary>06 <span>Primary qualification &amp; eligibility</span></summary><div><p>Long Primary: Score ≥ 50 with Bullish or Mixed trend, or a valid Newly bullish transition. Short Primary: Score &lt; 50 with Bearish or Mixed trend, or a valid Newly bearish transition. A valid Score and current trend are required.</p><p>Stock qualification additionally requires W &gt; 0 for long or W &lt; 0 for short, close ≥ $5, average volume over 10 completed sessions &gt; 500,000 shares, and daily turnover ≥ $10 million. Zero W does not qualify. Earnings dates are optional and never inferred.</p></div></details>
+        <details class="method-item"><summary>07 <span>Multi-theme assignment &amp; exports</span></summary><div><p>A ticker may qualify independently in multiple themes. Individual Theme Primary TXT files retain each qualification. The combined export emits the ticker once.</p><p>Combined placement prefers Core, then stronger directional W, then theme ID. Assigned section is export placement, not a permanent home theme. Also qualifies in shows the other qualifying themes. View filters do not change exports.</p><p>Saved is a manual browser-local bookmark list. It does not change memberships or qualification.</p></div></details>
+        <details class="method-item"><summary>08 <span>Launch &amp; pre-launch research</span></summary><div><p>Approved rebalance: 2026-11-06 close. First earned session: 2026-11-09. Old holdings earn approval session t; rebalance happens at t close. New holdings first earn the next US trading session. effective_from is that first earned session; effective_to is exclusive.</p><p>Before launch, the approved membership universe supports current pre-launch research. That bootstrap-only research is separate from official synthetic-index history. Launch initializes at 100; missing or incompatible prior history makes comparisons unavailable. Legacy ETF history is never spliced into vNext.</p></div></details>
+      </div>
+      <details class="method-item activation-details"><summary>Configuration &amp; activation status</summary><div><ul id="blockers"><li>Load a snapshot to check activation.</li></ul><p class="muted">Effective SPY and QQQ rosters are required for activation. Stale-roster warnings are advisory.</p></div></details>
+    </section>
+    <footer class="workspace-footer"><span>ThemeScope · A clearer next look.</span><span>Local research. Your pace.</span></footer>
+  </main>
+</div>
+<div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+<script src="preview.js"></script><script src="app.js"></script>
+</body></html>
