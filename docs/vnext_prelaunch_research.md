@@ -141,3 +141,25 @@ inspection/source scans pass. The user must still validate the native Windows
 pre-launch research workflow; these automated results do not close Gate E. No live market credentials, raw provider
 payloads or runtime databases are committed. No main/deployment/inspection-ref
 changes and no Gate E closure.
+
+## Launch-close research correction (Gate E remains open)
+
+Research membership timing differs from return-accounting effectivity on the launch
+close only. The engine accepts an independent `research_members_for` resolver.
+`approved_launch_close_membership()` selects the approved next-earned-session
+Core+Enabler intervals on L after configuration/roster gates pass. Official index
+construction still uses effective-dated accounting membership, without alteration.
+The pre-launch bootstrap selector still stops before L; L is never labelled pre-launch.
+
+| Session | Research | Official accounting / transitions |
+|---|---|---|
+| Nov 5 | Approved launch members, bootstrap research trend | No official index or compatible transition |
+| Nov 6 close | Approved launch members: Score, W, eligibility, breadth, Primary and exports | Official index exactly 100; earned_symbols empty; signal_eligible false; no earned return or transition |
+| Nov 9 | Effective members, normal research | First genuine Nov 6–Nov 9 earned return; transition unavailable |
+| Nov 10 | Effective members, normal research | Second earned observation; first possible adjacent-live transition |
+
+The launch-close snapshot records `research_membership_basis=approved_launch_membership`
+and its first-earned-session basis separately from initialized official history.
+This is not backdated membership. No dates, formulas, index math, compatibility,
+UI, provider or schema change. A deterministic fixture proves a launch-close
+Candidate can qualify; actual market data may legitimately yield zero Candidates.

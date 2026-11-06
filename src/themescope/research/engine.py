@@ -18,12 +18,14 @@ SNAPSHOT_VERSION='themescope-vnext-snapshot-1'
 
 def calculate_session(configuration, bars, sessions, target, market_direction, index_histories,
                       series_ids, symbol_mapping, *, previous=None, bootstrap_seeds=None,
-                      research_universe=None, research_indices=None):
+                      research_universe=None, research_indices=None, research_members_for=None):
     sessions=calendar(sessions)
     end=sessions.index(target)
     previous=previous or {}
     bootstrap_seeds=bootstrap_seeds or {}
     research_indices=research_indices or {}
+    if research_universe and research_members_for is not None:
+        raise ValueError('Choose one research membership selection')
     if research_universe:
         if (research_universe.research_session!=target
                 or research_universe.launch_rebalance_session!=configuration.methodology.get('launch_rebalance_session')
@@ -33,7 +35,8 @@ def calculate_session(configuration, bars, sessions, target, market_direction, i
             raise ValueError('Research and official index histories must remain separate')
     elif research_indices:
         raise ValueError('Explicit research universe required for research indices')
-    members_for=research_universe.members_for if research_universe else lambda theme_id:configuration.members_on(theme_id,target)
+    members_for=(research_universe.members_for if research_universe else research_members_for
+                 if research_members_for is not None else lambda theme_id:configuration.members_on(theme_id,target))
     metrics,scores,returns=benchmarks(configuration,bars,sessions,target,members_for=members_for)
     symbols=sorted({m.ticker for t in configuration.themes for m in members_for(t.theme_id)})
     eligibility={s:daily_eligibility(bars,s,sessions,target,configuration.methodology) for s in symbols}

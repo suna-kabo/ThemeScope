@@ -18,7 +18,7 @@ from ..themes.index import build_index,IndexUnavailable
 from ..themes.history import ThemeHistory
 from ..research.engine import calculate_session
 from ..research.exports import reviewed_mapping
-from ..research.universe import approved_launch_universe,contiguous_suffix
+from ..research.universe import approved_launch_universe,approved_launch_close_membership,contiguous_suffix
 from ..research_policy import ACTION_SENTENCES
 
 class RefreshService:
@@ -166,6 +166,7 @@ class RefreshService:
             # Blocked production membership is never activated by this application.
             working=config if self.mode=='fixture' or not blockers else replace(config,memberships=())
             research=approved_launch_universe(config,target,days,activation_blockers=blockers) if self.mode!='fixture' else None
+            launch_research=approved_launch_close_membership(config,target,days,activation_blockers=blockers) if self.mode!='fixture' else None
             init=sessions[0] if self.mode=='fixture' else launch
             initialization_members={}
             if init and init<=target and init in calendar:
@@ -226,11 +227,12 @@ class RefreshService:
                     if row and row.get('history'):previous[theme.theme_id]=ThemeHistory(**row['history'])
             if self.mode=='fixture':mapping={s:{'status':'verified','symbol':'NASDAQ:'+s} for s in names}
             else:
-                has_members=bool(research) or any(working.members_on(t.theme_id,target) for t in working.themes)
+                has_members=bool(research or launch_research) or any(working.members_on(t.theme_id,target) for t in working.themes)
                 mapping=reviewed_mapping(working,json.loads((self.root/'config/tradingview_symbols.json').read_text())['symbols']) if has_members else {}
             snapshot=calculate_session(working,bars,sessions,target,market['decision']['direction'],indices,series,mapping,
                                        previous=previous,bootstrap_seeds=seeds,
-                                       research_universe=research,research_indices=research_indices)
+                                       research_universe=research,research_indices=research_indices,
+                                       research_members_for=launch_research.members_for if launch_research else None)
             # Hash the actual source config, even while blocked calculations are empty.
             from hashlib import sha256
             snapshot['configuration_hash']=sha256(canonical({'themes':config,'rosters':rosters}).encode()).hexdigest()
@@ -240,6 +242,9 @@ class RefreshService:
                 'research_session':target,'membership_basis':'effective_membership',
                 'official_live_history':bool(init and init<=target and indices),
                 'launch_rebalance_session':launch,'first_earned_session':calendar[calendar.index(launch)+1] if launch in calendar else None}
+            if launch_research:
+                snapshot['research_membership_basis']='approved_launch_membership'
+                snapshot['research_membership_basis_session']=launch_research.first_earned_session
             snapshot['market']=market;snapshot['synthetic_fixture']=self.mode=='fixture'
             snapshot['today_plan']=ACTION_SENTENCES[market['decision']['direction']]
             self._status(progress='Checking optional earnings')

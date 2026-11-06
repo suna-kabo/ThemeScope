@@ -14,8 +14,9 @@ Phase 6: a8958f3. Phase 7: 9080337. Phase 8 validated for Gate D.
 Gate D is closed; roster import 94050ac and membership/evidence review 150c47c complete.
 Phase 9 is complete at 327fc2375ae0e4981af87d4b5136170ee542b60d.
 SQLite lifecycle fix 0b51a0f and pre-launch research fix ed12ba4 are complete.
-Current checkpoint: Lunar Lounge UI implementation; commit/push once, then stop
-for user review. Gate E remains open pending native Windows validation.
+Current scope: two separate Gate E fixes for launch-close research and Windows
+evidence line endings. Lunar Lounge is complete; UI remains frozen. Stop after
+tested commits/push and native Windows handoff; Gate E remains open.
 Launch rebalance 2026-11-06 close; all 726 retained relationships effective 2026-11-09.
 Production enabled; zero config blockers. Runtime SPY/QQQ roster gates remain.
 Preserve inspection/vnext-d-ui at 02e7d63 and every original gate ref.
@@ -542,3 +543,15 @@ No src/config/financial/provider/storage/export/launch changes. Approved launch
 2026-11-06 close and first earned session 2026-11-09 stay frozen. All original
 inspection refs and main remain unchanged. Gate E is not closed; native Windows,
 screen-reader speech and other browser engines remain local/platform checks.
+
+## Gate E launch-close research correction
+
+Launch L now selects approved first-earned-session membership for cross-sectional
+research through an independent resolver. Official accounting and bootstrap/live
+isolation remain unchanged: Nov 5 research; Nov 6 initialization at 100 plus research;
+Nov 9 first earned return without transition; Nov 10 first possible live transition.
+Tests cover 44 Active themes, 721 research rows, deterministic Candidate generation,
+no launch earned symbols/signals, generic shifted dates, blockers and unchanged drift.
+Native Windows validation and real Nov 9/10 checks remain open/deferred.
+
+Stage 1 validation: focused vNext suite 115 tests (114 passed, one Windows skip).

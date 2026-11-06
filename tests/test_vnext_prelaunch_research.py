@@ -6,7 +6,7 @@ from statistics import median
 from unittest.mock import patch
 from pathlib import Path
 import json,tempfile,unittest
-from src.themescope.research.universe import approved_launch_universe
+from src.themescope.research.universe import approved_launch_universe,approved_launch_close_membership
 from src.themescope.research.engine import calculate_session
 from src.themescope.research.primary import priority
 from src.themescope.themes.calculations import bar_map
@@ -125,6 +125,35 @@ class PrelaunchResearchTests(unittest.TestCase):
             self.assertTrue(all(D(p['level'])==100 and p['earned_symbols']==[] for p in starts))
         finally:store.close()
 
+    def test_launch_close_research_candidates_and_complete_earned_lifecycle(self):
+        fixture=PrelaunchFixture(self.root)
+        before=self.refresh(fixture,T)
+        launch=self.refresh(fixture,L)
+        first=self.refresh(fixture,E)
+        second=self.refresh(fixture,'2026-11-10')
+        expected={(m.ticker,m.theme_id) for m in fixture.config.memberships if m.calculation_eligible}
+        for current in (before,launch,first,second):
+            self.assertEqual({(r['ticker'],r['theme_id']) for r in current['relationships']},expected)
+            self.assertTrue(all(t['score'] is not None for t in current['themes']))
+            self.assertTrue(all(r['relative'].w is not None and r['eligibility'].available for r in current['relationships']))
+        self.assertEqual(launch['theme_layer']['state'],'initialized')
+        self.assertTrue(launch['theme_layer']['official_live_history'])
+        self.assertTrue(any(r['qualifies'] for r in launch['relationships']))
+        self.assertTrue(launch['exports']['combined']);self.assertTrue(launch['exports']['individual'])
+        self.assertTrue(all(t['index']['level']==100 and not t['history']['signal_eligible'] for t in launch['themes']))
+        self.assertTrue(all(not t['history']['bootstrap'] and ':pre-launch-research:' not in t['history']['series_id'] for t in launch['themes']))
+        self.assertTrue(all(all(v is None for v in t['transition'].values()) for current in (launch,first) for t in current['themes']))
+        self.assertTrue(all(t['history']['signal_eligible'] for current in (first,second) for t in current['themes']))
+        self.assertTrue(all(t['transition']['priority_change'] is not None for t in second['themes']))
+        store=Store(fixture.service.db)
+        try:
+            points=[json.loads(r[0]) for r in store.connection.execute('SELECT payload FROM theme_index')]
+            self.assertTrue(all(p['session']>=L for p in points if not p['bootstrap']))
+            starts=[p for p in points if p['session']==L and not p['bootstrap']]
+            self.assertTrue(starts)
+            self.assertTrue(all(D(p['level'])==100 and p['earned_symbols']==[] for p in starts))
+        finally:store.close()
+
     def test_selector_is_general_and_preserves_membership_objects(self):
         fixture=PrelaunchFixture(self.root);config=fixture.config
         launch='2026-11-12';earned='2026-11-13';target='2026-11-11'
@@ -136,6 +165,14 @@ class PrelaunchResearchTests(unittest.TestCase):
         self.assertIs(selection.relationships[0],config.memberships[0])
         self.assertTrue(all(not m.active_on(target) for m in selection.relationships))
         self.assertIsNone(approved_launch_universe(config,launch,DAYS))
+        close=approved_launch_close_membership(config,launch,DAYS)
+        self.assertEqual(close.first_earned_session,earned)
+        self.assertEqual(close.relationships,config.memberships)
+        self.assertIsNone(approved_launch_close_membership(config,target,DAYS))
+        self.assertIsNone(approved_launch_close_membership(config,earned,DAYS))
+        self.assertIsNone(approved_launch_close_membership(config,launch,DAYS,activation_blockers=['missing roster']))
+        blocked=replace(config,methodology=dict(config.methodology,production_enabled=False))
+        self.assertIsNone(approved_launch_close_membership(blocked,launch,DAYS))
         self.assertIsNone(approved_launch_universe(config,earned,DAYS))
 
     def test_config_and_each_roster_blocker_still_fail_closed(self):

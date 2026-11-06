@@ -86,10 +86,19 @@ class LaunchTests(unittest.TestCase):
         self.assertEqual(launched['theme_layer']['state'],'initialized')
         self.assertEqual(launched['theme_layer']['first_earned_session'],E)
         self.assertEqual(launched['production_blockers'],[])
-        self.assertEqual(launched['relationships'],[])
+        expected={(m.ticker,m.theme_id) for m in self.config.memberships if m.calculation_eligible}
+        self.assertEqual({(r['ticker'],r['theme_id']) for r in launched['relationships']},expected)
+        self.assertEqual(len(launched['relationships']),721)
+        self.assertTrue(all(r['relative'].w is not None and r['eligibility'].available for r in launched['relationships']))
+        self.assertEqual(launched['research_membership_basis'],'approved_launch_membership')
+        self.assertEqual(launched['research_membership_basis_session'],E)
+        self.assertTrue(all(not self.config.members_on(t.theme_id,L) for t in self.config.themes))
         active=[t for t in launched['themes'] if t['status']=='active']
         self.assertEqual(len(active),44)
         for theme in active:
+            self.assertIsNotNone(theme['score'])
+            self.assertTrue(all(metric.value is not None for metric in theme['returns']))
+            self.assertTrue(all(metric.value is not None for metric in theme['breadth']))
             self.assertEqual(theme['index']['level'],100,theme['theme_id'])
             self.assertIsNotNone(theme['index']['ema21'])
             self.assertIsNotNone(theme['index']['ema50'])
