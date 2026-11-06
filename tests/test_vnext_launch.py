@@ -76,9 +76,10 @@ class LaunchTests(unittest.TestCase):
     def test_real_44_theme_prelaunch_and_launch_close_with_full_rosters(self):
         service=self.service(full_rosters=True)
         before=self.refresh(service,'2026-11-05')
-        self.assertEqual(before['theme_layer']['state'],'pre_launch')
-        self.assertEqual(before['relationships'],[])
-        self.assertTrue(all(t['index']['level'] is None for t in before['themes']))
+        self.assertEqual(before['theme_layer']['state'],'pre_launch_research')
+        self.assertTrue(before['relationships'])
+        self.assertTrue(all(t['index']['bootstrap'] for t in before['themes']))
+        self.assertTrue(all(t['score'] is not None for t in before['themes'] if t['status']=='active'))
         self.assertEqual(self.index_rows(service),[])
         self.assertIn('SPY',before['market']['context'])
         launched=self.refresh(service,L)

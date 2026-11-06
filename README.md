@@ -49,13 +49,20 @@ relationships are effective **November 9, 2026**, the next XNYS session. Roles
 remain 659 Core, 62 Enabler and 5 Related; Related never enters calculations.
 Evidence review is complete and the industry registry is approved.
 
-Before November 6 completes, refresh publishes market context and clearly marks
-the theme layer pre-launch. At the November 6 close every valid Active theme
-initializes at 100 using November 9 Core+Enabler holdings, earning no launch-day
-return. The first genuine return is November 6 close to November 9 close.
-Bootstrap seeds EMAs only. The launch initialization cannot provide a prior
-live signal; November 9 transitions remain unavailable. Later transitions require
-compatible adjacent genuine earned-session history.
+Before November 6 completes, the latest safely completed session (normally the
+previous US close) supports **pre-launch research** with the approved launch universe:
+Theme Scores, bootstrap-derived current trends, priorities, stock peer W, Primary
+candidates and TXT exports. Related stays context only. A compact banner identifies
+the research session and the future official-history start. These are real research
+calculations from Alpaca SIP, not fictional fixture results or backdated membership.
+
+At the November 6 close every valid Active theme initializes its official index at
+100 using November 9 Core+Enabler holdings, earning no launch-day return. The first
+genuine return is November 6 close to November 9 close. Pre-launch bootstrap series
+are never stored as official index history and never supply transitions. The launch
+initialization cannot provide a prior earned live signal; November 9 transitions
+remain unavailable. Later transitions require compatible adjacent genuine history.
+See [pre-launch research](docs/vnext_prelaunch_research.md) for the explicit distinction.
 
 Effective SPY **501** / QQQ **101** constituent rosters dated November 5 remain
 separate manually maintained universes. Missing either effective roster blocks

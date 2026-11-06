@@ -251,3 +251,20 @@ Exact native retest commands and test coverage:
 [vnext_sqlite_lifecycle.md](vnext_sqlite_lifecycle.md). Keep existing runtime data.
 Gate E remains open until native validation is rerun. Main, original inspection
 checkpoints, launch dates, evidence, formulas and provider semantics are unchanged.
+
+
+## Gate E approved pre-launch research
+
+Before the approved launch close has safely completed, a fully approved universe
+now drives normal latest-completed-session research. The banner identifies the
+completed session and future official index start; Theme Research and Primary
+cards label the Pre-launch research trend. Scores, priorities, stock W, Primary
+TXT and Save-to-Watchlist are usable. The live runtime does not label these values
+as fictional or synthetic fixtures. Comparisons remain unavailable.
+
+Research uses original future-dated Core/Enabler relationships through a separate
+selection, never backdating official membership. Bootstrap research series cannot
+become official live history. Automatic cutover preserves L index=100 and E's first
+earned return. Existing Windows SQLite/status/lock hardening is unchanged.
+See [vnext_prelaunch_research.md](vnext_prelaunch_research.md) for native retesting.
+Gate E remains open pending native Windows validation of this path.

@@ -29,8 +29,11 @@ The review-application script continues to refuse rewriting activated membership
 ## Runtime boundary
 
 Before L completes, required market context and effective roster breadth refresh
-normally. Snapshot/API/UI mark the theme layer `pre_launch`; there are no live or
-bootstrap index rows, membership calculations or legacy thematic substitutions.
+normally. The subsequent approved Gate E clarification now supplies full current
+research using the approved launch universe: `pre_launch_research`, with separate
+bootstrap-only trend and no official index rows or membership backdating. The
+former market-only restriction is superseded. See vnext_prelaunch_research.md.
+Official L/E semantics below remain unchanged.
 
 At L close the orchestration selects Core+Enabler holdings from **the next earned
 session**, fetches their historical inputs, and calls the unchanged `build_index`

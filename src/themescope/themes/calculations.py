@@ -189,12 +189,13 @@ def breadth(symbols, closes, emas, policy=POLICY):
     return Metric(value, coverage.valid, coverage.configured, coverage.coverage)
 
 
-def benchmarks(configuration, bars, sessions, target):
-    """Effective membership is independent of daily liquidity eligibility."""
-    symbols = sorted({m.ticker for t in configuration.themes for m in configuration.members_on(t.theme_id, target)})
+def benchmarks(configuration, bars, sessions, target, *, members_for=None):
+    """Same formulas for effective membership or an explicit research selection."""
+    members_for=members_for or (lambda theme_id: configuration.members_on(theme_id,target))
+    symbols = sorted({m.ticker for t in configuration.themes for m in members_for(t.theme_id)})
     returns = [{s: price_return(bars, s, sessions, target, n) for s in symbols}
                for n in configuration.methodology['return_sessions']]
-    metrics = {t.theme_id: tuple(aggregate([m.ticker for m in configuration.members_on(t.theme_id, target)], r,
+    metrics = {t.theme_id: tuple(aggregate([m.ticker for m in members_for(t.theme_id)], r,
                                           policy=configuration.methodology) for r in returns)
                for t in configuration.themes if t.status == 'active'}
     return metrics, theme_scores(metrics, configuration.methodology), returns

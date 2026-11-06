@@ -139,9 +139,13 @@ provenance. Old holdings own L's return; vNext initializes at 100 at L close usi
 post-close Core+Enabler holdings effective the next session. Its launch point earns
 no historical return. Bootstrap is indicator-only and launch initialization cannot
 supply a prior earned-session signal. November 9 transitions remain unavailable
-until compatible adjacent genuine live history exists. Before L completes, refresh
-shows market context and an explicit pre-launch theme layer, without initialization
-or legacy substitution. Legacy ETF series are never spliced into vNext.
+until compatible adjacent genuine live history exists. Before L completes, fully
+approved launch membership may support current research for the latest completed
+session, without backdating membership or initializing official history. This
+research-only selection supplies unchanged benchmark/peer/breadth/eligibility
+formulas and a bootstrap-derived current trend for normal research priority.
+Its series is explicitly pre-launch, never official, never transition-compatible,
+and automatically stops being used at L. Legacy ETF series are never spliced in.
 
 ## 7. Active-theme requirements
 
@@ -305,9 +309,18 @@ Rules:
 - corporate-action-adjusted price returns
 - chain-link at membership changes to avoid false jumps
 
-At vNext launch, a bootstrap history using launch-date membership may be built only
-to initialize indicators. It must be explicitly tagged bootstrap and must not be
-presented as historical live ThemeScope signals.
+At vNext launch, bootstrap history using launch-date membership initializes
+indicators only. It is explicitly tagged and never historical live ThemeScope signals.
+
+Approved pre-launch research clarification: before the launch session has safely
+completed, a fully approved launch universe may also construct a bootstrap-only
+series ending at the latest completed session. Its EMA21/EMA50 and current trend
+may drive that current research snapshot's frozen priority/Primary rules. Theme
+Score and stock W use the same approved universe and unchanged 21/63-session
+formulas. No bootstrap points are published as official live index history, no
+relationship earns a backdated return, and all transition fields stay unavailable.
+Use explicit pre_launch_research / approved_launch_membership / official_live_history=false
+metadata and a distinct research series ID. Approval/roster blockers still fail closed.
 
 Live vNext history begins on the first actual vNext session.
 

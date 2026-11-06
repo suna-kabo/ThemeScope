@@ -13,11 +13,12 @@ from ..providers.base import Schedule,FixtureProvider
 from ..providers.alpaca import AlpacaMarketDataProvider
 from ..providers.cache import prepare
 from ..providers.earnings import optional_earnings,AlphaVantageEarnings
-from ..themes.calculations import bar_map
+from ..themes.calculations import bar_map,usable
 from ..themes.index import build_index,IndexUnavailable
 from ..themes.history import ThemeHistory
 from ..research.engine import calculate_session
 from ..research.exports import reviewed_mapping
+from ..research.universe import approved_launch_universe,contiguous_suffix
 from ..research_policy import ACTION_SENTENCES
 
 class RefreshService:
@@ -164,6 +165,7 @@ class RefreshService:
                     blockers.append(f'Effective {benchmark} constituent roster missing for {target}')
             # Blocked production membership is never activated by this application.
             working=config if self.mode=='fixture' or not blockers else replace(config,memberships=())
+            research=approved_launch_universe(config,target,days,activation_blockers=blockers) if self.mode!='fixture' else None
             init=sessions[0] if self.mode=='fixture' else launch
             initialization_members={}
             if init and init<=target and init in calendar:
@@ -171,6 +173,7 @@ class RefreshService:
                 for theme in working.themes:
                     initialization_members[theme.theme_id]=working.members_on(theme.theme_id,first_earned)
             names={m.ticker for t in working.themes for m in working.members_on(t.theme_id,target)}
+            if research:names.update(m.ticker for m in research.relationships if m.calculation_eligible)
             # Launch inputs come from post-close holdings, not earned membership on L.
             names.update(m.ticker for members in initialization_members.values() for m in members)
             if initialization_members:
@@ -190,7 +193,18 @@ class RefreshService:
             self._status(progress='Calculating market, themes and peer comparisons',provider_health='Healthy')
             market=market_layer(bars,sessions,rosters)
             market['rosters']=[asdict(r) for r in rosters]
-            indices={};seeds={};series={}
+            indices={};seeds={};series={};research_indices={}
+            if research:
+                for theme in working.themes:
+                    members=research.members_for(theme.theme_id)
+                    if not members:continue
+                    seed_names=tuple(m.ticker for m in members)
+                    recent=contiguous_suffix(sessions,lambda day:all(usable(bars.get((s,day))) for s in seed_names))
+                    if not recent:continue
+                    try:
+                        research_indices[theme.theme_id]=build_index(working,theme.theme_id,bars,calendar,recent[0],target,
+                                                                   bootstrap_symbols=seed_names)
+                    except IndexUnavailable:pass  # Insufficient data leaves this trend unavailable.
             if init and init<=target and init in calendar:
                 for theme in working.themes:
                     if theme.status!='active' or not initialization_members.get(theme.theme_id):continue
@@ -206,22 +220,26 @@ class RefreshService:
                         except IndexUnavailable:
                             pass  # Incomplete bootstrap cannot erase a valid live launch point.
             previous={}
-            if len(sessions)>1:
+            if len(sessions)>1 and not research:
                 for theme in working.themes:
                     row=store.theme_at(theme.theme_id,sessions[-2],working.methodology['version'])
                     if row and row.get('history'):previous[theme.theme_id]=ThemeHistory(**row['history'])
             if self.mode=='fixture':mapping={s:{'status':'verified','symbol':'NASDAQ:'+s} for s in names}
             else:
-                has_members=any(working.members_on(t.theme_id,target) for t in working.themes)
+                has_members=bool(research) or any(working.members_on(t.theme_id,target) for t in working.themes)
                 mapping=reviewed_mapping(working,json.loads((self.root/'config/tradingview_symbols.json').read_text())['symbols']) if has_members else {}
             snapshot=calculate_session(working,bars,sessions,target,market['decision']['direction'],indices,series,mapping,
-                                       previous=previous,bootstrap_seeds=seeds)
+                                       previous=previous,bootstrap_seeds=seeds,
+                                       research_universe=research,research_indices=research_indices)
             # Hash the actual source config, even while blocked calculations are empty.
             from hashlib import sha256
             snapshot['configuration_hash']=sha256(canonical({'themes':config,'rosters':rosters}).encode()).hexdigest()
             snapshot['production_blockers']=blockers
-            snapshot['theme_layer']={'state':'pre_launch' if launch and target<launch else 'activation_blocked' if blockers and self.mode!='fixture' else 'initialized' if target==launch else 'live',
-                                     'launch_rebalance_session':launch,'first_earned_session':calendar[calendar.index(launch)+1] if launch in calendar else None}
+            snapshot['theme_layer']=research.metadata() if research else {
+                'state':'activation_blocked' if blockers and self.mode!='fixture' else 'pre_launch' if launch and target<launch else 'initialized' if target==launch else 'live',
+                'research_session':target,'membership_basis':'effective_membership',
+                'official_live_history':bool(init and init<=target and indices),
+                'launch_rebalance_session':launch,'first_earned_session':calendar[calendar.index(launch)+1] if launch in calendar else None}
             snapshot['market']=market;snapshot['synthetic_fixture']=self.mode=='fixture'
             snapshot['today_plan']=ACTION_SENTENCES[market['decision']['direction']]
             self._status(progress='Checking optional earnings')

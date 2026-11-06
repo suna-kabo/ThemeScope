@@ -13,7 +13,8 @@ Gate C 7d3bf2e is approved; the real local SIP PoC passed (user-reported).
 Phase 6: a8958f3. Phase 7: 9080337. Phase 8 validated for Gate D.
 Gate D is closed; roster import 94050ac and membership/evidence review 150c47c complete.
 Phase 9 is complete at 327fc2375ae0e4981af87d4b5136170ee542b60d.
-Current scope: one focused Gate E native-Windows SQLite lifecycle hardening commit.
+SQLite lifecycle fix 0b51a0f is complete. Current scope: one separate Gate E
+pre-launch research fix, then stop with Gate E open pending native Windows validation.
 Launch rebalance 2026-11-06 close; all 726 retained relationships effective 2026-11-09.
 Production enabled; zero config blockers. Runtime SPY/QQQ roster gates remain.
 Preserve inspection/vnext-d-ui at 02e7d63 and every original gate ref.
@@ -401,7 +402,8 @@ all evidence and removed relationships. Approval/gate metadata is validated
 against membership and the XNYS calendar. No backdating or new evidence decisions.
 
 Runtime fetches post-close launch holdings even though none earn L's return.
-Pre-launch refresh remains market-only; L initializes every valid Active index at
+Original Phase 9 pre-launch refresh was market-only (superseded by the approved
+Gate E research clarification below); L initializes every valid Active index at
 100 with empty earned_symbols. Bootstrap index rows are explicitly flagged and
 only seed indicators. Launch initialization is not an earned-session signal;
 first-return transitions remain unavailable. Pure build_index and all formulas
@@ -467,3 +469,43 @@ match the unchanged baseline. Config/evidence validation, Python compilation,
 JavaScript syntax/helpers and loopback browser refresh/download smoke pass.
 Temporary safe inspection and protected-source/runtime/secret checks pass.
 Native Windows retest is still required before Gate E can close.
+
+## Gate E approved pre-launch research clarification
+
+The end-of-day swing workflow uses the latest safely completed US session before
+the upcoming US open. Official synthetic-return effectivity is a separate concept
+from the approved universe available for current research. The user explicitly
+authorizes current pre-launch research without changing any launch dates/formulas.
+
+LaunchResearchUniverse selects the approved future launch interval only before L
+and only with zero config/runtime roster blockers. Original Membership objects,
+active_on/members_on and all 726 dates remain untouched. Core+Enabler supplies
+benchmarks, breadth, LOO W and eligibility; Related is retained as context only.
+The engine has a separate research-universe/bootstrap-series input. All existing
+formula functions and live build_index semantics remain; only membership wiring
+changes. No hardcoded November 5 implementation exception.
+
+Pre-launch bootstrap provides current EMA21/EMA50 trend and normal static priority,
+so Primary candidates and deterministic individual/combined exports work. Published
+metadata marks pre_launch_research, research_session, approved_launch_membership,
+first-earned membership basis and official_live_history=false. Theme histories use
+a separate research series ID, bootstrap=true and signal_eligible=false. Research
+series points never enter theme_index. At L the path switches off automatically:
+level 100 with empty earned_symbols, then E's first genuine return. No pre-launch
+history supplies transitions or is spliced into the official series.
+
+UI identifies the completed research session and official start, labels Pre-launch
+research trend, and keeps comparisons unavailable. These are real research values
+in normal operation, never labeled as fictional fixtures. Save/watchlist/download
+flows remain unchanged. SQLite lifecycle/5s busy handling/atomic cache fix retained.
+
+Validation: full suite 321 cases, 319 passed/two existing native-Windows skips.
+Focused vNext: 114 cases, 113 passed/one native-Windows skip. Eight pre-launch,
+seven official-launch and eleven SQLite lifecycle regressions pass; all 64 frozen
+Market Matrix cases remain exact. Independent rational oracle matches all 44
+research medians/scores and a selected LOO W. Both real-loopback browser checks
+pass, including pre-launch export/Save and automatic official-launch cutover,
+with zero external requests/page errors. Evidence/config, compilation, JS and
+temporary safe inspection/protected-source/runtime/secret scans pass. Details and
+native retest commands: docs/vnext_prelaunch_research.md. Gate E remains OPEN. No main/deployment/frozen
+inspection changes, credential use, real runtime DB edits or evidence decisions.
