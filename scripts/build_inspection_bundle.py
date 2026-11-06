@@ -50,7 +50,9 @@ def build(root=ROOT, *, test_report=None, engine_report=None, provider_report=No
               'proposed_relationships': len(config.memberships),
               'unique_tickers': len({m.ticker for m in config.memberships}),
               'review_universe_tickers': len(config.universe['instruments']),
-              'launch_effective_dates': 'pending',
+              'launch_effective_dates': 'pending' if any(not m.effective_from for m in config.memberships) else sorted({m.effective_from for m in config.memberships}),
+              'production_enabled': config.methodology['production_enabled'],
+              'launch_rebalance_session': config.methodology['launch_rebalance_session'],
               'production_blockers': config.production_blockers(),
               'data_kind': 'configuration and synthetic fixtures only'}
     with tempfile.TemporaryDirectory(prefix='.inspection-', dir=root) as temporary:
@@ -92,7 +94,7 @@ def build(root=ROOT, *, test_report=None, engine_report=None, provider_report=No
             (ui/'preview.js').write_text('window.FIXTURE_SNAPSHOT='+snapshot_text+';', encoding='utf-8')
             engine_preview += '<h2>Gate D local UI</h2><p><a href="ui/index.html">Open synthetic interactive UI preview</a> · <a href="ui-report.md">Local launch and validation report</a></p>'
         (stage / 'index.html').write_text('<!doctype html><meta charset="utf-8"><title>ThemeScope vNext inspection</title>'
-            '<style>body{font:16px system-ui;max-width:1000px;margin:3rem auto;padding:0 1rem}table{border-collapse:collapse}td,th{padding:.5rem;border:1px solid #aaa;text-align:left}pre{white-space:pre-wrap;background:#eee;padding:1rem}a{color:#1463b8}</style><h1>ThemeScope vNext — provisional configuration</h1><p>No live market data. Production cutover is blocked.</p>'
+            '<style>body{font:16px system-ui;max-width:1000px;margin:3rem auto;padding:0 1rem}table{border-collapse:collapse}td,th{padding:.5rem;border:1px solid #aaa;text-align:left}pre{white-space:pre-wrap;background:#eee;padding:1rem}a{color:#1463b8}</style><h1>ThemeScope vNext — provisional configuration</h1><p>No live market data. See configuration activation status below.</p>'
             '<pre>'+html.escape(json.dumps(report, indent=2))+'</pre>'
             '<p><a href="methodology.md">Methodology</a> · <a href="migration-report.md">Migration comparison</a>'
             ' · <a href="test-report.txt">Tests</a></p>'+engine_preview, encoding='utf-8')

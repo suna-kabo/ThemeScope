@@ -1,3 +1,6 @@
+> Historical gate report. Launch/evidence status below describes that gate.
+> Current approved activation and Phase 9: [vnext_launch.md](vnext_launch.md).
+
 # Gate C — provider and incremental cache
 
 Phase 5 extends approved Gate B 0c0cff5. Phase 6 has not started.

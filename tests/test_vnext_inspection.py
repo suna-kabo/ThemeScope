@@ -38,7 +38,7 @@ class InspectionTests(unittest.TestCase):
         report = build(self.root, test_report=report_path)
         self.assertEqual(report['active_themes'], 44)
         self.assertEqual(report['unique_tickers'], 668)
-        self.assertTrue(report['production_blockers'])
+        self.assertEqual(report['production_blockers'],[])
         paths = list((self.root / 'inspection').iterdir())
         self.assertEqual(len(paths), 5)
         for path in paths:

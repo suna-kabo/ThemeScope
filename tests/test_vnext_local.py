@@ -65,7 +65,7 @@ class LocalTests(unittest.TestCase):
             finally:release.set();worker.join(5)
         self.assertIsNotNone(self.service.snapshot())
 
-    def test_earnings_failure_does_not_fail_refresh_and_pending_launch_never_activates(self):
+    def test_earnings_failure_does_not_fail_refresh_and_future_launch_never_activates(self):
         def broken(*a):raise TimeoutError()
         # Adapter failures are absorbed by optional_earnings; main refresh remains successful.
         from src.themescope.providers.earnings import AlphaVantageEarnings
@@ -76,12 +76,13 @@ class LocalTests(unittest.TestCase):
         self.assertTrue(all(e['status']=='Unavailable' for e in self.service.snapshot()['earnings'].values()))
         from src.themescope.domain import load_configuration
         self.service.mode='live';self.service.config_factory=lambda:load_configuration(ROOT)
-        # Fixture provider keeps this entirely offline; real configuration has pending launch dates.
+        # Fixture provider keeps this entirely offline; approved launch is later than the fixture completed session.
         result=self.service.refresh()
         self.assertIsNotNone(result)
         self.assertEqual(result['relationships'],[])
         self.assertEqual(result['exports']['combined'],'')
-        self.assertTrue(result['production_blockers'])
+        self.assertEqual(result['production_blockers'],[])
+        self.assertEqual(result['theme_layer']['state'],'pre_launch')
 
     def test_fastapi_routes_downloads_origin_guards_and_concurrent_post(self):
         client=TestClient(create_app(ROOT,self.service),base_url='http://127.0.0.1')

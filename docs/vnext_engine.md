@@ -1,3 +1,6 @@
+> Historical gate report. Launch/evidence status below describes that gate.
+> Current approved activation and Phase 9: [vnext_launch.md](vnext_launch.md).
+
 # Gate B — offline calculation engine
 
 Gate A (`359572c`) remains approved and unchanged. Phase 2 is `61fe259`; Phase 3
@@ -91,8 +94,8 @@ Run from the repository root with Python 3.12:
 
 ```sh
 python -m unittest discover -s tests -v
-python scripts/vnext_fixture_report.py --output /tmp/themescope-engine-report.json
-python scripts/build_inspection_bundle.py --test-report inspection/test-report.txt --engine-report /tmp/themescope-engine-report.json
+python scripts/vnext_fixture_report.py --output engine-report.json
+python scripts/build_inspection_bundle.py --test-report inspection/test-report.txt --engine-report engine-report.json
 ```
 
 Open `inspection/index.html` locally. The fixture uses fictional symbols and an

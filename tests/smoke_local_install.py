@@ -1,6 +1,6 @@
 """Clean staged-tree install/launcher smoke test; synthetic CSVs stay temporary.
 
-On Windows this executes setup.cmd, refresh.cmd and prepare-site.cmd from a
+On Windows this executes explicit legacy setup/refresh and prepare-site.cmd from a
 different working directory. Elsewhere it exercises their Python entry points.
 It never touches the real output/history, commits, pushes or deploys anything.
 """
@@ -40,7 +40,9 @@ def main():
         if os.name=='nt':
             for file in clone.glob('*.cmd'):file.write_bytes(file.read_bytes().replace(b'\r\n',b'\n').replace(b'\n',b'\r\n'))
         def run(script,args=(),success=True):
-            if os.name=='nt':command=['cmd.exe','/d','/c','call',str(clone/(script+'.cmd')),*args]
+            if os.name=='nt':
+                launcher='legacy-'+script if script in ('setup','refresh','open-dashboard') else script
+                command=['cmd.exe','/d','/c','call',str(clone/(launcher+'.cmd')),*args]
             else:
                 python=clone/'.venv/bin/python'
                 command=[sys.executable if script=='setup' else str(python),str(clone/'scripts'/({'setup':'setup_local','refresh':'refresh_local','prepare-site':'prepare_site','open-dashboard':'serve_local','preview-site':'serve_local'}[script]+'.py')),*( ['--site'] if script=='preview-site' else []),*args]

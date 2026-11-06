@@ -1,6 +1,6 @@
 # ThemeScope vNext Product and Methodology Specification
 
-Status: proposed implementation baseline  
+Status: approved implementation methodology; launch approved 2026-11-06
 Research-universe snapshot: 2026-11-05  
 Purpose: local, private, end-of-day US equity theme-rotation research dashboard
 
@@ -132,11 +132,16 @@ earns all of t's return and the new set earns the next trading session's return.
 effective_to is exclusive: the old relationship stops earning returns on that
 session. Do not backdate approval to the prior close.
 
-Launch dates remain pending. The 2026-11-05 review/export filename is not a
-go-live session. When launch session L is explicitly approved, old membership
-owns L's return, rebalance occurs at L close and effective_from is the next US
-trading session. For a new vNext series, initialize its level at L close without
-splicing legacy ETF returns into the vNext series; bootstrap is indicator-only.
+Explicit user approval before the November 6 market session sets launch session
+L = 2026-11-06 and first earned session = 2026-11-09. All 726 retained relationships
+start on November 9; none are backdated. The November 5 export date remains review
+provenance. Old holdings own L's return; vNext initializes at 100 at L close using
+post-close Core+Enabler holdings effective the next session. Its launch point earns
+no historical return. Bootstrap is indicator-only and launch initialization cannot
+supply a prior earned-session signal. November 9 transitions remain unavailable
+until compatible adjacent genuine live history exists. Before L completes, refresh
+shows market context and an explicit pre-launch theme layer, without initialization
+or legacy substitution. Legacy ETF series are never spliced into vNext.
 
 ## 7. Active-theme requirements
 

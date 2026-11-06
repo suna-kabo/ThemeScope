@@ -31,6 +31,6 @@
   "effective_to": "exclusive",
   "single_valid_theme_percentile": "unavailable because N-1 is zero",
   "return_validity": "each horizon has its own required endpoint observations; Theme Score requires both available horizons",
-  "production_enabled": false,
-  "launch_rebalance_session": null
+  "production_enabled": true,
+  "launch_rebalance_session": "2026-11-06"
 }

@@ -10,16 +10,16 @@ class DomainTests(unittest.TestCase):
     def setUp(self):
         self.config = load_configuration(ROOT)
 
-    def test_launch_counts_and_pending_dates(self):
+    def test_launch_counts_and_approved_dates(self):
         c = self.config
         self.assertEqual(sum(t.status == ThemeStatus.ACTIVE for t in c.themes), 44)
         self.assertEqual(sum(t.status == ThemeStatus.WATCH for t in c.themes), 8)
         self.assertEqual(len(c.memberships), 726)
         self.assertEqual(len({m.ticker for m in c.memberships}), 668)
         self.assertEqual(len(c.universe['instruments']), 1525)
-        self.assertTrue(all(m.effective_from is None for m in c.memberships))
+        self.assertTrue(all(m.effective_from == '2026-11-09' for m in c.memberships))
         self.assertEqual(c.members_on('semiconductors', '2026-11-05'), ())
-        self.assertTrue(c.production_blockers())
+        self.assertEqual(c.production_blockers(),[])
 
     def test_watch_only_never_calculates_and_related_excluded(self):
         c = self.config

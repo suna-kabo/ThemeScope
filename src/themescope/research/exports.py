@@ -15,6 +15,24 @@ class Qualification:
     w: Decimal
 
 
+def reviewed_mapping(configuration, mapping):
+    """Fill identifiers from explicit venues in the validated TradingView review.
+
+    No provider inference or default exchange: existing verified records win.
+    This adds no legacy anchor dependency and does not mutate legacy mappings.
+    """
+    result=dict(mapping)
+    if not configuration.universe.get('quantitative_policy_validated') or not configuration.universe.get('source_sha256'):
+        return result
+    for row in configuration.universe.get('instruments',()):
+        ticker=row['ticker'];venue=row['exchange']
+        if venue in ('NYSE','NASDAQ') and result.get(ticker,{}).get('status')!='verified':
+            result[ticker]={'status':'verified','symbol':venue+':'+ticker,
+                            'evidence_kind':'User-supplied TradingView review Symbol/Exchange',
+                            'source_sha256':configuration.universe['source_sha256']}
+    return result
+
+
 @deterministic
 def exports(relationships, direction, mapping):
     if direction not in ('long','short'):

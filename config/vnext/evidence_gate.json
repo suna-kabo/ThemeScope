@@ -1,11 +1,13 @@
 {
-  "status": "cutover_blocked",
+  "status": "launch_approved",
   "membership_review_package": "themescope-membership-master-review-2026-11-06",
   "findings": [],
   "industry_rule_registry_status": "approved",
   "industry_rule_covered_relationships": 451,
   "source_evidence_queue_count": 0,
   "baseline_evidence_queue_count": 335,
-  "launch_effective_dates": "pending",
-  "production_enabled": false
+  "launch_effective_dates": "approved",
+  "production_enabled": true,
+  "launch_rebalance_session": "2026-11-06",
+  "first_earned_session": "2026-11-09"
 }

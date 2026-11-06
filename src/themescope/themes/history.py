@@ -17,6 +17,7 @@ class ThemeHistory:
     priority: str
     bootstrap: bool = False
     history_version: str = HISTORY_VERSION
+    signal_eligible: bool = True
 
 
 def compatible(previous, current, sessions):
@@ -24,6 +25,7 @@ def compatible(previous, current, sessions):
     if previous is None or current.session not in sessions or previous.session not in sessions:
         return False
     return (not previous.bootstrap and not current.bootstrap
+            and previous.signal_eligible and current.signal_eligible
             and bool(current.series_id) and previous.series_id==current.series_id
             and previous.theme_id==current.theme_id
             and current.methodology.startswith('themescope-vnext-')

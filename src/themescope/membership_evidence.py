@@ -75,10 +75,27 @@ def validate_evidence(root,configuration=None):
     retained={k:r for k,r in decisions.items() if r['final_role']}
     if memberships.keys()!=retained.keys():raise ValueError('Retained/removed membership mismatch')
     unresolved={k for k,r in attachments.items() if r['status']!='verified'}
+    approval_path=folder/'launch_approval.json'
+    approval=json.loads(approval_path.read_text()) if approval_path.exists() else None
+    if approval:
+        from .domain import iso_date
+        if (approval.get('schema_version')!=1 or approval.get('retained_relationships')!=len(retained)
+                or not iso_date(approval['launch_rebalance_session'])
+                or not iso_date(approval['first_earned_session'])
+                or approval['first_earned_session']<=approval['launch_rebalance_session']
+                or not approval['approved_before_launch_session'] or not approval['production_enabled']):
+            raise ValueError('Explicit launch approval required')
+        schedule=Path(root)/'config/calendars/xnys_2020_2035_v1.json'
+        if schedule.exists():
+            from .domain import effective_session_after_close
+            days=[r['session'] for r in json.loads(schedule.read_text())['sessions']]
+            if effective_session_after_close(approval['launch_rebalance_session'],days)!=approval['first_earned_session']:
+                raise ValueError('Approved effective date is not next XNYS session')
     for k,row in memberships.items():
         decision=retained[k]
         if row['role']!=decision['final_role']:raise ValueError('Reviewed role changed: '+str(k))
-        if row['effective_from'] or row['effective_to']:raise ValueError('Launch dates must remain pending')
+        if row['effective_to'] or row['effective_from']!=(approval['first_earned_session'] if approval else ''):
+            raise ValueError('Membership date differs from explicit launch approval')
         expected='primary_source_refresh_required' if k in unresolved else decision['target_evidence_status']
         if row['evidence_status']!=expected:raise ValueError('Evidence status mismatch: '+str(k))
         if k in attachments and k not in unresolved and row['evidence_url']!=attachments[k]['source_url']:
@@ -88,6 +105,8 @@ def validate_evidence(root,configuration=None):
     with (folder/'evidence_review_queue.csv').open(newline='',encoding='utf-8') as handle:queue=unique(list(csv.DictReader(handle)),'queue')
     if queue.keys()!=unresolved:raise ValueError('Queue must equal unresolved tasks')
     gate=json.loads((folder/'evidence_gate.json').read_text())
+    if approval and any(gate.get(field)!=approval[field] for field in ('launch_rebalance_session','first_earned_session')):
+        raise ValueError('Stale launch gate metadata')
     if gate['source_evidence_queue_count']!=len(unresolved):raise ValueError('Stale evidence gate count')
     if gate['industry_rule_registry_status']!='approved' or gate['industry_rule_covered_relationships']!=covered:
         raise ValueError('Industry rule gate mismatch')
@@ -109,8 +128,10 @@ def validate_evidence(root,configuration=None):
         raise ValueError('Reviewed per-theme totals mismatch')
     if configuration is not None:
         if any(t.status=='active' and per_theme.get(t.theme_id,0)<5 for t in configuration.themes):raise ValueError('Active minimum violated')
-        if configuration.methodology['production_enabled'] or configuration.methodology['launch_rebalance_session']:
-            raise ValueError('Production/launch must remain disabled')
+        if configuration.methodology['production_enabled']!=bool(approval) or configuration.methodology['launch_rebalance_session']!=(approval['launch_rebalance_session'] if approval else None):
+            raise ValueError('Production/launch differs from explicit approval')
+        if gate['production_enabled']!=bool(approval) or gate['launch_effective_dates']!=('approved' if approval else 'pending'):
+            raise ValueError('Stale launch gate metadata')
     return {'relationships':len(rows),'roles':dict(counts),'industry_rules':len(registry['registry']['rules']),
             'rule_covered_relationships':covered,'verified_source_tasks':sum(attachments[k]['status']=='verified' for k in required),
             'supplemental_verified':sum(attachments[k]['status']=='verified' for k in extra),

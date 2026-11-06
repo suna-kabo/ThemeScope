@@ -12,6 +12,16 @@ class MembershipEvidenceTests(unittest.TestCase):
         self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
         self.root=Path(self.temp.name)
         shutil.copytree(ROOT/'config/vnext',self.root/'config/vnext')
+    def pending_review_copy(self):
+        folder=self.root/'config/vnext'
+        (folder/'launch_approval.json').unlink()
+        path=folder/'methodology.json';data=json.loads(path.read_text())
+        data.update(production_enabled=False,launch_rebalance_session=None);path.write_text(json.dumps(data))
+        path=folder/'memberships.csv'
+        with path.open(newline='') as f:reader=csv.DictReader(f);fields=reader.fieldnames;rows=list(reader)
+        for row in rows:row['effective_from']=''
+        with path.open('w',newline='') as f:writer=csv.DictWriter(f,fields);writer.writeheader();writer.writerows(rows)
+        apply(self.root)
     def test_authoritative_roles_removals_related_and_minimums(self):
         config=load_configuration(self.root);report=validate_evidence(self.root,config)
         self.assertEqual(report['relationships'],726)
@@ -25,10 +35,10 @@ class MembershipEvidenceTests(unittest.TestCase):
         self.assertTrue(all(not rows[k].calculation_eligible for k in related))
         for k in [('AKAM','cybersecurity'),('ZETA','ai-applications'),('HOOD','fintech-payments')]:self.assertEqual(rows[k].role,'Core')
         self.assertTrue(all(n>=5 for n in report['per_theme_eligible'].values()))
-        self.assertTrue(all(m.effective_from is None and m.effective_to is None for m in config.memberships))
-        self.assertFalse(config.methodology['production_enabled'])
-        self.assertIsNone(config.methodology['launch_rebalance_session'])
-        self.assertEqual(len(config.production_blockers()),3)
+        self.assertTrue(all(m.effective_from == '2026-11-09' and m.effective_to is None for m in config.memberships))
+        self.assertTrue(config.methodology['production_enabled'])
+        self.assertEqual(config.methodology['launch_rebalance_session'],'2026-11-06')
+        self.assertEqual(config.production_blockers(),[])
     def test_industry_rules_cover_exact_tuples_and_explicit_allowlists_only(self):
         master,registry,_=read_review(self.root)
         self.assertEqual(rule_coverage(master,registry),451)
@@ -42,6 +52,7 @@ class MembershipEvidenceTests(unittest.TestCase):
         row['industry_snapshot']='Broader industry inference'
         with self.assertRaisesRegex(ValueError,'tuple mismatch'):rule_coverage(copied,registry)
     def test_reapply_is_byte_identical_including_food_and_removed_rows(self):
+        self.pending_review_copy()
         folder=self.root/'config/vnext'
         names=('memberships.csv','evidence_review_queue.csv','evidence_gate.json')
         before={name:(folder/name).read_bytes() for name in names}
@@ -49,6 +60,7 @@ class MembershipEvidenceTests(unittest.TestCase):
         self.assertEqual(before,{name:(folder/name).read_bytes() for name in names})
         self.assertEqual(sum(m.theme_id=='food-beverage' for m in load_configuration(self.root).memberships),23)
     def test_unsupported_source_stays_unresolved_and_queue_never_forced_to_zero(self):
+        self.pending_review_copy()
         path=self.root/'config/vnext/primary_source_attachments.json'
         data=json.loads(path.read_text());data['attachments'][0].update(status='evidence_mismatch',unresolved_reason='Synthetic required fact not supported')
         path.write_text(json.dumps(data))

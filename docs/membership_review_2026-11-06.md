@@ -85,9 +85,11 @@ Application regenerates the queue from unresolved attachments. An unsupported ta
 
 All 44 Active themes retain at least five eligible members. Related rows never enter calculations; removed rows are absent, and ZG no longer duplicates Z in internet-commerce.
 
-## Remaining production blockers
+## Activation update after this review
 
-Launch effective dates pending; launch rebalance session not approved; production cutover disabled. Runtime roster gating remains in force (approved SPY/QQQ rosters effective 2026-11-05). Native Windows/performance validation items remain separate. No Phase 9, main changes, formula changes, live Alpaca calls or deployment. Existing inspection checkpoints are preserved.
+The later explicit user approval sets launch rebalance 2026-11-06, all 726 retained
+relationships effective 2026-11-09, and production enabled. See vnext_launch.md.
+The review itself did not select launch dates. Runtime roster gating remains in force (approved SPY/QQQ rosters effective 2026-11-05). Native Windows/performance validation items remain separate. This membership-review commit made no main/formula changes, live Alpaca calls or deployment. Existing inspection checkpoints are preserved.
 
 ## Validation results
 

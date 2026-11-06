@@ -1,3 +1,6 @@
+> Historical gate report. Launch/evidence status below describes that gate.
+> Current approved activation and Phase 9: [vnext_launch.md](vnext_launch.md).
+
 # vNext preflight — 5 November 2026 (Hong Kong)
 
 **Update after the initial comparison:** bundle v2 supplies the full 1,525-row

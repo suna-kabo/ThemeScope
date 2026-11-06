@@ -8,6 +8,8 @@ function watchlist(){if(!snapshot)return;const rows=watched.map(s=>`<article><h3
 function table(headers,rows){return rows.length?'<table><thead><tr>'+headers.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join('')+'</tr>').join('')+'</tbody></table>':'<p class="muted">No qualifying results for this session.</p>';}
 function render(data){snapshot=data;if(!data)return;
  $('fixture-banner').hidden=!data.synthetic_fixture;
+ const layer=data.theme_layer?.state;$('theme-layer').hidden=!layer;
+ $('theme-layer').textContent=({pre_launch:'Pre-launch: theme indices not yet initialized',initialized:'Launch close: index initialized at 100; first earned session '+data.theme_layer?.first_earned_session,live:'Live custom-theme calculations',activation_blocked:'Theme activation blocked; see Methodology'})[layer]||'';
  $('today-plan').textContent=data.today_plan||'Comparison unavailable';
  const market=data.market||{};$('decision-path').textContent=market.decision?.reason||'Unavailable';
  $('market-cards').innerHTML=['SPY','QQQ','IWM'].map(s=>{const r=market.context?.[s]||{};return `<article><span class="pill">${s}${s==='IWM'?' · CONTEXT':''}</span><div class="state">${esc(r.price_state)}</div>${s==='IWM'?'<p class="muted">Price context only</p>':`<p>Breadth: <strong>${esc(r.breadth?.state)}</strong></p><p class="muted">${esc(r.breadth?.valid??0)} / ${esc(r.breadth?.configured??0)} constituents valid</p><small>${esc((r.roster_warnings||[]).join(' ')||r.roster_source||'Roster unavailable')}</small>`}</article>`;}).join('');

@@ -16,6 +16,7 @@ from ..themes.calculations import bar_map
 from ..themes.index import build_index,IndexUnavailable
 from ..themes.history import ThemeHistory
 from ..research.engine import calculate_session
+from ..research.exports import reviewed_mapping
 from ..research_policy import ACTION_SENTENCES
 
 class RefreshService:
@@ -51,7 +52,8 @@ class RefreshService:
         snapshot=self.snapshot()
         state.update({'last_successful_session':snapshot.get('session') if snapshot else None,
                       'last_successful_refresh':snapshot.get('refreshed_at') if snapshot else None,
-                      'completeness':snapshot.get('completeness') if snapshot else None,'mode':self.mode})
+                      'completeness':snapshot.get('completeness') if snapshot else None,'mode':self.mode,
+                      'theme_layer':snapshot.get('theme_layer') if snapshot else None})
         # An interrupted process leaves an honest recovery message, never a live lock.
         if state.get('state')=='running' and not self.running:
             try:
@@ -129,7 +131,21 @@ class RefreshService:
                     blockers.append(f'Effective {benchmark} constituent roster missing for {target}')
             # Blocked production membership is never activated by this application.
             working=config if self.mode=='fixture' or not blockers else replace(config,memberships=())
+            init=sessions[0] if self.mode=='fixture' else launch
+            initialization_members={}
+            if init and init<=target and init in calendar:
+                first_earned=calendar[calendar.index(init)+1]
+                for theme in working.themes:
+                    initialization_members[theme.theme_id]=working.members_on(theme.theme_id,first_earned)
             names={m.ticker for t in working.themes for m in working.members_on(t.theme_id,target)}
+            # Launch inputs come from post-close holdings, not earned membership on L.
+            names.update(m.ticker for members in initialization_members.values() for m in members)
+            if initialization_members:
+                next_target=calendar[calendar.index(target)+1]
+                active_ids={t.theme_id for t in working.themes if t.status=='active'}
+                names.update(m.ticker for m in working.memberships if m.theme_id in active_ids and m.calculation_eligible
+                             and m.effective_from and m.effective_from<=next_target
+                             and (not m.effective_to or m.effective_to>first_earned))
             for benchmark in ('SPY','QQQ'):
                 roster=effective(rosters,benchmark,target)
                 if roster:names.update(roster.tickers)
@@ -142,20 +158,20 @@ class RefreshService:
             market=market_layer(bars,sessions,rosters)
             market['rosters']=[asdict(r) for r in rosters]
             indices={};seeds={};series={}
-            init=sessions[0] if self.mode=='fixture' else launch
             if init and init<=target and init in calendar:
                 for theme in working.themes:
-                    if theme.status!='active' or not working.members_on(theme.theme_id,target):continue
+                    if theme.status!='active' or not initialization_members.get(theme.theme_id):continue
                     try:
                         indices[theme.theme_id]=build_index(working,theme.theme_id,bars,calendar,init,target)
-                        series[theme.theme_id]=working.methodology['version']+':'+init
-                        if init!=sessions[0]:
-                            next_session=calendar[calendar.index(init)+1]
-                            seed_names=tuple(m.ticker for m in working.members_on(theme.theme_id,next_session))
-                            seeds[theme.theme_id]=build_index(working,theme.theme_id,bars,calendar,sessions[0],init,bootstrap_symbols=seed_names)
                     except IndexUnavailable:
-                        indices.pop(theme.theme_id,None)
-                        seeds.pop(theme.theme_id,None)
+                        continue
+                    series[theme.theme_id]=working.methodology['version']+':'+init
+                    if init!=sessions[0]:
+                        seed_names=tuple(m.ticker for m in initialization_members[theme.theme_id])
+                        try:
+                            seeds[theme.theme_id]=build_index(working,theme.theme_id,bars,calendar,sessions[0],init,bootstrap_symbols=seed_names)
+                        except IndexUnavailable:
+                            pass  # Incomplete bootstrap cannot erase a valid live launch point.
             previous={}
             if len(sessions)>1:
                 for theme in working.themes:
@@ -164,13 +180,15 @@ class RefreshService:
             if self.mode=='fixture':mapping={s:{'status':'verified','symbol':'NASDAQ:'+s} for s in names}
             else:
                 has_members=any(working.members_on(t.theme_id,target) for t in working.themes)
-                mapping=json.loads((self.root/'config/tradingview_symbols.json').read_text())['symbols'] if has_members else {}
+                mapping=reviewed_mapping(working,json.loads((self.root/'config/tradingview_symbols.json').read_text())['symbols']) if has_members else {}
             snapshot=calculate_session(working,bars,sessions,target,market['decision']['direction'],indices,series,mapping,
                                        previous=previous,bootstrap_seeds=seeds)
             # Hash the actual source config, even while blocked calculations are empty.
             from hashlib import sha256
             snapshot['configuration_hash']=sha256(canonical({'themes':config,'rosters':rosters}).encode()).hexdigest()
             snapshot['production_blockers']=blockers
+            snapshot['theme_layer']={'state':'pre_launch' if launch and target<launch else 'activation_blocked' if blockers and self.mode!='fixture' else 'initialized' if target==launch else 'live',
+                                     'launch_rebalance_session':launch,'first_earned_session':calendar[calendar.index(launch)+1] if launch in calendar else None}
             snapshot['market']=market;snapshot['synthetic_fixture']=self.mode=='fixture'
             snapshot['today_plan']=ACTION_SENTENCES[market['decision']['direction']]
             self._status(progress='Checking optional earnings')
@@ -185,6 +203,9 @@ class RefreshService:
                 run.bars(prepared.bars,identity=prepared.identity)
                 for row in snapshot['themes']:run.theme(row['theme_id'],row)
                 for row in snapshot['relationships']:run.stock(row['ticker'],row['theme_id'],row)
+                for theme,points in seeds.items():
+                    for point in points:
+                        if point.session<init:run.index(theme,point.session,point)
                 for theme,points in indices.items():
                     for point in points:run.index(theme,point.session,point)
                 run.db.execute('INSERT INTO market_snapshot VALUES(?,?)',(run.run,canonical(market)))
@@ -205,6 +226,7 @@ class RefreshService:
 def fixture_service(root):
     from scripts.vnext_fixture_report import fixture
     config,bars,sessions,target,indices,mapping=fixture()
+    config=replace(config,methodology=dict(config.methodology,launch_rebalance_session=sessions[0]))
     # Keep one subsequent calendar session available for earned-session timing.
     records=[{'session':s,'close':s+'T21:00:00+00:00'} for s in sessions]
     schedule=Schedule(records,now=lambda:datetime.fromisoformat(target+'T23:00:00+00:00'))

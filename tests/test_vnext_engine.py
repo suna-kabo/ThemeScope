@@ -69,13 +69,13 @@ class EngineTests(unittest.TestCase):
         invalid=dict(indices);invalid['alpha']=indices['alpha'][:-1]
         with self.assertRaises(ValueError):calculate_session(c,bars,sessions,target,'Long bias',invalid,series,mapping)
 
-    def test_pending_launch_and_watch_related_never_qualify(self):
+    def test_prelaunch_and_watch_related_never_qualify(self):
         c,bars,sessions,target,indices,mapping=fixture()
         launch=load_configuration(Path(__file__).resolve().parents[1])
         pending=calculate_session(launch,{},sessions,target,'Long bias',{}, {},{})
         self.assertEqual(pending['relationships'],[])
         self.assertEqual(pending['exports']['combined'],'')
-        self.assertTrue(pending['production_blockers'])
+        self.assertEqual(pending['production_blockers'],[])
         watch=replace(c,themes=tuple(replace(t,status='watch-only') for t in c.themes))
         self.assertEqual(calculate_session(watch,bars,sessions,target,'Long bias',{}, {},mapping)['relationships'],[])
         related=replace(c,memberships=tuple(replace(m,role=Role.RELATED) for m in c.memberships))

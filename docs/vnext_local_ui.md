@@ -129,16 +129,16 @@ are recorded in the inspection test report. They are not a full live-universe
 throughput claim. Real Windows first-use/CMD, browser opening, native locking and
 actual large-universe cold/warm SIP timings still require local validation.
 
-## Remaining production blockers
+## Current activation status (Phase 9)
 
-All 726 retained launch relationships have blank effective dates; no launch session
-has been chosen. The authoritative 2026-11-06 master review resolves the evidence
-queue and four inherited findings and approves 75 validated industry rules. See
-docs/membership_review_2026-11-06.md for source records and eligible counts. SPY/QQQ inputs are supplied effective 2026-11-05; earlier sessions still lack them. Native
-Windows and full-universe performance validation remain pending. No bootstrap
-observations are presented as live signals, no evidence is auto-approved, no
-Market Matrix formula changed, and no main merge, legacy retirement or deployment
-occurred. Gate D stops before Phase 9.
+Explicit approval now sets launch rebalance 2026-11-06 and all 726 retained
+relationships effective 2026-11-09, with production enabled. Evidence queue is
+zero and 75 industry rules remain approved. Effective SPY/QQQ roster gating is
+unchanged; supplied rosters begin 2026-11-05. The user reports full SIP roster
+compatibility passed locally for that session (501/101, no missing/unusable bars,
+12 pages, adjusted and raw requests). No credentials or raw payloads are recorded.
+See vnext_launch.md for launch regression results and remaining local checks.
+Earlier Gate D sections below record the original checkpoint, which is preserved.
 
 ## Gate D hardening after independent review
 
@@ -227,8 +227,10 @@ existing historical SIP adapter (1Day, split/spin-off plus raw), in batches up t
 Shared symbols may be fetched once but retain their independent roster memberships.
 Missing/unusable symbols are reported per benchmark and exit nonzero; request
 errors report the affected requested symbols instead of silently dropping them.
-No actual retrieval failure is currently established; live compatibility is pending.
+The user reports the local SIP compatibility check passed for 2026-11-05 (501 SPY,
+101 QQQ, zero missing/unusable, 12 pages). This was not rerun in cloud.
 
 Staleness remains advisory; Market Matrix logic and all frozen cells are unchanged.
-The roster effective date does not set the vNext theme launch session. Theme launch
-and evidence blockers remain unchanged, and Phase 9 has not started.
+The roster effective date does not set the vNext theme launch session. Later
+explicit user approval separately selected 2026-11-06 close / 2026-11-09 first
+earned session and authorized Phase 9. Gate D inspection refs are preserved.

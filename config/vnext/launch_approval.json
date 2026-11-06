@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "launch_rebalance_session": "2026-11-06",
+  "first_earned_session": "2026-11-09",
+  "production_enabled": true,
+  "approved_before_launch_session": true,
+  "authority": "Explicit user launch approval; no backdating",
+  "retained_relationships": 726,
+  "external_roster_validation": {
+    "roster_date": "2026-11-05",
+    "session": "2026-11-05",
+    "feed": "sip",
+    "SPY_configured": 501,
+    "QQQ_configured": 101,
+    "missing_or_unusable": 0,
+    "pages": 12,
+    "adjustment": "split,spin-off",
+    "raw_liquidity_request": true,
+    "source": "User-reported successful local validation"
+  }
+}

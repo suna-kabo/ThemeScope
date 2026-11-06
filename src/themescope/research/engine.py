@@ -38,14 +38,16 @@ def calculate_session(configuration, bars, sessions, target, market_direction, i
         members=configuration.members_on(theme.theme_id,target)
         names=[m.ticker for m in members]
         observation={'trend':'Unavailable','ema21':None,'ema50':None,'level':None,'bootstrap':False}
-        if theme.status=='active' and members and theme.theme_id in index_histories:
+        if theme.status=='active' and theme.theme_id in index_histories:
             points=tuple(index_histories[theme.theme_id])
             if not points or points[-1].session!=target or any(p.bootstrap for p in points):
                 raise ValueError('Target-session live index history required')
             observation=indicators(points,sessions,bootstrap=bootstrap_seeds.get(theme.theme_id,()),
                                    policy=configuration.methodology)[-1]
         series=series_ids.get(theme.theme_id,'')
-        current=ThemeHistory(target,theme.theme_id,configuration.methodology['version'],series,observation['trend'],'Watch')
+        earned=index_histories.get(theme.theme_id,())
+        current=ThemeHistory(target,theme.theme_id,configuration.methodology['version'],series,observation['trend'],'Watch',
+                             signal_eligible=bool(earned and earned[-1].earned_symbols))
         transition=transitions(previous.get(theme.theme_id),current,sessions)
         score=scores.get(theme.theme_id)
         label=priority(market_direction,score,observation['trend'],transition,configuration.methodology) if theme.status=='active' else 'Watch'

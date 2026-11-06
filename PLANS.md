@@ -11,9 +11,13 @@ Phase 2 complete: `61fe259`. Phase 3 complete: `1c10c5c`.
 Phase 4 validated for Gate B; checkpoint branch `inspection/vnext-b-engine`.
 Gate C 7d3bf2e is approved; the real local SIP PoC passed (user-reported).
 Phase 6: a8958f3. Phase 7: 9080337. Phase 8 validated for Gate D.
-Gate D is closed. Roster import 94050ac complete. Current scope: 2026-11-06
-authoritative membership/evidence master review, then stop; no Phase 9.
-Preserve inspection/vnext-d-ui at 02e7d63; Phase 9 must not start. SQLite schema remains 2.
+Gate D is closed; roster import 94050ac and membership/evidence review 150c47c complete.
+Current scope: explicitly approved launch and Phase 9 only, then STOP.
+Launch rebalance 2026-11-06 close; all 726 retained relationships effective 2026-11-09.
+Production enabled; zero config blockers. Runtime SPY/QQQ roster gates remain.
+Preserve inspection/vnext-d-ui at 02e7d63 and every original gate ref.
+Gate E is NOT authorized in this task. SQLite schema remains 2; no main/deployment.
+Historical phase notes below record restrictions/results applicable at each gate.
 Do not restart the baseline or reimport/reclassify the proposed launch ledger.
 
 Gate A at `359572c` was independently checked and approved. Do not redo it.
@@ -52,17 +56,17 @@ Old membership earns the entire close-to-close return ending on approval session
 Rebalance at t close. New membership first earns the next US trading session's
 return. `effective_from` is that next session; `effective_to` is exclusive.
 
-The user has not selected launch session L. Keep all launch dates pending. When L
-is explicitly approved, old membership owns L's return, rebalance at L close, and
-new membership first earns the next US session's return. Never infer L from the
-November 5 export filename or splice legacy ETF returns into a vNext series.
+The user explicitly selected L=2026-11-06 before that market session. Old holdings
+own L's return; rebalance at L close, initialize the new index at 100, and retained
+memberships first earn 2026-11-09. Never infer L from the November 5 export filename
+or splice legacy ETF returns into vNext. Bootstrap cannot supply live signals.
 
 The methodology is amended. Phase 1 tests prove old/new membership assignment
 across a Friday approval and Monday effective session. **Phase 3 now includes the numerical synthetic-index rebalance-boundary test**:
 100 -> 110 on approval Friday (old holdings +10%), then 132 Monday (new +20%). Bootstrap initializes indicators only and must never
 produce apparent live signal history.
 
-## Production blockers (not Gate B fixture implementation blockers)
+## Historical Gate B blockers (all configuration items since resolved)
 
 - 335 primary-source refresh relationships remain pending, preserved in status
   and in a sanitized review queue.
@@ -102,7 +106,7 @@ Only source and synthetic inspection artifacts may be pushed to the implementati
 and prescribed checkpoint branches. No main merge, deployment, trading endpoint,
 live Alpaca credentials, IEX fallback or runtime DB is part of this gate.
 
-## Handoff sequence — resume at Phase 5 after Gate B approval
+## Handoff sequence — Phases 1–8 complete; Phase 9 authorized
 
 1. Completed Phase 2: pure 21/63-session returns, member medians/coverage, tied percentiles,
    60/40 score, LOO W and SQLite storage; boundary/missing/corporate-action tests.
@@ -380,8 +384,46 @@ validation, compilation, JS syntax/helpers and safe inspection generation pass.
 Per-theme eligible counts and reproducibility details: docs/membership_review_2026-11-06.md.
 All 44 Active themes retain >=5 Core+Enabler members. Related excluded from math.
 
-Only configuration blockers left: pending effective dates; unapproved launch
+At membership-review commit 150c47c, the only configuration blockers were pending effective dates; unapproved launch
 rebalance session; production disabled. All 726 retained launch dates/end dates
 remain blank. Runtime roster gating remains; Windows/performance validation items
 are separate. No Phase 9, main changes, formula edits, live Alpaca use or deployment.
 Do not move original inspection checkpoint branches for this review application.
+
+## Phase 9 — approved launch and default-runtime cutover
+
+User approval before the November 6 market session authorizes launch rebalance
+2026-11-06, first earned session 2026-11-09 and production enabled. Mechanically
+dated all 726 retained rows only; preserved 659 Core / 62 Enabler / 5 Related,
+all evidence and removed relationships. Approval/gate metadata is validated
+against membership and the XNYS calendar. No backdating or new evidence decisions.
+
+Runtime fetches post-close launch holdings even though none earn L's return.
+Pre-launch refresh remains market-only; L initializes every valid Active index at
+100 with empty earned_symbols. Bootstrap index rows are explicitly flagged and
+only seed indicators. Launch initialization is not an earned-session signal;
+first-return transitions remain unavailable. Pure build_index and all formulas
+are unchanged. Related remains excluded. SQLite schema remains 2.
+
+Normal setup/refresh/open-dashboard launchers now use vNext. Explicit legacy
+launchers/readers/reproduction fixtures remain; no historical payload is rewritten.
+Reviewed TradingView Symbol/Exchange metadata supplements missing TXT identifiers
+without inferred venues or changing the legacy symbol map. No thematic anchor,
+ETF history or manual daily CSV enters the default computation path.
+
+User-reported external prerequisite: live SIP roster check for 2026-11-05 passed,
+501 SPY / 101 QQQ, zero missing/unusable, 12 pages, split/spin-off plus raw volume.
+No real credentials or raw provider payload were used here. Native Windows Phase 9
+launcher check, actual TradingView TXT import and full-universe live cold/warm
+performance remain local validation items. Effective roster checks still fail
+closed; stale-roster warnings remain advisory and IWM has no roster requirement.
+
+Validation: full Python suite 302 cases, 300 passed/two native-Windows skips.
+Focused vNext suite 95 cases, 94 passed/one native-Windows skip; seven launch
+regressions passed. Local 14 passed. Frozen migration cases include exact equality
+for all 64 Market Matrix cells. Real loopback browser refresh/TXT/watchlist/mobile
+smoke passed with zero external requests/page errors. Evidence/config counts,
+compilation and JavaScript checks passed. Safe inspection/source checks are
+recorded in docs/vnext_launch.md. Stop after
+the separate tested Phase 9 commit/push. Gate E has not started. No deployment,
+main changes, checkpoint-ref moves or live runtime database changes.
