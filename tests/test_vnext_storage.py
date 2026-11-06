@@ -56,7 +56,7 @@ class StorageTests(unittest.TestCase):
         self.save('2024-01-03',{'old':True})
         self.assertEqual(self.store.active(),{'new':True})
         self.save('2024-01-04',{'new':True})
-        other=Store(self.path)
+        other=Store(self.path,timeout=0)  # Explicit nonblocking competing-writer probe.
         self.addCleanup(other.close)
         with self.store.refresh('2024-01-05','themescope-vnext-1','fixture') as run:
             with self.assertRaises(sqlite3.OperationalError):

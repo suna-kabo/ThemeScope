@@ -234,3 +234,20 @@ Staleness remains advisory; Market Matrix logic and all frozen cells are unchang
 The roster effective date does not set the vNext theme launch session. Later
 explicit user approval separately selected 2026-11-06 close / 2026-11-09 first
 earned session and authorized Phase 9. Gate D inspection refs are preserved.
+
+
+## Gate E native Windows SQLite contention blocker
+
+A fresh Phase 9 Windows ZIP started Uvicorn normally, then `/api/status` failed
+at SQLite PRAGMA user_version with `database is locked`. This differs from the
+previously fixed Windows status-file replacement issue. The focused fix initializes
+schema 2 before serving, serializes creation/migration with a version recheck,
+and uses read-only polling connections with a 5.0-second bounded SQLite wait.
+Only BUSY/LOCKED read errors use known committed snapshot fallback; other errors
+remain visible. No uncommitted candidate enters the cache, failed refresh preserves
+previous dashboard/TXT, and RefreshLock remains exclusive. No WAL switch or DB reset.
+
+Exact native retest commands and test coverage:
+[vnext_sqlite_lifecycle.md](vnext_sqlite_lifecycle.md). Keep existing runtime data.
+Gate E remains open until native validation is rerun. Main, original inspection
+checkpoints, launch dates, evidence, formulas and provider semantics are unchanged.

@@ -12,11 +12,13 @@ Phase 4 validated for Gate B; checkpoint branch `inspection/vnext-b-engine`.
 Gate C 7d3bf2e is approved; the real local SIP PoC passed (user-reported).
 Phase 6: a8958f3. Phase 7: 9080337. Phase 8 validated for Gate D.
 Gate D is closed; roster import 94050ac and membership/evidence review 150c47c complete.
-Current scope: explicitly approved launch and Phase 9 only, then STOP.
+Phase 9 is complete at 327fc2375ae0e4981af87d4b5136170ee542b60d.
+Current scope: one focused Gate E native-Windows SQLite lifecycle hardening commit.
 Launch rebalance 2026-11-06 close; all 726 retained relationships effective 2026-11-09.
 Production enabled; zero config blockers. Runtime SPY/QQQ roster gates remain.
 Preserve inspection/vnext-d-ui at 02e7d63 and every original gate ref.
-Gate E is NOT authorized in this task. SQLite schema remains 2; no main/deployment.
+Gate E is open pending the user's native Windows retest. Do not close Gate E,
+move inspection refs, merge or deploy. SQLite schema remains 2.
 Historical phase notes below record restrictions/results applicable at each gate.
 Do not restart the baseline or reimport/reclassify the proposed launch ledger.
 
@@ -427,3 +429,41 @@ compilation and JavaScript checks passed. Safe inspection/source checks are
 recorded in docs/vnext_launch.md. Stop after
 the separate tested Phase 9 commit/push. Gate E has not started. No deployment,
 main changes, checkpoint-ref moves or live runtime database changes.
+
+## Gate E Windows SQLite lifecycle hardening after Phase 9
+
+Native Windows on a clean Phase 9 ZIP reproduced `/api/status` ASGI failures at
+Store's PRAGMA user_version: database is locked. Confirmed zero-wait read connections
+could race lazy schema creation/migration or commit locks after the server started.
+
+RefreshService now eagerly initializes before create_app/Uvicorn accepts requests.
+SQLite BEGIN IMMEDIATE serializes schema creation/migration, with version recheck
+inside the transaction; fresh 0 -> 1 -> 2 is atomic and failed initialization rolls
+back/closes safely. Existing schema-1 databases migrate without deleting data.
+Normal read-only snapshot connections never initialize or write. Default connection
+wait is exactly 5.0 seconds (busy_timeout 5000ms); journal mode and schema 2 remain.
+
+BUSY/LOCKED read failures alone use a guarded last-committed cache (or no snapshot
+on first use), with an explicit API diagnostic and safe warning. Other DB errors
+stay visible. Cache advances only after successful reads/COMMIT, resists late-reader
+regression and caller mutations, and never exposes a candidate before commit.
+Status samples operational state after DB waits, preserving interrupted recovery
+without falsely calling a just-completed refresh interrupted. RefreshLock and the
+refresh transaction/publication validation/rollback are unchanged.
+
+Eleven new deterministic regressions cover thread/process initialization races,
+concurrent schema-1 migration, rollback/retry, HTTP polling across fetch/calculate/
+uncommitted publication/real COMMIT locks, first refresh, bounded busy fallback,
+non-busy errors, cache ordering and actual commit failure preservation. Details and
+native Windows commands: docs/vnext_sqlite_lifecycle.md. Native validation remains
+pending; Gate E remains OPEN. No methodology/config/provider/Matrix/roster changes,
+main/deployment/inspection-ref changes or real runtime DB edits.
+
+Validation: full suite 313 cases, 311 passed/two native-Windows skips. Focused
+vNext suite 106 cases, 105 passed/one native-Windows skip, including all eleven
+new SQLite lifecycle regressions, five storage, fourteen local and market/locking
+coverage. Seven launch and both frozen migration cases pass; all 64 Matrix cells
+match the unchanged baseline. Config/evidence validation, Python compilation,
+JavaScript syntax/helpers and loopback browser refresh/download smoke pass.
+Temporary safe inspection and protected-source/runtime/secret checks pass.
+Native Windows retest is still required before Gate E can close.

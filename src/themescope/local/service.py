@@ -2,9 +2,10 @@
 from dataclasses import replace,asdict
 from datetime import datetime,timezone
 from pathlib import Path
-import json,os,tempfile,threading,time
+import json,logging,os,sqlite3,tempfile,threading,time
+from copy import deepcopy
 from ..local_refresh_lock import RefreshLock,RefreshBusy
-from ..storage import Store,canonical
+from ..storage import Store,canonical,is_busy
 from ..domain import load_configuration
 from ..market.rosters import load as load_rosters,effective
 from ..market.layer import market_layer
@@ -31,15 +32,47 @@ class RefreshService:
         self.records=records;self.rosters_factory=rosters_factory or (lambda:load_rosters(self.root))
         self._status_unpersisted=False
         self.state={'state':'idle','progress':'Ready','target_session':None,'provider_health':'Not checked','error':None}
+        # Eager startup, before create_app/Uvicorn can accept browser polling.
+        # SQLite serializes concurrent process initializers; no refresh lock is weakened.
+        store=Store(self.db)
+        try:self._publication_version,self._committed_snapshot=store.active_publication()
+        finally:store.close()
+        self._snapshot_busy=False
 
     def snapshot(self):
-        store=Store(self.db)
-        try:return store.active()
-        finally:store.close()
+        # Readers cannot initialize, migrate, write or see an uncommitted pointer.
+        store=None
+        try:
+            store=Store(self.db,read_only=True)
+            version,snapshot=store.active_publication()
+        except sqlite3.OperationalError as error:
+            if not is_busy(error):
+                raise  # I/O failures, corruption and SQL/schema errors stay visible.
+            logging.getLogger(__name__).warning(
+                'SQLite snapshot read remained busy after bounded wait; using last committed publication')
+            with self.guard:
+                self._snapshot_busy=True
+                return deepcopy(self._committed_snapshot)
+        finally:
+            if store is not None:store.close()
+        with self.guard:
+            self._snapshot_busy=False
+        return self._remember_committed(version,snapshot)
+
+    def _remember_committed(self,version,snapshot):
+        with self.guard:
+            # A slower read finishing later must not replace a newer committed cache.
+            if version>=self._publication_version:
+                self._publication_version=version
+                self._committed_snapshot=snapshot
+            return deepcopy(self._committed_snapshot)
 
     def status(self):
+        # A DB wait may span refresh completion: sample operational state afterward.
+        snapshot=self.snapshot()
         with self.guard:
             state=dict(self.state)
+            running=self.running
             # Never let an older recovery file hide an update that failed to persist.
             if not self._status_unpersisted:
                 try:
@@ -49,13 +82,13 @@ class RefreshService:
                             isinstance(persisted.get('progress'),str)):
                         state=persisted
                 except (OSError,ValueError):pass
-        snapshot=self.snapshot()
+            state['snapshot_read']='busy_last_committed' if self._snapshot_busy and snapshot else 'busy_no_snapshot' if self._snapshot_busy else 'ready'
         state.update({'last_successful_session':snapshot.get('session') if snapshot else None,
                       'last_successful_refresh':snapshot.get('refreshed_at') if snapshot else None,
                       'completeness':snapshot.get('completeness') if snapshot else None,'mode':self.mode,
                       'theme_layer':snapshot.get('theme_layer') if snapshot else None})
         # An interrupted process leaves an honest recovery message, never a live lock.
-        if state.get('state')=='running' and not self.running:
+        if state.get('state')=='running' and not running:
             try:
                 with RefreshLock(self.lock_path):state.update(state='interrupted',progress='Previous refresh stopped; retry is available')
             except RefreshBusy:pass
@@ -210,6 +243,10 @@ class RefreshService:
                     for point in points:run.index(theme,point.session,point)
                 run.db.execute('INSERT INTO market_snapshot VALUES(?,?)',(run.run,canonical(market)))
                 run.publish(snapshot,required_symbols=names)
+                committed_candidate=store.active_publication()
+            # Only visible after the refresh context's COMMIT has succeeded. On
+            # rollback this is never cached; an older replay retains its true pointer.
+            self._remember_committed(*committed_candidate)
             self._status(state='success',progress='Refresh complete',elapsed_seconds=round(time.perf_counter()-started,3))
             return snapshot
         except Exception as error:
