@@ -555,3 +555,19 @@ no launch earned symbols/signals, generic shifted dates, blockers and unchanged 
 Native Windows validation and real Nov 9/10 checks remain open/deferred.
 
 Stage 1 validation: focused vNext suite 115 tests (114 passed, one Windows skip).
+
+## Gate E Windows reviewed-evidence line endings
+
+Commit 860f87c preserves launch-close research independently of official accounting.
+The separate evidence fix pins four reviewed JSON/provenance files to LF while
+preserving CMD CRLF. A strict UTF-8 text hash replaces only CRLF pairs with LF in
+memory; approved expected hashes and reviewed content stay unchanged. Tests cover
+LF/CRLF full validation, actual content/format edits, provenance tampering, invalid
+UTF-8 and lone CR sensitivity. No semantic evidence checks are relaxed.
+See docs/vnext_gate_e_launch_windows.md for native validation and lifecycle checks.
+
+Final two-fix validation: full 325 (323 passed/two native-Windows skips), focused
+vNext 118 (117 passed/one skip), evidence 10 passed; all 64 frozen Matrix cases pass.
+Both validators, compilation, both JS syntax checks and dashboard JS tests pass.
+Only existing Starlette TestClient/httpx deprecation warning remains. No live calls.
+Gate E remains OPEN for the user's Nov 6 native refresh; real Nov 9/10 checks deferred.

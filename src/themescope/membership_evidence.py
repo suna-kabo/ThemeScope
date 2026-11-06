@@ -36,12 +36,22 @@ def rule_coverage(master,registry):
     return count
 
 
+def reviewed_json_sha256(path):
+    """Hash reviewed UTF-8 JSON text, ignoring only checkout CRLF representation.
+
+    Strict decoding and literal CRLF replacement preserve all other bytes/content,
+    including whitespace, lone CR, BOM and JSON formatting. Never use for binaries.
+    """
+    text=Path(path).read_bytes().decode('utf-8')
+    return sha256(text.replace('\r\n','\n').encode('utf-8')).hexdigest()
+
+
 def validate_supplied_files(folder):
-    audit=json.loads((folder/'membership_review_provenance.json').read_text())
+    audit=json.loads((folder/'membership_review_provenance.json').read_text(encoding='utf-8'))
     for name,expected in [('industry_rule_registry.json',audit['source_files_sha256']['themescope_industry_rule_registry_2026-11-06.json']),
                           ('primary_source_attachment_tasks.json',audit['source_files_sha256']['themescope_primary_source_attachment_tasks_2026-11-06.json'])]:
-        if sha256((folder/name).read_bytes()).hexdigest()!=expected:raise ValueError('Supplied review file changed: '+name)
-    if sha256((folder/'membership_master_review.json').read_bytes()).hexdigest()!=audit['normalized_master_sha256']:
+        if reviewed_json_sha256(folder/name)!=expected:raise ValueError('Supplied review file changed: '+name)
+    if reviewed_json_sha256(folder/'membership_master_review.json')!=audit['normalized_master_sha256']:
         raise ValueError('Master decisions changed without reviewed provenance')
 
 
@@ -59,7 +69,7 @@ def validate_evidence(root,configuration=None):
     if len(decisions)!=master['baseline_relationship_count']:raise ValueError('Master baseline count mismatch')
     covered=rule_coverage(master,registry)
     if covered!=master['summary']['target_industry_rule_accepted']:raise ValueError('Industry rule count mismatch')
-    tasks=json.loads((folder/'primary_source_attachment_tasks.json').read_text())['tasks']
+    tasks=json.loads((folder/'primary_source_attachment_tasks.json').read_text(encoding='utf-8'))['tasks']
     attachments=unique(evidence['attachments'],'source attachment')
     required=unique(tasks,'source task')
     extra={k for k,r in decisions.items() if r['source_action']=='attach_latest_official_source'}-required.keys()

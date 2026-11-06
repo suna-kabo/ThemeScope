@@ -4,7 +4,7 @@ from pathlib import Path
 import csv,json,shutil,tempfile,unittest
 from scripts.apply_membership_review import apply
 from src.themescope.domain import load_configuration
-from src.themescope.membership_evidence import validate_evidence,read_review,rule_coverage
+from src.themescope.membership_evidence import validate_evidence,read_review,rule_coverage,validate_supplied_files,reviewed_json_sha256
 ROOT=Path(__file__).resolve().parents[1]
 
 class MembershipEvidenceTests(unittest.TestCase):
@@ -95,3 +95,42 @@ class MembershipEvidenceTests(unittest.TestCase):
         original=path.read_bytes()
         with self.assertRaisesRegex(ValueError,'activated historical'):apply(self.root)
         self.assertEqual(path.read_bytes(),original)
+
+    def test_lf_and_windows_crlf_review_documents_preserve_approved_hashes(self):
+        folder=self.root/'config/vnext'
+        names=('industry_rule_registry.json','primary_source_attachment_tasks.json',
+               'membership_master_review.json','membership_review_provenance.json')
+        originals={n:(folder/n).read_bytes().replace(b'\r\n',b'\n') for n in names}
+        provenance=json.loads(originals['membership_review_provenance.json'])
+        for newline in (b'\n',b'\r\n'):
+            with self.subTest(newline=newline):
+                for n,raw in originals.items():(folder/n).write_bytes(raw.replace(b'\n',newline))
+                validate_supplied_files(folder)
+                self.assertEqual(validate_evidence(self.root,load_configuration(self.root))['remaining_queue'],0)
+                self.assertEqual(json.loads((folder/'membership_review_provenance.json').read_bytes()),provenance)
+                self.assertEqual(reviewed_json_sha256(folder/'industry_rule_registry.json'),
+                    provenance['source_files_sha256']['themescope_industry_rule_registry_2026-11-06.json'])
+                self.assertEqual(reviewed_json_sha256(folder/'membership_master_review.json'),provenance['normalized_master_sha256'])
+
+    def test_actual_content_and_formatting_edits_still_fail_for_each_hashed_json(self):
+        folder=self.root/'config/vnext'
+        for name in ('industry_rule_registry.json','primary_source_attachment_tasks.json','membership_master_review.json'):
+            path=folder/name;original=path.read_bytes()
+            for edited in (original+b' ',original.replace(b'2026',b'2025',1)):
+                with self.subTest(file=name,edit=edited[-12:]):
+                    self.assertNotEqual(edited,original)
+                    path.write_bytes(edited)
+                    with self.assertRaises(ValueError):validate_supplied_files(folder)
+            path.write_bytes(original)
+        path=folder/'membership_review_provenance.json'
+        data=json.loads(path.read_bytes());data['normalized_master_sha256']='0'*64
+        path.write_text(json.dumps(data),encoding='utf-8')
+        with self.assertRaisesRegex(ValueError,'Master decisions changed'):validate_supplied_files(folder)
+
+    def test_review_hash_is_strict_utf8_and_does_not_ignore_lone_cr(self):
+        path=self.root/'review.json'
+        path.write_bytes(b'{"a":1}\n');expected=reviewed_json_sha256(path)
+        path.write_bytes(b'{"a":1}\r\n');self.assertEqual(reviewed_json_sha256(path),expected)
+        path.write_bytes(b'{"a":1}\r');self.assertNotEqual(reviewed_json_sha256(path),expected)
+        path.write_bytes(b'\xff')
+        with self.assertRaises(UnicodeDecodeError):reviewed_json_sha256(path)
