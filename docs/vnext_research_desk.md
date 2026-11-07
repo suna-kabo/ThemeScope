@@ -268,3 +268,51 @@ Screenshots inspect 2560×1440, 1920×1080, 390px and 200% text. Fixtures/presen
 states only; no live-provider validation. The existing favicon 404 stays recorded.
 No src/config or financial test changes. Gate E remains open; real Nov 9/10 checks
 remain deferred. main/inspection refs are preserved; no merge or deployment.
+
+## Narrow consistency pass after 51839b3
+
+Earnings presentation now uses only the existing ticker status/date records. When
+no record has a date or explicit `Available` status, earnings UI is hidden in Primary,
+the ticker inspector, the optional full-theme table and Saved context. The Earnings
+filter resets when hidden, preventing a stale view filter from concealing Primary
+rows. Header/cell removal is coordinated in both unique and By theme tables.
+
+Any reported date enables earnings presentation. Explicit `Available` with no dates
+shows `No reported date`; an individual `Unavailable` stays `Unavailable` while any
+other record establishes availability. The current backend emits all-Unavailable
+for a disabled provider, a global failure and a successful empty calendar; the UI
+cannot distinguish those cases. This pass follows the approved all-unavailable
+presentation rule without adding a backend flag or mislabeling ambiguous records.
+Earnings remain optional and never affect qualification, refresh or exports.
+
+IWM now shares the exact ticker/price/state/EMA type scale used by SPY/QQQ. Its
+existing close/EMA context remains price-only; lower placement, Context only and a
+quiet surface establish its secondary role. No breadth or Matrix influence added.
+
+Shared research line-height and inline target tokens center links, numeric text,
+state/Priority and Save controls within the existing table cells. Symmetric cell
+padding stays compact. Both dense and comfortable modes remain supported; mobile
+targets and text resizing remain intact. Unavailable theme breadth still displays
+`—`; only supplied valid/configured/coverage metadata is exposed in a native title
+and screen-reader text. No sample/coverage rule or calculation changed.
+
+Validation includes full 327 tests (two existing Windows skips), focused 120 (one
+skip), all 64 Matrix cases, all three browser smokes, both JS syntax checks, dashboard
+helpers, compilation and both validators. Browser regressions exercise hidden global
+earnings, dates, explicit empty success, individual failure, global failure/filter
+reset, table alignment, IWM computed typography, absence of IWM breadth and compact
+unavailable breadth metadata. No financial tests, backend/src, config, provider,
+cache, SQLite, lifecycle, export, Saved storage or inspector navigation change.
+
+Fresh deterministic captures inspect desktop/1440p density, 200% text and 390px.
+The review gallery remains outside Git. Native Windows rendering, other browsers and
+screen-reader speech remain unverified. The pre-existing favicon 404 is recorded
+separately. main/inspection refs and Gate E remain unchanged; Nov 9/10 live checks
+remain deferred. One focused commit, then stop for visual review.
+
+Final consistency acceptance: all three browser scripts pass; 14 axe A/AA audits,
+zero violations, page errors, external requests or unexpected console errors.
+Geometry checks verify symmetric spacing for links/states/Priority/Save. Density
+at 2560×1440 is 31 complete Theme rows and 27 Primary rows (previously 32/24).
+Eleven fixture screenshots were inspected and supplied in a local gallery/ZIP.
+All earnings transitions and the unavailable-breadth title regression pass.

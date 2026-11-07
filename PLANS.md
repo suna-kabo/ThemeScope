@@ -673,3 +673,23 @@ external requests or unexpected console errors. Known favicon 404 remains isolat
 Nine fresh fixture-only screenshots are delivered in a local review gallery/ZIP.
 Desktop grid rows align within one pixel; 200% text and both motion-reduction controls
 pass. No src/config diff. Complete this single targeted commit and stop for review.
+
+## Narrow UI consistency after 51839b3
+
+Hide earnings fields/filter/column when existing records are globally unavailable;
+clear the hidden filter without affecting qualification. Explicit available dates,
+empty available records and failures keep distinct supplied-state labels. Existing
+contract cannot distinguish disabled, failed and successful-empty all-Unavailable
+results; no backend change or fabricated dates. Hide redundant earnings in full-theme
+and Saved presentation too, preserving their behavior/storage.
+IWM shares SPY/QQQ typography and existing-price EMA context, with no breadth/Matrix
+role. Shared row rhythm centers values/controls; unavailable breadth keeps a dash
+and supplied coverage metadata only. Full/focused suites and functional browser
+smokes pass; final browser verifies earnings transitions, density, geometry, IWM,
+320/390px, 200% text, reduced motion and accessibility. No src/config/financial test
+changes. One commit, clean tree, stop for review; main and Gate E remain unchanged.
+Final acceptance PASSED: 14 axe audits/zero violations, all browser scripts, exact
+row-centering and IWM computed-type checks; 31 Theme/27 Primary rows at 1440p.
+Eleven fresh fixture screenshots reviewed, including 390px and 200% text. Known
+favicon 404 remains isolated; no page errors, external requests or other console
+errors. Financial/runtime behavior and protected refs remain unchanged.

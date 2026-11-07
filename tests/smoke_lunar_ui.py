@@ -83,8 +83,10 @@ def main():
                 for destination,selector in [('themes','#theme-table'),('primary','#candidates')]:
                     nav(destination)
                     visible=page.locator(selector+' tbody tr').evaluate_all('rows=>rows.filter(r=>r.getBoundingClientRect().top>=0&&r.getBoundingClientRect().bottom<=innerHeight).length')
-                    assert visible>=20,(destination,visible)
+                    assert visible>=(30 if destination=='themes' else 24),(destination,visible)
                     results['visible_rows_1440p'][destination]=visible
+                    centered=page.locator(selector+' tbody tr').first.evaluate("row=>[...row.querySelectorAll('td > .theme-link,td > .ticker-link,td > .state,td > .priority,td > .save-button')].every(e=>{const p=e.parentElement.getBoundingClientRect(),b=e.getBoundingClientRect();return Math.abs((b.top-p.top)-(p.bottom-b.bottom))<2})")
+                    assert centered,(destination,'interactive/state boxes centered between dividers')
                 # Inspector scroll does not move the page and closure restores its origin.
                 page.set_viewport_size({'width':1440,'height':1000});nav('themes')
                 scroll_link=page.locator('#theme-table a').nth(24);scroll_link.scroll_into_view_if_needed()
@@ -93,6 +95,12 @@ def main():
                 page.keyboard.press('Escape');expect(page.locator('#research-inspector')).not_to_be_visible()
                 assert abs(page.evaluate('scrollY')-origin_scroll)<2
                 expect(scroll_link).to_be_focused()
+                # IWM shares typography, keeps only price/EMA context and has no breadth.
+                for selector in ['.market-ticker','.market-price','.state','.market-emas']:
+                    sizes=[page.locator('.market-card').nth(i).locator(selector).first.evaluate('e=>getComputedStyle(e).fontSize') for i in [0,1,2]]
+                    assert len(set(sizes))==1,(selector,sizes)
+                assert page.locator('.market-card.context .breadth-bar').count()==0
+                expect(page.locator('.market-card.context')).to_contain_text('Context only')
                 # Snapshot-only visuals: correct breadth lengths, raw axes and inspectable points.
                 nav('overview');open_map()
                 map_rows=[t for t in actual['themes'] if t['status']=='active' and t['returns'] and all(t['returns'][i]['value'] is not None for i in [0,1])]
@@ -150,6 +158,7 @@ def main():
                 page.locator('#inspector-members [data-inspect-ticker="NVDA"]').click()
                 expect(page.locator('#inspector-title')).to_have_text('NVDA');expect(page.locator('dialog[open]')).to_have_count(1)
                 expect(page.locator('#inspector-content')).to_contain_text('Other qualifying themes')
+                assert 'Earnings' not in page.locator('#inspector-content').inner_text()
                 assert 'Stock 1M' not in page.locator('#inspector-content').inner_text()
                 capture('ticker-inspector-1440');audit('ticker-inspector')
                 page.keyboard.press('Escape');expect(page.locator('#research-inspector')).not_to_be_visible()
@@ -173,10 +182,13 @@ def main():
                 first=page.locator('#candidates [data-save]').first;ticker=first.get_attribute('data-save');key=first.get_attribute('data-focus-key')
                 first.focus();first.press('Space');expect(first).to_have_attribute('aria-pressed','true')
                 page.wait_for_timeout(1800);expect(page.locator(f'[data-focus-key="{key}"]')).to_be_focused()
+                capture('primary-earnings-disabled-1440')
                 page.get_by_role('button',name='By theme',exact=True).click();expect(page.locator('#candidates tbody tr')).to_have_count(relationships)
                 page.locator('#candidate-search').fill(ticker)
                 assert page.locator('#candidates tbody tr').count()>=1
-                page.locator('#candidate-earnings').select_option('available');expect(page.locator('#candidates')).to_contain_text('No Primary stocks match')
+                expect(page.locator('#candidate-earnings')).to_be_hidden()
+                assert page.locator('#candidates th').all_text_contents()==['Ticker','Theme','Role','W · pp','Save']
+                assert page.locator('#candidates td[data-label="Earnings"]').count()==0
                 with page.expect_download() as item:page.get_by_role('link',name='Export all Primary',exact=False).click()
                 text=Path(item.value.path()).read_text();assert text==actual['exports']['combined']
                 identifiers=[s for s in text.splitlines() if s and not s.startswith('###')];assert len(identifiers)==len(set(identifiers))
@@ -320,6 +332,35 @@ def main():
                 state['snapshot']['earnings'][short['ticker']]={'status':'Available','dates':['2026-11-12']}
                 update('illustrative short candidate and earnings date');nav('primary');page.locator('#candidate-filters [data-reset]').click();page.get_by_role('button',name='Unique tickers',exact=True).click()
                 page.locator('#candidate-earnings').select_option('available');expect(page.locator('#candidates tbody tr')).to_have_count(1);expect(page.locator('#candidates')).to_contain_text('2026-11-12');capture('short-candidate-1440')
+                # Explicit Available-without-date and an ambiguous failure remain distinct.
+                state['snapshot']['earnings'][short['ticker']]={'status':'Available','dates':[]}
+                update('enabled earnings without a reported date')
+                expect(page.locator('#candidate-earnings')).to_be_visible()
+                page.locator('#candidate-earnings').select_option('unavailable')
+                expect(page.locator('#candidates')).to_contain_text('No reported date')
+                page.locator('#candidates [data-inspect-ticker]').first.click()
+                expect(page.locator('#inspector-content')).to_contain_text('No reported date')
+                page.keyboard.press('Escape')
+                other=next(r['ticker'] for r in state['snapshot']['relationships'] if r['ticker']!=short['ticker'])
+                state['snapshot']['earnings'][other]={'status':'Available','dates':[]}
+                state['snapshot']['earnings'][short['ticker']]={'status':'Unavailable','dates':[]}
+                update('individual earnings unavailable with provider enabled')
+                expect(page.locator('#candidates')).to_contain_text('Unavailable')
+                state['snapshot']['earnings']={t:{'status':'Unavailable','dates':[]} for t in state['snapshot']['earnings']}
+                update('earnings globally unavailable')
+                expect(page.locator('#candidate-earnings')).to_be_hidden()
+                expect(page.locator('#candidate-earnings')).to_have_value('')
+                expect(page.locator('#candidates tbody tr')).to_have_count(1)
+                page.locator('#candidates [data-inspect-ticker]').first.click()
+                assert 'Earnings' not in page.locator('#inspector-content').inner_text()
+                page.keyboard.press('Escape')
+                assert state['snapshot']['exports']==actual['exports']
+                # Unavailable breadth retains its compact dash and only supplied metadata.
+                breadth_theme=state['snapshot']['themes'][0]
+                breadth_theme['breadth'][0].update(value=None,valid=11,configured=15,coverage='0.7333333333333333')
+                update('breadth unavailable coverage metadata');nav('themes');page.locator('#theme-search').fill(breadth_theme['name'])
+                expect(page.locator('#theme-table [title="11/15 valid · 73.33% coverage"]')).to_contain_text('—')
+                results['interactions'].append('earnings disabled/enabled/date/empty/failure transitions; IWM typography; unavailable breadth metadata')
                 state['snapshot']=deepcopy(actual);state['snapshot']['themes'][0]['score']=None;state['snapshot']['themes'][0]['returns']=None;state['snapshot']['themes'][0]['index']['trend']='Unavailable';update('unavailable metrics');nav('themes')
                 page.locator('#theme-search').fill(state['snapshot']['themes'][0]['name']);expect(page.locator('#theme-table')).to_contain_text('Unavailable');assert 'NaN' not in page.locator('#theme-table').inner_text()
                 # Raw axes retain extreme values, negative/zero, ties and omit unavailable returns.
