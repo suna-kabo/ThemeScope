@@ -3,20 +3,27 @@
 <body>
 <a class="skip-link" href="#workspace">Skip to research</a>
 <aside class="rail">
-  <a class="brand" href="#overview" aria-label="ThemeScope home"><span class="brand-mark" aria-hidden="true">◔</span><span>ThemeScope<small>YOUR RESEARCH DESK</small></span></a>
+  <a class="brand" href="#overview" aria-label="ThemeScope home"><span class="brand-mark" aria-hidden="true">◔</span><span>ThemeScope</span></a>
   <nav aria-label="Research" class="main-nav">
     <a href="#overview" data-nav="overview"><span aria-hidden="true" class="nav-icon">◫</span>Overview</a>
     <a href="#themes" data-nav="themes"><span aria-hidden="true" class="nav-icon">◈</span>Themes</a>
-    <a href="#candidates" data-nav="candidates"><span aria-hidden="true" class="nav-icon">⌕</span>Candidates</a>
+    <a href="#primary" data-nav="primary"><span aria-hidden="true" class="nav-icon">⌕</span>Primary<span id="primary-count" class="nav-count">0</span></a>
     <a href="#saved" data-nav="saved"><span aria-hidden="true" class="nav-icon">☆</span>Saved<span id="saved-count" class="nav-count">0</span></a>
     <a href="#methodology" data-nav="methodology" class="secondary-nav"><span aria-hidden="true" class="nav-icon">≡</span>Methodology</a>
   </nav>
-  <div class="rail-footer"><span class="quiet-orbit" aria-hidden="true">◌</span><p>A little perspective.<br>A clearer next look.</p><small>PRIVATE · END OF DAY</small></div>
+  <div class="rail-footer"><button id="display-toggle" class="button quiet" aria-expanded="false" aria-controls="display-panel"><span aria-hidden="true">Aa</span> Display</button></div>
+  <section id="display-panel" class="display-panel" aria-labelledby="display-title" hidden>
+    <div class="section-heading"><h2 id="display-title">Display</h2><button id="display-close" class="button quiet small" aria-label="Close Display">×</button></div>
+    <fieldset><legend>Density</legend><div class="segmented"><button data-density="compact" aria-pressed="true">Compact</button><button data-density="comfortable" aria-pressed="false">Comfortable</button></div></fieldset>
+    <div class="display-text"><span>Text size</span><button class="button quiet small" data-text-step="-25" aria-label="Decrease text size">−</button><output id="text-size">100%</output><button class="button quiet small" data-text-step="25" aria-label="Increase text size">+</button></div>
+    <label class="display-check"><input id="display-motion" type="checkbox">Reduce motion</label>
+    <label class="display-check"><input id="display-contrast" type="checkbox">High contrast</label>
+  </section>
 </aside>
 <div class="app-shell">
   <header class="app-header">
     <div class="session-label"><span class="status-dot" aria-hidden="true"></span><span id="target">Completed US session —</span></div>
-    <div class="header-actions"><span id="progress" role="status" aria-live="polite">Connecting to your desk…</span><button id="refresh" class="button primary"><span aria-hidden="true">↻</span><span id="refresh-label">Refresh Data</span></button></div>
+    <div class="header-actions"><span id="progress" role="status" aria-live="polite">Connecting…</span><button id="refresh" class="button primary"><span aria-hidden="true">↻</span><span id="refresh-label">Refresh Data</span></button></div>
   </header>
   <div class="operational-strip">
     <span id="completeness">Completeness —</span><span id="provider">Provider —</span>
@@ -27,17 +34,17 @@
     <p id="theme-layer" class="notice info" hidden></p>
     <div id="error" class="notice negative" role="alert" hidden></div>
     <section id="overview-page" class="view" aria-labelledby="overview-title">
-      <div class="page-heading"><div><p class="eyebrow">THE DAILY PICTURE</p><h1 id="overview-title" tabindex="-1">Overview<span class="heading-dot">.</span></h1><p class="subtitle">Find the themes. Follow the strength. Take a closer look.</p></div><a href="#themes" class="button secondary">Explore themes <span aria-hidden="true">↗</span></a></div>
-      <div id="market-direction" class="direction-panel"><p class="eyebrow">MARKET MATRIX</p><h2>One session, a clearer perspective.</h2><p class="muted">Refresh Data to load the latest completed US session.</p></div>
+      <div class="page-heading"><div><h1 id="overview-title" tabindex="-1">Overview</h1></div><a href="#themes" class="button secondary">Explore themes <span aria-hidden="true">↗</span></a></div>
+      <div id="market-direction" class="direction-panel"><h2>Market</h2><p class="muted">No completed session loaded.</p></div>
       <div id="market-cards" class="market-grid"></div>
       <div class="overview-research">
-        <section class="research-panel" aria-labelledby="top-themes-title"><div class="section-heading"><div><p class="eyebrow">WHERE TO LOOK</p><h2 id="top-themes-title">Themes in focus</h2></div><a href="#themes" class="text-link">All themes <span aria-hidden="true">↗</span></a></div><div id="primary-themes"></div></section>
-        <section class="research-panel" aria-labelledby="preview-candidates-title"><div class="section-heading"><div><p class="eyebrow">YOUR NEXT CHART</p><h2 id="preview-candidates-title">Primary candidates</h2></div><a href="#candidates" class="text-link">All candidates <span aria-hidden="true">↗</span></a></div><div id="candidate-preview"></div></section>
+        <section class="research-panel" aria-labelledby="top-themes-title"><div class="section-heading"><div><h2 id="top-themes-title">Primary themes</h2></div><a href="#themes" class="text-link">All themes <span aria-hidden="true">↗</span></a></div><div id="primary-themes"></div></section>
+        <section class="research-panel" aria-labelledby="preview-candidates-title"><div class="section-heading"><div><h2 id="preview-candidates-title">Primary stocks</h2></div><a href="#primary" class="text-link">All Primary <span aria-hidden="true">↗</span></a></div><div id="candidate-preview"></div></section>
       </div>
-      <a href="#methodology" class="method-link">How this list is built →</a>
+
     </section>
     <section id="themes-page" class="view" aria-labelledby="themes-title" hidden>
-      <div class="page-heading"><div><p class="eyebrow">THE BIGGER PICTURE</p><h1 id="themes-title" tabindex="-1">Themes<span class="heading-dot">.</span></h1><p class="subtitle">Custom themes, compared on the same terms.</p></div><div class="segmented" role="group" aria-label="Theme universe"><button data-universe="active" aria-pressed="true">Active <span id="active-count">—</span></button><button data-universe="watch_only" aria-pressed="false">Watch-only <span id="watch-count">—</span></button></div></div>
+      <div class="page-heading"><div><h1 id="themes-title" tabindex="-1">Themes</h1></div><div class="segmented" role="group" aria-label="Theme universe"><button data-universe="active" aria-pressed="true">Active <span id="active-count">—</span></button><button data-universe="watch_only" aria-pressed="false">Watch-only <span id="watch-count">—</span></button></div></div>
       <form id="theme-filters" class="filter-bar" role="search" aria-label="Filter themes">
         <label class="search-field">Search themes<input id="theme-search" type="search" placeholder="Theme or family…" autocomplete="off"></label>
         <label>Family<select id="theme-family"><option value="">All families</option></select></label>
@@ -45,31 +52,31 @@
         <label>Trend<select id="theme-trend"><option value="">All trends</option><option>Bullish</option><option>Bearish</option><option>Mixed</option><option>Unavailable</option></select></label>
         <button type="button" data-reset="themes" class="button quiet">Reset</button>
       </form>
-      <div class="table-meta"><p id="theme-results" role="status" aria-live="polite">Waiting for a snapshot</p><span># = list position · equal scores share a tie label</span></div>
+      <div class="table-meta"><p id="theme-results" role="status" aria-live="polite">Waiting for a snapshot</p><span>Equal Scores retain tie labels</span></div>
       <div id="theme-table" class="table-wrap theme-wrap" role="region" aria-label="Theme research results" tabindex="0"></div>
     </section>
     <section id="theme-detail" class="view" aria-labelledby="detail-title" hidden><div id="detail-content"></div></section>
     <section id="candidate-page" class="view" aria-labelledby="candidates-title" hidden>
-      <div class="page-heading"><div><p class="eyebrow">FROM THEME TO TICKER</p><h1 id="candidates-title" tabindex="-1">Candidates<span class="heading-dot">.</span></h1><p class="subtitle">A shortlist for chart inspection. Each theme qualifies independently.</p></div><a id="combined" class="button primary download" href="/api/exports/combined.txt" download="Primary.txt" aria-disabled="true" tabindex="-1">Export all Primary <span aria-hidden="true">↓</span></a></div>
-      <form id="candidate-filters" class="filter-bar" role="search" aria-label="Filter candidates">
-        <label class="search-field">Search candidates<input id="candidate-search" type="search" placeholder="Ticker or theme…" autocomplete="off"></label>
+      <div class="page-heading"><div><h1 id="candidates-title" tabindex="-1">Primary Watchlist</h1><p id="primary-context" class="compact-context"></p></div><a id="combined" title="Full published Primary list; view filters do not change this export" class="button primary download" href="/api/exports/combined.txt" download="Primary.txt" aria-disabled="true" tabindex="-1">Export all Primary <span aria-hidden="true">↓</span></a></div>
+      <form id="candidate-filters" class="filter-bar" role="search" aria-label="Filter Primary">
+        <label class="search-field">Search Primary<input id="candidate-search" type="search" placeholder="Ticker or theme…" autocomplete="off"></label>
         <label>Theme<select id="candidate-theme"><option value="">All themes</option></select></label>
         <label>Role<select id="candidate-role"><option value="">All roles</option><option>Core</option><option>Enabler</option></select></label>
         <label>W vs Theme Peers<select id="candidate-w"><option value="">Any W</option><option value="positive">Positive W</option><option value="negative">Negative W</option></select></label>
         <label>Earnings<select id="candidate-earnings"><option value="">Any earnings state</option><option value="available">Date available</option><option value="unavailable">Unavailable</option></select></label>
         <button type="button" data-reset="candidates" class="button quiet">Reset</button>
       </form>
-      <div class="candidate-tools"><div class="segmented" role="group" aria-label="Candidate display"><button data-candidate-mode="unique" aria-pressed="true">Unique tickers</button><button data-candidate-mode="relationships" aria-pressed="false">By theme</button></div><label class="inline-label">Sort<select id="candidate-sort"><option value="ticker">Ticker A–Z</option><option value="w-desc">W high to low</option><option value="w-asc">W low to high</option><option value="theme">Theme A–Z</option></select></label></div>
-      <p class="table-meta" id="candidate-results" role="status" aria-live="polite">Waiting for a snapshot</p><p class="table-note">Unique tickers use W from their assigned export section. Filters change this view only; TXT exports always contain the full published Primary list.</p>
+      <div class="candidate-tools"><div class="segmented" role="group" aria-label="Primary display"><button data-candidate-mode="unique" aria-pressed="true">Unique tickers</button><button data-candidate-mode="relationships" aria-pressed="false">By theme</button></div><label class="inline-label">Sort<select id="candidate-sort"><option value="ticker">Ticker A–Z</option><option value="w-desc">W high to low</option><option value="w-asc">W low to high</option><option value="theme">Theme A–Z</option></select></label></div>
+      <p class="table-meta" id="candidate-results" role="status" aria-live="polite">Waiting for a snapshot</p>
       <div id="candidates"></div>
     </section>
     <section id="saved-page" class="view" aria-labelledby="saved-title" hidden>
-      <div class="page-heading"><div><p class="eyebrow">KEPT FOR A CLOSER LOOK</p><h1 id="saved-title" tabindex="-1">Saved<span class="heading-dot">.</span></h1><p class="subtitle">Your bookmarks, with today's research context. Stored in this browser only.</p></div><a href="#candidates" class="button secondary">Browse candidates <span aria-hidden="true">↗</span></a></div>
+      <div class="page-heading"><div><h1 id="saved-title" tabindex="-1">Saved</h1></div><a href="#primary" class="button secondary">Browse Primary <span aria-hidden="true">↗</span></a></div>
       <div id="saved"></div>
     </section>
     <section id="methodology-page" class="view" aria-labelledby="methodology-title" hidden>
-      <div class="page-heading"><div><p class="eyebrow">KNOW WHAT YOU'RE LOOKING AT</p><h1 id="methodology-title" tabindex="-1">Methodology<span class="heading-dot">.</span></h1><p class="subtitle">The rules behind the research. No hidden signals.</p></div></div>
-      <div class="method-intro"><span class="quiet-orbit" aria-hidden="true">◌</span><p>ThemeScope connects market context, custom equity themes and stock comparisons.<br><span class="muted">It supports research. Chart and setup evaluation remain separate.</span></p></div>
+      <div class="page-heading"><div><h1 id="methodology-title" tabindex="-1">Methodology</h1></div></div>
+
       <div class="method-grid">
         <details class="method-item"><summary>01 <span>Market Matrix</span></summary><div><p>SPY and QQQ price states and their constituent breadth determine the returned Market Matrix direction. Both prices Bullish or both Bearish establish their unanimous direction; breadth adds context. Other combinations follow the configured frozen matrix.</p><p>IWM is price context only. It never decides direction and has no constituent roster.</p></div></details>
         <details class="method-item"><summary>02 <span>Custom Theme Score</span></summary><div><p>Theme 1M and 3M are median Core + Enabler stock price returns over 21 and 63 completed trading sessions. At least five valid members and 80% coverage are required.</p><p>Score combines cross-theme percentiles: 60% 1M + 40% 3M. It is a relative ranking measure, not a probability or expected return. Related members and thematic ETFs have no calculation role.</p></div></details>
@@ -82,7 +89,7 @@
       </div>
       <details class="method-item activation-details"><summary>Configuration &amp; activation status</summary><div><ul id="blockers"><li>Load a snapshot to check activation.</li></ul><p class="muted">Effective SPY and QQQ rosters are required for activation. Stale-roster warnings are advisory.</p></div></details>
     </section>
-    <footer class="workspace-footer"><span>ThemeScope · A clearer next look.</span><span>Local research. Your pace.</span></footer>
+
   </main>
 </div>
 <div id="feedback" class="feedback" role="status" aria-live="polite"></div>

@@ -34,15 +34,14 @@ def main():
                 expect(page.locator('#theme-layer')).to_contain_text('2026-11-06 close')
                 expect(page.locator('#fixture-banner')).to_be_hidden()
                 page.locator('[data-nav="themes"]').click()
-                expect(page.locator('#theme-table')).to_contain_text('Pre-launch research trend')
+                expect(page.locator('#theme-table')).to_contain_text('Trend')
                 expect(page.locator('#theme-table')).to_contain_text('Bullish')
-                expect(page.locator('#theme-table')).to_contain_text('Comparison unavailable')
-                page.locator('[data-nav="candidates"]').click()
+                page.locator('[data-nav="primary"]').click()
                 assert page.locator('#candidates tbody tr').count()>0
                 save=page.locator('#candidates [data-save]').first;ticker=save.get_attribute('data-save');save.click()
                 page.locator('[data-nav="saved"]').click()
                 expect(page.locator('#saved')).to_contain_text(ticker)
-                page.locator('[data-nav="candidates"]').click()
+                page.locator('[data-nav="primary"]').click()
                 with page.expect_download() as item:
                     page.get_by_role('link',name='Export all Primary').click()
                 text=Path(item.value.path()).read_text();assert text and '###' in text
@@ -52,7 +51,7 @@ def main():
                 fixture.target='2026-11-06';page.get_by_role('button',name='Refresh Data',exact=True).click()
                 expect(page.locator('#theme-layer')).to_contain_text('Launch close: index initialized at 100',timeout=30000)
                 page.locator('[data-nav="themes"]').click()
-                expect(page.locator('#theme-table')).to_contain_text('Synthetic Theme Trend')
+                expect(page.locator('#theme-table')).to_contain_text('Trend')
                 assert service.snapshot()['theme_layer']['official_live_history']
                 page.set_viewport_size({'width':390,'height':844})
                 assert page.locator('body').bounding_box()['width']<=390

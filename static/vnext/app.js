@@ -8,9 +8,9 @@
   const percent = (value, scale = 1, signed = false) => valid(value) ? `${signed && Number(value) > 0 ? '+' : ''}${number(Number(value) * scale)}%` : '—';
   const points = value => valid(value) ? `${Number(value) > 0 ? '+' : ''}${number(Number(value) * 100)} pp` : '—';
   const money = value => valid(value) ? `$${number(value)}` : '—';
-  const iconPaths = {up:'M6 18 18 6M6 6h12v12',down:'M6 6l12 12M6 18h12V6',flat:'M4 12h16m-4-4 4 4-4 4M8 8l-4 4 4 4',overview:'M4 4h16v16H4zM4 10h16M12 10v10',themes:'m12 3 9 9-9 9-9-9 9-9zM8 12l4-4 4 4-4 4-4-4z',candidates:'M10 17a7 7 0 1 0 0-14 7 7 0 0 0 0 14zm5-2 6 6',saved:'m12 3 2.8 5.8 6.4.9-4.6 4.5 1.1 6.4-5.7-3-5.7 3 1.1-6.4L2.8 9.7l6.4-.9L12 3z',methodology:'M5 5h14M5 10h14M5 15h9M5 20h9',orbit:'M20 12a8 8 0 1 1-8-8M12 4v8h8'};
+  const iconPaths = {up:'M6 18 18 6M6 6h12v12',down:'M6 6l12 12M6 18h12V6',flat:'M4 12h16m-4-4 4 4-4 4M8 8l-4 4 4 4',overview:'M4 4h16v16H4zM4 10h16M12 10v10',themes:'m12 3 9 9-9 9-9-9 9-9zM8 12l4-4 4 4-4 4-4-4z',primary:'M10 17a7 7 0 1 0 0-14 7 7 0 0 0 0 14zm5-2 6 6',saved:'m12 3 2.8 5.8 6.4.9-4.6 4.5 1.1 6.4-5.7-3-5.7 3 1.1-6.4L2.8 9.7l6.4-.9L12 3z',methodology:'M5 5h14M5 10h14M5 15h9M5 20h9',orbit:'M20 12a8 8 0 1 1-8-8M12 4v8h8'};
   const icon = key => `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${iconPaths[key] || iconPaths.flat}"/></svg>`;
-  const tone = value => /bullish|positive|long/i.test(value || '') ? 'positive' : /bearish|negative|short/i.test(value || '') ? 'negative' : /mixed|neutral|watch/i.test(value || '') ? 'mixed' : 'neutral';
+  const tone = value => /bullish|positive|long/i.test(value || '') ? 'positive' : /bearish|negative|short/i.test(value || '') ? 'negative' : /mixed/i.test(value || '') ? 'mixed' : 'neutral';
   const signTone = value => !valid(value) || Number(value) === 0 ? 'neutral' : Number(value) > 0 ? 'positive' : 'negative';
   const symbol = value => icon(tone(value) === 'positive' ? 'up' : tone(value) === 'negative' ? 'down' : 'flat');
   const state = value => `<span class="state ${tone(value)}"><span aria-hidden="true">${symbol(value)}</span>${esc(value || 'Unavailable')}</span>`;
@@ -25,8 +25,26 @@
   const name = id => snapshot?.themes?.find(t => t.theme_id === id)?.name || id || 'Unavailable';
   const themeHref = id => '#themes/' + encodeURIComponent(id);
   const themeLink = id => `<a class="theme-link" href="${themeHref(id)}">${esc(name(id))}</a>`;
-  const saveButton = (ticker, location) => `<button class="save-button" data-save="${esc(ticker)}" data-focus-key="${esc(location + ':' + ticker)}" aria-pressed="${watched.includes(ticker)}" aria-label="${watched.includes(ticker) ? 'Saved ' + esc(ticker) + '; remove from Saved' : 'Save ' + esc(ticker)}"><span aria-hidden="true">${watched.includes(ticker) ? '★' : '☆'}</span><span>${watched.includes(ticker) ? 'Saved' : 'Save'}</span></button>`;
+  const saveButton = (ticker, location) => `<button class="save-button" data-save="${esc(ticker)}" data-focus-key="${esc(location + ':' + ticker)}" aria-pressed="${watched.includes(ticker)}" aria-label="${watched.includes(ticker) ? 'Saved ' + esc(ticker) + '; remove from Saved' : 'Save ' + esc(ticker)}"><span aria-hidden="true">${watched.includes(ticker) ? '★' : '☆'}</span><span class="sr-only">${watched.includes(ticker) ? 'Saved' : 'Save'}</span></button>`;
   const empty = (title, message, action = '') => `<div class="empty-state"><span class="quiet-orbit" aria-hidden="true">◌</span><h3>${esc(title)}</h3><p>${esc(message)}</p>${action}</div>`;
+  const displayKey = 'themescope-vnext-display';
+  let display = {density:'compact', text:100, motion:false, contrast:false};
+  try {
+    const stored = JSON.parse(localStorage.getItem(displayKey) || '{}');
+    display = {density:stored.density === 'comfortable' ? 'comfortable' : 'compact', text:[100,125,150,175,200].includes(stored.text) ? stored.text : 100, motion:stored.motion === true, contrast:stored.contrast === true};
+  } catch { /* Independent, optional browser preference. */ }
+  function applyDisplay(persist = false) {
+    const root = document.documentElement;
+    root.dataset.density = display.density; root.dataset.motion = display.motion ? 'reduce' : 'system'; root.dataset.contrast = display.contrast ? 'high' : 'standard';
+    root.style.fontSize = display.text + '%';
+    $('text-size').textContent = display.text + '%';
+    $('display-motion').checked = display.motion; $('display-contrast').checked = display.contrast;
+    document.querySelectorAll('button[data-density]').forEach(b => b.setAttribute('aria-pressed',String(b.dataset.density === display.density)));
+    document.querySelector('[data-text-step="-25"]').disabled = display.text === 100;
+    document.querySelector('[data-text-step="25"]').disabled = display.text === 200;
+    if (persist) try { localStorage.setItem(displayKey,JSON.stringify(display)); } catch { announce('Display settings apply for this visit; browser storage is unavailable.'); }
+  }
+  function closeDisplay() { $('display-panel').hidden = true; $('display-toggle').setAttribute('aria-expanded','false'); }
   function focusKey() { return document.activeElement?.dataset?.focusKey; }
   function restoreFocus(key) { if (key) [...document.querySelectorAll(`[data-focus-key="${CSS.escape(key)}"]`)].find(node => !node.closest('[hidden]'))?.focus({preventScroll:true}); }
   function announce(text) {
@@ -81,15 +99,15 @@
   }
   function renderOverview() {
     const market = snapshot?.market || {}, decision = market.decision || {}, direction = snapshot?.market_direction || decision.direction || 'Unclassified';
-    $('market-direction').innerHTML = `<div class="direction-row"><div><p class="eyebrow">MARKET MATRIX</p><h2 class="direction-name ${tone(direction)}"><span class="direction-symbol" aria-hidden="true">${symbol(direction)}</span>${esc(direction)}</h2></div><span class="priority neutral">Completed-session view</span></div><p id="today-plan">${esc(snapshot?.today_plan || 'Required market evidence is unavailable. Refresh to load your research context.')}</p><details class="decision-details"><summary>Why this direction?</summary><p id="decision-path">${esc(decision.reason || 'Unavailable until a successful refresh.')}</p><p>Breadth consensus: ${esc(market.breadth_consensus || 'Unavailable')}${decision.breadth_qualifier ? ' · ' + esc(decision.breadth_qualifier) : ''}. IWM is context only.</p></details>`;
+    $('market-direction').innerHTML = `<div class="direction-row"><div><span class="metric-label">Market</span><h2 class="direction-name ${tone(direction)}"><span class="direction-symbol" aria-hidden="true">${symbol(direction)}</span>${esc(direction)}</h2></div><details class="decision-details"><summary>Market Matrix</summary><p id="decision-path">${esc(decision.reason || 'Unavailable until a successful refresh.')}</p><p id="today-plan">${esc(snapshot?.today_plan || '')}</p><p>Breadth: ${esc(market.breadth_consensus || 'Unavailable')}${decision.breadth_qualifier ? ' · ' + esc(decision.breadth_qualifier) : ''}</p></details></div>`;
     $('market-cards').innerHTML = ['SPY','QQQ','IWM'].map(ticker => {
       const row = market.context?.[ticker] || {}, b = row.breadth || {};
-      return `<article class="market-card ${ticker === 'IWM' ? 'context' : ''}" aria-label="${ticker} market context"><div class="market-card-head"><span class="market-ticker">${ticker}${ticker === 'IWM' ? ' <small>· CONTEXT</small>' : ''}</span>${state(row.price_state)}</div><div class="market-price">${money(row.close)}</div>${ticker === 'IWM' ? '<p>Price context only · outside the Market Matrix</p>' : `<div class="market-breadth"><span>Above EMA21 <strong>${percent(b.above_ema21)}</strong></span><span>Above EMA50 <strong>${percent(b.above_ema50)}</strong></span></div><details><summary>Breadth ${esc(b.state || 'Unavailable')} · ${esc(b.valid ?? 0)}/${esc(b.configured ?? 0)} valid</summary><p>EMA21 ${money(row.ema21)} · EMA50 ${money(row.ema50)}</p><p>${esc(row.roster_source || 'Roster unavailable')}</p><p>${esc((row.roster_warnings || []).join(' ') || 'No roster advisories.')}</p></details>`}</article>`;
+      return `<article class="market-card ${ticker === 'IWM' ? 'context' : ''}" aria-label="${ticker} market context"><div class="market-card-head"><span class="market-ticker">${ticker}</span><span class="market-price">${money(row.close)}</span>${state(row.price_state)}</div>${ticker === 'IWM' ? '<span class="muted">Context only</span>' : `<div class="market-emas"><span>EMA21 <b>${money(row.ema21)}</b></span><span>EMA50 <b>${money(row.ema50)}</b></span></div><div class="market-breadth"><span>Breadth 21 <strong>${percent(b.above_ema21)}</strong></span><span>Breadth 50 <strong>${percent(b.above_ema50)}</strong></span></div><details><summary>${esc(b.state || 'Unavailable')} breadth · ${esc(b.valid ?? 0)}/${esc(b.configured ?? 0)} valid</summary><p>${esc(row.roster_source || 'Roster unavailable')}</p><p>${esc((row.roster_warnings || []).join(' ') || 'No roster advisories.')}</p></details>`}</article>`;
     }).join('');
-    const themes = primaryThemes().slice(0, 6);
-    $('primary-themes').innerHTML = themes.length ? themes.map((t, i) => `<div class="preview-row"><span class="position">${String(i + 1).padStart(2,'0')}</span><div><a class="preview-name" href="${themeHref(t.theme_id)}">${esc(t.name || t.theme_id)}</a><small>${esc(t.family)}</small></div><div class="preview-value">${number(t.score)}<small>${priority(t.priority)}</small></div></div>`).join('') : empty('No Primary themes today', 'A directional Primary list needs aligned market and theme evidence. Explore all themes for context.', '<a href="#themes" class="text-link">Explore themes →</a>');
-    const stocks = uniqueRows(qualifiedRows()).sort((a, b) => a.ticker.localeCompare(b.ticker)).slice(0, 8);
-    $('candidate-preview').innerHTML = stocks.length ? stocks.map(r => `<div class="preview-row stock-row"><div><span class="ticker">${esc(r.ticker)}</span><small>${themeLink(r.theme_id)} · ${esc(r.role)}</small></div><div class="preview-value ${signTone(r.relative?.w)}">${points(r.relative?.w)}<small>W vs Theme Peers</small></div>${saveButton(r.ticker, 'overview')}</div>`).join('') : empty('Nothing to shortlist yet', 'Primary candidates appear when a stock qualifies in a Primary theme. Refresh or inspect the theme universe.', '<a href="#candidates" class="text-link">Open Candidates →</a>');
+    const themes = primaryThemes().slice(0, 5);
+    $('primary-themes').innerHTML = themes.length ? themes.map((t, i) => `<div class="preview-row"><span class="position">${String(i + 1).padStart(2,'0')}</span><div><a class="preview-name" href="${themeHref(t.theme_id)}">${esc(t.name || t.theme_id)}</a><small>${esc(t.family)}</small></div><div class="preview-value">${number(t.score)}<small>${priority(t.priority)}</small></div></div>`).join('') : empty('No Primary themes today', 'No themes qualify in this snapshot.', '<a href="#themes" class="text-link">Explore themes →</a>');
+    const stocks = uniqueRows(qualifiedRows()).sort((a, b) => a.ticker.localeCompare(b.ticker)).slice(0, 5);
+    $('candidate-preview').innerHTML = stocks.length ? stocks.map(r => `<div class="preview-row stock-row"><div><span class="ticker">${esc(r.ticker)}</span><small>${themeLink(r.theme_id)} · ${esc(r.role)}</small></div><div class="preview-value ${signTone(r.relative?.w)}">${points(r.relative?.w)}</div>${saveButton(r.ticker, 'overview')}</div>`).join('') : empty('No Primary stocks', 'No qualifying stocks in this snapshot.', '<a href="#primary" class="text-link">Open Primary →</a>');
   }
   function setOptions(id, options) {
     const select = $(id), first = select.options[0].outerHTML, previous = select.value;
@@ -126,10 +144,10 @@
     const rows = themeRows();
     $('theme-results').textContent = `${rows.length} ${ui.universe === 'active' ? 'Active themes' : 'Watch-only concepts'} · ${snapshot?.session || 'No snapshot'} · Sort: ${({'score':'Score','name':'Theme','return1':'1M','return3':'3M','trend':'Trend','breadth':'Breadth EMA21','priority':'Priority','change':'Comparison'})[ui.themeSort]} ${ui.themeDescending ? 'high → low' : 'low → high'}`;
     if (!rows.length) { $('theme-table').innerHTML = empty(snapshot ? 'No themes match this view' : 'Your theme universe is waiting', snapshot ? 'Try another search or reset the filters. Watch-only concepts have no live calculation membership.' : 'Refresh Data to load a completed-session snapshot.', '<button class="button secondary" data-reset="themes">Reset filters</button>'); return; }
-    const heading = `<thead><tr><th scope="col" title="Position in this sorted and filtered list, not an official canonical rank">#</th>${sortHeading('Theme / family','name')}${sortHeading('Score','score',true)}${sortHeading('1M %','return1',true)}${sortHeading('3M %','return3',true)}${sortHeading(prelaunch() ? 'Pre-launch research trend' : 'Synthetic Theme Trend','trend')}${sortHeading('Breadth >21 / >50','breadth',true)}${sortHeading('Priority','priority')}${sortHeading('Change','change')}</tr></thead>`;
+    const heading = `<thead><tr><th scope="col" title="Position in this sorted and filtered list, not an official canonical rank">#</th>${sortHeading('Theme','name')}${sortHeading('Score','score',true)}${sortHeading('1M %','return1',true)}${sortHeading('3M %','return3',true)}${sortHeading('Trend','trend')}${sortHeading('B21 / B50','breadth',true)}${sortHeading('Priority','priority')}</tr></thead>`;
     const body = rows.map((t, i) => {
       const tie = valid(t.score) && rows.some((x, j) => j !== i && valid(x.score) && Number(x.score) === Number(t.score));
-      return `<tr data-theme-row="${esc(t.theme_id)}" class="${ui.selectedTheme === t.theme_id ? 'selected-row' : ''}"><td class="list-position">${String(i+1).padStart(2,'0')}</td><td class="theme-name" data-label="Theme">${themeLink(t.theme_id)}${ui.selectedTheme === t.theme_id ? '<span class="sr-only"> · Last opened theme</span>' : ''}<small>${esc(t.family)}${tie ? ' · equal Score' : ''}</small></td><td class="numeric" data-label="Score">${number(t.score)}</td><td class="numeric ${signTone(t.returns?.[0]?.value)}" data-label="1M">${percent(t.returns?.[0]?.value,100,true)}</td><td class="numeric ${signTone(t.returns?.[1]?.value)}" data-label="3M">${percent(t.returns?.[1]?.value,100,true)}</td><td data-label="${prelaunch() ? 'Research trend' : 'Trend'}">${state(t.index?.trend)}</td><td class="numeric" data-label="Breadth >21 / >50"><span class="breadth-values"><span>${percent(t.breadth?.[0]?.value)}</span><span>${percent(t.breadth?.[1]?.value)}</span></span></td><td data-label="Priority">${priority(t.priority)}</td><td class="comparison-cell" data-label="Change"><span class="comparison">${esc(comparison(t))}</span></td></tr>`;
+      return `<tr data-theme-row="${esc(t.theme_id)}" class="${ui.selectedTheme === t.theme_id ? 'selected-row' : ''}"><td class="list-position">${String(i+1).padStart(2,'0')}</td><td class="theme-name" data-label="Theme">${themeLink(t.theme_id)}${ui.selectedTheme === t.theme_id ? '<span class="sr-only"> · Last opened theme</span>' : ''}<small class="theme-family">${esc(t.family)}</small>${tie ? '<small class="tie-label">equal Score</small>' : ''}</td><td class="numeric" data-label="Score">${number(t.score)}</td><td class="numeric ${signTone(t.returns?.[0]?.value)}" data-label="1M">${percent(t.returns?.[0]?.value,100,true)}</td><td class="numeric ${signTone(t.returns?.[1]?.value)}" data-label="3M">${percent(t.returns?.[1]?.value,100,true)}</td><td data-label="${prelaunch() ? 'Research trend' : 'Trend'}">${state(t.index?.trend)}</td><td class="numeric" data-label="Breadth >21 / >50"><span class="breadth-values"><span>${percent(t.breadth?.[0]?.value)}</span><span>${percent(t.breadth?.[1]?.value)}</span></span></td><td data-label="Priority">${priority(t.priority)}</td></tr>`;
     }).join('');
     const sortControl = `<label class="theme-mobile-sort inline-label">Sort themes<select id="theme-mobile-sort"><option value="score:desc">Score high to low</option><option value="score:asc">Score low to high</option><option value="name:asc">Theme A–Z</option><option value="return1:desc">1M high to low</option><option value="return3:desc">3M high to low</option><option value="priority:asc">Priority</option></select></label>`;
     $('theme-table').innerHTML = sortControl + `<table role="table"><caption class="sr-only">Custom theme research · financial metrics from the published snapshot. 1M and 3M are median member returns. Breadth is context only.</caption>${heading}<tbody role="rowgroup">${body}</tbody></table>`;
@@ -143,9 +161,9 @@
     return `<details class="member-disclosure" data-disclosure="${esc(key)}"${disclosures.has(key) ? ' open' : ''}><summary data-focus-key="${esc('disclosure:' + key)}">Research details</summary><div class="member-context"><p><strong>${row.qualifies ? 'Qualifies in this theme' : 'Does not qualify in this theme'}</strong> · ${esc(eligibility(row))}</p>${why ? `<p>${esc(why)}</p>` : ''}<p>Assigned section: ${row.assigned_section ? themeLink(row.assigned_section) : 'No current Primary assignment'}</p><p>Also qualifies in: ${(row.also_qualifies_in || []).map(themeLink).join(', ') || '—'}</p><dl><dt>Peer median 1M</dt><dd>${percent(rel.peer1?.value,100,true)}</dd><dt>Peer median 3M</dt><dd>${percent(rel.peer3?.value,100,true)}</dd><dt>ER1M / ER3M</dt><dd>${points(rel.er1)} / ${points(rel.er3)}</dd><dt>W vs Theme Peers</dt><dd>${points(rel.w)}</dd><dt>Close</dt><dd>${money(e.close)}</dd><dt>Average volume · 10 sessions</dt><dd>${number(e.average_volume,0)}</dd><dt>Daily turnover</dt><dd>${money(e.turnover)}</dd><dt>Earnings</dt><dd>${earnings(row.ticker)}</dd></dl><p>Stock 1M / 3M returns: not supplied in this snapshot. Peer medians and excess returns are shown as provided.</p></div></details>`;
   }
   function candidateRow(row, location) {
-    return `<tr><td><span class="ticker">${esc(row.ticker)}</span>${relationshipContext(row,location)}</td><td>${themeLink(row.theme_id)}<small class="muted"> · ${esc(row.role)}</small></td><td class="numeric ${signTone(row.relative?.w)}">${points(row.relative?.w)}</td><td>${themeLink(row.assigned_section)}<details class="member-disclosure"><summary>Also qualifies in (${row.also_qualifies_in?.length || 0})</summary><div class="member-context">${(row.also_qualifies_in || []).map(themeLink).join('<br>') || 'No other current qualifications'}</div></details></td><td class="table-note">${earnings(row.ticker)}</td><td>${saveButton(row.ticker,location + ':' + row.theme_id)}</td></tr>`;
+    return `<tr><td data-label="Ticker"><span class="ticker">${esc(row.ticker)}</span></td><td data-label="Theme">${themeLink(row.theme_id)}</td><td data-label="Role">${esc(row.role)}</td><td data-label="W" class="numeric ${signTone(row.relative?.w)}">${points(row.relative?.w)}</td><td data-label="Earnings" class="table-note">${earnings(row.ticker)}</td><td data-label="Save">${saveButton(row.ticker,location + ':' + row.theme_id)}</td></tr>`;
   }
-  const candidateHeaders = ['Stock / qualification','W relationship / role',{label:'W vs Theme Peers',numeric:true},'Assigned section / also qualifies in','Earnings','Saved'];
+  const candidateHeaders = ['Ticker','Theme','Role',{label:'W · pp',numeric:true},'Earnings','Save'];
   function matchesCandidate(row) {
     const query = $('candidate-search').value.trim().toLowerCase(), filter = $('candidate-theme').value, w = row.relative?.w;
     const text = `${row.ticker} ${name(row.theme_id)} ${name(row.assigned_section)} ${(row.also_qualifies_in || []).map(name).join(' ')}`.toLowerCase();
@@ -158,9 +176,11 @@
     const sort = $('candidate-sort').value;
     rows.sort((a,b) => (sort === 'w-desc' || sort === 'w-asc' ? compareValues(valid(a.relative?.w) ? Number(a.relative.w) : null, valid(b.relative?.w) ? Number(b.relative.w) : null, sort === 'w-desc') : sort === 'theme' ? name(a.theme_id).localeCompare(name(b.theme_id)) : a.ticker.localeCompare(b.ticker)) || a.ticker.localeCompare(b.ticker) || a.theme_id.localeCompare(b.theme_id));
     document.querySelectorAll('[data-candidate-mode]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.candidateMode === mode)));
-    $('candidate-results').textContent = `${rows.length} shown · ${all.length} qualifying relationships · ${unique.length} unique tickers · ${snapshot?.session || 'No snapshot'}`;
-    if (!rows.length) { $('candidates').innerHTML = empty(all.length ? 'No candidates match these filters' : 'No Primary candidates this session', all.length ? 'Reset the filters to return to the full published shortlist.' : 'The published rules have not produced a qualifying shortlist. Explore theme members for context; no candidate is inferred.', '<button class="button secondary" data-reset="candidates">Reset filters</button>'); return; }
-    if (mode === 'unique') $('candidates').innerHTML = `<div class="table-wrap" role="region" tabindex="0" aria-label="Unique Primary candidates">${table(candidateHeaders,rows.map(r => candidateRow(r,'candidates')), 'Unique Primary candidates. W is from the assigned export relationship, in percentage points.')}</div>`;
+    $('primary-count').textContent = unique.length;
+    $('primary-context').textContent = `${unique.length} stocks · ${all.length} theme qualifications · ${snapshot?.session || 'No snapshot'}`;
+    $('candidate-results').textContent = `${rows.length} shown · ${all.length} theme qualifications · ${unique.length} stocks · ${snapshot?.session || 'No snapshot'}`;
+    if (!rows.length) { $('candidates').innerHTML = empty(all.length ? 'No Primary stocks match these filters' : 'No Primary stocks this session', all.length ? 'Try resetting the filters.' : 'No qualifying stocks in this snapshot.', '<button class="button secondary" data-reset="candidates">Reset filters</button>'); return; }
+    if (mode === 'unique') $('candidates').innerHTML = `<div class="table-wrap" role="region" tabindex="0" aria-label="Unique Primary stocks">${table(candidateHeaders,rows.map(r => candidateRow(r,'candidates')), 'Unique Primary stocks. W is from the assigned export relationship, in percentage points.')}</div>`;
     else {
       const groups = new Map();
       for (const row of rows) { if (!groups.has(row.theme_id)) groups.set(row.theme_id,[]); groups.get(row.theme_id).push(row); }
@@ -180,7 +200,7 @@
   function renderDetail(themeId) {
     const theme = snapshot?.themes?.find(t => t.theme_id === themeId);
     if (!theme) { $('detail-content').innerHTML = `<a href="#themes" class="back-link">← Back to Themes</a>` + empty('Theme not available', 'This theme is not in the current published snapshot. Return to Themes or refresh your data.'); return; }
-    const originName = origin.startsWith('#candidates') ? 'Candidates' : origin.startsWith('#saved') ? 'Saved' : origin.startsWith('#overview') ? 'Overview' : 'Themes';
+    const originName = origin.startsWith('#primary') ? 'Primary' : origin.startsWith('#saved') ? 'Saved' : origin.startsWith('#overview') ? 'Overview' : 'Themes';
     const metric = (label,value,note = '') => `<div class="metric-block"><span class="metric-label">${label}</span><div class="metric-value">${value}</div>${note ? `<small>${note}</small>` : ''}</div>`;
     $('detail-content').innerHTML = `<div class="crumbs"><a href="${esc(origin)}" class="back-link" data-return-theme="${esc(themeId)}">← Back to ${originName}</a>${themeDownload(themeId)}</div><div class="detail-heading"><p class="eyebrow">${esc(theme.family)} · ${theme.status === 'active' ? 'ACTIVE THEME' : 'WATCH-ONLY CONCEPT'}</p><h1 id="detail-title" tabindex="-1">${esc(theme.name || themeId)}</h1>${priority(theme.priority)}</div><div class="detail-summary">${metric('Custom Theme Score', number(theme.score), 'Cross-theme percentile blend')}${metric('Median 1M', `<span class="${signTone(theme.returns?.[0]?.value)}">${percent(theme.returns?.[0]?.value,100,true)}</span>`, '21 completed sessions')}${metric('Median 3M', `<span class="${signTone(theme.returns?.[1]?.value)}">${percent(theme.returns?.[1]?.value,100,true)}</span>`, '63 completed sessions')}${metric(prelaunch() ? 'Pre-launch research trend' : 'Synthetic Theme Trend', state(theme.index?.trend), 'Index vs EMA21 / EMA50')}${metric('Breadth > EMA21', percent(theme.breadth?.[0]?.value), `${theme.breadth?.[0]?.valid ?? 0}/${theme.breadth?.[0]?.configured ?? 0} valid members`)}${metric('Breadth > EMA50', percent(theme.breadth?.[1]?.value), `${theme.breadth?.[1]?.valid ?? 0}/${theme.breadth?.[1]?.configured ?? 0} valid members`)}</div><div class="detail-context"><span>Comparison: <strong>${esc(comparison(theme))}</strong></span><span>Index <strong>${number(theme.index?.level)}</strong></span><span>EMA21 <strong>${number(theme.index?.ema21)}</strong> / EMA50 <strong>${number(theme.index?.ema50)}</strong></span></div><p class="detail-explainer">${comparison(theme) === 'Comparison unavailable' ? 'No compatible prior live session. Research bootstrap and legacy ETF history cannot supply a live transition. ' : ''}Breadth is context only. <a href="#methodology">Metric definitions →</a></p><div class="section-heading"><h2>Member research</h2><span id="member-count" class="muted table-note"></span></div><form id="member-filters" class="filter-bar" role="search" aria-label="Filter theme members"><label class="search-field">Search members<input id="member-search" type="search" placeholder="Ticker…" value="${esc(ui.memberSearch)}"></label><label>Role<select id="member-role"><option value="">All roles</option><option>Core</option><option>Enabler</option></select></label><label>Eligibility<select id="member-eligibility"><option value="">All states</option><option>Eligible</option><option>Ineligible</option><option>Unavailable</option></select></label><label>Sort<select id="member-sort"><option value="ticker">Ticker A–Z</option><option value="w-desc">W high to low</option><option value="w-asc">W low to high</option></select></label></form><div id="member-table" class="table-wrap member-table" role="region" tabindex="0" aria-label="Theme member research"></div>`;
     $('member-role').value = ui.memberRole; $('member-eligibility').value = ui.memberEligibility; $('member-sort').value = ui.memberSort;
@@ -188,17 +208,19 @@
   }
   function renderSaved() {
     $('saved-count').textContent = watched.length;
-    if (!watched.length) { $('saved').innerHTML = empty('Keep something worth another look', 'Save a stock from Candidates or a theme’s member list. Your bookmarks stay here in this browser, separate from theme membership.', '<a class="button secondary" href="#candidates">Find candidates →</a>'); return; }
-    $('saved').innerHTML = '<div class="saved-list">' + watched.map(ticker => {
+    if (!watched.length) { $('saved').innerHTML = empty('No Saved tickers', 'Browser-local bookmarks.', '<a class="button secondary" href="#primary">Browse Primary →</a>'); return; }
+    $('saved').innerHTML = '<p class="saved-scope">Browser-local bookmarks</p><div class="saved-list">' + watched.map(ticker => {
       const rows = (snapshot?.relationships || []).filter(r => r.ticker === ticker), assignment = snapshot?.exports?.assignments?.[ticker];
-      return `<article class="saved-row"><span class="ticker">${esc(ticker)}</span><div class="saved-context"><p>${assignment ? `Current Primary · Assigned section: ${themeLink(assignment.assigned_section)}` : snapshot ? 'No current Primary qualification' : 'Refresh to load current research context'}</p><p class="muted">Earnings: ${earnings(ticker)}</p>${rows.length ? `<details><summary>${rows.length} current theme relationship${rows.length === 1 ? '' : 's'}</summary>${rows.map(r => `<div class="saved-context-row">${themeLink(r.theme_id)} · ${esc(r.role)}<br><span class="${signTone(r.relative?.w)}">W ${points(r.relative?.w)}</span> · ${esc(eligibility(r))} · ${r.qualifies ? 'Qualifies' : 'Not qualified'}</div>`).join('')}</details>` : '<p class="muted">No relationship supplied in the current snapshot. Bookmark retained.</p>'}</div><button class="button quiet small" data-remove="${esc(ticker)}" data-focus-key="saved-remove:${esc(ticker)}" aria-label="Remove ${esc(ticker)} from Saved">Remove</button></article>`;
+      const assigned = rows.find(r => r.theme_id === assignment?.assigned_section);
+      return `<article class="saved-row"><span class="ticker">${esc(ticker)}</span><div class="saved-context"><span>${assignment ? `Current Primary · ${themeLink(assignment.assigned_section)}` : snapshot ? 'Not currently Primary' : 'No snapshot'}</span>${!rows.length ? '<small>No current relationship · bookmark retained</small>' : ''}</div><span class="numeric ${signTone(assigned?.relative?.w)}">${points(assigned?.relative?.w)}</span><span class="table-note">${earnings(ticker)}</span><button class="button quiet small" data-remove="${esc(ticker)}" data-focus-key="saved-remove:${esc(ticker)}" aria-label="Remove ${esc(ticker)} from Saved">Remove</button></article>`;
     }).join('') + '</div>';
   }
+
   function syncSaveButtons() {
     document.querySelectorAll('[data-save]').forEach(button => {
       const saved = watched.includes(button.dataset.save);
       button.setAttribute('aria-pressed',String(saved)); button.setAttribute('aria-label',saved ? `Saved ${button.dataset.save}; remove from Saved` : `Save ${button.dataset.save}`);
-      button.innerHTML = `<span aria-hidden="true">${saved ? '★' : '☆'}</span><span>${saved ? 'Saved' : 'Save'}</span>`;
+      button.innerHTML = `<span aria-hidden="true">${saved ? '★' : '☆'}</span><span class="sr-only">${saved ? 'Saved' : 'Save'}</span>`;
     });
     $('saved-count').textContent = watched.length;
   }
@@ -217,8 +239,9 @@
   function parseRoute() {
     const raw = location.hash || '#overview';
     if (['#market','#daily-plan'].includes(raw)) return '#overview';
+    if (raw === '#candidates') return '#primary';
     if (raw === '#watchlist') return '#saved';
-    return /^#(overview|themes(?:\/[^/]+)?|candidates|saved|methodology)$/.test(raw) ? raw : '#overview';
+    return /^#(overview|themes(?:\/[^/]+)?|primary|saved|methodology)$/.test(raw) ? raw : '#overview';
   }
   function detailId() { try { return decodeURIComponent(route.split('/')[1] || ''); } catch { return ''; } }
   function showRoute(initial = false) {
@@ -227,7 +250,7 @@
     if (route) positions.set(route,{scroll:window.scrollY, table:$('theme-table').scrollTop});
     route = next;
     const part = route.slice(1).split('/')[0], isDetail = route.startsWith('#themes/');
-    const viewId = isDetail ? 'theme-detail' : ({overview:'overview-page',themes:'themes-page',candidates:'candidate-page',saved:'saved-page',methodology:'methodology-page'})[part];
+    const viewId = isDetail ? 'theme-detail' : ({overview:'overview-page',themes:'themes-page',primary:'candidate-page',saved:'saved-page',methodology:'methodology-page'})[part];
     document.querySelectorAll('.view').forEach(view => { view.hidden = view.id !== viewId; view.classList.remove('entering'); });
     const view = $(viewId); view?.classList.add('entering');
     document.querySelectorAll('[data-nav]').forEach(link => { if (link.dataset.nav === part) link.setAttribute('aria-current','page'); else link.removeAttribute('aria-current'); });
@@ -278,7 +301,7 @@
     const failed = ['failed','interrupted'].includes(status.state);
     $('error').hidden = !failed && !requestError;
     $('error').textContent = failed ? `${status.state === 'interrupted' ? 'Refresh interrupted' : 'Refresh failed'}${status.error ? ' (' + status.error + ')' : ''}. Previous successful results and exports remain available. Refresh Data to retry.` : requestError;
-    if (previous.state === 'running' && status.state === 'success') announce('Refresh complete. Your research desk is up to date.');
+    if (previous.state === 'running' && status.state === 'success') announce('Refresh complete.');
   }
   let polling = false;
   async function poll() {
@@ -313,6 +336,10 @@
       return;
     }
     if (!button) return;
+    if (button.id === 'display-toggle') { const open = $('display-panel').hidden; $('display-panel').hidden = !open; button.setAttribute('aria-expanded',String(open)); if (open) $('display-close').focus(); return; }
+    if (button.id === 'display-close') { closeDisplay(); $('display-toggle').focus(); return; }
+    if (button.dataset.density) { display.density = button.dataset.density; applyDisplay(true); return; }
+    if (button.dataset.textStep) { display.text = Math.max(100,Math.min(200,display.text + Number(button.dataset.textStep))); applyDisplay(true); return; }
     if (button.dataset.save) { changeSaved(button.dataset.save); return; }
     if (button.dataset.remove) { changeSaved(button.dataset.remove,true); return; }
     if (button.dataset.universe) { ui.universe = button.dataset.universe; renderThemes(); return; }
@@ -333,6 +360,9 @@
       ui.memberSearch = $('member-search').value; ui.memberRole = $('member-role').value; ui.memberEligibility = $('member-eligibility').value; ui.memberSort = $('member-sort').value; renderMembers(detailId());
     }
   }
+  document.addEventListener('keydown',event => { if (event.key === 'Escape' && !$('display-panel').hidden) { closeDisplay(); $('display-toggle').focus(); } });
+  document.addEventListener('click',event => { if (!$('display-panel').hidden && !event.target.closest('#display-panel, #display-toggle')) closeDisplay(); });
+  document.addEventListener('change',event => { if (event.target.id === 'display-motion' || event.target.id === 'display-contrast') { display.motion = $('display-motion').checked; display.contrast = $('display-contrast').checked; applyDisplay(true); } });
   document.addEventListener('input',event => { if (event.target.matches('input')) filterChange(event); });
   document.addEventListener('change',event => { if (event.target.matches('select')) filterChange(event); });
   window.addEventListener('hashchange',() => showRoute());
@@ -346,6 +376,7 @@
     } catch { requestError = 'Unable to reach the local server. Previous results remain available. Refresh Data to retry.'; }
     await poll();
   });
+  applyDisplay();
   history.scrollRestoration = 'manual';
   document.querySelectorAll('[data-nav]').forEach(link => { link.querySelector('.nav-icon').innerHTML = icon(link.dataset.nav); });
   document.querySelector('.brand-mark').innerHTML = icon('orbit');

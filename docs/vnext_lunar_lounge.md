@@ -1,5 +1,8 @@
 # Lunar Lounge UI implementation
 
+Historical presentation record. The [Research Desk redesign](vnext_research_desk.md)
+supersedes this visual/navigation design while preserving the financial contract.
+
 6 November 2026. Functional parent: `ed12ba49e4ea6ce3cfb1998ae6bdc72d11fe0324`.
 Implementation branch: `refactor/themescope-vnext`. One design direction, no framework
 migration, no deployment. This implements the user's later UI brief; the exploration

@@ -591,3 +591,19 @@ Final review validation: 327 full cases (325 pass/two native-Windows skips),
 compilation, both JS syntax checks and dashboard JS tests pass. Findings are
 non-blocking diagnostics/cache-policy/manual-integration limitations plus existing
 TestClient deprecation. No actual runtime defect demonstrated; no runtime changes.
+
+## Research Desk UI redesign after the final Gate E review
+
+User authorized three focused UI commits, superseding the Lunar Lounge presentation
+without changing its financial/runtime contract. Step 1 introduces compact navy/
+indigo/lavender styling, Primary navigation, flatter market/research composition,
+page-level table scrolling, semantic colors and separate browser Display choices.
+Saved retains its existing ticker-array key. No src/config changes. Full suite:
+327 cases, 325 passed/two native-Windows skips. Refresh/export/Saved and pre-launch
+cutover browser smokes pass. Inspectors and lightweight research visualizations
+are the next two authorized steps; Gate E remains open for real Nov 9/10 checks.
+See docs/vnext_research_desk.md for current design and validation evidence.
+Stage 1 final browser rerun passed all destinations/Display, nine axe A/AA views,
+320px reflow and 200% text resize, with zero page errors/external requests. Visual
+review confirmed mobile and high-contrast states. Accessible-label overflow and
+large-text sidebar/reflow findings were fixed before the first focused UI commit.

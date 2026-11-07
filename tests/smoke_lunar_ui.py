@@ -55,15 +55,15 @@ def main():
                     if not axe_path:return
                     # Evaluate the locally supplied script; the browser never fetches a CDN.
                     page.evaluate(Path(axe_path).read_text())
-                    findings=page.evaluate("""async()=>{const r=await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa','wcag22aa']}});return {violations:r.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>n.target)})),incomplete:r.incomplete.map(v=>v.id)};}""")
+                    findings=page.evaluate("""async()=>{const r=await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa','wcag22aa']}});return {violations:r.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary,html:n.html}))})),incomplete:r.incomplete.map(v=>v.id)};}""")
                     results['axe'][label]=findings
                     assert not findings['violations'],(label,findings)
                 # Dedicated destinations, real config, representative desktop widths.
                 for width in (1440,1600,1920):
                     page.set_viewport_size({'width':width,'height':1000})
-                    for destination in ('overview','themes','candidates','saved','methodology'):
+                    for destination in ('overview','themes','primary','saved','methodology'):
                         nav(destination);expect(page.locator('.view:visible')).to_have_count(1)
-                        assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),(width,destination)
+                        assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),(width,destination,page.evaluate("[...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>innerWidth+1&&!e.closest('[hidden]')).slice(0,15).map(e=>[e.tagName,e.id,e.className,e.getBoundingClientRect().right])"))
                         capture(f'{destination}-{width}')
                         if width==1440:audit(destination)
                     nav('themes');table=page.locator('#theme-table')
@@ -76,7 +76,7 @@ def main():
                 page.locator('#theme-priority').select_option('Watch');expect(page.locator('#theme-table')).to_contain_text('No themes match')
                 page.get_by_role('button',name='Reset',exact=True).click();expect(page.locator('#theme-table tbody tr')).to_have_count(44)
                 family=actual['themes'][0]['family'];page.locator('#theme-family').select_option(family)
-                assert all(family in row.inner_text() for row in page.locator('#theme-table tbody tr').all())
+                assert all(family in row.text_content() for row in page.locator('#theme-table tbody tr').all())
                 page.locator('#theme-trend').select_option('Unavailable');expect(page.locator('#theme-table')).to_contain_text('No themes match')
                 page.locator('#theme-filters [data-reset]').click()
                 page.get_by_role('button',name='Watch-only',exact=False).click();expect(page.locator('#theme-table tbody tr')).to_have_count(8)
@@ -85,9 +85,10 @@ def main():
                 scores=page.locator('#theme-table tbody tr td:nth-child(3)').all_text_contents();assert list(map(float,scores))==sorted(map(float,scores))
                 assert page.locator('[aria-sort="ascending"]').count()==1
                 results['interactions'].append('theme search, family/priority/trend filters, Watch-only, sort')
-                # Sticky header remains visible inside the results scroller.
-                page.locator('#theme-table').evaluate('e=>e.scrollTop=400')
-                assert page.locator('#theme-table th').first.bounding_box()['y']>=page.locator('#theme-table').bounding_box()['y']
+                # The page, not an inner results pane, owns vertical scrolling.
+                assert page.locator('#theme-table').evaluate('e=>e.scrollHeight<=e.clientHeight+1')
+                page.mouse.move(1100,600);page.mouse.wheel(0,400);page.wait_for_timeout(150)
+                assert page.evaluate('scrollY')>0
                 page.locator('#theme-search').fill('semiconductors')
                 detail_link=page.locator('#theme-table a').first;detail_link.focus();detail_link.press('Enter')
                 expect(page.locator('#detail-title')).to_have_text('Semiconductors')
@@ -105,7 +106,7 @@ def main():
                 page.go_forward();expect(page.locator('#themes-title')).to_be_visible()
                 results['interactions'].append('keyboard Theme Detail, real individual TXT, restored search/focus, browser Back/Forward')
                 # Candidate unique vs independent relationships, unchanged canonical TXT.
-                nav('candidates');unique=len({r['ticker'] for r in actual['relationships'] if r['qualifies']});relationships=sum(r['qualifies'] for r in actual['relationships'])
+                nav('primary');unique=len({r['ticker'] for r in actual['relationships'] if r['qualifies']});relationships=sum(r['qualifies'] for r in actual['relationships'])
                 expect(page.locator('#candidates tbody tr')).to_have_count(unique)
                 first=page.locator('#candidates [data-save]').first;ticker=first.get_attribute('data-save');key=first.get_attribute('data-focus-key')
                 first.focus();first.press('Space');expect(first).to_have_attribute('aria-pressed','true')
@@ -113,18 +114,32 @@ def main():
                 page.get_by_role('button',name='By theme',exact=True).click();expect(page.locator('#candidates tbody tr')).to_have_count(relationships)
                 page.locator('#candidate-search').fill(ticker)
                 assert page.locator('#candidates tbody tr').count()>=1
-                page.locator('#candidate-earnings').select_option('available');expect(page.locator('#candidates')).to_contain_text('No candidates match')
+                page.locator('#candidate-earnings').select_option('available');expect(page.locator('#candidates')).to_contain_text('No Primary stocks match')
                 with page.expect_download() as item:page.get_by_role('link',name='Export all Primary',exact=False).click()
                 text=Path(item.value.path()).read_text();assert text==actual['exports']['combined']
                 identifiers=[s for s in text.splitlines() if s and not s.startswith('###')];assert len(identifiers)==len(set(identifiers))
                 page.locator('#candidate-filters [data-reset]').click()
                 page.locator('#candidate-role').select_option('Core');assert page.locator('#candidates tbody tr').count()>0
-                page.locator('#candidate-w').select_option('negative');expect(page.locator('#candidates')).to_contain_text('No candidates match')
+                page.locator('#candidate-w').select_option('negative');expect(page.locator('#candidates')).to_contain_text('No Primary stocks match')
                 results['interactions'].append('multi-theme and unique candidate views, filters, stable poll focus, canonical combined TXT')
                 nav('saved');expect(page.locator('#saved')).to_contain_text(ticker);capture('saved-populated-1440');audit('saved-populated')
                 page.reload();expect(page.locator('#saved')).to_contain_text(ticker)
-                page.get_by_role('button',name=f'Remove {ticker} from Saved').click();expect(page.locator('#saved')).to_contain_text('Keep something worth another look');expect(page.locator('#saved-title')).to_be_focused()
+                page.get_by_role('button',name=f'Remove {ticker} from Saved').click();expect(page.locator('#saved')).to_contain_text('No Saved tickers');expect(page.locator('#saved-title')).to_be_focused()
                 results['interactions'].append('existing local bookmark persistence, current relationship context, Remove focus')
+                # Display choices use a different key and survive a browser reload.
+                page.locator('#display-toggle').click();expect(page.locator('#display-panel')).to_be_visible()
+                page.locator('button[data-density="comfortable"]').click()
+                page.locator('#display-motion').check();page.locator('#display-contrast').check()
+                page.locator('[data-text-step="25"]').click();expect(page.locator('#text-size')).to_have_text('125%')
+                assert page.evaluate("JSON.parse(localStorage.getItem('themescope-vnext-display')).contrast")
+                assert page.evaluate("JSON.parse(localStorage.getItem('themescope-vnext-watchlist')).length") == 0
+                page.reload();page.locator('#display-toggle').click();expect(page.locator('#text-size')).to_have_text('125%')
+                expect(page.locator('#display-motion')).to_be_checked();expect(page.locator('#display-contrast')).to_be_checked()
+                audit('display-high-contrast');capture('display-high-contrast')
+                page.locator('button[data-density="compact"]').click();page.locator('[data-text-step="-25"]').click()
+                page.locator('#display-motion').uncheck();page.locator('#display-contrast').uncheck()
+                page.keyboard.press('Escape');expect(page.locator('#display-toggle')).to_be_focused()
+                results['interactions'].append('Display storage, density, text size, contrast, motion, keyboard dismissal')
                 # Keyboard-only main navigation, skip link and reduced-motion semantics.
                 page.locator('[data-nav="methodology"]').focus();page.keyboard.press('Enter');expect(page.locator('#methodology-title')).to_be_focused()
                 page.locator('.method-item summary').first.focus();page.keyboard.press('Enter');expect(page.locator('.method-item').first).to_have_attribute('open','')
@@ -134,8 +149,8 @@ def main():
                 # Responsive reflow on every surface; actual financial tables stay locally scrollable.
                 for width in (800,390,320):
                     page.set_viewport_size({'width':width,'height':844})
-                    for destination in ('overview','themes','candidates','saved','methodology'):
-                        nav(destination);assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),(width,destination)
+                    for destination in ('overview','themes','primary','saved','methodology'):
+                        nav(destination);assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),(width,destination,page.evaluate("[...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>innerWidth+1&&!e.closest('[hidden]')).slice(0,15).map(e=>[e.tagName,e.id,e.className,e.getBoundingClientRect().right])"))
                         if width==390:capture(f'{destination}-390')
                     nav('themes');page.locator('#theme-filters [data-reset]').click();page.locator('#theme-mobile-sort').select_option('name:asc')
                     page.locator('#theme-table a[href="#themes/semiconductors"]').click();assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');capture(f'theme-detail-{width}')
@@ -144,7 +159,7 @@ def main():
                 page.set_viewport_size({'width':1440,'height':1000})
                 # 200% root text resize independently stresses layout. This is not native browser zoom.
                 page.evaluate("document.documentElement.style.fontSize='200%'")
-                for destination in ('overview','themes','candidates','saved','methodology'):
+                for destination in ('overview','themes','primary','saved','methodology'):
                     nav(destination);assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),('200% text',destination)
                 results['widths']['200% text resize']='five destinations reflow without document overflow'
                 page.evaluate("document.documentElement.style.fontSize=''")
@@ -169,7 +184,7 @@ def main():
                     for t in state['snapshot']['themes']:t['priority']='Watch'
                     for r in state['snapshot']['relationships']:r['qualifies']=False
                     update(label);expect(page.locator('#market-direction')).to_contain_text(direction);expect(page.locator('#primary-themes')).to_contain_text('No Primary themes')
-                    nav('candidates');expect(page.locator('#candidates')).to_contain_text('No Primary candidates');nav('overview')
+                    nav('primary');expect(page.locator('#candidates')).to_contain_text('No Primary stocks');nav('overview')
                 # An explicit illustrative short qualification, not a recalculation of market rules.
                 state['snapshot']=deepcopy(actual)
                 short=next(r for r in state['snapshot']['relationships'] if r['relative']['w'] is not None and float(r['relative']['w'])<0)
@@ -178,12 +193,12 @@ def main():
                 for r in state['snapshot']['relationships']:r['qualifies']=r is short
                 short['assigned_section']=short['theme_id'];short['also_qualifies_in']=[]
                 state['snapshot']['earnings'][short['ticker']]={'status':'Available','dates':['2026-11-12']}
-                update('illustrative short candidate and earnings date');nav('candidates');page.locator('#candidate-filters [data-reset]').click();page.get_by_role('button',name='Unique tickers',exact=True).click()
+                update('illustrative short candidate and earnings date');nav('primary');page.locator('#candidate-filters [data-reset]').click();page.get_by_role('button',name='Unique tickers',exact=True).click()
                 page.locator('#candidate-earnings').select_option('available');expect(page.locator('#candidates tbody tr')).to_have_count(1);expect(page.locator('#candidates')).to_contain_text('2026-11-12');capture('short-candidate-1440')
                 state['snapshot']=deepcopy(actual);state['snapshot']['themes'][0]['score']=None;state['snapshot']['themes'][0]['returns']=None;state['snapshot']['themes'][0]['index']['trend']='Unavailable';update('unavailable metrics');nav('themes')
                 page.locator('#theme-search').fill(state['snapshot']['themes'][0]['name']);expect(page.locator('#theme-table')).to_contain_text('Unavailable');assert 'NaN' not in page.locator('#theme-table').inner_text()
                 # Loading/no prior snapshot must remain usable and honestly disabled.
-                state['snapshot']=None;state['status'].update(state='idle',progress='Ready');page.reload();expect(page.locator('#progress')).to_have_text('Ready');nav('candidates');expect(page.locator('#combined')).to_have_attribute('aria-disabled','true');capture('no-snapshot-1440');results['states'].append('loading / no prior snapshot')
+                state['snapshot']=None;state['status'].update(state='idle',progress='Ready');page.reload();expect(page.locator('#progress')).to_have_text('Ready');nav('primary');expect(page.locator('#combined')).to_have_attribute('aria-disabled','true');capture('no-snapshot-1440');results['states'].append('loading / no prior snapshot')
                 # Existing Saved schema, including a symbol absent from today's snapshot.
                 page.evaluate("localStorage.setItem('themescope-vnext-watchlist',JSON.stringify(['LEGACY']))");page.reload();nav('saved');expect(page.locator('#saved')).to_contain_text('LEGACY');results['states'].append('existing Saved ticker retained without snapshot')
                 assert not errors,errors;assert not outside,outside
