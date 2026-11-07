@@ -3,7 +3,8 @@
 This separate fix follows SQLite lifecycle commit 0b51a0f. The user explicitly
 approved a distinction between the universe available for current research and
 membership that officially earns synthetic-index returns. Gate E remains open
-pending native Windows validation of the new research path.
+with the real native Windows Nov 6 launch validation now passed; real Nov 9/10
+earned-return/transition checks remain deferred.
 
 ## Daily workflow and membership
 
@@ -114,6 +115,11 @@ errors. After launch, verify normal automatic official-history behavior. No data
 reset or manual daily CSV upload is required. Account/full-universe timing and
 native Windows execution are local checks; cloud tests use synthetic bars only.
 
+## Historical validation at ed12ba4
+
+These test counts describe the pre-launch fix checkpoint. Current status and
+subsequent launch-close research validation are in [Gate E review](vnext_gate_e_review.md).
+
 ## Regression evidence
 
 - Actual approved 44-theme / 726-relationship configuration with deterministic
@@ -123,7 +129,8 @@ native Windows execution are local checks; cloud tests use synthetic bars only.
   scores and a selected LOO W; Related is excluded and symbols deduplicate.
 - Pre-launch publication writes zero theme_index rows, every official date remains
   November 9, research histories are bootstrap/ineligible, and transitions are N/A.
-- Research automatically stops at launch. Official level=100/empty earned_symbols,
+- The pre-launch bootstrap series stops before launch; launch-close research uses
+  the approved next-earned-session members independently. Official level=100/empty earned_symbols,
   first November 9 return and natural drift remain intact; no pre-launch live point.
 - General future-date selection, config/each-roster fail-closed behavior, genuinely
   insufficient versus adequate contiguous indicators, unchanged liquidity exclusion

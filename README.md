@@ -5,7 +5,8 @@ Score, synthetic trend and stock-versus-peer Primary qualification. SPY/QQQ defi
 market context; IWM is context only. Thematic ETFs have no calculation role.
 
 The implementation branch is `refactor/themescope-vnext`. Phase 9 is implemented;
-Gate E remains a separate subsequent review. The existing `inspection/` directory
+Gate E non-live review is complete; the real native Windows Nov 6 launch refresh
+has passed. Real Nov 9/10 chronological checks remain deferred. The existing `inspection/` directory
 is the preserved historical Gate D fixture, not current launch status. Nothing
 here deploys a public site.
 
@@ -57,11 +58,14 @@ the research session and the future official-history start. These are real resea
 calculations from Alpaca SIP, not fictional fixture results or backdated membership.
 
 At the November 6 close every valid Active theme initializes its official index at
-100 using November 9 Core+Enabler holdings, earning no launch-day return. The first
+100 using November 9 Core+Enabler holdings, earning no launch-day return. Launch-close
+research independently uses that approved universe for Scores, W, eligibility,
+breadth, Primary candidates and exports. The first
 genuine return is November 6 close to November 9 close. Pre-launch bootstrap series
 are never stored as official index history and never supply transitions. The launch
 initialization cannot provide a prior earned live signal; November 9 transitions
-remain unavailable. Later transitions require compatible adjacent genuine history.
+remain unavailable. November 10 is the first possible compatible adjacent-live
+transition; real Nov 9/10 chronological checks remain deferred.
 See [pre-launch research](docs/vnext_prelaunch_research.md) for the explicit distinction.
 
 Effective SPY **501** / QQQ **101** constituent rosters dated November 5 remain
@@ -89,8 +93,10 @@ Do not overwrite legacy `output/manual_csv/local_history` during updates.
 TXT identifiers use existing verified mappings, supplemented only by explicit
 Symbol/Exchange identifiers in the validated user-supplied TradingView review
 universe. No venue is guessed; unresolved identifiers still fail closed. Actual
-TradingView TXT import and full-universe native Windows cold/warm timing remain
-local checks. The user reports SIP roster compatibility passed for November 5:
+TradingView TXT import and a separately measured cold/warm comparison remain local
+checks. The user reports a successful native Windows Nov 6 SIP refresh: 899/899
+symbols, 44 Active themes, available research outputs and initialized official
+indices at 100, in approximately 52.5 seconds. The user reports SIP roster compatibility passed for November 5:
 501 SPY, 101 QQQ, zero missing/unusable, 12 pages, adjusted plus raw requests.
 
 ## Developer checks
@@ -109,3 +115,5 @@ Tests use fixtures/mocks, never account credentials. See
 [Phase 9 details](docs/vnext_launch.md), [methodology](docs/vnext/ThemeScope_vNext_Product_and_Methodology_Spec.md)
 and [PLANS.md](PLANS.md). Gate E, merge to main and deployment are not part of
 this implementation.
+
+Current review evidence and deferred checks: [Gate E review](docs/vnext_gate_e_review.md).

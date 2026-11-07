@@ -14,13 +14,14 @@ Phase 6: a8958f3. Phase 7: 9080337. Phase 8 validated for Gate D.
 Gate D is closed; roster import 94050ac and membership/evidence review 150c47c complete.
 Phase 9 is complete at 327fc2375ae0e4981af87d4b5136170ee542b60d.
 SQLite lifecycle fix 0b51a0f and pre-launch research fix ed12ba4 are complete.
-Current scope: two separate Gate E fixes for launch-close research and Windows
-evidence line endings. Lunar Lounge is complete; UI remains frozen. Stop after
-tested commits/push and native Windows handoff; Gate E remains open.
+Current checkpoint: non-live Gate E correctness review and regression validation
+completed after 860f87c / 4bc6656; no demonstrated runtime blockers. The user reports native Windows Nov 6 launch validation PASSED
+(899/899 SIP symbols, ~52.5 seconds). UI remains frozen; Gate E stays OPEN for
+real Nov 9/10 chronological checks. See docs/vnext_gate_e_review.md.
 Launch rebalance 2026-11-06 close; all 726 retained relationships effective 2026-11-09.
 Production enabled; zero config blockers. Runtime SPY/QQQ roster gates remain.
 Preserve inspection/vnext-d-ui at 02e7d63 and every original gate ref.
-Gate E is open pending the user's native Windows retest. Do not close Gate E,
+Gate E is open pending real Nov 9/10 chronological checks. Do not close Gate E,
 move inspection refs, merge or deploy. SQLite schema remains 2.
 Historical phase notes below record restrictions/results applicable at each gate.
 Do not restart the baseline or reimport/reclassify the proposed launch ledger.
@@ -571,3 +572,22 @@ vNext 118 (117 passed/one skip), evidence 10 passed; all 64 frozen Matrix cases 
 Both validators, compilation, both JS syntax checks and dashboard JS tests pass.
 Only existing Starlette TestClient/httpx deprecation warning remains. No live calls.
 Gate E remains OPEN for the user's Nov 6 native refresh; real Nov 9/10 checks deferred.
+
+## Gate E final correctness review — 7 November 2026
+
+User-reported real native Windows Nov 6 validation PASSED: success, healthy SIP,
+899/899, 44 Active themes, Scores/W/eligibility/Candidates, official level 100,
+no earned return or eligible signal/transition; elapsed about 52.5 seconds.
+Earlier pending-Windows notes above are historical checkpoint records.
+No demonstrated runtime blocker found in the final review. Added focused service/
+HTTP regressions for provider/calculation/partial-publication failure preservation,
+same-session replacement/failure and older replay. Documentation now distinguishes
+pre-launch bootstrap stopping from continuing launch-close research. No runtime,
+UI, schema, formulas, memberships or export semantics changed; no cleanup deletion.
+See docs/vnext_gate_e_review.md for findings, validation and deferred live checks.
+
+Final review validation: 327 full cases (325 pass/two native-Windows skips),
+120 focused vNext (119 pass/one skip), all 64 Matrix cases unchanged. Both validators,
+compilation, both JS syntax checks and dashboard JS tests pass. Findings are
+non-blocking diagnostics/cache-policy/manual-integration limitations plus existing
+TestClient deprecation. No actual runtime defect demonstrated; no runtime changes.

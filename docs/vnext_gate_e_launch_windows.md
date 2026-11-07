@@ -1,7 +1,12 @@
 # Gate E: launch-close research and Windows evidence integrity
 
 These are two separate corrections after the completed Lunar Lounge checkpoint.
-The UI is unchanged. Gate E remains open pending native Windows validation.
+The UI is unchanged. The user now reports native Windows Nov 6 launch validation
+PASSED: healthy SIP, success, 899/899 symbols, 44 Active themes, available Scores/
+relationships/W/eligibility/Candidates, initialized official levels at 100 and
+approximately 52.5 seconds. Gate E remains open for real Nov 9/10 chronological
+checks. The commands below remain reproducible retest instructions; this is no
+longer a pending Nov 6 launcher validation. See [current review](vnext_gate_e_review.md).
 
 ## Launch-close research
 
@@ -79,7 +84,8 @@ transitions. Persisted non-bootstrap launch index points must have empty
 remain formally inactive on Nov 6. No pre-launch research series supplies a live
 transition. Do not require a nonempty real-market Candidate list.
 
-Cloud fixtures validate these paths but cannot close native Windows validation.
+The native Nov 6 pass was supplied by the user; cloud fixtures independently
+validate the paths but cannot substitute for the later real chronological checks.
 Real Nov 9 and Nov 10 chronological production checks remain deferred until those
 completed US sessions exist. No merge, branch deletion, deployment or Gate E closure.
 

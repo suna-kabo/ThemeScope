@@ -4,6 +4,9 @@ This implementation follows explicit user authorization after membership review
 150c47c. Gate D is closed. This is not Gate E; independent final review remains
 separate. No main update, deployment, inspection-ref move or live database change.
 
+This page retains the Phase 9 historical validation record. Current lifecycle and
+user-reported native Windows pass: [Gate E review](vnext_gate_e_review.md).
+
 ## Exact approval
 
 | Setting | Value |
@@ -41,6 +44,8 @@ with start=L. It no longer requires a relationship earning L before initializing
 Every valid Active theme initializes at exactly 100 with empty `earned_symbols`.
 After-close holdings are the approved November 9 set. No November 6 return is
 earned by that new series, and no membership date is altered as a workaround.
+The later launch-close correction also supplies full cross-sectional research on L
+from the approved next-earned-session universe; it does not change this accounting.
 
 Bootstrap points are explicitly tagged in SQLite and excluded from live theme
 history. They initialize EMA21/EMA50 only. Missing bootstrap data cannot erase a
@@ -82,7 +87,7 @@ compatibility passed for market session 2026-11-05: all 501/101 usable, zero mis
 12 pages, SIP 1Day split/spin-off adjustment and raw liquidity requests. This is an
 external prerequisite, not a cloud account test; no secrets/payloads are stored.
 
-## Validation
+## Historical Phase 9 validation
 
 - Full suite: **302 cases, 300 passed, two native-Windows skips**.
 - Focused vNext: **95 cases, 94 passed, one native-Windows skip**.
@@ -112,4 +117,5 @@ Windows Phase 9 launcher execution and full-universe live cold/warm performance
 against the <10 minute hard target / <5 minute goal remain local checks. Actual
 SIP availability for all theme-member tickers is not established by a roster-only
 compatibility run; required missing target bars still fail publication. No IEX
-fallback or automatic membership/roster replacement. Gate E has not started.
+fallback or automatic membership/roster replacement. At that Phase 9 checkpoint,
+Gate E had not started; see the current review linked above for subsequent status.
