@@ -105,3 +105,80 @@ changed-snapshot focus/search retention, failure preservation and absent Saved
 symbols pass. No page errors/external requests. At 2560×1440, 30 complete theme rows
 and 24 Primary rows are visible at default text/density. The retained tables and
 inspector use values supplied by the same snapshot; no financial assertions changed.
+
+## Retained visualizations
+
+- SPY/QQQ breadth mini-bars show the supplied percentages. Cyan is contextual;
+  direction still comes from the unchanged Market Matrix. IWM has no breadth bars.
+- Theme Inspector breadth bars show supplied percentages and valid/configured
+  coverage. Coverage is not mislabeled as a count above the EMA.
+- Optional Overview **Theme Map**: x = raw Theme 1M return, y = raw Theme 3M return,
+  one point per Active theme with both returns. Linear axes include zero and all
+  finite observations with padding; no outlier trimming, percentile substitution,
+  financial ranking or new calculation path. Missing-return themes are omitted
+  with an explicit plotted/Active count. Negative and zero values, identical points
+  and extreme returns are supported. Large ranges can compress the other points;
+  the labelled theme selector and keyboard point navigation retain access to every
+  observation and its exact raw values. Trend has shape/text as well as color.
+  Hover/focus shows name, Score, raw returns, trend and Priority. Enter opens the
+  existing Inspector; the Theme table remains the detailed reference.
+
+The map is a native disclosure so it can be opened when useful without making the
+default Overview taller. SVG coordinates and breadth lengths are display transforms
+of supplied values; no return, Score, W or qualification is calculated in JavaScript.
+The optional W distribution was intentionally omitted: sorted signed W rows already
+show the member comparison, and another chart would crowd the Inspector. No stock
+charts, pies/gauges, embeds, remote data/assets or chart library were introduced.
+
+## Validation and review record
+
+The three focused commits preserve all runtime/financial/configuration files from
+`946259b`. Stage 1 and Stage 2 each passed the full 327-case Python suite before
+commit. Final full suite: **327 run, 325 passed, two existing native-Windows skips**.
+Final focused vNext: **120 run, 119 passed, one native-Windows skip**. All 64 frozen
+Market Matrix cases remain unchanged. Configuration and reviewed evidence validators,
+Python compilation, both JavaScript syntax checks and dashboard helper tests pass.
+
+The browser suite uses real loopback application routes with deterministic test bars
+and explicitly mocked presentation states; no live account credentials/data. It
+checks all five destinations, optional full Theme Detail, both inspectors, Display,
+keyboard navigation, Back/Forward, source scroll/focus, refresh while inspecting,
+failed-refresh retention, canonical combined/individual TXT, Saved persistence and
+retained missing symbols, density, filters and sorting. Chart checks compare breadth
+bar lengths to supplied values, verify exact raw labels, outlier/negative/zero/tied/
+unavailable cases, keyboard selection and inspector navigation. Financial assertions
+are not replaced by presentation fixtures. Existing CSP remains unchanged.
+
+Supported inspected sizes: 1440/1600/1920 desktop, 2560×1440 density measurement,
+800/390/320 narrow layouts and 200% root text resizing (not native browser zoom).
+Chromium/axe checks are supplemented by visual screenshot inspection and explicit
+solid-token contrast checks. Native Windows redesign rendering, Safari/Firefox and
+actual screen-reader speech remain unverified. This is not a blanket conformance claim.
+
+Screenshot files are deterministic review artifacts, not live Alpaca payloads. They
+remain outside Git; historical PNG authorization is not reused for new binary uploads.
+Generate the report and screenshots with an existing Playwright/Chromium environment:
+
+```text
+THEMESCOPE_UI_ARTIFACTS=/tmp/themescope-review THEMESCOPE_AXE_SCRIPT=/path/to/local/axe.min.js python tests/smoke_lunar_ui.py
+python tests/smoke_vnext_ui.py
+python tests/smoke_prelaunch_ui.py
+```
+
+`THEMESCOPE_AXE_SCRIPT` is audit-only and optional, never a runtime/CDN dependency.
+The review set includes Overview, Themes, Primary, Theme Inspector, Ticker Inspector,
+populated Saved, Methodology, 390px Overview, 320px Inspector, Display high contrast,
+and desktop/mobile Theme Maps. Generated `results.json` records the actual run.
+
+The result is stopped for user visual review after the three UI commits. Gate E
+remains OPEN, real completed Nov 9/10 validations remain deferred, main and original
+inspection refs remain unchanged. No merge, deployment or repeat Nov 6 live test.
+
+Final browser acceptance PASSED: all three browser scripts, 14 axe A/AA audits with
+zero violations, zero page errors and zero external requests. No unexpected console
+errors. One pre-existing cosmetic diagnostic remains: the browser requests the
+unconfigured `/favicon.ico` and gets 404. The test records that exact resource/status
+separately and fails on any other console error. It was not hidden by weakening CSP
+or changing the frozen local server. All requested research interactions pass.
+The final curated review gallery/ZIP contains 12 distinct fixture-only screenshots;
+no screenshots, credentials, DB or provider payloads are added to this commit.

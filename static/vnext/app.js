@@ -24,6 +24,9 @@
   const positions = new Map(), blobUrls = new Map();
   let inspector = null, inspectorTrigger = '', inspectorOrigin = '', inspectorScroll = 0;
   const inspectorViews = new Map();
+  let mapSelected = '', mapResizeTimer;
+  let mapWidth = 800;
+  const mapHeight = 280, mapPadding = {left:66,right:24,top:24,bottom:50};
   const name = id => snapshot?.themes?.find(t => t.theme_id === id)?.name || id || 'Unavailable';
   const themeHref = id => '#themes/' + encodeURIComponent(id);
   const chevron = '<span class="chevron" aria-hidden="true">›</span>';
@@ -46,6 +49,7 @@
     document.querySelectorAll('button[data-density]').forEach(b => b.setAttribute('aria-pressed',String(b.dataset.density === display.density)));
     document.querySelector('[data-text-step="-25"]').disabled = display.text === 100;
     document.querySelector('[data-text-step="25"]').disabled = display.text === 200;
+    if ($('theme-map-panel').open) renderThemeMap();
     if (persist) try { localStorage.setItem(displayKey,JSON.stringify(display)); } catch { announce('Display settings apply for this visit; browser storage is unavailable.'); }
   }
   function closeDisplay() { $('display-panel').hidden = true; $('display-toggle').setAttribute('aria-expanded','false'); }
@@ -101,13 +105,58 @@
     for (const row of rows) if (!tickers.has(row.ticker) || row.theme_id === row.assigned_section) tickers.set(row.ticker, row);
     return [...tickers.values()];
   }
+  // Display transforms only: all breadth, returns, scores and trend come from the snapshot.
+  function breadthBar(label,value,coverage = '') {
+    const available = valid(value), bounded = available ? Math.max(0,Math.min(100,Number(value))) : 0;
+    return `<div class="breadth-bar"><span class="breadth-label">${esc(label)}</span><svg viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true" focusable="false"><rect class="breadth-track" width="100" height="6" rx="2"/>${available ? `<rect class="breadth-fill" width="${bounded}" height="6" rx="2"/>` : ''}</svg><strong>${percent(value)}</strong>${coverage ? `<small>${esc(coverage)}</small>` : ''}</div>`;
+  }
+  function mapThemes() { return (snapshot?.themes || []).filter(t=>t.status === 'active' && valid(t.returns?.[0]?.value) && valid(t.returns?.[1]?.value)); }
+  function mapDescription(t) { return `${t.name || t.theme_id} · Score ${number(t.score)} · 1M ${percent(t.returns?.[0]?.value,100,true)} · 3M ${percent(t.returns?.[1]?.value,100,true)} · ${t.index?.trend || 'Unavailable'} · ${t.priority || 'Watch'}`; }
+  function renderThemeMap() {
+    const fontScale = parseFloat(getComputedStyle(document.documentElement).fontSize) / 16;
+    mapPadding.left=66*fontScale; mapPadding.right=24*fontScale; mapPadding.top=24; mapPadding.bottom=50*fontScale;
+    const panelWidth = $('theme-map').clientWidth;
+    mapWidth = Math.max(240,panelWidth ? (window.innerWidth <= 800 ? panelWidth : panelWidth * .78 - 20) : 800);
+    const rows = mapThemes().sort((a,b)=>name(a.theme_id).localeCompare(name(b.theme_id))), active = (snapshot?.themes || []).filter(t=>t.status === 'active').length;
+    if (!rows.length) { $('theme-map').innerHTML = empty('Theme Map unavailable','No Active themes with both supplied returns.'); return; }
+    // Linear raw-return axes include zero and every finite supplied observation. Never trim outliers.
+    const domain = index=>{
+      const values=rows.map(t=>Number(t.returns[index].value)), low=Math.min(0,...values), high=Math.max(0,...values);
+      const padding=Math.max((high-low)*.07,.005);
+      return [low-padding,high+padding];
+    };
+    const [xmin,xmax]=domain(0), [ymin,ymax]=domain(1), width=mapWidth-mapPadding.left-mapPadding.right, height=mapHeight-mapPadding.top-mapPadding.bottom;
+    const x=v=>mapPadding.left+(v-xmin)/(xmax-xmin)*width, y=v=>mapPadding.top+(ymax-v)/(ymax-ymin)*height;
+    const tickCount=mapWidth<500 ? 3 : 5;
+    const ticks=(low,high)=>Array.from({length:tickCount},(_,i)=>low+(high-low)*i/(tickCount-1));
+    const xTicks=ticks(xmin,xmax).map((v,i)=>`<g class="map-tick"><line x1="${x(v)}" y1="${mapHeight-mapPadding.bottom}" x2="${x(v)}" y2="${mapHeight-mapPadding.bottom+4}"/><text x="${x(v)}" y="${mapHeight-mapPadding.bottom+21*fontScale}" text-anchor="${i === 0 ? 'start' : i === tickCount-1 ? 'end' : 'middle'}">${percent(v,100)}</text></g>`).join('');
+    const yTicks=ticks(ymin,ymax).map(v=>`<g class="map-tick"><line x1="${mapPadding.left-4}" y1="${y(v)}" x2="${mapPadding.left}" y2="${y(v)}"/><text x="${mapPadding.left-9}" y="${y(v)+4}" text-anchor="end">${percent(v,100)}</text></g>`).join('');
+    const point=t=>{
+      const cx=x(Number(t.returns[0].value)),cy=y(Number(t.returns[1].value)), cls=tone(t.index?.trend);
+      const shape=cls === 'negative' ? `<path d="M${cx-5} ${cy-4}h10l-5 9z"/>` : cls === 'mixed' ? `<path d="M${cx} ${cy-6}l6 6-6 6-6-6z"/>` : `<circle cx="${cx}" cy="${cy}" r="4.5"/>`;
+      return `<a href="${themeHref(t.theme_id)}" data-inspect-theme="${esc(t.theme_id)}" data-map-theme="${esc(t.theme_id)}" data-focus-key="map:${esc(t.theme_id)}" class="map-point ${cls}" aria-label="${esc(mapDescription(t))}"><title>${esc(mapDescription(t))}</title><circle class="point-hit" cx="${cx}" cy="${cy}" r="12"/><circle class="point-ring" cx="${cx}" cy="${cy}" r="9"/>${shape}</a>`;
+    };
+    $('theme-map').innerHTML = `<div class="map-toolbar"><p class="table-note">Raw returns · linear axes · ${rows.length}/${active} Active themes</p><label class="inline-label">Focus theme<select id="map-selection" data-focus-key="map-selection"><option value="">Select a theme</option>${rows.map(t=>`<option value="${esc(t.theme_id)}">${esc(t.name || t.theme_id)}</option>`).join('')}</select></label></div><div class="map-layout"><div class="map-chart"><div class="map-axis-label">3M return ↑</div><svg id="theme-map-svg" viewBox="0 0 ${mapWidth} ${mapHeight}" role="group" aria-label="Theme Map: raw 1M return horizontally, raw 3M return vertically. Each link opens theme research." data-xmin="${xmin}" data-xmax="${xmax}" data-ymin="${ymin}" data-ymax="${ymax}"><rect class="map-field" x="${mapPadding.left}" y="${mapPadding.top}" width="${width}" height="${height}"/><line class="map-zero" x1="${x(0)}" y1="${mapPadding.top}" x2="${x(0)}" y2="${mapHeight-mapPadding.bottom}"/><line class="map-zero" x1="${mapPadding.left}" y1="${y(0)}" x2="${mapWidth-mapPadding.right}" y2="${y(0)}"/>${xTicks}${yTicks}${rows.map(point).join('')}</svg><div class="map-axis-label map-x-label">1M return →</div></div><div id="map-readout" class="map-readout" aria-live="polite"></div></div><div class="map-footer"><span class="map-legend"><span class="positive">● Bullish</span><span class="negative">▼ Bearish</span><span class="mixed">◆ Mixed</span><span class="neutral">○ Unavailable</span></span><a class="text-link" href="#themes">Theme table ${chevron}</a></div>`;
+    if (!rows.some(t=>t.theme_id === mapSelected)) mapSelected = rows[0].theme_id;
+    $('map-selection').value = mapSelected;
+    showMapReadout(mapSelected);
+  }
+  function showMapReadout(id) {
+    const t=mapThemes().find(t=>t.theme_id === id);
+    if (!t || !$('map-readout')) return;
+    mapSelected=id;
+    $('map-selection').value=id;
+    document.querySelectorAll('[data-map-theme]').forEach(node=>node.classList.toggle('map-selected',node.dataset.mapTheme === id));
+    $('map-readout').innerHTML=`<h3>${themeLink(id)}</h3><dl><div><dt>Score</dt><dd>${number(t.score)}</dd></div><div><dt>1M</dt><dd class="${signTone(t.returns[0].value)}">${percent(t.returns[0].value,100,true)}</dd></div><div><dt>3M</dt><dd class="${signTone(t.returns[1].value)}">${percent(t.returns[1].value,100,true)}</dd></div></dl>${state(t.index?.trend)}<p>${priority(t.priority)}</p>`;
+  }
   function renderOverview() {
     const market = snapshot?.market || {}, decision = market.decision || {}, direction = snapshot?.market_direction || decision.direction || 'Unclassified';
     $('market-direction').innerHTML = `<div class="direction-row"><div><span class="metric-label">Market</span><h2 class="direction-name ${tone(direction)}"><span class="direction-symbol" aria-hidden="true">${symbol(direction)}</span>${esc(direction)}</h2></div><details class="decision-details"><summary>Market Matrix</summary><p id="decision-path">${esc(decision.reason || 'Unavailable until a successful refresh.')}</p><p id="today-plan">${esc(snapshot?.today_plan || '')}</p><p>Breadth: ${esc(market.breadth_consensus || 'Unavailable')}${decision.breadth_qualifier ? ' · ' + esc(decision.breadth_qualifier) : ''}</p></details></div>`;
     $('market-cards').innerHTML = ['SPY','QQQ','IWM'].map(ticker => {
       const row = market.context?.[ticker] || {}, b = row.breadth || {};
-      return `<article class="market-card ${ticker === 'IWM' ? 'context' : ''}" aria-label="${ticker} market context"><div class="market-card-head"><span class="market-ticker">${ticker}</span><span class="market-price">${money(row.close)}</span>${state(row.price_state)}</div>${ticker === 'IWM' ? '<span class="muted">Context only</span>' : `<div class="market-emas"><span>EMA21 <b>${money(row.ema21)}</b></span><span>EMA50 <b>${money(row.ema50)}</b></span></div><div class="market-breadth"><span>Breadth 21 <strong>${percent(b.above_ema21)}</strong></span><span>Breadth 50 <strong>${percent(b.above_ema50)}</strong></span></div><details><summary>${esc(b.state || 'Unavailable')} breadth · ${esc(b.valid ?? 0)}/${esc(b.configured ?? 0)} valid</summary><p>${esc(row.roster_source || 'Roster unavailable')}</p><p>${esc((row.roster_warnings || []).join(' ') || 'No roster advisories.')}</p></details>`}</article>`;
+      return `<article class="market-card ${ticker === 'IWM' ? 'context' : ''}" aria-label="${ticker} market context"><div class="market-card-head"><span class="market-ticker">${ticker}</span><span class="market-price">${money(row.close)}</span>${state(row.price_state)}</div>${ticker === 'IWM' ? '<span class="muted">Context only</span>' : `<div class="market-emas"><span>EMA21 <b>${money(row.ema21)}</b></span><span>EMA50 <b>${money(row.ema50)}</b></span></div><div class="market-breadth">${breadthBar('Breadth 21',b.above_ema21)}${breadthBar('Breadth 50',b.above_ema50)}</div><details><summary>${esc(b.state || 'Unavailable')} breadth · ${esc(b.valid ?? 0)}/${esc(b.configured ?? 0)} valid</summary><p>${esc(row.roster_source || 'Roster unavailable')}</p><p>${esc((row.roster_warnings || []).join(' ') || 'No roster advisories.')}</p></details>`}</article>`;
     }).join('');
+    renderThemeMap();
     const themes = primaryThemes().slice(0, 5);
     $('primary-themes').innerHTML = themes.length ? themes.map((t, i) => `<div class="preview-row"><span class="position">${String(i + 1).padStart(2,'0')}</span><div>${themeLink(t.theme_id)}<small>${esc(t.family)}</small></div><div class="preview-value">${number(t.score)}<small>${priority(t.priority)}</small></div></div>`).join('') : empty('No Primary themes today', 'No themes qualify in this snapshot.', '<a href="#themes" class="text-link">Explore themes →</a>');
     const stocks = uniqueRows(qualifiedRows()).sort((a, b) => a.ticker.localeCompare(b.ticker)).slice(0, 5);
@@ -298,7 +347,7 @@
     const t = snapshot?.themes?.find(row=>row.theme_id === inspector.id);
     if (!t) { $('inspector-content').innerHTML = empty('Theme unavailable','No theme supplied in this snapshot.'); return; }
     const v = inspectorView();
-    $('inspector-content').innerHTML = `<div class="inspector-subhead"><span>${esc(t.family)} · ${t.status === 'active' ? 'Active' : 'Watch-only'}</span><a class="text-link" href="${themeHref(t.theme_id)}">Open full theme ${chevron}</a></div><div class="inspector-metrics">${metric('Score',number(t.score))}${metric('Priority',priority(t.priority))}${metric('Trend',state(t.index?.trend))}${metric('1M',`<span class="${signTone(t.returns?.[0]?.value)}">${percent(t.returns?.[0]?.value,100,true)}</span>`)}${metric('3M',`<span class="${signTone(t.returns?.[1]?.value)}">${percent(t.returns?.[1]?.value,100,true)}</span>`)}</div><dl class="index-strip"><div><dt>Synthetic index</dt><dd>${number(t.index?.level)}</dd></div><div><dt>EMA21</dt><dd>${number(t.index?.ema21)}</dd></div><div><dt>EMA50</dt><dd>${number(t.index?.ema50)}</dd></div></dl><div class="inspector-breadth">${metric('Breadth 21',percent(t.breadth?.[0]?.value))}${metric('Breadth 50',percent(t.breadth?.[1]?.value))}</div><p class="inspector-comparison">${esc(comparison(t))} · ${prelaunch() ? 'Pre-launch research' : snapshot?.theme_layer?.state === 'initialized' ? 'Launch initialization · no earned return' : snapshot?.theme_layer?.state === 'live' ? 'Official theme history' : 'No official live history'}</p><div class="section-heading"><h3>Member research</h3>${themeDownload(t.theme_id)}</div><form class="inspector-filters" aria-label="Filter inspector members"><div class="segmented" role="group" aria-label="Member view">${['All','Primary','Eligible','Core','Enabler'].map(f=>`<button type="button" data-inspector-filter="${f}" data-focus-key="inspect-filter:${f}" aria-pressed="${v.filter === f}">${f}</button>`).join('')}</div><div class="inspector-search-row"><label>Search members<input id="inspector-search" type="search" placeholder="Ticker…" value="${esc(v.search)}" data-focus-key="inspector-search"></label><label>Sort<select id="inspector-sort" data-focus-key="inspector-sort"><option value="ticker">Ticker A–Z</option><option value="w-desc">W high to low</option><option value="w-asc">W low to high</option></select></label></div></form><p id="inspector-member-count" class="table-meta" role="status"></p><div id="inspector-members" class="inspector-table"></div>`;
+    $('inspector-content').innerHTML = `<div class="inspector-subhead"><span>${esc(t.family)} · ${t.status === 'active' ? 'Active' : 'Watch-only'}</span><a class="text-link" href="${themeHref(t.theme_id)}">Open full theme ${chevron}</a></div><div class="inspector-metrics">${metric('Score',number(t.score))}${metric('Priority',priority(t.priority))}${metric('Trend',state(t.index?.trend))}${metric('1M',`<span class="${signTone(t.returns?.[0]?.value)}">${percent(t.returns?.[0]?.value,100,true)}</span>`)}${metric('3M',`<span class="${signTone(t.returns?.[1]?.value)}">${percent(t.returns?.[1]?.value,100,true)}</span>`)}</div><dl class="index-strip"><div><dt>Synthetic index</dt><dd>${number(t.index?.level)}</dd></div><div><dt>EMA21</dt><dd>${number(t.index?.ema21)}</dd></div><div><dt>EMA50</dt><dd>${number(t.index?.ema50)}</dd></div></dl><div class="inspector-breadth">${breadthBar('Above EMA21',t.breadth?.[0]?.value,`${t.breadth?.[0]?.valid ?? 0}/${t.breadth?.[0]?.configured ?? 0} valid`)}${breadthBar('Above EMA50',t.breadth?.[1]?.value,`${t.breadth?.[1]?.valid ?? 0}/${t.breadth?.[1]?.configured ?? 0} valid`)}</div><p class="inspector-comparison">${esc(comparison(t))} · ${prelaunch() ? 'Pre-launch research' : snapshot?.theme_layer?.state === 'initialized' ? 'Launch initialization · no earned return' : snapshot?.theme_layer?.state === 'live' ? 'Official theme history' : 'No official live history'}</p><div class="section-heading"><h3>Member research</h3>${themeDownload(t.theme_id)}</div><form class="inspector-filters" aria-label="Filter inspector members"><div class="segmented" role="group" aria-label="Member view">${['All','Primary','Eligible','Core','Enabler'].map(f=>`<button type="button" data-inspector-filter="${f}" data-focus-key="inspect-filter:${f}" aria-pressed="${v.filter === f}">${f}</button>`).join('')}</div><div class="inspector-search-row"><label>Search members<input id="inspector-search" type="search" placeholder="Ticker…" value="${esc(v.search)}" data-focus-key="inspector-search"></label><label>Sort<select id="inspector-sort" data-focus-key="inspector-sort"><option value="ticker">Ticker A–Z</option><option value="w-desc">W high to low</option><option value="w-asc">W low to high</option></select></label></div></form><p id="inspector-member-count" class="table-meta" role="status"></p><div id="inspector-members" class="inspector-table"></div>`;
     $('inspector-sort').value = v.sort;
     renderInspectorMembers();
   }
@@ -442,6 +491,7 @@
   });
   function filterChange(event) {
     const id = event.target.id;
+    if (id === 'map-selection') { showMapReadout(event.target.value); return; }
     if (id === 'inspector-search') { inspectorView().search = event.target.value; renderInspectorMembers(); return; }
     if (id === 'inspector-sort') { inspectorView().sort = event.target.value; renderInspectorMembers(); return; }
     if (['theme-search','theme-family','theme-priority','theme-trend'].includes(id)) renderThemes();
@@ -451,6 +501,15 @@
       ui.memberSearch = $('member-search').value; ui.memberRole = $('member-role').value; ui.memberEligibility = $('member-eligibility').value; ui.memberSort = $('member-sort').value; renderMembers(detailId());
     }
   }
+  document.addEventListener('pointerover',event=>{ const point=event.target.closest('[data-map-theme]'); if (point) showMapReadout(point.dataset.mapTheme); });
+  document.addEventListener('focusin',event=>{ const point=event.target.closest('[data-map-theme]'); if (point) { showMapReadout(point.dataset.mapTheme); } });
+  document.addEventListener('keydown',event=>{
+    const point=event.target.closest('[data-map-theme]');
+    if (!point || !['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(event.key)) return;
+    const points=[...document.querySelectorAll('[data-map-theme]')], index=points.indexOf(point);
+    const next=event.key === 'Home' ? 0 : event.key === 'End' ? points.length-1 : (index+(['ArrowRight','ArrowDown'].includes(event.key) ? 1 : -1)+points.length)%points.length;
+    event.preventDefault();points[next]?.focus({preventScroll:true});
+  });
   document.addEventListener('keydown',event => { if (event.key === 'Escape' && !$('display-panel').hidden) { closeDisplay(); $('display-toggle').focus(); } });
   document.addEventListener('click',event => { if (!$('display-panel').hidden && !event.target.closest('#display-panel, #display-toggle')) closeDisplay(); });
   document.addEventListener('change',event => { if (event.target.id === 'display-motion' || event.target.id === 'display-contrast') { display.motion = $('display-motion').checked; display.contrast = $('display-contrast').checked; applyDisplay(true); } });
@@ -467,6 +526,8 @@
     } catch { requestError = 'Unable to reach the local server. Previous results remain available. Refresh Data to retry.'; }
     await poll();
   });
+  $('theme-map-panel').addEventListener('toggle',()=>{ if ($('theme-map-panel').open) renderThemeMap(); });
+  window.addEventListener('resize',()=>{ clearTimeout(mapResizeTimer); mapResizeTimer=setTimeout(()=>{ if ($('theme-map-panel').open) { const key=focusKey(); renderThemeMap(); restoreFocus(key); } },100); });
   $('research-inspector').addEventListener('cancel',event=>{ event.preventDefault(); closeInspector(); });
   applyDisplay();
   history.scrollRestoration = 'manual';

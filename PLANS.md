@@ -619,3 +619,19 @@ Step 2 acceptance complete: all three browser scripts pass, zero axe A/AA violat
 page errors or external requests. Covers inspector Back/Forward/Escape, source
 focus/scroll, refresh preservation, 320px/200% text and forced colors. Default
 1440p density measures 30 theme rows and 24 Primary rows. No runtime/config diff.
+
+Step 2 committed as 739ad32. Step 3 retains market/theme breadth bars and an optional
+raw-return Theme Map, using native SVG and the existing snapshot. Linear axes include
+zero/outliers, and keyboard/select access preserves overlapping points. No percentage
+rank substitution or financial calculation path. W distribution intentionally omitted
+because signed sortable member rows already serve that comparison with less clutter.
+Final full suite: 327 run, 325 pass/two Windows skips. Focused: 120 run, 119 pass/one
+Windows skip; all 64 frozen Matrix cases. Validators, compilation, both JS syntax
+checks and dashboard helper tests pass. Functional browser refresh/export/Saved and
+fixture launch cutover checks pass. Final visual/browser artifacts are local-only.
+Final browser acceptance PASSED: all three browser scripts; 14 axe A/AA views,
+zero violations, page errors or external requests. Only the confirmed pre-existing
+/favicon.ico 404 is recorded separately from unexpected console errors. Twelve
+fixture screenshots are supplied in the local review gallery/ZIP, outside Git.
+No src/config/runtime changes, no dependencies, merge or deployment. Gate E stays
+open and real Nov 9/10 chronological checks remain deferred. Stop for visual review.

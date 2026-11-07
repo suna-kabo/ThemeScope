@@ -39,6 +39,8 @@ def main():
                 page=browser.new_page(viewport={'width':1440,'height':1000},reduced_motion='reduce')
                 errors=[];outside=[]
                 page.on('pageerror',lambda e:errors.append(str(e)))
+                console_errors=[]
+                page.on('console',lambda m:console_errors.append({'text':m.text,'url':m.location.get('url','')}) if m.type=='error' else None)
                 page.on('request',lambda r:outside.append(r.url) if not r.url.startswith((origin,'blob:')) else None)
                 # A visual label is injected in the TEST browser only; never in product source.
                 page.add_init_script("""addEventListener('DOMContentLoaded',()=>{const e=document.createElement('p');e.textContent='UI validation · deterministic test data · not live';e.setAttribute('data-test-stamp','');e.style.cssText='position:fixed;bottom:8px;right:12px;z-index:99;background:#171923;color:#f1f0f7;padding:5px 10px;border:1px solid #bcadff;border-radius:7px;font:11px system-ui;max-width:calc(100vw - 24px);pointer-events:none';document.body.append(e);});""")
@@ -88,6 +90,30 @@ def main():
                 page.keyboard.press('Escape');expect(page.locator('#research-inspector')).not_to_be_visible()
                 assert abs(page.evaluate('scrollY')-origin_scroll)<2
                 expect(scroll_link).to_be_focused()
+                # Snapshot-only visuals: correct breadth lengths, raw axes and inspectable points.
+                nav('overview');page.locator('#theme-map-panel > summary').click()
+                map_rows=[t for t in actual['themes'] if t['status']=='active' and t['returns'] and all(t['returns'][i]['value'] is not None for i in [0,1])]
+                expect(page.locator('[data-map-theme]')).to_have_count(len(map_rows))
+                expect(page.locator('#theme-map')).to_contain_text('Raw returns · linear axes')
+                for i,ticker in enumerate(['SPY','QQQ']):
+                    bars=page.locator('.market-card').nth(i).locator('.breadth-fill')
+                    for j,field in enumerate(['above_ema21','above_ema50']):
+                        assert abs(float(bars.nth(j).get_attribute('width'))-float(actual['market']['context'][ticker]['breadth'][field]))<1e-9
+                point=page.locator('[data-map-theme="semiconductors"]');point.focus()
+                expect(page.locator('#map-readout')).to_contain_text('Semiconductors')
+                page.keyboard.press('ArrowRight');assert page.evaluate('document.activeElement.hasAttribute("data-map-theme")')
+                page.locator('#map-selection').select_option('semiconductors')
+                expect(point).to_have_class('map-point positive map-selected')
+                capture('theme-map-1440');audit('theme-map')
+                point.focus();page.keyboard.press('Enter');expect(page.locator('#inspector-title')).to_have_text('Semiconductors')
+                page.keyboard.press('Escape');expect(point).to_be_focused()
+                for width in (800,390,320):
+                    page.set_viewport_size({'width':width,'height':844});page.wait_for_timeout(180)
+                    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),('map',width)
+                    if width==320:
+                        page.locator('#theme-map').scroll_into_view_if_needed();capture('theme-map-320');audit('theme-map-320')
+                page.set_viewport_size({'width':1440,'height':1000});page.locator('#theme-map-panel > summary').click()
+                results['interactions'].append('raw-return map, exact breadth display, keyboard points/selection/inspector, narrow map')
                 # Search, all filters, independent Watch-only universe, stable sorting.
                 page.set_viewport_size({'width':1440,'height':1000});nav('themes')
                 page.locator('#theme-search').fill('semiconductors');expect(page.locator('#theme-table tbody tr')).to_have_count(1)
@@ -202,6 +228,9 @@ def main():
                 assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
                 page.keyboard.press('Escape');expect(page.locator('#research-inspector')).not_to_be_visible()
                 results['widths']['200% text resize']='five destinations and inspector reflow without document overflow'
+                nav('overview');page.locator('#theme-map-panel > summary').click()
+                assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+                page.locator('#theme-map-panel > summary').click()
                 page.evaluate("document.documentElement.style.fontSize=''")
                 # Mock only API responses for presentation-state coverage; no calculations changed.
                 state={'snapshot':deepcopy(actual),'status':service.status()}
@@ -251,6 +280,22 @@ def main():
                 page.locator('#candidate-earnings').select_option('available');expect(page.locator('#candidates tbody tr')).to_have_count(1);expect(page.locator('#candidates')).to_contain_text('2026-11-12');capture('short-candidate-1440')
                 state['snapshot']=deepcopy(actual);state['snapshot']['themes'][0]['score']=None;state['snapshot']['themes'][0]['returns']=None;state['snapshot']['themes'][0]['index']['trend']='Unavailable';update('unavailable metrics');nav('themes')
                 page.locator('#theme-search').fill(state['snapshot']['themes'][0]['name']);expect(page.locator('#theme-table')).to_contain_text('Unavailable');assert 'NaN' not in page.locator('#theme-table').inner_text()
+                # Raw axes retain extreme values, negative/zero, ties and omit unavailable returns.
+                state['snapshot']=deepcopy(actual)
+                active=[t for t in state['snapshot']['themes'] if t['status']=='active']
+                active[0]['returns'][0]['value']='12.0';active[0]['returns'][1]['value']='-0.4'
+                active[1]['returns'][0]['value']='0';active[1]['returns'][1]['value']='0'
+                active[2]['returns']=deepcopy(active[1]['returns']);active[3]['returns']=None
+                state['snapshot']['refreshed_at']='map extremes and missing values'
+                nav('overview');page.locator('#theme-map-panel > summary').click()
+                expect(page.locator('[data-map-theme]')).to_have_count(43,timeout=6000)
+                page.wait_for_function("()=>Number(document.querySelector('#theme-map-svg')?.dataset.xmax)>12")
+                svg=page.locator('#theme-map-svg');assert float(svg.get_attribute('data-xmax'))>12 and float(svg.get_attribute('data-ymin'))<-.4
+                page.locator('#map-selection').select_option(active[0]['theme_id']);expect(page.locator('#map-readout')).to_contain_text('+1,200.00%')
+                expect(page.locator('#map-readout')).to_contain_text('-40.00%')
+                page.locator('#map-selection').select_option(active[1]['theme_id']);expect(page.locator('#map-readout')).to_contain_text('0.00%')
+                assert page.locator('[data-map-theme]').evaluate_all("nodes=>nodes.every(n=>{const p=n.querySelector('.point-hit');return Number.isFinite(+p.getAttribute('cx'))&&Number.isFinite(+p.getAttribute('cy'))})")
+                results['states'].append('raw map extremes, negative/zero, identical points and unavailable returns')
                 # Loading/no prior snapshot must remain usable and honestly disabled.
                 state['snapshot']=None;state['status'].update(state='idle',progress='Ready');page.reload();expect(page.locator('#progress')).to_have_text('Ready');nav('primary');expect(page.locator('#combined')).to_have_attribute('aria-disabled','true');capture('no-snapshot-1440');results['states'].append('loading / no prior snapshot')
                 # Existing Saved schema, including a symbol absent from today's snapshot.
@@ -260,7 +305,10 @@ def main():
                 page.emulate_media(forced_colors='active');page.evaluate("document.querySelectorAll('[data-test-stamp]').forEach(e=>{e.style.color='CanvasText';e.style.background='Canvas'})");nav('methodology');audit('forced-colors');page.emulate_media(forced_colors='none')
                 results['interactions'].append('absent Saved ticker inspector, forced colors')
                 assert not errors,errors;assert not outside,outside
-                results.update(page_errors=errors,external_requests=outside,passed=True)
+                known=[e for e in console_errors if e['url']==origin+'/favicon.ico' and '404 (Not Found)' in e['text']]
+                unexpected=[e for e in console_errors if e not in known]
+                assert not unexpected,unexpected
+                results.update(page_errors=errors,console_errors=unexpected,known_browser_diagnostics=[{'resource':'/favicon.ico','status':404,'preexisting':True} for e in known],external_requests=outside,passed=True)
                 browser.close()
         finally:server.should_exit=True;worker.join(5);sock.close()
     if out:(out/'results.json').write_text(json.dumps(results,indent=2)+'\n')
