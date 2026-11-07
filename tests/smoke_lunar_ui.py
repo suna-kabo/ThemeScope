@@ -224,8 +224,10 @@ def main():
                 page.evaluate("document.documentElement.style.fontSize='200%'")
                 for destination in ('overview','themes','primary','saved','methodology'):
                     nav(destination);assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),('200% text',destination)
-                nav('themes');page.locator('#theme-filters [data-reset]').click();page.locator('#theme-table a').first.click()
+                capture('text-200-methodology')
+                nav('themes');capture('text-200-themes');page.locator('#theme-filters [data-reset]').click();page.locator('#theme-table a').first.click()
                 assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+                capture('text-200-inspector')
                 page.keyboard.press('Escape');expect(page.locator('#research-inspector')).not_to_be_visible()
                 results['widths']['200% text resize']='five destinations and inspector reflow without document overflow'
                 nav('overview');page.locator('#theme-map-panel > summary').click()

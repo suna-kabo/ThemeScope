@@ -78,16 +78,24 @@
       <div class="page-heading"><div><h1 id="methodology-title" tabindex="-1">Methodology</h1></div></div>
 
       <div class="method-grid">
+        <section class="method-group" aria-labelledby="method-market"><h2 id="method-market">Market</h2>
         <details class="method-item"><summary>01 <span>Market Matrix</span></summary><div><p>SPY and QQQ price states and their constituent breadth determine the returned Market Matrix direction. Both prices Bullish or both Bearish establish their unanimous direction; breadth adds context. Other combinations follow the configured frozen matrix.</p><p>IWM is price context only. It never decides direction and has no constituent roster.</p></div></details>
+        </section>
+        <section class="method-group" aria-labelledby="method-themes"><h2 id="method-themes">Themes</h2>
         <details class="method-item"><summary>02 <span>Custom Theme Score</span></summary><div><p>Theme 1M and 3M are median Core + Enabler stock price returns over 21 and 63 completed trading sessions. At least five valid members and 80% coverage are required.</p><p>Score combines cross-theme percentiles: 60% 1M + 40% 3M. It is a relative ranking measure, not a probability or expected return. Related members and thematic ETFs have no calculation role.</p></div></details>
         <details class="method-item"><summary>03 <span>Synthetic Theme Trend</span></summary><div><p>A chain-linked index with weights that drift between rebalances. Its current level relative to EMA21 and EMA50 gives Bullish, Bearish or Mixed. EMA equality is Mixed.</p><p>Bootstrap initializes indicators only. It cannot create official live signals or compatible historical transitions.</p></div></details>
         <details class="method-item"><summary>04 <span>Theme breadth</span></summary><div><p>The share of valid Core + Enabler members above their own EMA21 and EMA50, with coverage shown in Theme Detail. Breadth is context only: it does not enter Theme Score or Primary qualification.</p></div></details>
+        </section>
+        <section class="method-group" aria-labelledby="method-stocks"><h2 id="method-stocks">Stocks</h2>
         <details class="method-item"><summary>05 <span>W vs Theme Peers</span></summary><div><p>Each stock is compared with the other Core + Enabler members of that theme, leaving itself out. ER1M and ER3M are its excess returns over those peer medians.</p><p>W = 60% ER1M + 40% ER3M. W and excess returns are displayed in percentage points (pp), not as a standalone stock return. A stock can have a different W in each theme.</p></div></details>
         <details class="method-item"><summary>06 <span>Primary qualification &amp; eligibility</span></summary><div><p>Long Primary: Score ≥ 50 with Bullish or Mixed trend, or a valid Newly bullish transition. Short Primary: Score &lt; 50 with Bearish or Mixed trend, or a valid Newly bearish transition. A valid Score and current trend are required.</p><p>Stock qualification additionally requires W &gt; 0 for long or W &lt; 0 for short, close ≥ $5, average volume over 10 completed sessions &gt; 500,000 shares, and daily turnover ≥ $10 million. Zero W does not qualify. Earnings dates are optional and never inferred.</p></div></details>
         <details class="method-item"><summary>07 <span>Multi-theme assignment &amp; exports</span></summary><div><p>A ticker may qualify independently in multiple themes. Individual Theme Primary TXT files retain each qualification. The combined export emits the ticker once.</p><p>Combined placement prefers Core, then stronger directional W, then theme ID. Assigned section is export placement, not a permanent home theme. Also qualifies in shows the other qualifying themes. View filters do not change exports.</p><p>Saved is a manual browser-local bookmark list. It does not change memberships or qualification.</p></div></details>
+        </section>
+        <section class="method-group" aria-labelledby="method-system"><h2 id="method-system">System</h2>
         <details class="method-item"><summary>08 <span>Launch &amp; pre-launch research</span></summary><div><p>Approved rebalance: 2026-11-06 close. First earned session: 2026-11-09. Old holdings earn approval session t; rebalance happens at t close. New holdings first earn the next US trading session. effective_from is that first earned session; effective_to is exclusive.</p><p>Before launch, the approved membership universe supports current pre-launch research. That bootstrap-only research is separate from official synthetic-index history. Launch initializes at 100; missing or incompatible prior history makes comparisons unavailable. Legacy ETF history is never spliced into vNext.</p></div></details>
-      </div>
       <details class="method-item activation-details"><summary>Configuration &amp; activation status</summary><div><ul id="blockers"><li>Load a snapshot to check activation.</li></ul><p class="muted">Effective SPY and QQQ rosters are required for activation. Stale-roster warnings are advisory.</p></div></details>
+        </section>
+      </div>
     </section>
 
   </main>

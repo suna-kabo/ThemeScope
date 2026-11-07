@@ -635,3 +635,20 @@ zero violations, page errors or external requests. Only the confirmed pre-existi
 fixture screenshots are supplied in the local review gallery/ZIP, outside Git.
 No src/config/runtime changes, no dependencies, merge or deployment. Gate E stays
 open and real Nov 9/10 chronological checks remain deferred. Stop for visual review.
+
+## Final Research Desk visual polish after 31b3f1a
+
+User approved the current UI functionally and requested one presentation-only commit.
+Inspected all requested desktop screenshots before editing. Refined warm violet tokens,
+quiet navigation edges, partial accent rules, market/inspector hierarchy, dense row
+styling and a softer Saved surface. Grouped existing Methodology disclosures without
+changing their contents. Theme Map retained for useful raw-return positioning; rejected
+extra cards, charts, settings or dramatic angles. app.js/src/config unchanged.
+Full 327 tests (two existing Windows skips), focused 120 (one skip), all 64 Matrix
+cases, both functional browser smokes, validators, compilation and JS checks pass.
+The browser acceptance checks and fresh desktop/mobile/200%-text/high-contrast captures
+validate the polish before the single commit. No runtime changes, dependencies,
+financial assertions or private data. Gate E and real Nov 9/10 checks remain open/deferred.
+Visual review also corrected missing/per-theme W emphasis on mobile. Density is
+preserved/improved: 32 Theme rows and 24 Primary rows at 1440p. The final gallery
+includes 15 fixture-only screenshots and explicit 200% text views outside Git.

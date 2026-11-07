@@ -182,3 +182,55 @@ separately and fails on any other console error. It was not hidden by weakening 
 or changing the frozen local server. All requested research interactions pass.
 The final curated review gallery/ZIP contains 12 distinct fixture-only screenshots;
 no screenshots, credentials, DB or provider payloads are added to this commit.
+
+## Final visual polish after 31b3f1a — 7 November 2026
+
+This is a presentation-only refinement of the approved Research Desk. The five
+navigation destinations, filters, inspector/history/focus behavior, supplied values,
+map meaning, Saved storage and canonical exports remain unchanged. app.js, src/
+and config/ have no changes in this pass. No dependencies or assets were added.
+
+- Warmer ink/violet tokens and off-white text, with readable lavender interactions
+  and the existing mint/coral/amber semantics. Quiet grid rules differ from input
+  boundaries; high contrast and forced colors retain explicit system boundaries.
+- Navigation uses a restrained tint and short angled active edge. Major separators
+  become short accent rules; Overview market framing uses a tonal surface without
+  a full enclosing border. SPY/QQQ prices and returned trend retain visual priority.
+- Theme names and persistent chevrons remain obvious at rest; underlines appear on
+  hover/focus. Stronger name/Score hierarchy and softer rules retain aligned dense
+  rows. Chevron line height is constrained so visual emphasis does not add row height.
+- Inspector titles, Score, signed returns and W have distinct hierarchy. Existing
+  ticker summary fields share one soft summary surface; relationship metrics align
+  by role/W/eligibility, excess returns and peer medians. The side sheet's behavior
+  and all fields are unchanged. No invented ticker returns or Related rows.
+- Primary gets a short heading edge; Saved gets a quieter violet surface. Methodology
+  groups the unchanged eight reference items under Market/Themes/Stocks/System;
+  activation stays in System. All nine disclosure contents are byte-for-byte intact.
+- Chevron response is 2px/80ms, Save emphasis is static with 110ms feedback; current
+  OS/user reduced-motion settings still suppress transitions. No background motion.
+
+Theme Map is **retained**. Its labelled raw-return coordinates, point readout and
+keyboard/select access answer a research question; its collapsed state preserves
+Overview density. No chart semantics or calculation code changed. A more dramatic
+angled layout, per-row cards, extra labels/prose and additional charts/settings were
+rejected because they would reduce daily scanning clarity or expand the scope.
+
+Validation: full 327 tests (325 pass, two existing native-Windows skips); focused
+120 (119 pass, one skip); all 64 frozen Market Matrix cases. All three browser
+smokes, both JS syntax checks, dashboard helpers, compilation and both validators
+pass. Chromium visual review covers desktop, 800/390/320, high contrast and 200%
+root text resize; the final local gallery includes explicit text-resize screenshots.
+Axe A/AA has zero violations in the audited views. The pre-existing favicon 404
+remains separately recorded; no unexpected console errors, page errors or external
+requests. Native Windows polish rendering, other engines and screen-reader speech
+remain unverified. Screenshots use deterministic fixtures and remain outside Git.
+
+This supersedes only the earlier visual treatment. main/inspection refs and Gate E
+remain untouched; Nov 9/10 real chronological validation remains deferred. No merge,
+deployment or live market-data call. Stop for user visual review after one commit.
+
+Polish review findings: the enlarged chevrons initially added row height, corrected
+with a constrained line height. Mobile 'Per theme'/missing W initially inherited
+numeric emphasis, corrected to supporting text size. Final density is 32 complete
+theme rows and 24 Primary rows at 1440p. Fourteen axe audits pass; the refreshed
+review gallery has 15 distinct fixture screenshots including 200% text views.
