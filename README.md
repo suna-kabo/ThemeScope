@@ -7,8 +7,8 @@ market context; IWM is context only. Thematic ETFs have no calculation role.
 The implementation branch is `refactor/themescope-vnext`. Phase 9 is implemented;
 Gate E non-live review is complete; the real native Windows Nov 6 launch refresh
 has passed. Real Nov 9/10 chronological checks remain deferred. The existing `inspection/` directory
-is the preserved historical Gate D fixture, not current launch status. Nothing
-here deploys a public site.
+is the preserved historical Gate D fixture, not current launch status. The optional
+static synthetic demo below is separate from the private live workflow.
 
 ## Local operation
 
@@ -99,6 +99,15 @@ symbols, 44 Active themes, available research outputs and initialized official
 indices at 100, in approximately 52.5 seconds. The user reports SIP roster compatibility passed for November 5:
 501 SPY, 101 QQQ, zero missing/unusable, 12 pages, adjusted plus raw requests.
 
+## Optional public synthetic demo
+
+Build the current UI with fictional offline data using
+`python scripts/build_cloudflare_demo.py`. Cloudflare Pages can serve only the
+generated `dist/cloudflare-pages` directory; no live backend, credentials or market
+data are included. See [exact Pages setup and GitHub default-branch steps](docs/cloudflare_demo.md).
+The historical `inspection/ui` is not the deployment source. No deployment has
+been performed by this change; the local research runtime remains unchanged.
+
 ## Developer checks
 
 ```sh
@@ -113,7 +122,7 @@ node tests/test_dashboard.js
 
 Tests use fixtures/mocks, never account credentials. See
 [Phase 9 details](docs/vnext_launch.md), [methodology](docs/vnext/ThemeScope_vNext_Product_and_Methodology_Spec.md)
-and [PLANS.md](PLANS.md). Gate E, merge to main and deployment are not part of
-this implementation.
+and [PLANS.md](PLANS.md). Gate E and merging to main remain deferred. Public
+hosting, if configured manually, is limited to the synthetic static demo.
 
 Current review evidence and deferred checks: [Gate E review](docs/vnext_gate_e_review.md).

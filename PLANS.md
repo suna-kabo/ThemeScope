@@ -713,3 +713,39 @@ styles/baselines. Full-height Themes screenshots include actual equal-score labe
 visual review confirms separation and balanced tracks. Density stays 31/27 rows.
 No page errors/external requests or unexpected console errors; known favicon 404
 remains recorded. Nine fixture screenshots are supplied outside Git. Stop after push.
+
+## Public entry point and synthetic static demo after 1222968
+
+User explicitly authorized a public synthetic/read-only showcase, separate from the
+private local live workflow. Repository inspected public with default branch still
+main. Available GitHub integration has no settings-write capability, so no workaround
+or metadata change was attempted; exact manual default-branch steps are documented.
+No authenticated Cloudflare Pages integration is available; no deployment performed.
+
+New stdlib builder copies the current static/vnext frontend byte-for-byte and generates
+only synthetic preview data, Pages headers and a local original favicon. It extends
+the authoritative offline fixture using unchanged pure engines and approved formula
+settings; it reads no live memberships/rosters/mappings, provider, credentials or DB.
+Output is ignored dist/cloudflare-pages, rebuilt deterministically with fixed files.
+No frontend duplication, runtime dependencies, src/config or financial changes.
+Historical inspection/ui remains untouched because inspection/browser tests use it;
+it must never be used as the Pages source. Docs cover exact manual Pages settings,
+no-secret build, disabled automatic dependencies/other-branch previews and removal.
+
+Static browser validation applies the generated CSP and covers all views, inspectors,
+Back, filters/sort, Map, Saved persistence, Display, replay, fixture-only exports and
+390px. Eight axe audits pass, with zero external/API requests, console/page or HTTP
+errors. Fresh desktop Overview/mobile Primary screenshots were visually inspected
+outside Git. Focused build tests pass: isolated clean source build, identical rebuild,
+stale cleanup, current asset equality, synthetic-only data/export, safety scanning,
+no network/SQLite and symlink rejection. Existing local UI/assets/runtime are unchanged.
+Gate E stays open, real Nov 9/10 checks deferred; no merge/main/inspection-ref changes.
+
+Final validation: full suite 330 tests (328 passed, two existing native-Windows skips);
+focused vNext 120 (119 passed, one skip); all three new build tests pass. All three
+existing local browser smokes pass, including 14 axe audits with zero violations,
+plus the static demo browser smoke/eight clear axe audits. Both config/evidence
+validators, Python compilation, both JS syntax checks and JS helper tests pass.
+Generated textual output safety scan passes; isolated canary checks confirm no
+credential/path leakage. Sandbox TestClient stall required the same fixture-only
+suite to run outside network isolation; no live calls or credentials were used.
