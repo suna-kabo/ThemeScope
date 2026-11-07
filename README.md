@@ -99,14 +99,26 @@ symbols, 44 Active themes, available research outputs and initialized official
 indices at 100, in approximately 52.5 seconds. The user reports SIP roster compatibility passed for November 5:
 501 SPY, 101 QQQ, zero missing/unusable, 12 pages, adjusted plus raw requests.
 
-## Optional public synthetic demo
+## Static public presentation
 
-Build the current UI with fictional offline data using
-`python scripts/build_cloudflare_demo.py`. Cloudflare Pages can serve only the
-generated `dist/cloudflare-pages` directory; no live backend, credentials or market
-data are included. See [exact Pages setup and GitHub default-branch steps](docs/cloudflare_demo.md).
-The historical `inspection/ui` is not the deployment source. No deployment has
-been performed by this change; the local research runtime remains unchanged.
+Two separate workflows use the current UI. The synthetic Git build remains
+`python scripts/build_cloudflare_demo.py` → `dist/cloudflare-pages`.
+To publish an already committed real local dashboard snapshot, keep ThemeScope
+running and use `publish-public-snapshot.cmd 2026-11-06 themescope`, supplying the
+exact completed session and existing Pages project. It builds `dist/cloudflare-public`
+and uploads only frozen static assets using your local Wrangler login.
+
+**First disable automatic production Git deployments in the existing Pages project**
+and confirm its production branch is `refactor/themescope-vnext`; otherwise a Git
+build could overwrite the real snapshot with synthetic demo data. The helper
+checks a clean implementation branch, validates/filters the committed loopback
+snapshot and confirms a new production upload. No real snapshot enters Git.
+
+The public site is read-only: no refresh, provider calls or cloud database. Saved
+remains browser-local. The local research runtime and financial behavior remain
+unchanged. Historical `inspection/ui` is not a deployment source. See
+[exact setup, safety checks and local publishing instructions](docs/cloudflare_demo.md).
+No real snapshot deployment has been performed by this source change.
 
 ## Developer checks
 
@@ -123,6 +135,7 @@ node tests/test_dashboard.js
 Tests use fixtures/mocks, never account credentials. See
 [Phase 9 details](docs/vnext_launch.md), [methodology](docs/vnext/ThemeScope_vNext_Product_and_Methodology_Spec.md)
 and [PLANS.md](PLANS.md). Gate E and merging to main remain deferred. Public
-hosting, if configured manually, is limited to the synthetic static demo.
+hosting is limited to the synthetic demo or explicitly published frozen dashboard
+snapshot; the live research backend remains local.
 
 Current review evidence and deferred checks: [Gate E review](docs/vnext_gate_e_review.md).

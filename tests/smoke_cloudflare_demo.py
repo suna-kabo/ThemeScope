@@ -12,12 +12,19 @@ ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
 from scripts.build_cloudflare_demo import build, ASSETS
 
 
-def main():
+def main(public=False):
     from playwright.sync_api import sync_playwright, expect
     with tempfile.TemporaryDirectory() as folder:
         root=Path(folder);assets=root/'static/vnext';assets.mkdir(parents=True)
         for name in ASSETS:shutil.copyfile(ROOT/'static/vnext'/name,assets/name)
-        output=build(root)
+        if public:
+            from unittest.mock import patch
+            from public_snapshot_support import public_contract_fixture
+            from scripts import build_public_snapshot
+            with patch.object(build_public_snapshot,'fetch_snapshot',return_value=public_contract_fixture()):
+                output=build_public_snapshot.build('2026-11-06',root)
+        else:
+            output=build(root)
         headers=[line.strip().split(': ',1) for line in (output/'_headers').read_text().splitlines() if line.startswith('  ')]
         class Static(SimpleHTTPRequestHandler):
             def log_message(self,*args):pass
@@ -42,15 +49,29 @@ def main():
                     if r.url.startswith(origin+'/api/'):api.append(r.url)
                 page.on('request',request)
                 page.goto(origin)
-                expect(page.locator('#fixture-banner')).to_be_visible()
+                if public:
+                    expect(page.locator('#public-banner')).to_have_text('Public snapshot · Completed US session 2026-11-06 · Read-only')
+                    expect(page.locator('#public-banner')).to_be_visible()
+                    expect(page.locator('#fixture-banner')).to_be_hidden()
+                    expect(page.locator('#refresh')).to_be_hidden()
+                    expect(page.locator('#progress')).to_have_text('Read-only snapshot')
+                    assert 'Synthetic inspection fixture' not in page.locator('body').inner_text()
+                    assert 'Replay fixture' not in page.locator('body').inner_text()
+                else:
+                    expect(page.locator('#fixture-banner')).to_be_visible()
                 expect(page.locator('#overview-title')).to_be_visible()
                 expect(page.locator('#theme-map-panel')).to_have_attribute('open','')
                 expect(page.locator('[data-map-theme]')).to_have_count(4)
                 assert page.locator('.market-card.context .breadth-bar').count()==0
                 before=page.locator('#market-cards').inner_text()
-                page.get_by_role('button',name='Replay fixture',exact=True).click()
+                if public:
+                    # A programmatic click also cannot escape the static-mode guard.
+                    page.locator('#refresh').evaluate('(button)=>button.click()')
+                    expect(page.locator('#progress')).to_have_text('Read-only snapshot')
+                else:
+                    page.get_by_role('button',name='Replay fixture',exact=True).click()
+                    expect(page.locator('#progress')).to_have_text('Synthetic fixture replayed')
                 assert page.locator('#market-cards').inner_text()==before
-                expect(page.locator('#progress')).to_have_text('Synthetic fixture replayed')
                 nav=lambda name:page.locator(f'[data-nav="{name}"]').click()
                 nav('themes');expect(page.locator('#theme-table tbody tr')).to_have_count(5)
                 page.locator('#theme-search').fill('alpha');expect(page.locator('#theme-table tbody tr')).to_have_count(1)
@@ -79,7 +100,7 @@ def main():
                     if artifacts:
                         directory=Path(artifacts);directory.mkdir(parents=True,exist_ok=True)
                         page.screenshot(path=str(directory/(name+'.png')),full_page=True)
-                capture('static-demo-overview')
+                capture('public-snapshot-overview' if public else 'static-demo-overview')
                 axe_path=os.environ.get('THEMESCOPE_AXE_SCRIPT');audits={}
                 def audit(name):
                     if axe_path:
@@ -93,7 +114,7 @@ def main():
                 page.set_viewport_size({'width':390,'height':844})
                 for destination in ('overview','themes','primary','saved','methodology'):
                     nav(destination);assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),destination
-                    if destination=='primary':capture('static-demo-primary-mobile')
+                    if destination=='primary':capture('public-snapshot-primary-mobile' if public else 'static-demo-primary-mobile')
                 audit('mobile-methodology')
                 # Poll interval would have fired repeatedly if preview mode accidentally fell through.
                 page.wait_for_timeout(1800)
@@ -101,7 +122,7 @@ def main():
                 assert not external,external
                 assert not api,api
                 assert not failures,failures
-                print(json.dumps({'static_demo':'passed','current_ui':True,'replay':'fixture only',
+                print(json.dumps({'static_demo':'passed','mode':'public snapshot (manufactured test input)' if public else 'synthetic demo','current_ui':True,'replay':'hidden' if public else 'fixture only',
                     'exports':'DEMO identifiers only','saved':'persisted browser-local',
                     'axe':audits,'external_requests':external,'api_requests':api,'page_console_errors':errors,'http_errors':failures},indent=2))
                 browser.close()

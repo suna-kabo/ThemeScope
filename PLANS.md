@@ -749,3 +749,60 @@ validators, Python compilation, both JS syntax checks and JS helper tests pass.
 Generated textual output safety scan passes; isolated canary checks confirm no
 credential/path leakage. Sandbox TestClient stall required the same fixture-only
 suite to run outside network isolation; no live calls or credentials were used.
+
+## Local-to-Pages frozen public publishing after 229117a
+
+User explicitly authorized publishing the already committed public research dashboard
+from their local machine, with a mandatory matching completed-session argument. This
+supersedes the earlier synthetic-only hosting restriction for this narrowly scoped
+presentation artifact; local research/backend architecture and Gate E remain unchanged.
+No authenticated Cloudflare Pages integration is available here, so no actual account
+snapshot retrieval or deployment was performed. All test data are manufactured.
+
+Added separate public builder and Windows publishing helper, preserving the synthetic
+builder. Shared constants/favicon move to a presentation-only module, without changing
+the synthetic fixture or weakening its safety checks. Real builder reads only the fixed
+loopback dashboard endpoint, which already exposes committed publications/last-good
+copies. Validates real-mode flag, schema, completeness, healthy publication metadata,
+timestamp, session and presentation shapes. Copies an explicit nested allowlist of
+existing metrics/relationships/eligibility/assignments and identifier-only TXT exports,
+without recalculation. Excludes configuration hashes, serialized history, provider
+identity, cache/performance/internal data and unknown fields. Six-file output is staged,
+scanned and kept under ignored dist/cloudflare-public. Failed validation preserves the
+previous prepared artifact; a separate OS-held publication lock covers build/upload.
+
+Minimal frontend adds explicit frozen-public mode/banner, hides and guards Refresh,
+keeps all requests/polling off and retains browser Saved/Display/inspectors/Map/exports.
+Local live and synthetic fixture behavior are preserved. Public snapshots use the
+current assets plus no-network CSP/no-store headers. No src/config/schema/provider/
+calculation/export semantics changes. No real payload, credentials or binaries in Git.
+
+Publisher requires the clean implementation branch, no tracked runtime/output artifacts,
+explicit session and explicit existing project name. Uses normal local Wrangler OAuth;
+market credentials are stripped from its process environment and upload runs away from
+repo config/.env/Functions in an isolated allowlisted copy. Checks project existence and
+latest recorded production branch, never creates a project, and confirms a new successful
+Production deployment with branch/source commit after upload rather than trusting a
+preview URL. Unknown/pending/failed confirmation returns nonzero. Pages production
+branch and disabled automatic production/preview Git builds require the documented
+one-time dashboard setup; scripts do not modify Cloudflare settings. Existing synthetic
+Git builds would otherwise overwrite a real upload. Current Wrangler syntax and JSON
+format were verified against official Cloudflare documentation and CLI source.
+
+Focused tests use mocked loopback/CLI calls only. Static-public browser checks include
+all destinations, Theme/ticker inspectors, Back, filters/sort, Map, Saved persistence,
+Display, blob export, guarded hidden Refresh and 390px, with zero external/API requests,
+console/page/HTTP errors and eight clear axe audits. Static synthetic smoke also passes.
+Desktop/mobile public-mode screenshots were visually inspected outside Git; they contain
+manufactured contract data, not real November 6 results. Native Windows launcher/OAuth,
+actual Pages settings/account access and production domain session check remain local.
+Main/inspection refs untouched; Gate E open and real Nov 9/10 checks still deferred.
+
+Final acceptance: full 342 tests (340 passed/two existing Windows skips); focused
+public-publishing 12 passed and synthetic build 3 passed; focused vNext 120
+(119 passed/one skip). All five browser programs pass: existing local UI/refresh/
+exports/launch-cutover plus both static modes. Thirty axe audits across these
+checks have zero violations (14 local, eight synthetic, eight frozen-public).
+Both static modes have zero external/API requests and page/console/HTTP errors.
+Both validators, compilation, both JS syntax checks and JS helper tests pass.
+No actual local real payload or Cloudflare upload was used for validation.

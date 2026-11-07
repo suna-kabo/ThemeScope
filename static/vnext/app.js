@@ -15,7 +15,8 @@
   const symbol = value => icon(tone(value) === 'positive' ? 'up' : tone(value) === 'negative' ? 'down' : 'flat');
   const state = value => `<span class="state ${tone(value)}"><span aria-hidden="true">${symbol(value)}</span>${esc(value || 'Unavailable')}</span>`;
   const priority = value => `<span class="priority ${tone(value)}">${esc(value || 'Watch')}</span>`;
-  const preview = Boolean(window.FIXTURE_SNAPSHOT);
+  const publicSnapshot = window.THEMESCOPE_STATIC_SOURCE?.mode === 'public_snapshot';
+  const preview = publicSnapshot || Boolean(window.FIXTURE_SNAPSHOT);
   const savedKey = 'themescope-vnext-watchlist';
   let snapshot = null, snapshotSignature = '', currentStatus = {}, route = '', origin = '#themes', feedbackTimer, requestError = '';
   let watched = [];
@@ -87,7 +88,11 @@
     return `<table class="${className}"><caption class="sr-only">${esc(caption)}</caption><thead><tr>${headers.map(h => `<th scope="col"${h.numeric ? ' class="numeric"' : ''}>${h.label || h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>`;
   }
   function renderLayer() {
-    $('fixture-banner').hidden = !snapshot?.synthetic_fixture;
+    $('fixture-banner').hidden = publicSnapshot || !snapshot?.synthetic_fixture;
+    $('public-banner').hidden = !publicSnapshot;
+    if (publicSnapshot) $('public-banner').textContent = `Public snapshot · Completed US session ${snapshot.session} · Read-only`;
+    $('refresh').hidden = publicSnapshot;
+    if (publicSnapshot) document.querySelector('.diagnostics summary').textContent = 'Snapshot details';
     const layer = snapshot?.theme_layer || {}, session = snapshot?.session;
     const messages = {
       pre_launch_research:`Pre-launch research · Completed session ${session} · Approved launch membership universe. Official index history begins at the ${layer.launch_rebalance_session} close; first earned session ${layer.first_earned_session}.`,
@@ -456,7 +461,7 @@
     $('provider').textContent = 'Provider · ' + (typeof status.provider_health === 'string' ? status.provider_health : status.provider_health?.status || 'Not checked');
     $('read-status').textContent = status.snapshot_read?.startsWith('busy') ? 'Storage is busy. Showing the last committed snapshot.' : '';
     $('refresh').disabled = status.state === 'running';
-    $('refresh-label').textContent = preview ? 'Replay fixture' : status.state === 'running' ? 'Refreshing…' : 'Refresh Data';
+    $('refresh-label').textContent = publicSnapshot ? 'Read-only snapshot' : preview ? 'Replay fixture' : status.state === 'running' ? 'Refreshing…' : 'Refresh Data';
     const failed = ['failed','interrupted'].includes(status.state);
     if (inspector) $('inspector-status').textContent = failed ? 'Refresh failed · previous successful snapshot retained' : status.state === 'running' ? progress : 'Completed session ' + (snapshot?.session || '—');
     $('error').hidden = !failed && !requestError;
@@ -545,6 +550,7 @@
   document.addEventListener('change',event => { if (event.target.matches('select')) filterChange(event); });
   window.addEventListener('hashchange',() => showRoute());
   $('refresh').addEventListener('click',async () => {
+    if (publicSnapshot) return;
     if (preview) { render(window.FIXTURE_SNAPSHOT); showStatus({state:'success',progress:'Synthetic fixture replayed',target_session:snapshot.session,last_successful_refresh:'Inspection fixture',completeness:snapshot.completeness,provider_health:'Fixture'}); return; }
     requestError = '';
     $('refresh').disabled = true;
@@ -563,6 +569,7 @@
   document.querySelector('.brand-mark').innerHTML = icon('orbit');
   document.querySelectorAll('a span[aria-hidden="true"]').forEach(span => { if (span.textContent === '↗') span.innerHTML = icon('up'); });
   renderSaved(); renderOverview(); renderThemes(); renderCandidates(); showRoute(true);
-  if (preview) { render(window.FIXTURE_SNAPSHOT); showStatus({state:'success',progress:'Synthetic inspection fixture',target_session:snapshot.session,last_successful_refresh:'Inspection fixture',completeness:snapshot.completeness,provider_health:'Fixture'}); }
+  if (publicSnapshot) { render(window.THEMESCOPE_STATIC_SOURCE.snapshot); showStatus({state:'success',progress:'Read-only snapshot',target_session:snapshot.session,last_successful_refresh:snapshot.refreshed_at,completeness:snapshot.completeness,provider_health:snapshot.provider_health}); }
+  else if (preview) { render(window.FIXTURE_SNAPSHOT); showStatus({state:'success',progress:'Synthetic inspection fixture',target_session:snapshot.session,last_successful_refresh:'Inspection fixture',completeness:snapshot.completeness,provider_health:'Fixture'}); }
   else { poll(); setInterval(poll,1500); }
 })();
