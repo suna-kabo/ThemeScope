@@ -66,3 +66,42 @@ vertical table pane are verified. Review fixed the root Display selector, contai
 screen-reader-only content within horizontal tables, and made the sidebar/text
 reflow responsive to enlarged text. JavaScript, validators, compilation and whitespace
 checks pass. Deterministic review captures remain local; no binary payload is pushed.
+
+## Research Inspector
+
+Theme and ticker links show a persistent underline and cyan chevron, with hover,
+keyboard focus and native link semantics. Modified clicks retain normal link
+behavior. The optional full Theme Detail route remains available. Repeated row
+`Research details` disclosures are replaced by a single native modal dialog,
+roughly 42% of desktop width and a full-width mobile sheet. The desk remains
+visible behind it; its controls are inert while the inspector is open.
+
+Opening adds a hash/history entry. Moving from a member to its ticker or another
+theme replaces that inspector entry, so there is no modal stack. Escape, Close or
+browser Back dismiss it; Forward restores it. Direct inspector URLs also work.
+Filters, page scroll and source focus survive closure. A changed snapshot updates
+inspector data while preserving member search, selection, sort, focus and scroll.
+The inspector reports refresh failure and retains the last published research.
+
+Theme view shows supplied Score/Priority/trend/returns, index/EMAs, breadth,
+comparison availability and Core/Enabler member research. All/Primary/Eligible/
+Core/Enabler are view filters only. Ticker view shows current Primary state,
+server assignment, other qualifying themes and each supplied relationship's
+role/W/eligibility/excess returns/peer medians. Where no assigned relationship
+exists, multiple W/role values are explicitly **Per theme**. No standalone stock
+returns, guessed chart URLs or fabricated Related rows. Supplied liquidity inputs
+remain available in a single disclosure.
+
+Stage 2 visual review fixed mobile dialog positioning against the reserved
+scrollbar gutter and added explicit forced-colors system tokens. Full regression
+remains 327 cases (325 pass/two existing Windows skips). Refresh/export/Saved and
+pre-launch/launch cutover browser smokes pass. Final inspector browser acceptance
+and screenshots are recorded with the completed redesign below.
+
+Stage 2 acceptance complete: all three browser scripts pass. Axe A/AA reports zero
+violations, including both inspectors, 320px ticker Inspector and forced colors.
+Browser Back/Forward, Escape, source focus/scroll restoration, member filters,
+changed-snapshot focus/search retention, failure preservation and absent Saved
+symbols pass. No page errors/external requests. At 2560×1440, 30 complete theme rows
+and 24 Primary rows are visible at default text/density. The retained tables and
+inspector use values supplied by the same snapshot; no financial assertions changed.

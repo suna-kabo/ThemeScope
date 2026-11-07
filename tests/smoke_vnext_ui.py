@@ -39,6 +39,9 @@ def main():
                     page.get_by_role('link',name='Export all Primary').click()
                 text=Path(download.value.path()).read_text()
                 assert text.count('NASDAQ:AAA')==1 and text.count('NASDAQ:BBB')==1
+                page.locator('#candidates [data-inspect-ticker]').first.click()
+                expect(page.locator('#inspector-content')).to_contain_text('Other qualifying themes')
+                page.keyboard.press('Escape')
                 page.locator('[data-nav="overview"]').click()
                 page.locator('[data-nav="methodology"]').click()
                 assert page.url.endswith('#methodology')

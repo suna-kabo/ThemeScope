@@ -49,7 +49,9 @@ def main():
                 results['states'].append('real configured pre-launch research')
                 nav=lambda name:page.locator(f'[data-nav="{name}"]').click()
                 def capture(label):
-                    if out:page.screenshot(path=str(out/(label+'.png')))
+                    if out:
+                        page.evaluate('''()=>{const d=document.querySelector('dialog[open]');if(d&&!d.querySelector('[data-test-stamp]'))d.append(document.querySelector('[data-test-stamp]').cloneNode(true));}''')
+                        page.screenshot(path=str(out/(label+'.png')))
                 axe_path=os.environ.get('THEMESCOPE_AXE_SCRIPT')
                 def audit(label):
                     if not axe_path:return
@@ -70,6 +72,22 @@ def main():
                     geometry=table.evaluate('e=>({width:e.clientWidth,scroll:e.scrollWidth})')
                     assert geometry['scroll']<=geometry['width']+1,(width,geometry)
                     results['widths'][str(width)]=geometry
+                # At 1440p height, density remains useful without small value text.
+                page.set_viewport_size({'width':2560,'height':1440})
+                results['visible_rows_1440p']={}
+                for destination,selector in [('themes','#theme-table'),('primary','#candidates')]:
+                    nav(destination)
+                    visible=page.locator(selector+' tbody tr').evaluate_all('rows=>rows.filter(r=>r.getBoundingClientRect().top>=0&&r.getBoundingClientRect().bottom<=innerHeight).length')
+                    assert visible>=20,(destination,visible)
+                    results['visible_rows_1440p'][destination]=visible
+                # Inspector scroll does not move the page and closure restores its origin.
+                page.set_viewport_size({'width':1440,'height':1000});nav('themes')
+                scroll_link=page.locator('#theme-table a').nth(24);scroll_link.scroll_into_view_if_needed()
+                origin_scroll=page.evaluate('scrollY');scroll_link.click()
+                page.locator('#research-inspector').evaluate('e=>e.scrollTop=e.scrollHeight')
+                page.keyboard.press('Escape');expect(page.locator('#research-inspector')).not_to_be_visible()
+                assert abs(page.evaluate('scrollY')-origin_scroll)<2
+                expect(scroll_link).to_be_focused()
                 # Search, all filters, independent Watch-only universe, stable sorting.
                 page.set_viewport_size({'width':1440,'height':1000});nav('themes')
                 page.locator('#theme-search').fill('semiconductors');expect(page.locator('#theme-table tbody tr')).to_have_count(1)
@@ -91,20 +109,35 @@ def main():
                 assert page.evaluate('scrollY')>0
                 page.locator('#theme-search').fill('semiconductors')
                 detail_link=page.locator('#theme-table a').first;detail_link.focus();detail_link.press('Enter')
-                expect(page.locator('#detail-title')).to_have_text('Semiconductors')
-                expect(page.locator('#detail-title')).to_be_focused()
-                expect(page.locator('#member-table')).to_contain_text('Not qualified')
+                expect(page.locator('#inspector-title')).to_have_text('Semiconductors');expect(page.locator('#inspector-title')).to_be_focused()
+                expect(page.locator('#research-inspector')).to_be_visible();expect(page.locator('#themes-title')).to_be_visible()
+                expect(page.locator('#inspector-members')).to_contain_text('Not qualified')
+                page.locator('[data-inspector-filter="Primary"]').click()
+                expected_members=sum(r['qualifies'] for r in actual['relationships'] if r['theme_id']=='semiconductors')
+                expect(page.locator('#inspector-members tbody tr')).to_have_count(expected_members)
+                page.locator('[data-inspector-filter="All"]').click();page.locator('#inspector-search').fill('NVDA')
+                expect(page.locator('#inspector-members tbody tr')).to_have_count(1)
+                capture('theme-inspector-1440');audit('theme-inspector')
+                page.locator('#inspector-members [data-inspect-ticker="NVDA"]').click()
+                expect(page.locator('#inspector-title')).to_have_text('NVDA');expect(page.locator('dialog[open]')).to_have_count(1)
+                expect(page.locator('#inspector-content')).to_contain_text('Other qualifying themes')
+                assert 'Stock 1M' not in page.locator('#inspector-content').inner_text()
+                capture('ticker-inspector-1440');audit('ticker-inspector')
+                page.keyboard.press('Escape');expect(page.locator('#research-inspector')).not_to_be_visible()
+                expect(page.locator('#theme-search')).to_have_value('semiconductors');expect(detail_link).to_be_focused()
+                expect(page.locator('[data-theme-row="semiconductors"]')).to_have_class('selected-row')
+                page.go_forward();expect(page.locator('#inspector-title')).to_have_text('NVDA')
+                page.go_back();expect(page.locator('#research-inspector')).not_to_be_visible()
+                detail_link.click();page.get_by_role('link',name='Open full theme',exact=False).click()
+                expect(page.locator('#detail-title')).to_have_text('Semiconductors');expect(page.locator('#detail-title')).to_be_focused()
                 page.locator('#member-search').fill('NVDA');expect(page.locator('#member-table tbody tr')).to_have_count(1)
-                page.locator('#member-table summary').first.click();expect(page.locator('#member-table')).to_contain_text('not supplied in this snapshot')
+                assert page.locator('#member-table summary').count()==0
                 with page.expect_download() as item:page.get_by_role('link',name='Theme Primary TXT',exact=False).click()
                 assert Path(item.value.path()).read_text()==actual['exports']['individual']['semiconductors']
                 capture('theme-detail-1440');audit('theme-detail')
                 page.get_by_role('link',name='Back to Themes',exact=False).click()
-                expect(page.locator('#theme-search')).to_have_value('semiconductors');expect(page.locator('#theme-table a').first).to_be_focused()
-                expect(page.locator('[data-theme-row="semiconductors"]')).to_have_class('selected-row')
-                page.go_back();expect(page.locator('#detail-title')).to_be_visible()
-                page.go_forward();expect(page.locator('#themes-title')).to_be_visible()
-                results['interactions'].append('keyboard Theme Detail, real individual TXT, restored search/focus, browser Back/Forward')
+                expect(page.locator('#theme-search')).to_have_value('semiconductors');expect(detail_link).to_be_focused()
+                results['interactions'].append('Theme/ticker inspector, native keyboard focus, one dialog, preserved filters, browser Back/Forward, optional full theme and canonical TXT')
                 # Candidate unique vs independent relationships, unchanged canonical TXT.
                 nav('primary');unique=len({r['ticker'] for r in actual['relationships'] if r['qualifies']});relationships=sum(r['qualifies'] for r in actual['relationships'])
                 expect(page.locator('#candidates tbody tr')).to_have_count(unique)
@@ -153,15 +186,22 @@ def main():
                         nav(destination);assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),(width,destination,page.evaluate("[...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>innerWidth+1&&!e.closest('[hidden]')).slice(0,15).map(e=>[e.tagName,e.id,e.className,e.getBoundingClientRect().right])"))
                         if width==390:capture(f'{destination}-390')
                     nav('themes');page.locator('#theme-filters [data-reset]').click();page.locator('#theme-mobile-sort').select_option('name:asc')
-                    page.locator('#theme-table a[href="#themes/semiconductors"]').click();assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');capture(f'theme-detail-{width}')
-                    if width==320:audit('theme-detail-320')
+                    page.locator('#theme-table a[href="#themes/semiconductors"]').click();assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');capture(f'theme-inspector-{width}')
+                    page.locator('#inspector-search').fill('NVDA');page.locator('#inspector-members [data-inspect-ticker]').first.click()
+                    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');capture(f'ticker-inspector-{width}')
+                    assert page.locator('#research-inspector').bounding_box()['x']>=0
+                    if width==320:audit('ticker-inspector-320')
+                    page.keyboard.press('Escape');expect(page.locator('#research-inspector')).not_to_be_visible()
                     results['widths'][str(width)]='all six surfaces: no document overflow'
                 page.set_viewport_size({'width':1440,'height':1000})
                 # 200% root text resize independently stresses layout. This is not native browser zoom.
                 page.evaluate("document.documentElement.style.fontSize='200%'")
                 for destination in ('overview','themes','primary','saved','methodology'):
                     nav(destination);assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),('200% text',destination)
-                results['widths']['200% text resize']='five destinations reflow without document overflow'
+                nav('themes');page.locator('#theme-filters [data-reset]').click();page.locator('#theme-table a').first.click()
+                assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+                page.keyboard.press('Escape');expect(page.locator('#research-inspector')).not_to_be_visible()
+                results['widths']['200% text resize']='five destinations and inspector reflow without document overflow'
                 page.evaluate("document.documentElement.style.fontSize=''")
                 # Mock only API responses for presentation-state coverage; no calculations changed.
                 state={'snapshot':deepcopy(actual),'status':service.status()}
@@ -172,6 +212,20 @@ def main():
                     expect(page.locator('#progress')).to_have_text(state['status']['progress'],timeout=6000)
                     page.wait_for_timeout(1600)
                     results['states'].append(label)
+                nav('themes');page.locator('#theme-filters [data-reset]').click();page.locator('#theme-search').fill('semiconductors')
+                page.locator('#theme-table a').first.click();page.locator('#inspector-search').fill('NVDA');page.locator('#inspector-search').focus()
+                state['snapshot']['themes']=deepcopy(actual['themes'])
+                revised=next(t for t in state['snapshot']['themes'] if t['theme_id']=='semiconductors');revised['score']='88.12'
+                state['snapshot']['refreshed_at']='inspector refresh'
+                expect(page.locator('#inspector-content')).to_contain_text('88.12',timeout=6000)
+                expect(page.locator('#inspector-search')).to_be_focused();expect(page.locator('#inspector-search')).to_have_value('NVDA')
+                retained=page.locator('#inspector-members').inner_text()
+                state['status'].update(state='failed',progress='Refresh failed',error='synthetic_provider_failure')
+                expect(page.locator('#inspector-status')).to_contain_text('previous successful snapshot retained',timeout=6000)
+                assert page.locator('#inspector-members').inner_text()==retained
+                assert state['snapshot']['exports']==actual['exports']
+                page.go_back();expect(page.locator('#theme-search')).to_have_value('semiconductors')
+                results['interactions'].append('changed snapshot preserves inspector/search/focus; refresh failure retains visible members and canonical exports')
                 nav('overview')
                 state['status'].update(state='running',progress='Calculating market, themes and peer comparisons');update('refresh running');expect(page.locator('#refresh')).to_be_disabled();expect(page.locator('#market-direction')).to_contain_text('Long bias')
                 state['status'].update(state='failed',progress='Refresh failed',error='synthetic_provider_failure');update('refresh failure with previous snapshot');expect(page.locator('#error')).to_contain_text('Previous successful results');assert state['snapshot']['exports']==actual['exports']
@@ -201,6 +255,10 @@ def main():
                 state['snapshot']=None;state['status'].update(state='idle',progress='Ready');page.reload();expect(page.locator('#progress')).to_have_text('Ready');nav('primary');expect(page.locator('#combined')).to_have_attribute('aria-disabled','true');capture('no-snapshot-1440');results['states'].append('loading / no prior snapshot')
                 # Existing Saved schema, including a symbol absent from today's snapshot.
                 page.evaluate("localStorage.setItem('themescope-vnext-watchlist',JSON.stringify(['LEGACY']))");page.reload();nav('saved');expect(page.locator('#saved')).to_contain_text('LEGACY');results['states'].append('existing Saved ticker retained without snapshot')
+                page.locator('#saved [data-inspect-ticker="LEGACY"]').click();expect(page.locator('#inspector-content')).to_contain_text('No current relationship')
+                page.keyboard.press('Escape')
+                page.emulate_media(forced_colors='active');page.evaluate("document.querySelectorAll('[data-test-stamp]').forEach(e=>{e.style.color='CanvasText';e.style.background='Canvas'})");nav('methodology');audit('forced-colors');page.emulate_media(forced_colors='none')
+                results['interactions'].append('absent Saved ticker inspector, forced colors')
                 assert not errors,errors;assert not outside,outside
                 results.update(page_errors=errors,external_requests=outside,passed=True)
                 browser.close()

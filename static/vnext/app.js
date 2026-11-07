@@ -21,10 +21,14 @@
   let watched = [];
   try { const values = JSON.parse(localStorage.getItem(savedKey) || '[]'); if (Array.isArray(values)) watched = [...new Set(values.filter(s => typeof s === 'string' && s.trim()))]; } catch { /* A blocked or malformed browser store must not stop research. */ }
   const ui = {universe:'active', themeSort:'score', themeDescending:true, selectedTheme:'', candidateMode:'unique', memberSearch:'', memberRole:'', memberEligibility:'', memberSort:'ticker'};
-  const positions = new Map(), disclosures = new Set(), blobUrls = new Map();
+  const positions = new Map(), blobUrls = new Map();
+  let inspector = null, inspectorTrigger = '', inspectorOrigin = '', inspectorScroll = 0;
+  const inspectorViews = new Map();
   const name = id => snapshot?.themes?.find(t => t.theme_id === id)?.name || id || 'Unavailable';
   const themeHref = id => '#themes/' + encodeURIComponent(id);
-  const themeLink = id => `<a class="theme-link" href="${themeHref(id)}">${esc(name(id))}</a>`;
+  const chevron = '<span class="chevron" aria-hidden="true">›</span>';
+  const tickerLink = ticker => `<a class="ticker ticker-link" href="#primary?ticker=${encodeURIComponent(ticker)}" data-inspect-ticker="${esc(ticker)}" data-focus-key="ticker:${esc(ticker)}">${esc(ticker)}${chevron}</a>`;
+  const themeLink = id => `<a class="theme-link" href="${themeHref(id)}" data-inspect-theme="${esc(id)}" data-focus-key="theme:${esc(id)}">${esc(name(id))}${chevron}</a>`;
   const saveButton = (ticker, location) => `<button class="save-button" data-save="${esc(ticker)}" data-focus-key="${esc(location + ':' + ticker)}" aria-pressed="${watched.includes(ticker)}" aria-label="${watched.includes(ticker) ? 'Saved ' + esc(ticker) + '; remove from Saved' : 'Save ' + esc(ticker)}"><span aria-hidden="true">${watched.includes(ticker) ? '★' : '☆'}</span><span class="sr-only">${watched.includes(ticker) ? 'Saved' : 'Save'}</span></button>`;
   const empty = (title, message, action = '') => `<div class="empty-state"><span class="quiet-orbit" aria-hidden="true">◌</span><h3>${esc(title)}</h3><p>${esc(message)}</p>${action}</div>`;
   const displayKey = 'themescope-vnext-display';
@@ -46,7 +50,7 @@
   }
   function closeDisplay() { $('display-panel').hidden = true; $('display-toggle').setAttribute('aria-expanded','false'); }
   function focusKey() { return document.activeElement?.dataset?.focusKey; }
-  function restoreFocus(key) { if (key) [...document.querySelectorAll(`[data-focus-key="${CSS.escape(key)}"]`)].find(node => !node.closest('[hidden]'))?.focus({preventScroll:true}); }
+  function restoreFocus(key) { if (key) [...(inspector ? $('research-inspector') : document).querySelectorAll(`[data-focus-key="${CSS.escape(key)}"]`)].find(node => !node.closest('[hidden]'))?.focus({preventScroll:true}); }
   function announce(text) {
     clearTimeout(feedbackTimer); $('feedback').textContent = text; $('feedback').classList.add('visible');
     feedbackTimer = setTimeout(() => $('feedback').classList.remove('visible'), 3200);
@@ -105,9 +109,9 @@
       return `<article class="market-card ${ticker === 'IWM' ? 'context' : ''}" aria-label="${ticker} market context"><div class="market-card-head"><span class="market-ticker">${ticker}</span><span class="market-price">${money(row.close)}</span>${state(row.price_state)}</div>${ticker === 'IWM' ? '<span class="muted">Context only</span>' : `<div class="market-emas"><span>EMA21 <b>${money(row.ema21)}</b></span><span>EMA50 <b>${money(row.ema50)}</b></span></div><div class="market-breadth"><span>Breadth 21 <strong>${percent(b.above_ema21)}</strong></span><span>Breadth 50 <strong>${percent(b.above_ema50)}</strong></span></div><details><summary>${esc(b.state || 'Unavailable')} breadth · ${esc(b.valid ?? 0)}/${esc(b.configured ?? 0)} valid</summary><p>${esc(row.roster_source || 'Roster unavailable')}</p><p>${esc((row.roster_warnings || []).join(' ') || 'No roster advisories.')}</p></details>`}</article>`;
     }).join('');
     const themes = primaryThemes().slice(0, 5);
-    $('primary-themes').innerHTML = themes.length ? themes.map((t, i) => `<div class="preview-row"><span class="position">${String(i + 1).padStart(2,'0')}</span><div><a class="preview-name" href="${themeHref(t.theme_id)}">${esc(t.name || t.theme_id)}</a><small>${esc(t.family)}</small></div><div class="preview-value">${number(t.score)}<small>${priority(t.priority)}</small></div></div>`).join('') : empty('No Primary themes today', 'No themes qualify in this snapshot.', '<a href="#themes" class="text-link">Explore themes →</a>');
+    $('primary-themes').innerHTML = themes.length ? themes.map((t, i) => `<div class="preview-row"><span class="position">${String(i + 1).padStart(2,'0')}</span><div>${themeLink(t.theme_id)}<small>${esc(t.family)}</small></div><div class="preview-value">${number(t.score)}<small>${priority(t.priority)}</small></div></div>`).join('') : empty('No Primary themes today', 'No themes qualify in this snapshot.', '<a href="#themes" class="text-link">Explore themes →</a>');
     const stocks = uniqueRows(qualifiedRows()).sort((a, b) => a.ticker.localeCompare(b.ticker)).slice(0, 5);
-    $('candidate-preview').innerHTML = stocks.length ? stocks.map(r => `<div class="preview-row stock-row"><div><span class="ticker">${esc(r.ticker)}</span><small>${themeLink(r.theme_id)} · ${esc(r.role)}</small></div><div class="preview-value ${signTone(r.relative?.w)}">${points(r.relative?.w)}</div>${saveButton(r.ticker, 'overview')}</div>`).join('') : empty('No Primary stocks', 'No qualifying stocks in this snapshot.', '<a href="#primary" class="text-link">Open Primary →</a>');
+    $('candidate-preview').innerHTML = stocks.length ? stocks.map(r => `<div class="preview-row stock-row"><div>${tickerLink(r.ticker)}<small>${themeLink(r.theme_id)} · ${esc(r.role)}</small></div><div class="preview-value ${signTone(r.relative?.w)}">${points(r.relative?.w)}</div>${saveButton(r.ticker, 'overview')}</div>`).join('') : empty('No Primary stocks', 'No qualifying stocks in this snapshot.', '<a href="#primary" class="text-link">Open Primary →</a>');
   }
   function setOptions(id, options) {
     const select = $(id), first = select.options[0].outerHTML, previous = select.value;
@@ -154,14 +158,8 @@
     const mobile = $('theme-mobile-sort'); if ([...mobile.options].some(o => o.value === `${ui.themeSort}:${ui.themeDescending ? 'desc' : 'asc'}`)) mobile.value = `${ui.themeSort}:${ui.themeDescending ? 'desc' : 'asc'}`;
   }
   function eligibility(row) { return !row.eligibility?.available ? 'Unavailable' : row.eligibility.eligible ? 'Eligible' : 'Ineligible'; }
-  function relationshipContext(row, location) {
-    const key = `${location}:${row.ticker}:${row.theme_id}`;
-    const rel = row.relative || {}, e = row.eligibility || {};
-    const why = (e.reasons || []).map(r => ({insufficient_volume_history:'Insufficient volume history',missing_completed_regular_session:'Missing completed regular-session data',price_below_floor:'Close below $5',average_volume_not_above_floor:'10-session average volume is not above 500,000',turnover_below_floor:'Daily turnover below $10 million'})[r] || r).join(' · ');
-    return `<details class="member-disclosure" data-disclosure="${esc(key)}"${disclosures.has(key) ? ' open' : ''}><summary data-focus-key="${esc('disclosure:' + key)}">Research details</summary><div class="member-context"><p><strong>${row.qualifies ? 'Qualifies in this theme' : 'Does not qualify in this theme'}</strong> · ${esc(eligibility(row))}</p>${why ? `<p>${esc(why)}</p>` : ''}<p>Assigned section: ${row.assigned_section ? themeLink(row.assigned_section) : 'No current Primary assignment'}</p><p>Also qualifies in: ${(row.also_qualifies_in || []).map(themeLink).join(', ') || '—'}</p><dl><dt>Peer median 1M</dt><dd>${percent(rel.peer1?.value,100,true)}</dd><dt>Peer median 3M</dt><dd>${percent(rel.peer3?.value,100,true)}</dd><dt>ER1M / ER3M</dt><dd>${points(rel.er1)} / ${points(rel.er3)}</dd><dt>W vs Theme Peers</dt><dd>${points(rel.w)}</dd><dt>Close</dt><dd>${money(e.close)}</dd><dt>Average volume · 10 sessions</dt><dd>${number(e.average_volume,0)}</dd><dt>Daily turnover</dt><dd>${money(e.turnover)}</dd><dt>Earnings</dt><dd>${earnings(row.ticker)}</dd></dl><p>Stock 1M / 3M returns: not supplied in this snapshot. Peer medians and excess returns are shown as provided.</p></div></details>`;
-  }
   function candidateRow(row, location) {
-    return `<tr><td data-label="Ticker"><span class="ticker">${esc(row.ticker)}</span></td><td data-label="Theme">${themeLink(row.theme_id)}</td><td data-label="Role">${esc(row.role)}</td><td data-label="W" class="numeric ${signTone(row.relative?.w)}">${points(row.relative?.w)}</td><td data-label="Earnings" class="table-note">${earnings(row.ticker)}</td><td data-label="Save">${saveButton(row.ticker,location + ':' + row.theme_id)}</td></tr>`;
+    return `<tr><td data-label="Ticker">${tickerLink(row.ticker)}</td><td data-label="Theme">${themeLink(row.theme_id)}</td><td data-label="Role">${esc(row.role)}</td><td data-label="W" class="numeric ${signTone(row.relative?.w)}">${points(row.relative?.w)}</td><td data-label="Earnings" class="table-note">${earnings(row.ticker)}</td><td data-label="Save">${saveButton(row.ticker,location + ':' + row.theme_id)}</td></tr>`;
   }
   const candidateHeaders = ['Ticker','Theme','Role',{label:'W · pp',numeric:true},'Earnings','Save'];
   function matchesCandidate(row) {
@@ -195,7 +193,7 @@
   function renderMembers(themeId) {
     const rows = memberRows(themeId), total = (snapshot?.relationships || []).filter(r => r.theme_id === themeId).length;
     $('member-count').textContent = `${rows.length} of ${total} supplied Core + Enabler relationships`;
-    $('member-table').innerHTML = rows.length ? table(['Stock / research details','Role',{label:'W vs Theme Peers',numeric:true},'Eligibility','Qualification','Earnings','Saved'], rows.map(r => `<tr><td><span class="ticker">${esc(r.ticker)}</span>${relationshipContext(r,'members')}</td><td>${esc(r.role)}</td><td class="numeric ${signTone(r.relative?.w)}">${points(r.relative?.w)}</td><td class="table-note">${esc(eligibility(r))}</td><td><span class="table-note">${r.qualifies ? 'Qualifies' : 'Not qualified'}</span></td><td class="table-note">${earnings(r.ticker)}</td><td>${saveButton(r.ticker,'member:' + themeId)}</td></tr>`), name(themeId) + ' calculation members; Related members are not present in this snapshot.') : empty(total ? 'No members match this view' : 'No calculation members supplied', total ? 'Try another ticker, role or eligibility filter.' : 'Watch-only concepts and Related members do not enter calculations. No member rows are invented.');
+    $('member-table').innerHTML = rows.length ? table(['Ticker','Role',{label:'W vs Theme Peers',numeric:true},'Eligibility','Qualification','Earnings','Saved'], rows.map(r => `<tr><td>${tickerLink(r.ticker)}</td><td>${esc(r.role)}</td><td class="numeric ${signTone(r.relative?.w)}">${points(r.relative?.w)}</td><td class="table-note">${esc(eligibility(r))}</td><td><span class="table-note">${r.qualifies ? 'Qualifies' : 'Not qualified'}</span></td><td class="table-note">${earnings(r.ticker)}</td><td>${saveButton(r.ticker,'member:' + themeId)}</td></tr>`), name(themeId) + ' calculation members; Related members are not present in this snapshot.') : empty(total ? 'No members match this view' : 'No calculation members supplied', total ? 'Try another ticker, role or eligibility filter.' : 'Watch-only concepts and Related members do not enter calculations. No member rows are invented.');
   }
   function renderDetail(themeId) {
     const theme = snapshot?.themes?.find(t => t.theme_id === themeId);
@@ -212,7 +210,7 @@
     $('saved').innerHTML = '<p class="saved-scope">Browser-local bookmarks</p><div class="saved-list">' + watched.map(ticker => {
       const rows = (snapshot?.relationships || []).filter(r => r.ticker === ticker), assignment = snapshot?.exports?.assignments?.[ticker];
       const assigned = rows.find(r => r.theme_id === assignment?.assigned_section);
-      return `<article class="saved-row"><span class="ticker">${esc(ticker)}</span><div class="saved-context"><span>${assignment ? `Current Primary · ${themeLink(assignment.assigned_section)}` : snapshot ? 'Not currently Primary' : 'No snapshot'}</span>${!rows.length ? '<small>No current relationship · bookmark retained</small>' : ''}</div><span class="numeric ${signTone(assigned?.relative?.w)}">${points(assigned?.relative?.w)}</span><span class="table-note">${earnings(ticker)}</span><button class="button quiet small" data-remove="${esc(ticker)}" data-focus-key="saved-remove:${esc(ticker)}" aria-label="Remove ${esc(ticker)} from Saved">Remove</button></article>`;
+      return `<article class="saved-row">${tickerLink(ticker)}<div class="saved-context"><span>${assignment ? `Current Primary · ${themeLink(assignment.assigned_section)}` : snapshot ? 'Not currently Primary' : 'No snapshot'}</span>${!rows.length ? '<small>No current relationship · bookmark retained</small>' : ''}</div><span class="numeric ${signTone(assigned?.relative?.w)}">${points(assigned?.relative?.w)}</span><span class="table-note">${earnings(ticker)}</span><button class="button quiet small" data-remove="${esc(ticker)}" data-focus-key="saved-remove:${esc(ticker)}" aria-label="Remove ${esc(ticker)} from Saved">Remove</button></article>`;
     }).join('') + '</div>';
   }
 
@@ -229,15 +227,100 @@
     let persisted = true;
     try { localStorage.setItem(savedKey, JSON.stringify(watched)); } catch { persisted = false; }
     syncSaveButtons();
-    if (route === '#saved') {
+    if (inspector && route === '#saved') renderSaved();
+    if (route === '#saved' && !inspector) {
       const index = [...document.querySelectorAll('[data-remove]')].findIndex(b => b.dataset.remove === ticker);
       renderSaved(); const buttons = document.querySelectorAll('[data-remove]');
       (buttons[Math.min(Math.max(index,0),buttons.length - 1)] || $('saved-title')).focus({preventScroll:true});
     }
     announce(`${ticker} ${watched.includes(ticker) ? 'saved' : 'removed from Saved'}${persisted ? '' : ' for this visit; browser storage is unavailable'}.`);
   }
+  function inspectorFromLocation() {
+    const params = new URLSearchParams((location.hash || '').split('?')[1] || '');
+    const kind = params.has('theme') ? 'theme' : params.has('ticker') ? 'ticker' : null;
+    const id = kind && params.get(kind);
+    return id ? {kind,id} : null;
+  }
+  function inspectorView() {
+    const key = inspector?.kind + ':' + inspector?.id;
+    if (!inspectorViews.has(key)) inspectorViews.set(key,{filter:'All',search:'',sort:'ticker'});
+    return inspectorViews.get(key);
+  }
+  function openInspector(kind,id,trigger) {
+    if (!inspector) { inspectorTrigger = trigger; inspectorOrigin = route; inspectorScroll = window.scrollY; }
+    const url = (route || '#overview') + '?' + kind + '=' + encodeURIComponent(id);
+    const owned = inspector ? Boolean(history.state?.researchInspector) : true;
+    if (inspector) history.replaceState({researchInspector:owned},'',url);
+    else history.pushState({researchInspector:true},'',url);
+    syncInspector();
+  }
+  function closeInspector() {
+    if (history.state?.researchInspector) history.back();
+    else { history.replaceState(null,'',route || '#overview'); syncInspector(); }
+  }
+  function dismissInspector(restore = true) {
+    if (!inspector) return;
+    inspector = null;
+    $('research-inspector').close();
+    document.documentElement.classList.remove('inspecting');
+    if (restore) {
+      window.scrollTo(0,inspectorScroll);
+      restoreFocus(inspectorTrigger);
+      if (document.activeElement === document.body) document.querySelector('.view:not([hidden]) h1')?.focus({preventScroll:true});
+    }
+    document.title = (route.startsWith('#themes/') ? name(detailId()) : route === '#primary' ? 'Primary Watchlist' : route.slice(1).replace(/^./,x=>x.toUpperCase())) + ' · ThemeScope';
+  }
+  function syncInspector() {
+    const next = inspectorFromLocation();
+    if (!next) { dismissInspector(); return; }
+    const unchanged = inspector?.kind === next.kind && inspector?.id === next.id;
+    if (!inspector) { inspectorScroll = window.scrollY; if (inspectorOrigin !== route) inspectorTrigger = ''; }
+    inspector = next;
+    if (inspector.kind === 'theme') { ui.selectedTheme = inspector.id; document.querySelectorAll('[data-theme-row]').forEach(row=>row.classList.toggle('selected-row',row.dataset.themeRow === inspector.id)); }
+    renderInspector(unchanged);
+    if (!$('research-inspector').open) { closeDisplay(); $('research-inspector').showModal(); document.documentElement.classList.add('inspecting'); }
+    if (!unchanged) { $('research-inspector').scrollTop = 0; $('inspector-title').focus({preventScroll:true}); }
+  }
+  function metric(label,value) { return `<div class="metric-block"><span class="metric-label">${label}</span><div class="metric-value">${value}</div></div>`; }
+  function renderInspector(preserve = false) {
+    if (!inspector) return;
+    const dialog = $('research-inspector'), focused = dialog.contains(document.activeElement) ? focusKey() : null;
+    const textSelection = document.activeElement?.id === 'inspector-search' ? document.activeElement.selectionStart : null;
+    const scroll = dialog.scrollTop;
+    $('inspector-kind').textContent = inspector.kind === 'theme' ? 'Theme research' : 'Ticker research';
+    $('inspector-title').textContent = inspector.kind === 'theme' ? name(inspector.id) : inspector.id;
+    $('inspector-status').textContent = ['failed','interrupted'].includes(currentStatus.state) ? 'Refresh failed · previous successful snapshot retained' : 'Completed session ' + (snapshot?.session || '—');
+    document.title = $('inspector-title').textContent + ' · Research · ThemeScope';
+    if (inspector.kind === 'theme') renderThemeInspector(); else renderTickerInspector();
+    if (preserve) { dialog.scrollTop = scroll; restoreFocus(focused); if (textSelection != null) $('inspector-search')?.setSelectionRange(textSelection,textSelection); }
+  }
+  function renderThemeInspector() {
+    const t = snapshot?.themes?.find(row=>row.theme_id === inspector.id);
+    if (!t) { $('inspector-content').innerHTML = empty('Theme unavailable','No theme supplied in this snapshot.'); return; }
+    const v = inspectorView();
+    $('inspector-content').innerHTML = `<div class="inspector-subhead"><span>${esc(t.family)} · ${t.status === 'active' ? 'Active' : 'Watch-only'}</span><a class="text-link" href="${themeHref(t.theme_id)}">Open full theme ${chevron}</a></div><div class="inspector-metrics">${metric('Score',number(t.score))}${metric('Priority',priority(t.priority))}${metric('Trend',state(t.index?.trend))}${metric('1M',`<span class="${signTone(t.returns?.[0]?.value)}">${percent(t.returns?.[0]?.value,100,true)}</span>`)}${metric('3M',`<span class="${signTone(t.returns?.[1]?.value)}">${percent(t.returns?.[1]?.value,100,true)}</span>`)}</div><dl class="index-strip"><div><dt>Synthetic index</dt><dd>${number(t.index?.level)}</dd></div><div><dt>EMA21</dt><dd>${number(t.index?.ema21)}</dd></div><div><dt>EMA50</dt><dd>${number(t.index?.ema50)}</dd></div></dl><div class="inspector-breadth">${metric('Breadth 21',percent(t.breadth?.[0]?.value))}${metric('Breadth 50',percent(t.breadth?.[1]?.value))}</div><p class="inspector-comparison">${esc(comparison(t))} · ${prelaunch() ? 'Pre-launch research' : snapshot?.theme_layer?.state === 'initialized' ? 'Launch initialization · no earned return' : snapshot?.theme_layer?.state === 'live' ? 'Official theme history' : 'No official live history'}</p><div class="section-heading"><h3>Member research</h3>${themeDownload(t.theme_id)}</div><form class="inspector-filters" aria-label="Filter inspector members"><div class="segmented" role="group" aria-label="Member view">${['All','Primary','Eligible','Core','Enabler'].map(f=>`<button type="button" data-inspector-filter="${f}" data-focus-key="inspect-filter:${f}" aria-pressed="${v.filter === f}">${f}</button>`).join('')}</div><div class="inspector-search-row"><label>Search members<input id="inspector-search" type="search" placeholder="Ticker…" value="${esc(v.search)}" data-focus-key="inspector-search"></label><label>Sort<select id="inspector-sort" data-focus-key="inspector-sort"><option value="ticker">Ticker A–Z</option><option value="w-desc">W high to low</option><option value="w-asc">W low to high</option></select></label></div></form><p id="inspector-member-count" class="table-meta" role="status"></p><div id="inspector-members" class="inspector-table"></div>`;
+    $('inspector-sort').value = v.sort;
+    renderInspectorMembers();
+  }
+  function renderInspectorMembers() {
+    if (inspector?.kind !== 'theme' || !$('inspector-members')) return;
+    const v = inspectorView(), all = (snapshot?.relationships || []).filter(r=>r.theme_id === inspector.id);
+    const rows = all.filter(r=>(!v.search || r.ticker.toLowerCase().includes(v.search.toLowerCase())) && (v.filter === 'All' || v.filter === 'Primary' && r.qualifies || v.filter === 'Eligible' && r.eligibility?.eligible || r.role === v.filter));
+    rows.sort((a,b)=>(v.sort === 'ticker' ? a.ticker.localeCompare(b.ticker) : compareValues(valid(a.relative?.w) ? Number(a.relative.w) : null,valid(b.relative?.w) ? Number(b.relative.w) : null,v.sort === 'w-desc')) || a.ticker.localeCompare(b.ticker));
+    $('inspector-member-count').textContent = `${rows.length} / ${all.length} supplied members`;
+    $('inspector-members').innerHTML = rows.length ? table(['Ticker','Role',{label:'W · pp',numeric:true},'State','Save'],rows.map(r=>`<tr><td>${tickerLink(r.ticker)}</td><td>${esc(r.role)}</td><td class="numeric ${signTone(r.relative?.w)}">${points(r.relative?.w)}</td><td class="member-state">${esc(eligibility(r))}<small>${r.qualifies ? 'Primary' : 'Not qualified'}</small></td><td>${saveButton(r.ticker,'inspector-member')}</td></tr>`),'Supplied theme members; W in percentage points. Related rows are not invented.') : empty('No supplied members match','');
+  }
+  function renderTickerInspector() {
+    const ticker = inspector.id, rows = (snapshot?.relationships || []).filter(r=>r.ticker === ticker).sort((a,b)=>name(a.theme_id).localeCompare(name(b.theme_id)));
+    const assignment = snapshot?.exports?.assignments?.[ticker], assigned = rows.find(r=>r.theme_id === assignment?.assigned_section);
+    // W and role always belong to a supplied relationship. No cross-theme aggregate.
+    const lead = assigned || (rows.length === 1 ? rows[0] : null), e = (lead || rows[0])?.eligibility;
+    const primaryState = rows.some(r=>r.qualifies) ? 'Current Primary' : 'Not currently Primary';
+    const cell = (label,value,toneClass='')=>`<div><dt>${label}</dt><dd class="${toneClass}">${value}</dd></div>`;
+    $('inspector-content').innerHTML = `<div class="inspector-subhead"><span>${primaryState}</span>${saveButton(ticker,'inspector-ticker')}</div><div class="inspector-metrics ticker-metrics">${metric('Role',lead ? esc(lead.role) : rows.length ? 'Per theme' : '—')}${metric('W · pp',`<span class="${signTone(lead?.relative?.w)}">${lead ? points(lead.relative?.w) : rows.length ? 'Per theme' : '—'}</span>`)}${metric('Eligibility',e ? esc(eligibility({eligibility:e})) : 'Unavailable')}${metric('Earnings',earnings(ticker))}</div><dl class="assignment"><dt>Assigned theme</dt><dd>${assignment ? themeLink(assignment.assigned_section) : 'No current assignment'}</dd><dt>Other qualifying themes</dt><dd>${rows.filter(r=>r.qualifies && r.theme_id !== assignment?.assigned_section).map(r=>themeLink(r.theme_id)).join('<br>') || '—'}</dd></dl><div class="section-heading"><h3>Theme relationships</h3><span class="muted table-note">${rows.length} supplied</span></div><div class="ticker-relationships">${rows.map(r=>`<section class="ticker-relationship"><div class="relationship-heading">${themeLink(r.theme_id)}<span class="table-note">${r.qualifies ? 'Qualifies' : 'Not qualified'}</span></div><dl class="relationship-metrics">${cell('Role',esc(r.role))}${cell('W',points(r.relative?.w),signTone(r.relative?.w))}${cell('Eligibility',esc(eligibility(r)))}${cell('ER1M',points(r.relative?.er1),signTone(r.relative?.er1))}${cell('ER3M',points(r.relative?.er3),signTone(r.relative?.er3))}${cell('Peer median 1M',percent(r.relative?.peer1?.value,100,true),signTone(r.relative?.peer1?.value))}${cell('Peer median 3M',percent(r.relative?.peer3?.value,100,true),signTone(r.relative?.peer3?.value))}</dl>${r.eligibility?.reasons?.length ? `<p class="table-note">${r.eligibility.reasons.map(reason=>esc(({insufficient_volume_history:'Insufficient volume history',missing_completed_regular_session:'Missing completed session',price_below_floor:'Close below $5',average_volume_not_above_floor:'10-session average volume not above 500,000',turnover_below_floor:'Turnover below $10 million'})[reason] || reason)).join(' · ')}</p>` : ''}</section>`).join('') || '<p class="empty-state">No current relationship supplied. Bookmark retained if Saved.</p>'}</div>${e ? `<details class="liquidity-details"><summary>Liquidity inputs</summary><dl class="relationship-metrics">${cell('Close',money(e.close))}${cell('Average volume · 10 sessions',number(e.average_volume,0))}${cell('Daily turnover',money(e.turnover))}</dl></details>` : ''}`;
+  }
   function parseRoute() {
-    const raw = location.hash || '#overview';
+    const raw = (location.hash || '#overview').split('?')[0];
     if (['#market','#daily-plan'].includes(raw)) return '#overview';
     if (raw === '#candidates') return '#primary';
     if (raw === '#watchlist') return '#saved';
@@ -247,6 +330,8 @@
   function showRoute(initial = false) {
     const next = parseRoute();
     const previousRoute = route;
+    if (next === route) { syncInspector(); return; }
+    dismissInspector(false);
     if (route) positions.set(route,{scroll:window.scrollY, table:$('theme-table').scrollTop});
     route = next;
     const part = route.slice(1).split('/')[0], isDetail = route.startsWith('#themes/');
@@ -262,6 +347,7 @@
     const title = isDetail ? name(detailId()) : part.charAt(0).toUpperCase() + part.slice(1);
     document.title = title + ' · ThemeScope';
     requestAnimationFrame(() => {
+      if (inspectorFromLocation()) { syncInspector(); return; }
       if (!initial) view?.querySelector('h1')?.focus({preventScroll:true});
       const pos = positions.get(route); window.scrollTo(0,pos?.scroll || 0);
       if (!isDetail && part === 'themes') $('theme-table').scrollTop = pos?.table || 0;
@@ -280,6 +366,7 @@
     setOptions('theme-family',[...new Set((snapshot.themes || []).map(t => t.family).filter(Boolean))].sort().map(f => [f,f]));
     setOptions('candidate-theme',(snapshot.themes || []).filter(t => qualifiedRows().some(r => r.theme_id === t.theme_id)).sort((a,b) => (a.name || a.theme_id).localeCompare(b.name || b.theme_id)).map(t => [t.theme_id,t.name || t.theme_id]));
     renderThemes(); renderCandidates(); renderSaved();
+    if (inspector) renderInspector(true);
     if (route.startsWith('#themes/')) { renderDetail(detailId()); document.title = name(detailId()) + ' · ThemeScope'; }
     const url = download();
     $('combined').setAttribute('aria-disabled',String(!url)); $('combined').tabIndex = url ? 0 : -1; if (url) $('combined').href = url;
@@ -299,6 +386,7 @@
     $('refresh').disabled = status.state === 'running';
     $('refresh-label').textContent = preview ? 'Replay fixture' : status.state === 'running' ? 'Refreshing…' : 'Refresh Data';
     const failed = ['failed','interrupted'].includes(status.state);
+    if (inspector) $('inspector-status').textContent = failed ? 'Refresh failed · previous successful snapshot retained' : status.state === 'running' ? progress : 'Completed session ' + (snapshot?.session || '—');
     $('error').hidden = !failed && !requestError;
     $('error').textContent = failed ? `${status.state === 'interrupted' ? 'Refresh interrupted' : 'Refresh failed'}${status.error ? ' (' + status.error + ')' : ''}. Previous successful results and exports remain available. Refresh Data to retry.` : requestError;
     if (previous.state === 'running' && status.state === 'success') announce('Refresh complete.');
@@ -318,12 +406,11 @@
     } finally { polling = false; }
   }
   document.addEventListener('submit',event => { if (event.target.matches('form')) event.preventDefault(); });
-  document.addEventListener('toggle',event => {
-    const key = event.target.dataset?.disclosure;
-    if (key) { if (event.target.open) disclosures.add(key); else disclosures.delete(key); }
-  },true);
   document.addEventListener('click',event => {
     const button = event.target.closest('button'), link = event.target.closest('a');
+    if ((link?.dataset.inspectTheme || link?.dataset.inspectTicker) && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+      event.preventDefault(); openInspector(link.dataset.inspectTheme ? 'theme' : 'ticker',link.dataset.inspectTheme || link.dataset.inspectTicker,link.dataset.focusKey); return;
+    }
     if (link?.getAttribute('href') === '#workspace') { event.preventDefault(); $('workspace').focus(); $('workspace').scrollIntoView(); return; }
     if (link?.getAttribute('aria-disabled') === 'true') { event.preventDefault(); return; }
     if (link?.getAttribute('href')?.startsWith('#themes/')) {
@@ -336,6 +423,8 @@
       return;
     }
     if (!button) return;
+    if (button.id === 'inspector-close') { closeInspector(); return; }
+    if (button.dataset.inspectorFilter) { inspectorView().filter = button.dataset.inspectorFilter; renderInspector(true); restoreFocus('inspect-filter:' + button.dataset.inspectorFilter); return; }
     if (button.id === 'display-toggle') { const open = $('display-panel').hidden; $('display-panel').hidden = !open; button.setAttribute('aria-expanded',String(open)); if (open) $('display-close').focus(); return; }
     if (button.id === 'display-close') { closeDisplay(); $('display-toggle').focus(); return; }
     if (button.dataset.density) { display.density = button.dataset.density; applyDisplay(true); return; }
@@ -353,6 +442,8 @@
   });
   function filterChange(event) {
     const id = event.target.id;
+    if (id === 'inspector-search') { inspectorView().search = event.target.value; renderInspectorMembers(); return; }
+    if (id === 'inspector-sort') { inspectorView().sort = event.target.value; renderInspectorMembers(); return; }
     if (['theme-search','theme-family','theme-priority','theme-trend'].includes(id)) renderThemes();
     if (id === 'theme-mobile-sort') { const [key,direction] = event.target.value.split(':'); ui.themeSort = key; ui.themeDescending = direction === 'desc'; renderThemes(); $('theme-mobile-sort')?.focus(); }
     if (id.startsWith('candidate-') && id !== 'candidate-filters') renderCandidates();
@@ -376,6 +467,7 @@
     } catch { requestError = 'Unable to reach the local server. Previous results remain available. Refresh Data to retry.'; }
     await poll();
   });
+  $('research-inspector').addEventListener('cancel',event=>{ event.preventDefault(); closeInspector(); });
   applyDisplay();
   history.scrollRestoration = 'manual';
   document.querySelectorAll('[data-nav]').forEach(link => { link.querySelector('.nav-icon').innerHTML = icon(link.dataset.nav); });

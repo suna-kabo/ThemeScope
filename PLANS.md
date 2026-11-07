@@ -607,3 +607,15 @@ Stage 1 final browser rerun passed all destinations/Display, nine axe A/AA views
 320px reflow and 200% text resize, with zero page errors/external requests. Visual
 review confirmed mobile and high-contrast states. Accessible-label overflow and
 large-text sidebar/reflow findings were fixed before the first focused UI commit.
+
+Step 1 committed as 2c2d449. Step 2 adds one native theme/ticker Research Inspector
+with persistent link chevrons, history/Back, source focus and filter preservation.
+Repeated row disclosures move into the inspector; full Theme Detail stays optional.
+Snapshot changes preserve inspector input/focus; failure retains published data.
+Only presentation/tests/docs changed. Full 327-case suite and the two functional
+browser smokes pass. Native mobile dialog alignment and forced-colors tokens were
+hardened during visual/accessibility review before the second focused UI commit.
+Step 2 acceptance complete: all three browser scripts pass, zero axe A/AA violations,
+page errors or external requests. Covers inspector Back/Forward/Escape, source
+focus/scroll, refresh preservation, 320px/200% text and forced colors. Default
+1440p density measures 30 theme rows and 24 Primary rows. No runtime/config diff.
