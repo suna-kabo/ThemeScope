@@ -88,7 +88,10 @@
       live:'Official theme history · Completed-session research',
       activation_blocked:'Theme activation blocked · Market context remains available. See Configuration & activation status in Methodology.'
     };
-    $('theme-layer').hidden = !messages[layer.state];
+    const routine = ['initialized','live'].includes(layer.state);
+    $('lifecycle-detail').hidden = !messages[layer.state];
+    $('lifecycle-detail').textContent = messages[layer.state] || '';
+    $('theme-layer').hidden = routine || !messages[layer.state];
     $('theme-layer').textContent = messages[layer.state] || '';
     $('blockers').innerHTML = (snapshot?.production_blockers || []).map(b => `<li>${esc(b)}</li>`).join('') || '<li>No activation blockers recorded.</li>';
   }
@@ -149,12 +152,21 @@
     document.querySelectorAll('[data-map-theme]').forEach(node=>node.classList.toggle('map-selected',node.dataset.mapTheme === id));
     $('map-readout').innerHTML=`<h3>${themeLink(id)}</h3><dl><div><dt>Score</dt><dd>${number(t.score)}</dd></div><div><dt>1M</dt><dd class="${signTone(t.returns[0].value)}">${percent(t.returns[0].value,100,true)}</dd></div><div><dt>3M</dt><dd class="${signTone(t.returns[1].value)}">${percent(t.returns[1].value,100,true)}</dd></div></dl>${state(t.index?.trend)}<p>${priority(t.priority)}</p>`;
   }
+  function marketEMA(label,close,value) {
+    const available = valid(close) && valid(value), relation = !available ? 'Unavailable' : Number(close) > Number(value) ? 'Above' : Number(close) < Number(value) ? 'Below' : 'At';
+    const cls = relation === 'Above' ? 'positive' : relation === 'Below' ? 'negative' : 'neutral';
+    return `<div class="ema-context ${cls}"><span>${icon(relation === 'Above' ? 'up' : relation === 'Below' ? 'down' : 'flat')} ${relation} ${label}</span><b>${money(value)}</b></div>`;
+  }
   function renderOverview() {
     const market = snapshot?.market || {}, decision = market.decision || {}, direction = snapshot?.market_direction || decision.direction || 'Unclassified';
     $('market-direction').innerHTML = `<div class="direction-row"><div><span class="metric-label">Market</span><h2 class="direction-name ${tone(direction)}"><span class="direction-symbol" aria-hidden="true">${symbol(direction)}</span>${esc(direction)}</h2></div><details class="decision-details"><summary>Market Matrix</summary><p id="decision-path">${esc(decision.reason || 'Unavailable until a successful refresh.')}</p><p id="today-plan">${esc(snapshot?.today_plan || '')}</p><p>Breadth: ${esc(market.breadth_consensus || 'Unavailable')}${decision.breadth_qualifier ? ' · ' + esc(decision.breadth_qualifier) : ''}</p></details></div>`;
     $('market-cards').innerHTML = ['SPY','QQQ','IWM'].map(ticker => {
       const row = market.context?.[ticker] || {}, b = row.breadth || {};
-      return `<article class="market-card ${ticker === 'IWM' ? 'context' : ''}" aria-label="${ticker} market context"><div class="market-card-head"><span class="market-ticker">${ticker}</span><span class="market-price">${money(row.close)}</span>${state(row.price_state)}</div>${ticker === 'IWM' ? '<span class="muted">Context only</span>' : `<div class="market-emas"><span>EMA21 <b>${money(row.ema21)}</b></span><span>EMA50 <b>${money(row.ema50)}</b></span></div><div class="market-breadth">${breadthBar('Breadth 21',b.above_ema21)}${breadthBar('Breadth 50',b.above_ema50)}</div><details><summary>${esc(b.state || 'Unavailable')} breadth · ${esc(b.valid ?? 0)}/${esc(b.configured ?? 0)} valid</summary><p>${esc(row.roster_source || 'Roster unavailable')}</p><p>${esc((row.roster_warnings || []).join(' ') || 'No roster advisories.')}</p></details>`}</article>`;
+      return `<article class="market-card ${ticker === 'IWM' ? 'context' : ''}" aria-label="${ticker} market context"><div class="market-card-head"><span class="market-ticker">${ticker}</span><span class="market-price">${money(row.close)}</span>${state(row.price_state)}</div>${ticker === 'IWM' ? '<span class="muted">Context only</span>' : `<div class="market-emas">${marketEMA('EMA21',row.close,row.ema21)}${marketEMA('EMA50',row.close,row.ema50)}</div><div class="market-breadth">${breadthBar('Breadth 21',b.above_ema21)}${breadthBar('Breadth 50',b.above_ema50)}</div><span class="breadth-state ${tone(b.state)}" title="${esc(b.valid ?? 0)}/${esc(b.configured ?? 0)} valid">${symbol(b.state)} ${esc(b.state || 'Unavailable')} breadth</span>`}</article>`;
+    }).join('');
+    $('market-data-details').innerHTML = ['SPY','QQQ'].map(ticker=>{
+      const row=market.context?.[ticker] || {}, b=row.breadth || {};
+      return `<p>${ticker} breadth · ${esc(b.valid ?? 0)}/${esc(b.configured ?? 0)} valid · ${esc(b.state || 'Unavailable')}<br>${esc(row.roster_source || 'Roster unavailable')}<br>${esc((row.roster_warnings || []).join(' ') || 'No roster advisories.')}</p>`;
     }).join('');
     renderThemeMap();
     const themes = primaryThemes().slice(0, 5);
@@ -438,7 +450,12 @@
     if (inspector) $('inspector-status').textContent = failed ? 'Refresh failed · previous successful snapshot retained' : status.state === 'running' ? progress : 'Completed session ' + (snapshot?.session || '—');
     $('error').hidden = !failed && !requestError;
     $('error').textContent = failed ? `${status.state === 'interrupted' ? 'Refresh interrupted' : 'Refresh failed'}${status.error ? ' (' + status.error + ')' : ''}. Previous successful results and exports remain available. Refresh Data to retry.` : requestError;
-    if (previous.state === 'running' && status.state === 'success') announce('Refresh complete.');
+    if (previous.state === 'running' && status.state === 'success') {
+      announce('Refresh complete.');
+      $('refresh').classList.remove('refresh-complete');
+      void $('refresh').offsetWidth;
+      $('refresh').classList.add('refresh-complete');
+    }
   }
   let polling = false;
   async function poll() {

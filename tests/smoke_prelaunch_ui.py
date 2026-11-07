@@ -49,7 +49,9 @@ def main():
                 assert len(identifiers)==len(set(identifiers))
                 # Auto cutover uses the same server and never calls research history live.
                 fixture.target='2026-11-06';page.get_by_role('button',name='Refresh Data',exact=True).click()
-                expect(page.locator('#theme-layer')).to_contain_text('Launch close: index initialized at 100',timeout=30000)
+                page.locator('.diagnostics summary').click()
+                expect(page.locator('#lifecycle-detail')).to_contain_text('Launch close: index initialized at 100',timeout=30000)
+                expect(page.locator('#theme-layer')).to_be_hidden()
                 page.locator('[data-nav="themes"]').click()
                 expect(page.locator('#theme-table')).to_contain_text('Trend')
                 assert service.snapshot()['theme_layer']['official_live_history']

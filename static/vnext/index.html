@@ -27,7 +27,7 @@
   </header>
   <div class="operational-strip">
     <span id="completeness">Completeness —</span><span id="provider">Provider —</span>
-    <details class="diagnostics"><summary>Refresh details</summary><div class="diagnostics-body"><p id="last-success">Last successful refresh —</p><p id="target-detail">Target session —</p><p id="read-status"></p><p>Refresh publishes one complete snapshot. Failed refreshes preserve the previous results and exports.</p></div></details>
+    <details class="diagnostics"><summary>Refresh details</summary><div class="diagnostics-body"><p id="last-success">Last successful refresh —</p><p id="target-detail">Target session —</p><p id="read-status"></p><p id="lifecycle-detail" hidden></p><div id="market-data-details"></div><p>Refresh publishes one complete snapshot. Failed refreshes preserve the previous results and exports.</p></div></details>
   </div>
   <main id="workspace" tabindex="-1">
     <div id="fixture-banner" class="notice warning" hidden>Synthetic inspection fixture · fictional symbols and results · no live signals.</div>
@@ -41,7 +41,7 @@
         <section class="research-panel" aria-labelledby="top-themes-title"><div class="section-heading"><div><h2 id="top-themes-title">Primary themes</h2></div><a href="#themes" class="text-link">All themes <span aria-hidden="true">↗</span></a></div><div id="primary-themes"></div></section>
         <section class="research-panel" aria-labelledby="preview-candidates-title"><div class="section-heading"><div><h2 id="preview-candidates-title">Primary stocks</h2></div><a href="#primary" class="text-link">All Primary <span aria-hidden="true">↗</span></a></div><div id="candidate-preview"></div></section>
       </div>
-      <details id="theme-map-panel" class="theme-map-panel"><summary>Theme Map <span>1M × 3M returns</span></summary><div id="theme-map"></div></details>
+      <details id="theme-map-panel" class="theme-map-panel" open><summary>Theme Map <span>1M × 3M returns</span></summary><div id="theme-map"></div></details>
     </section>
     <section id="themes-page" class="view" aria-labelledby="themes-title" hidden>
       <div class="page-heading"><div><h1 id="themes-title" tabindex="-1">Themes</h1></div><div class="segmented" role="group" aria-label="Theme universe"><button data-universe="active" aria-pressed="true">Active <span id="active-count">—</span></button><button data-universe="watch_only" aria-pressed="false">Watch-only <span id="watch-count">—</span></button></div></div>

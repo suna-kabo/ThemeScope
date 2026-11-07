@@ -50,6 +50,9 @@ def main():
                 expect(page.locator('#theme-layer')).to_contain_text('Pre-launch research')
                 results['states'].append('real configured pre-launch research')
                 nav=lambda name:page.locator(f'[data-nav="{name}"]').click()
+                def open_map():
+                    if not page.locator('#theme-map-panel').evaluate('e=>e.open'):page.locator('#theme-map-panel > summary').click()
+                expect(page.locator('#theme-map-panel')).to_have_attribute('open','')
                 def capture(label):
                     if out:
                         page.evaluate('''()=>{const d=document.querySelector('dialog[open]');if(d&&!d.querySelector('[data-test-stamp]'))d.append(document.querySelector('[data-test-stamp]').cloneNode(true));}''')
@@ -91,7 +94,7 @@ def main():
                 assert abs(page.evaluate('scrollY')-origin_scroll)<2
                 expect(scroll_link).to_be_focused()
                 # Snapshot-only visuals: correct breadth lengths, raw axes and inspectable points.
-                nav('overview');page.locator('#theme-map-panel > summary').click()
+                nav('overview');open_map()
                 map_rows=[t for t in actual['themes'] if t['status']=='active' and t['returns'] and all(t['returns'][i]['value'] is not None for i in [0,1])]
                 expect(page.locator('[data-map-theme]')).to_have_count(len(map_rows))
                 expect(page.locator('#theme-map')).to_contain_text('Raw returns · linear axes')
@@ -230,7 +233,7 @@ def main():
                 capture('text-200-inspector')
                 page.keyboard.press('Escape');expect(page.locator('#research-inspector')).not_to_be_visible()
                 results['widths']['200% text resize']='five destinations and inspector reflow without document overflow'
-                nav('overview');page.locator('#theme-map-panel > summary').click()
+                nav('overview');open_map()
                 assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
                 page.locator('#theme-map-panel > summary').click()
                 page.evaluate("document.documentElement.style.fontSize=''")
@@ -261,8 +264,45 @@ def main():
                 state['status'].update(state='running',progress='Calculating market, themes and peer comparisons');update('refresh running');expect(page.locator('#refresh')).to_be_disabled();expect(page.locator('#market-direction')).to_contain_text('Long bias')
                 state['status'].update(state='failed',progress='Refresh failed',error='synthetic_provider_failure');update('refresh failure with previous snapshot');expect(page.locator('#error')).to_contain_text('Previous successful results');assert state['snapshot']['exports']==actual['exports']
                 state['status'].update(state='success',progress='Refresh complete',error=None);update('refresh success');expect(page.locator('#error')).to_be_hidden()
-                state['snapshot']['theme_layer'].update(state='initialized',official_live_history=True);update('initialized launch');expect(page.locator('#theme-layer')).to_contain_text('Launch close: index initialized at 100')
-                state['snapshot']['theme_layer'].update(state='live');update('normal live');expect(page.locator('#theme-layer')).to_contain_text('Official theme history')
+                state['snapshot']['theme_layer'].update(state='initialized',official_live_history=True);update('initialized launch');expect(page.locator('#theme-layer')).to_be_hidden();expect(page.locator('#lifecycle-detail')).to_contain_text('Launch close: index initialized at 100')
+                state['snapshot']['theme_layer'].update(state='live');update('normal live');expect(page.locator('#theme-layer')).to_be_hidden();expect(page.locator('#lifecycle-detail')).to_contain_text('Official theme history')
+                # Alignment and EMA presentation use existing values; breadth state stays supplied.
+                state['snapshot']['market']['context']['SPY'].update(close='735.29',ema21='759.99',ema50='762.65',price_state='Bearish')
+                state['snapshot']['market']['context']['QQQ'].update(close='656.10',ema21='650.00',ema50='656.10',price_state='Mixed')
+                state['snapshot']['market']['context']['SPY']['breadth']['state']='Negative'
+                state['snapshot']['market']['context']['QQQ']['breadth']['state']='Positive'
+                state['snapshot']['market_direction']='Short bias'
+                update('market alignment presentation boundaries')
+                expect(page.locator('.market-card').nth(0).locator('.ema-context.negative')).to_have_count(2)
+                expect(page.locator('.market-card').nth(1).locator('.ema-context.positive')).to_have_count(1)
+                expect(page.locator('.market-card').nth(1).locator('.ema-context.neutral')).to_contain_text('At EMA50')
+                expect(page.locator('.market-card').nth(0).locator('.breadth-state')).to_have_class('breadth-state negative')
+                expect(page.locator('.market-card').nth(1).locator('.breadth-state')).to_have_class('breadth-state positive')
+                assert page.locator('#market-cards details').count()==0
+                for width,height in [(2560,1440),(1920,1080),(390,844)]:
+                    page.set_viewport_size({'width':width,'height':height});nav('overview');open_map();page.evaluate('scrollTo(0,0)')
+                    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+                    if width>800:
+                        for selector in ['.market-ticker','.market-price','.state','.market-emas','.market-breadth','.breadth-state']:
+                            y=[page.locator('.market-card').nth(i).locator(selector).first.bounding_box()['y'] for i in [0,1]]
+                            assert abs(y[0]-y[1])<1,(width,selector,y)
+                    capture('market-overview-'+str(width))
+                page.set_viewport_size({'width':1440,'height':1000})
+                page.evaluate("document.documentElement.style.fontSize='200%'");capture('market-overview-text-200')
+                assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+                page.evaluate("document.documentElement.style.fontSize=''")
+                state['snapshot']['market']['context']['SPY'].update(close=None,ema21=None)
+                update('missing market EMA inputs');expect(page.locator('.market-card').nth(0).locator('.ema-context.neutral').first).to_contain_text('Unavailable EMA21')
+                # Motion is finite, and both user/OS reduction suppress it.
+                page.emulate_media(reduced_motion='no-preference');nav('themes')
+                assert page.locator('#themes-page').evaluate('e=>getComputedStyle(e).animationDuration')=='0.11s'
+                page.locator('#display-toggle').click();page.locator('#display-motion').check();page.keyboard.press('Escape')
+                nav('overview');assert page.locator('#overview-page').evaluate('e=>getComputedStyle(e).animationName')=='none'
+                page.locator('#display-toggle').click();page.locator('#display-motion').uncheck();page.keyboard.press('Escape')
+                page.emulate_media(reduced_motion='reduce');nav('themes')
+                assert page.locator('#themes-page').evaluate('e=>getComputedStyle(e).animationName')=='none'
+                nav('overview')
+                results['interactions'].append('aligned market rows, Above/Below/At/missing EMA, supplied breadth, quiet lifecycle, default map and finite reduced motion')
                 for label,direction in [('neutral','Neutral'),('short-biased','Short bias'),('unclassified','Unclassified')]:
                     state['snapshot']['market_direction']=direction;state['snapshot']['market']['decision']['direction']=direction
                     state['snapshot']['today_plan']='Illustrative browser state · not a live signal'
@@ -289,7 +329,7 @@ def main():
                 active[1]['returns'][0]['value']='0';active[1]['returns'][1]['value']='0'
                 active[2]['returns']=deepcopy(active[1]['returns']);active[3]['returns']=None
                 state['snapshot']['refreshed_at']='map extremes and missing values'
-                nav('overview');page.locator('#theme-map-panel > summary').click()
+                nav('overview');open_map()
                 expect(page.locator('[data-map-theme]')).to_have_count(43,timeout=6000)
                 page.wait_for_function("()=>Number(document.querySelector('#theme-map-svg')?.dataset.xmax)>12")
                 svg=page.locator('#theme-map-svg');assert float(svg.get_attribute('data-xmax'))>12 and float(svg.get_attribute('data-ymin'))<-.4

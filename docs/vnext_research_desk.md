@@ -234,3 +234,37 @@ with a constrained line height. Mobile 'Per theme'/missing W initially inherited
 numeric emphasis, corrected to supporting text size. Final density is 32 complete
 theme rows and 24 Primary rows at 1440p. Fourteen axe audits pass; the refreshed
 review gallery has 15 distinct fixture screenshots including 200% text views.
+
+## Targeted market overview follow-up after 0b520b4
+
+One focused presentation update requested by the user; the approved navigation,
+inspectors, Theme Map axes/data, financial methodology, lifecycle metadata, Saved,
+exports and backend remain unchanged.
+
+- Normal initialized/live notices no longer occupy the workspace. Their existing
+  lifecycle message is available in Refresh details. Pre-launch/research, activation
+  blockers, fixture warnings and refresh failures keep their meaningful notices.
+- Theme Map is expanded on initial load and can still be collapsed manually.
+  Polling does not overwrite that choice; coordinates and data are unchanged.
+- SPY/QQQ use shared grid tracks and identical header columns for ticker, price and
+  returned price state. Tabular market numbers and aligned EMA/breadth rows replace
+  incidental flex spacing. A larger ticker column prevents crowding at 200% text.
+- Existing close and EMA values are compared for display only: Above/Below/At,
+  with directional icon/text and green/red/neutral tone. Missing input is explicit.
+  No distance return, threshold, trend rule or other financial metric is introduced.
+- Breadth bars/percentages remain. A compact semantic state uses the supplied
+  breadth state, without re-deriving it. Coverage/source/advisories move to Refresh
+  details; coverage also remains in the state's accessible native title.
+- Market direction icon/text align centrally. Motion adds only a finite 110ms
+  opacity/2px route entrance and 180ms refresh accent; existing short inspector,
+  chevron/Save/row feedback remains. OS and user Reduce Motion suppress animations.
+
+Full suite 327 (325 pass/two Windows skips), focused 120 (119 pass/one skip), all
+64 frozen Matrix cases, three browser scripts, validators, compilation and JS checks
+pass. Browser assertions cover Above/Below/At/missing EMA, returned breadth states,
+shared desktop y positions, hidden routine lifecycle notices with diagnostics kept,
+default map expansion, both reduced-motion controls and unchanged dense tables.
+Screenshots inspect 2560×1440, 1920×1080, 390px and 200% text. Fixtures/presentation
+states only; no live-provider validation. The existing favicon 404 stays recorded.
+No src/config or financial test changes. Gate E remains open; real Nov 9/10 checks
+remain deferred. main/inspection refs are preserved; no merge or deployment.

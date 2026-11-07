@@ -652,3 +652,24 @@ financial assertions or private data. Gate E and real Nov 9/10 checks remain ope
 Visual review also corrected missing/per-theme W emphasis on mobile. Density is
 preserved/improved: 32 Theme rows and 24 Primary rows at 1440p. The final gallery
 includes 15 fixture-only screenshots and explicit 200% text views outside Git.
+
+## Targeted market overview interactions after 0b520b4
+
+User requested only concrete presentation fixes. Routine initialized/live lifecycle
+text moves to Refresh details; meaningful warnings remain. Theme Map opens by default.
+Shared SPY/QQQ grid aligns ticker/price/state/EMA/breadth, with explicit larger
+Above/Below/At EMA labels derived only from existing prices. Supplied breadth state
+is compact and semantic; coverage/source/advisories remain in diagnostics. Direction
+icon is aligned, route motion is 110ms/2px and refresh feedback finite; both motion
+reduction modes remain respected. Dense tables remain 32/24 rows at 1440p.
+Full 327 (two Windows skips), focused 120 (one skip), all 64 Matrix cases and both
+functional browser smokes pass. Main browser covers exact alignment, EMA boundary
+presentation, diagnostics, map default and reduced motion, with fresh visual review.
+A 200%-text spacing finding widened the common ticker column before the final run.
+No backend, financial/configuration changes or live chronological validation.
+One commit, then stop for review; main/inspection refs and Gate E stay unchanged.
+Final browser rerun PASSED with 14 axe audits/zero violations, no page errors,
+external requests or unexpected console errors. Known favicon 404 remains isolated.
+Nine fresh fixture-only screenshots are delivered in a local review gallery/ZIP.
+Desktop grid rows align within one pixel; 200% text and both motion-reduction controls
+pass. No src/config diff. Complete this single targeted commit and stop for review.
