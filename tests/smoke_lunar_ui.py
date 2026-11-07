@@ -56,7 +56,7 @@ def main():
                 def capture(label):
                     if out:
                         page.evaluate('''()=>{const d=document.querySelector('dialog[open]');if(d&&!d.querySelector('[data-test-stamp]'))d.append(document.querySelector('[data-test-stamp]').cloneNode(true));}''')
-                        page.screenshot(path=str(out/(label+'.png')))
+                        page.screenshot(path=str(out/(label+'.png')),full_page=label in ('themes-1440','themes-1920','themes-1440p'))
                 axe_path=os.environ.get('THEMESCOPE_AXE_SCRIPT')
                 def audit(label):
                     if not axe_path:return
@@ -73,7 +73,22 @@ def main():
                         assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),(width,destination,page.evaluate("[...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>innerWidth+1&&!e.closest('[hidden]')).slice(0,15).map(e=>[e.tagName,e.id,e.className,e.getBoundingClientRect().right])"))
                         capture(f'{destination}-{width}')
                         if width==1440:audit(destination)
+                    nav('overview')
+                    headline=page.locator('.market-card .market-ticker,.market-card .market-price').evaluate_all("nodes=>nodes.map(e=>{const s=getComputedStyle(e);return [s.fontFamily,s.fontSize,s.lineHeight,s.fontWeight,s.letterSpacing]})")
+                    assert len(headline)==6 and all(x==headline[0] for x in headline),(width,headline)
+                    for card in page.locator('.market-card').all():
+                        y=[card.locator(selector).bounding_box()['y'] for selector in ['.market-ticker','.market-price']]
+                        assert abs(y[0]-y[1])<1,(width,y)
                     nav('themes');table=page.locator('#theme-table')
+                    widths=table.locator('th').evaluate_all('nodes=>nodes.map(e=>e.getBoundingClientRect().width)')
+                    assert len(widths)==8
+                    ratios=[3,33,8,9,9,12,14,12]
+                    total=sum(widths)
+                    assert all(abs(actual-total*ratio/100)<1 for actual,ratio in zip(widths,ratios)),(width,widths)
+                    for row in table.locator('tbody tr').all():
+                        body=row.locator('td').evaluate_all('nodes=>nodes.map(e=>e.getBoundingClientRect().width)')
+                        assert all(abs(a-b)<1 for a,b in zip(widths,body))
+
                     geometry=table.evaluate('e=>({width:e.clientWidth,scroll:e.scrollWidth})')
                     assert geometry['scroll']<=geometry['width']+1,(width,geometry)
                     results['widths'][str(width)]=geometry
@@ -85,8 +100,10 @@ def main():
                     visible=page.locator(selector+' tbody tr').evaluate_all('rows=>rows.filter(r=>r.getBoundingClientRect().top>=0&&r.getBoundingClientRect().bottom<=innerHeight).length')
                     assert visible>=(30 if destination=='themes' else 24),(destination,visible)
                     results['visible_rows_1440p'][destination]=visible
+                    if destination=='themes':capture('themes-1440p')
                     centered=page.locator(selector+' tbody tr').first.evaluate("row=>[...row.querySelectorAll('td > .theme-link,td > .ticker-link,td > .state,td > .priority,td > .save-button')].every(e=>{const p=e.parentElement.getBoundingClientRect(),b=e.getBoundingClientRect();return Math.abs((b.top-p.top)-(p.bottom-b.bottom))<2})")
                     assert centered,(destination,'interactive/state boxes centered between dividers')
+                nav('overview');capture('overview-1440p')
                 # Inspector scroll does not move the page and closure restores its origin.
                 page.set_viewport_size({'width':1440,'height':1000});nav('themes')
                 scroll_link=page.locator('#theme-table a').nth(24);scroll_link.scroll_into_view_if_needed()

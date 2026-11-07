@@ -693,3 +693,23 @@ row-centering and IWM computed-type checks; 31 Theme/27 Primary rows at 1440p.
 Eleven fresh fixture screenshots reviewed, including 390px and 200% text. Known
 favicon 404 remains isolated; no page errors, external requests or other console
 errors. Financial/runtime behavior and protected refs remain unchanged.
+
+## Exact horizontal table/headline geometry after 40d54af
+
+User limited scope to desktop Theme column geometry and exact market headline type.
+Fixed tracks total 100% (3/33/8/9/9/12/14/12), with matching header/body widths and
+separated Trend/Breadth regions. Desktop rules exclude existing labelled reflow.
+Ticker/price share family, size, line-height, weight and tracking across SPY/QQQ/IWM;
+all reuse header grid spacing. IWM has no breadth/Matrix role. No vertical padding,
+navigation, filter, inspector, Map, animation, data or runtime changes.
+Added exact browser geometry/style assertions and full-height Themes captures.
+Reviewed desktop screenshots by eye before the single geometry commit. Existing
+functional browser scripts, accessibility checks, JS syntax/helpers and compilation
+are the relevant regressions. No financial tests changed; protected refs/Gate E and
+real Nov 9/10 validation stay unchanged/deferred.
+Final geometry acceptance PASSED: all three browser scripts, 14 axe audits with zero
+violations, matching desktop header/body tracks and six identical headline computed
+styles/baselines. Full-height Themes screenshots include actual equal-score labels;
+visual review confirms separation and balanced tracks. Density stays 31/27 rows.
+No page errors/external requests or unexpected console errors; known favicon 404
+remains recorded. Nine fixture screenshots are supplied outside Git. Stop after push.

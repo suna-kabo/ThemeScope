@@ -316,3 +316,28 @@ Geometry checks verify symmetric spacing for links/states/Priority/Save. Density
 at 2560×1440 is 31 complete Theme rows and 27 Primary rows (previously 32/24).
 Eleven fixture screenshots were inspected and supplied in a local gallery/ZIP.
 All earnings transitions and the unavailable-breadth title regression pass.
+
+## Exact geometry correction after 40d54af
+
+Only two visual defects addressed. Desktop Themes now uses fixed-layout columns
+with a 100% allocation: position 3%, Theme 33%, Score 8%, 1M 9%, 3M 9%, Trend 12%,
+Breadth 14%, Priority 12%. Header/body share the same table tracks; content and
+Score ties cannot resize them. Trend is left-aligned with a 20px inset; Breadth
+starts at its fixed track, avoiding the former empty region. Mobile/200%-text
+labelled reflow is excluded from those desktop rules. Vertical row tokens/padding
+are unchanged.
+
+SPY/QQQ/IWM ticker and price share one exact headline rule: inherited font family,
+1.75rem (1.5rem narrow), 700 weight, 1.1 line-height, -.02em tracking. Price retains
+tabular numerals. All three headers share ticker/price/state grid definitions and
+spacing. IWM keeps its secondary surface/placement, Context only and existing EMA
+context, with no breadth or Market Matrix vote.
+
+Browser tests compare all six computed headline styles, ticker/price y positions,
+each desktop column against the prescribed percentage, and every body row against
+header tracks. Existing browser/axe checks retain density, responsive/reduced-motion,
+keyboard, earnings, export and inspector assertions. Full-height desktop Themes
+and Overview screenshots are reviewed before commit. No app.js, data, methodology,
+backend, runtime, animations, earnings/Saved/filter or export changes. Historical
+Python-suite results above are unchanged; this CSS-only task reruns the three relevant
+browser scripts, axe audits, JS helper/syntax checks and test compilation.
