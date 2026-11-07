@@ -136,6 +136,43 @@ class PublicSnapshotTests(unittest.TestCase):
         with self.assertRaises(builder.SnapshotError):self.build()
 
 
+class WranglerListingTests(unittest.TestCase):
+    def listing(self, output):
+        with patch.object(publisher,'wrangler',return_value=output):
+            return publisher.listing(['pages','project','list','--json'],ROOT)
+
+    def test_pure_json_array(self):
+        self.assertEqual(self.listing('[{"Project Name":"themescope"}]'),[{'Project Name':'themescope'}])
+        self.assertEqual(self.listing(' \n[]\n '),[])
+
+    def test_utf8_informational_prefix(self):
+        row=[{'Project Name':'themescope','Note':'本機登入'}]
+        payload=json.dumps(row,ensure_ascii=False)
+        for prefix in ('⛅ Wrangler · 已登入\n','npm notice 更新資訊: ', '[INFO] Wrangler 資訊\n'):
+            with self.subTest(prefix=prefix):
+                self.assertEqual(self.listing(prefix+payload),row)
+
+    def test_informational_suffix(self):
+        row=[{'Environment':'Production','Branch':publisher.BRANCH,'Source':'abcdef0'}]
+        for suffix in ('\nnpm notice 新版本可用\n','\n[NOTICE] Metadata complete', ' Wrangler finished.'):
+            with self.subTest(suffix=suffix):
+                self.assertEqual(self.listing('Wrangler metadata:\n'+json.dumps(row)+suffix),row)
+
+    def test_malformed_or_missing_json_rejected_without_raw_output(self):
+        for output in ('private-output-canary', '[{"broken":', '[{"inner":[{}]} garbage]',
+                       '{"inner":[{}]', '[{}]\n[{broken}]', '[{}]]', '[{}]\n[{}]',
+                       '[{"duplicate":1,"duplicate":2}]', '[{"value":NaN}]'):
+            with self.subTest(output=output),self.assertRaises(builder.SnapshotError) as error:
+                self.listing(output)
+            self.assertEqual(str(error.exception),'Wrangler returned unexpected JSON; nothing further will be deployed.')
+            self.assertNotIn('private-output-canary',str(error.exception))
+
+    def test_wrong_json_top_level_or_row_type_rejected(self):
+        for output in ('{"projects":[{}]}','"[{}]"','null','true','42','[1]','[[]]','[null]'):
+            with self.subTest(output=output),self.assertRaises(builder.SnapshotError):
+                self.listing(output)
+
+
 class PublisherTests(unittest.TestCase):
     def setUp(self):
         quiet=patch('builtins.print');quiet.start();self.addCleanup(quiet.stop)
@@ -148,14 +185,17 @@ class PublisherTests(unittest.TestCase):
         self.before=[{'Id':'old','Environment':'Production','Branch':publisher.BRANCH,'Source':'previous','Status':'1 minute ago'}]
         self.after=[{'Id':'new','Environment':'Production','Branch':publisher.BRANCH,'Source':self.commit[:7],'Status':'just now'}]+self.before
 
-    def run_publish(self,projects=None,before=None,after=None,deploy_error=False):
+    def run_publish(self,projects=None,before=None,after=None,deploy_error=False,noisy=False):
         calls=[]
+        def metadata(value):
+            payload=json.dumps(value)
+            return '⛅ Wrangler · 本機資訊\n'+payload+'\nnpm notice 更新可用' if noisy else payload
         def fake(arguments,directory):
             calls.append(arguments)
-            if arguments[:3]==['pages','project','list']:return json.dumps([{'Project Name':'themescope'}] if projects is None else projects)
+            if arguments[:3]==['pages','project','list']:return metadata([{'Project Name':'themescope'}] if projects is None else projects)
             if arguments[:3]==['pages','deployment','list']:
                 n=sum(c[:3]==['pages','deployment','list'] for c in calls)
-                return json.dumps((self.before if before is None else before) if n==1 else (self.after if after is None else after))
+                return metadata((self.before if before is None else before) if n==1 else (self.after if after is None else after))
             self.assertEqual(arguments[:2],['pages','deploy'])
             self.assertEqual(arguments[3:5],['--project-name=themescope','--branch='+publisher.BRANCH])
             builder.validate_output(Path(arguments[2]))
@@ -166,15 +206,17 @@ class PublisherTests(unittest.TestCase):
         return calls
 
     def test_existing_production_verified_and_upload_is_exact_static_allowlist(self):
-        calls=self.run_publish()
-        self.assertEqual(sum(c[:2]==['pages','deploy'] for c in calls),1)
-        self.assertFalse(any('create' in c for c in calls))
+        for noisy in (False,True):
+            with self.subTest(noisy=noisy):
+                calls=self.run_publish(noisy=noisy)
+                self.assertEqual(sum(c[:2]==['pages','deploy'] for c in calls),1)
+                self.assertFalse(any('create' in c for c in calls))
 
     def test_missing_project_wrong_production_preview_and_pending_fail_closed(self):
         for kwargs in (dict(projects=[]),dict(before=[]),dict(before=[dict(self.before[0],Branch='main')]),
                        dict(after=self.before),dict(after=[dict(self.after[0],Environment='Preview')]),
                        dict(after=[dict(self.after[0],Status='Active')]),dict(after=[dict(self.after[0],Status='Failure')]),
-                       dict(after=[dict(self.after[0],Status='unknown')]),dict(deploy_error=True)):
+                       dict(after=[dict(self.after[0],Status='unknown')]),dict(after=[dict(self.after[0],Source='b'*7)]),dict(deploy_error=True)):
             with self.subTest(kwargs=kwargs),self.assertRaises(builder.SnapshotError):self.run_publish(**kwargs)
 
     def test_branch_dirty_tree_and_tracked_artifacts_guard(self):
@@ -191,6 +233,8 @@ class PublisherTests(unittest.TestCase):
             self.assertEqual(options['cwd'],self.root)
             self.assertFalse(any('API_KEY' in k or 'API_SECRET' in k for k in options['env']))
             self.assertEqual(options['env']['CI'],'true')
+            self.assertEqual(options['encoding'],'utf-8')
+            self.assertEqual(options['errors'],'strict')
             self.assertNotIn('shell',options)
         with patch.object(shutil,'which',return_value='npx'),patch.object(subprocess,'run',return_value=subprocess.CompletedProcess([],1,'private token','private path')):
             with self.assertRaisesRegex(builder.SnapshotError,'login'):publisher.wrangler([],self.root)

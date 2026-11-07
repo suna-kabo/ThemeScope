@@ -48,8 +48,9 @@ def wrangler(arguments, directory):
     env.update(CI='true', WRANGLER_SEND_METRICS='false', NO_COLOR='1')
     try:
         result = subprocess.run([executable, '--yes', 'wrangler@4', *arguments], cwd=directory,
-            env=env, stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=600)
-    except (OSError, subprocess.TimeoutExpired):
+            env=env, stdin=subprocess.DEVNULL, capture_output=True, text=True,
+            encoding='utf-8', errors='strict', timeout=600)
+    except (OSError, UnicodeError, subprocess.TimeoutExpired):
         raise SnapshotError('Wrangler could not complete. No deployment success is confirmed.') from None
     if result.returncode:
         # Do not relay arbitrary CLI diagnostics that might include private paths.
@@ -59,11 +60,41 @@ def wrangler(arguments, directory):
 
 def listing(arguments, directory):
     try:
-        data = json.loads(wrangler(arguments, directory))
-        if not isinstance(data, list) or any(not isinstance(row, dict) for row in data):
+        output = wrangler(arguments, directory)
+        def unique_object(pairs):
+            row = {}
+            for key, value in pairs:
+                if key in row:
+                    raise ValueError
+                row[key] = value
+            return row
+        def invalid_constant(_):
+            raise ValueError
+        decoder = json.JSONDecoder(object_pairs_hook=unique_object, parse_constant=invalid_constant)
+        # A JSON string containing brackets is not a top-level metadata array.
+        if output.lstrip('\ufeff \t\r\n').startswith('"'):
+            raise ValueError
+        data = None
+        offset = 0
+        while match := re.search(r'[\[\]{}]', output[offset:]):
+            start = offset + match.start()
+            if output[start] in ']}':
+                raise ValueError
+            # Known log-level tags are plain informational text, not JSON starts.
+            tag = re.match(r'\[(?:INFO|WARN|WARNING|ERROR|DEBUG|NOTICE|wrangler|npx|npm)\]', output[start:], re.IGNORECASE)
+            if tag:
+                offset = start + tag.end()
+                continue
+            candidate, offset = decoder.raw_decode(output, start)
+            # Never recover an inner array from a broken/object wrapper, choose
+            # among multiple payloads, or ignore malformed JSON after a payload.
+            if data is not None or not isinstance(candidate, list) or any(not isinstance(row, dict) for row in candidate):
+                raise ValueError
+            data = candidate
+        if data is None:
             raise ValueError
         return data
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, RecursionError):
         raise SnapshotError('Wrangler returned unexpected JSON; nothing further will be deployed.') from None
 
 

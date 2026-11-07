@@ -806,3 +806,16 @@ checks have zero violations (14 local, eight synthetic, eight frozen-public).
 Both static modes have zero external/API requests and page/console/HTTP errors.
 Both validators, compilation, both JS syntax checks and JS helper tests pass.
 No actual local real payload or Cloudflare upload was used for validation.
+
+## Wrangler metadata framing fix after 85beb95
+
+Publisher metadata parsing now uses strict JSON raw_decode to locate one top-level
+array of objects amid ordinary Wrangler/npx informational text and known log tags.
+Malformed/nested-wrapper/ambiguous payloads, wrong row types, duplicate keys and
+non-finite values fail closed with the same non-secret diagnostic. Wrangler output
+is explicitly decoded as strict UTF-8. Existing project, branch, source-commit and
+production-environment verification are unchanged; no snapshot/financial/deployment
+semantics changes and no actual upload. Added the five requested parsing regressions,
+including non-ASCII messages and suffixes, plus noisy-output mocked publishing flow.
+Validation: 17 focused publishing tests pass; full suite 347 tests (345 passed,
+two existing native-Windows skips); publisher/test compilation and diff checks pass.
