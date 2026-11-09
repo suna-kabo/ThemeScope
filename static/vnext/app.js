@@ -457,7 +457,8 @@
     if ($('progress').textContent !== progress) $('progress').textContent = progress;
     $('target-detail').textContent = 'Target session ' + (status.target_session || '—');
     $('last-success').textContent = 'Last successful refresh ' + (status.last_successful_refresh || '—');
-    $('completeness').textContent = status.completeness?.complete ? `Data complete · ${status.completeness.valid_target}/${status.completeness.required} symbols` : 'Completeness —';
+    const coverage = status.completeness;
+    $('completeness').textContent = coverage?.complete ? coverage.terminal_target > 0 ? `Data complete · ${coverage.valid_target}/${coverage.required} inputs · ${coverage.trading_target} trading · ${coverage.terminal_target} terminal` : `Data complete · ${coverage.valid_target}/${coverage.required} symbols` : 'Completeness —';
     $('provider').textContent = 'Provider · ' + (typeof status.provider_health === 'string' ? status.provider_health : status.provider_health?.status || 'Not checked');
     $('read-status').textContent = status.snapshot_read?.startsWith('busy') ? 'Storage is busy. Showing the last committed snapshot.' : '';
     $('refresh').disabled = status.state === 'running';

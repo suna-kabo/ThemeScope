@@ -41,7 +41,9 @@ class PublicSnapshotTests(unittest.TestCase):
         source['provider_health']['identity']='internal-data-version'
         source['themes'][0]['index']['raw_payload']={'drop':True}
         source['relationships'][0]['relative']['private']='drop'
+        source['completeness'].update(trading_target=20,terminal_target=1,historical_inputs=0)
         result=builder.project_snapshot(source,'2026-11-06')
+        self.assertEqual(result['completeness'],source['completeness'])
         self.assertEqual(result['themes'][0]['score'],source['themes'][0]['score'])
         self.assertEqual(result['themes'][0]['returns'],source['themes'][0]['returns'])
         self.assertEqual(result['relationships'][0]['relative']['w'],source['relationships'][0]['relative']['w'])

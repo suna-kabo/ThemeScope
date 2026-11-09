@@ -819,3 +819,82 @@ semantics changes and no actual upload. Added the five requested parsing regress
 including non-ASCII messages and suffixes, plus noisy-output mocked publishing flow.
 Validation: 17 focused publishing tests pass; full suite 347 tests (345 passed,
 two existing native-Windows skips); publisher/test compilation and diff checks pass.
+
+## Gate E terminal corporate-action correctness — 10 November 2026
+
+The user’s real Nov 9 SIP run failed on missing ROKU (899 required, one missing,
+no zero-volume/unusable bars). This is a genuine terminal-merger gap, not a provider
+outage. Native Nov 9 validation is NOT passed; Gate E remains OPEN and real Nov 10
+validation is still required. No new public snapshot, deployment, merge, provider
+credential use or production-history deletion/rewrite is authorized/performed here.
+
+Verified Nasdaq ECA2026-806: ROKU last traded Nov 6, suspended Nov 9; consideration
+USD 95.30 + 0.9799 FOXA shares. New separate versioned corporate_actions.json records
+explicit approval, source, terms, valuation and removal dates. Framework is generic
+for acquisition, symbol conversion and known-cash delisting; no ROKU-specific code
+branch, scraper, missing-bar inference or guessed successor/price/terms. Cash-only,
+stock-only, mixed and known-zero terminal values use deterministic Decimal arithmetic.
+Successor raw close/old raw last close express approved share units; ordinary split/
+spin-off adjusted returns remain unchanged. Replacement requires independently
+approved ordinary membership and is never inferred from consideration.
+
+Approved hybrid isolates TerminalValue from actual Bar inputs. Only an existing
+holding/index receives the terminal factor; old-ticker current price, return, ER/W,
+volume/liquidity and Primary eligibility remain unavailable/ineligible. Every
+ordinary current requirement needs a real completed positive-volume bar; only an
+approved exact symbol/session terminal proof is exceptional. Missing successor,
+malformed/unapproved records and arbitrary missing tickers fail closed with sanitized
+codes/symbols. A terminal exception cannot cover a later session.
+
+Confirmed existing timing: exclusive effective_to Nov 10 allows old ROKU to earn
+Nov 9, rebalances at Nov 9 close and excludes it from Nov 10 earned holdings. Original
+reviewed launch CSV/evidence and Nov 6 initialization remain intact; the versioned
+corporate ledger applies a dated forward amendment in resolved configuration.
+Reviewed-role/evidence/hash checks are preserved, including Windows line endings.
+Historical tests now copy the necessary calendar; pre-launch review fixtures exclude
+the later action amendment. Ordinary review proposal counts reflect the one closed
+membership without altering scanner review behavior or automatic activation.
+
+Provider abstraction/SIP requests unchanged. Cache plans real history only through
+last trading close, plus genuine successor valuation dependencies; existing FOXA
+SPY inputs are reused. Bounded warm repair and split/spin-off anchor/reseed behavior
+remain; settled historical inputs outside repair are not fetched every warm run.
+No fabricated bars are cached/persisted. SQLite schema stays v2: pinned immutable
+observations plus per-run references and new in-snapshot action/valuation audit are
+sufficient. Index and publication independently verify terms/values against actual
+observations. Publication revalidates proof/audit inside the existing transaction;
+failed refresh preserves prior successful dashboard/exports and rolls back new data.
+Original launch rows remain immutable; configuration hash includes approved actions,
+while methodology/series identity and compatible-live transition semantics stay fixed.
+
+Coverage stays honest: current Nov 9 configuration requires 899 symbols including
+ROKU and FOXA; completion is 898 genuine trading inputs + one approved terminal input,
+not 899 trading bars. Separate counters and a minimal status-text clarification show
+this distinction; static projection may retain the counters but no real public build
+or upload was run. Nov 10 current requirements are 898; ROKU is retained only as a
+historical accounting dependency and no longer contributes. No UI redesign, Score,
+W, qualification, liquidity/breadth thresholds, Market Matrix or launch-date changes.
+
+Numerical rational oracle: manufactured prior raw close 100, successor raw close 50,
+consideration 144.295, six-stock launch 100 → Nov 9 107.3825 → Nov 10 118.12075 after
+remaining holdings +10%. Raw/adjusted inputs differ deliberately. Tests also prove
+no old target volume/stock research/Primary, no later successor revaluation, explicit
+conversion, exact-date completeness, no arbitrary bypass, prior-row immutability,
+Nov 9 no transition, Nov 10 compatible transition and transactional audit rollback.
+See docs/vnext_terminal_actions.md and the methodology clarification for details and
+exact native Windows rerun checks. Do not mark Gate E passed from fixture results.
+
+On the valuation session the planner still probes the original symbol; any unexpected
+post-termination bar fails rather than being hidden/overridden by the approved action.
+The contradiction regression preserves the last-good snapshot. Fixture generators now
+respect configured last-trading dates instead of inventing post-termination trading.
+
+Final acceptance: full suite 358 tests (356 passed/two existing Windows skips);
+focused vNext 131 (130 passed/one skip); 11 terminal-action tests pass, including
+cash/stock/mixed/zero-cash terms, raw-unit numerical oracle, genuine target-bar
+contradiction, exact-date exception, quarantine, rollback and lifecycle/replay.
+Existing provider/cache checks (11) pass, all 64 frozen Matrix cases remain intact.
+All five browser programs pass; 30 axe audits have zero violations, with no external
+requests or page errors. Both static modes also make zero API requests. Both config/
+evidence validators, Python compilation, JS syntax/helpers and diff checks pass.
+No native Windows SIP success is claimed; actual Nov 9 rerun and Nov 10 remain open.

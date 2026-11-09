@@ -7,6 +7,7 @@ from copy import deepcopy
 from ..local_refresh_lock import RefreshLock,RefreshBusy
 from ..storage import Store,canonical,is_busy
 from ..domain import load_configuration
+from ..corporate_actions import validate_actions,action_audit,apply_membership_ends
 from ..market.rosters import load as load_rosters,effective
 from ..market.layer import market_layer
 from ..providers.base import Schedule,FixtureProvider
@@ -155,6 +156,9 @@ class RefreshService:
                 os.environ.get('APCA_API_KEY_ID'),os.environ.get('APCA_API_SECRET_KEY'),schedule)
             target=provider.get_latest_completed_session()
             days=sorted(r['session'] for r in records);end=days.index(target)
+            reached=tuple(a for a in config.corporate_actions if a.last_trading_session<=target)
+            if reached:
+                config=replace(apply_membership_ends(config,reached,days),corporate_actions=config.corporate_actions)
             start=max(0,end-config.methodology['bootstrap_sessions'])
             launch=config.methodology.get('launch_rebalance_session')
             if launch and launch in days and launch<=target:start=min(start,max(0,days.index(launch)-config.methodology['bootstrap_sessions']))
@@ -173,8 +177,13 @@ class RefreshService:
                 first_earned=calendar[calendar.index(init)+1]
                 for theme in working.themes:
                     initialization_members[theme.theme_id]=working.members_on(theme.theme_id,first_earned)
-            names={m.ticker for t in working.themes for m in working.members_on(t.theme_id,target)}
-            if research:names.update(m.ticker for m in research.relationships if m.calculation_eligible)
+            target_names={m.ticker for t in working.themes for m in working.members_on(t.theme_id,target)}
+            next_target=calendar[calendar.index(target)+1]
+            target_names.update(m.ticker for t in working.themes for m in working.members_on(t.theme_id,next_target))
+            names=set(target_names)
+            if research:
+                target_names.update(m.ticker for m in research.relationships if m.calculation_eligible)
+                names.update(target_names)
             # Launch inputs come from post-close holdings, not earned membership on L.
             names.update(m.ticker for members in initialization_members.values() for m in members)
             if initialization_members:
@@ -185,11 +194,14 @@ class RefreshService:
                              and (not m.effective_to or m.effective_to>first_earned))
             for benchmark in ('SPY','QQQ'):
                 roster=effective(rosters,benchmark,target)
-                if roster:names.update(roster.tickers)
-            names.update(('SPY','QQQ','IWM'))
+                if roster:
+                    names.update(roster.tickers);target_names.update(roster.tickers)
+            names.update(('SPY','QQQ','IWM'));target_names.update(('SPY','QQQ','IWM'))
+            actions=tuple(a for a in config.corporate_actions if a.ticker in names)
+            validate_actions(tuple(a for a in actions if a.last_trading_session<=target),days)
             self._status(target_session=target,progress='Fetching missing sessions and repair window')
             store=Store(self.db)
-            prepared=prepare(store,provider,names,sessions)
+            prepared=prepare(store,provider,names,sessions,terminal_actions=actions,target_symbols=target_names)
             bars=bar_map(prepared.bars)
             self._status(progress='Calculating market, themes and peer comparisons',provider_health='Healthy')
             market=market_layer(bars,sessions,rosters)
@@ -210,7 +222,7 @@ class RefreshService:
                 for theme in working.themes:
                     if theme.status!='active' or not initialization_members.get(theme.theme_id):continue
                     try:
-                        indices[theme.theme_id]=build_index(working,theme.theme_id,bars,calendar,init,target)
+                        indices[theme.theme_id]=build_index(working,theme.theme_id,bars,calendar,init,target,terminal_values=prepared.terminal_values)
                     except IndexUnavailable:
                         continue
                     series[theme.theme_id]=working.methodology['version']+':'+init
@@ -251,7 +263,12 @@ class RefreshService:
             earnings=None if self.mode=='fixture' else AlphaVantageEarnings(os.environ.get('ALPHAVANTAGE_API_KEY'))
             snapshot['earnings']=optional_earnings(earnings,{r['ticker'] for r in snapshot['relationships']})
             snapshot['refreshed_at']=datetime.now(timezone.utc).isoformat()
-            snapshot['completeness']={'required':len(names),'valid_target':len(names),'complete':True}
+            snapshot['completeness']={'required':len(target_names),'valid_target':len(target_names),'complete':True}
+            if prepared.terminal_values:
+                snapshot['corporate_actions']=action_audit(actions,prepared.terminal_values,prepared.identity)
+                terminal_count=sum(v.valuation_session==target and v.ticker in target_names for v in prepared.terminal_values)
+                snapshot['completeness'].update(trading_target=len(target_names)-terminal_count,
+                    terminal_target=terminal_count,historical_inputs=len(names-target_names))
             snapshot['provider_health']={'identity':prepared.identity,'status':'Healthy'}
             snapshot['performance']={'fetched_observations':prepared.fetched,'batch_requests':prepared.requests}
             self._status(progress='Committing snapshot and exports')
@@ -265,7 +282,7 @@ class RefreshService:
                 for theme,points in indices.items():
                     for point in points:run.index(theme,point.session,point)
                 run.db.execute('INSERT INTO market_snapshot VALUES(?,?)',(run.run,canonical(market)))
-                run.publish(snapshot,required_symbols=names)
+                run.publish(snapshot,required_symbols=target_names,terminal_actions=actions)
                 committed_candidate=store.active_publication()
             # Only visible after the refresh context's COMMIT has succeeded. On
             # rollback this is never cached; an older replay retains its true pointer.

@@ -13,6 +13,7 @@ class InspectionTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
+        shutil.copytree(ROOT/'config/calendars',self.root/'config/calendars')
 
     def test_reject_private_assets_and_secrets(self):
         for name, content in [('.env', 'x'), ('data.sqlite3', 'x'),

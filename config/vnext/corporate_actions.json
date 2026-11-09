@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "events": [
+    {
+      "event_id": "roku-fox-terminal-2026-11-09",
+      "ticker": "ROKU",
+      "event_type": "acquisition",
+      "last_trading_session": "2026-11-06",
+      "valuation_session": "2026-11-09",
+      "membership_effective_to": "2026-11-10",
+      "cash_per_share": "95.30",
+      "stock_ticker": "FOXA",
+      "stock_ratio": "0.9799",
+      "replacement_ticker": null,
+      "currency": "USD",
+      "source": "https://www.nasdaqtrader.com/TraderNews.aspx?id=eca2026-806",
+      "source_notice": "Nasdaq Equity Corporate Actions Alert 2026-806, published 2026-11-06",
+      "approval_status": "approved",
+      "approval_reference": "Explicit user Gate E correctness request, hybrid accounting clarification and reusable terminal-event framework approval",
+      "reviewed_on": "2026-11-10"
+    }
+  ]
+}

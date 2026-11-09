@@ -648,3 +648,22 @@ are validated, and 451 relationships are covered by the 75 documented supplied
 industry rules. See config/vnext and docs/membership_review_2026-11-06.md.
 No launch effective dates, end dates or launch session are assigned by this review;
 production remains disabled and Phase 9 is not authorized.
+
+## Approved terminal corporate-action accounting clarification — 2026-11-10
+
+An explicitly approved terminal event may supply an existing holding's final
+index return when the original ticker has no trading bar. Its economic value is
+cash per old share plus the approved stock ratio times the successor's genuine
+valuation-session raw close, divided by the original genuine last-trading-session
+raw close for the final gross factor. Ordinary split/spin-off adjusted returns
+are unchanged. This is an accounting value, never OHLCV, liquidity, stock research
+returns or Primary eligibility. Unknown/malformed events and missing successor
+observations fail closed. The approved lifecycle ends the old earned membership
+on the next session (exclusive effective_to), rebalancing only after the final
+return; replacement requires separate approved successor membership.
+
+The first reviewed event is ROKU under Nasdaq ECA2026-806: Nov 6 last trade,
+Nov 9 terminal valuation, Nov 10 exclusive removal, USD 95.30 + 0.9799 FOXA shares.
+Nov 6 initialization and history are preserved; real Nov 9/10 validation remains
+required. The separate versioned ledger and provenance/completeness conventions
+are documented in [terminal corporate actions](../vnext_terminal_actions.md).

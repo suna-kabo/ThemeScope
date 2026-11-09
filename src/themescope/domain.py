@@ -122,6 +122,7 @@ class Configuration:
     universe: dict
     methodology: dict
     evidence_gate: dict
+    corporate_actions: tuple = ()
 
     def members_on(self, theme_id, session):
         theme = next(t for t in self.themes if t.theme_id == theme_id)
@@ -199,4 +200,9 @@ def load_configuration(root):
     if configuration.evidence_gate.get('membership_review_package') or (folder / 'membership_master_review.json').exists():
         from .membership_evidence import validate_evidence
         validate_evidence(root, configuration)
+    from .corporate_actions import load_actions, apply_membership_ends
+    actions=load_actions(root)
+    if actions:
+        sessions=json.loads((Path(root)/'config/calendars/xnys_2020_2035_v1.json').read_text())['sessions']
+        configuration=apply_membership_ends(configuration,actions,[r['session'] for r in sessions])
     return configuration

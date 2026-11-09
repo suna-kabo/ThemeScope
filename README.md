@@ -139,3 +139,11 @@ hosting is limited to the synthetic demo or explicitly published frozen dashboar
 snapshot; the live research backend remains local.
 
 Current review evidence and deferred checks: [Gate E review](docs/vnext_gate_e_review.md).
+
+Real Nov 9 validation exposed a terminal-merger gap: ROKU has no trading bar.
+The generic approved corporate-action framework accounts for its final holding
+value separately from stock research, retains Nov 6 history, and removes it from
+Nov 10 earned membership. **The native Nov 9 SIP rerun is still pending; Gate E
+remains open and Nov 10 validation is still required.** See
+[terminal accounting and exact Windows rerun steps](docs/vnext_terminal_actions.md).
+Do not publish a new real snapshot yet.

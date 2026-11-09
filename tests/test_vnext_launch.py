@@ -31,11 +31,13 @@ class LaunchTests(unittest.TestCase):
             MarketRoster('QQQ','2026-11-05',('QQQ',),'Synthetic QQQ universe'))
         names.update(s for r in rows for s in r.tickers)
         names.update(('SPY','QQQ','IWM'))
+        names.update(a.stock_ticker for a in config.corporate_actions if a.stock_ticker)
         begin=DAYS.index(L)-253
         days=DAYS[begin:DAYS.index('2026-11-10')+1]
         data=[]
         for name in names:
             for day in days:
+                if any(a.ticker==name and day>a.last_trading_session for a in config.corporate_actions):continue
                 # Airlines has five members: DAL doubles twice; the other four are flat.
                 price=400 if name=='DAL' and day>='2026-11-10' else 200 if name=='DAL' and day>=E else 100
                 data.append(Bar(name,day,price,price,2000000))
@@ -68,7 +70,7 @@ class LaunchTests(unittest.TestCase):
         self.assertEqual(effective_session_after_close(L,DAYS),E)
         self.assertEqual(Counter(m.role for m in c.memberships),{'Core':659,'Enabler':62,'Related':5})
         self.assertEqual(len(c.memberships),726)
-        self.assertTrue(all(m.effective_from==E and m.effective_to is None for m in c.memberships))
+        self.assertTrue(all(m.effective_from==E and m.effective_to==('2026-11-10' if m.ticker=='ROKU' else None) for m in c.memberships))
         self.assertTrue(all(not m.active_on('2026-11-05') and not m.active_on(L) and m.active_on(E) for m in c.memberships))
         self.assertEqual(c.production_blockers(),[])
         self.assertEqual([(r.benchmark,len(r.tickers)) for r in rosters(ROOT)],[('SPY',501),('QQQ',101)])

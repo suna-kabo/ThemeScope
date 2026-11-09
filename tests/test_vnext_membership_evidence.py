@@ -12,9 +12,11 @@ class MembershipEvidenceTests(unittest.TestCase):
         self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
         self.root=Path(self.temp.name)
         shutil.copytree(ROOT/'config/vnext',self.root/'config/vnext')
+        shutil.copytree(ROOT/'config/calendars',self.root/'config/calendars')
     def pending_review_copy(self):
         folder=self.root/'config/vnext'
         (folder/'launch_approval.json').unlink()
+        (folder/'corporate_actions.json').unlink()  # Historical pre-launch review has no later terminal amendment.
         path=folder/'methodology.json';data=json.loads(path.read_text())
         data.update(production_enabled=False,launch_rebalance_session=None);path.write_text(json.dumps(data))
         path=folder/'memberships.csv'
@@ -35,7 +37,7 @@ class MembershipEvidenceTests(unittest.TestCase):
         self.assertTrue(all(not rows[k].calculation_eligible for k in related))
         for k in [('AKAM','cybersecurity'),('ZETA','ai-applications'),('HOOD','fintech-payments')]:self.assertEqual(rows[k].role,'Core')
         self.assertTrue(all(n>=5 for n in report['per_theme_eligible'].values()))
-        self.assertTrue(all(m.effective_from == '2026-11-09' and m.effective_to is None for m in config.memberships))
+        self.assertTrue(all(m.effective_from == '2026-11-09' and m.effective_to == ('2026-11-10' if m.ticker == 'ROKU' else None) for m in config.memberships))
         self.assertTrue(config.methodology['production_enabled'])
         self.assertEqual(config.methodology['launch_rebalance_session'],'2026-11-06')
         self.assertEqual(config.production_blockers(),[])

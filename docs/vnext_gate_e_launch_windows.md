@@ -1,5 +1,10 @@
 # Gate E: launch-close research and Windows evidence integrity
 
+**Current update:** the real Nov 9 run failed on missing ROKU after its merger.
+The generic terminal-accounting correction is implemented; native Nov 9 revalidation
+is pending. Follow [current rerun instructions](vnext_terminal_actions.md), preserve
+the database/Nov 6 history, and do not close Gate E or publish a new snapshot yet.
+
 These are two separate corrections after the completed Lunar Lounge checkpoint.
 The UI is unchanged. The user now reports native Windows Nov 6 launch validation
 PASSED: healthy SIP, success, 899/899 symbols, 44 Active themes, available Scores/

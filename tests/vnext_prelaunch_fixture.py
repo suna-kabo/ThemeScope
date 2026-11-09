@@ -34,6 +34,7 @@ class PrelaunchFixture:
         for name in sorted(names):
             rate=D(1+sum((i+1)*ord(c) for i,c in enumerate(name))%200)/100
             for i,day in enumerate(self.sessions):
+                if any(a.ticker==name and day>a.last_trading_session for a in self.config.corporate_actions):continue
                 price=D(100)+i*rate
                 data.append(Bar(name,day,price,price,2000000))
         self.bars=tuple(data)

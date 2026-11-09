@@ -31,7 +31,7 @@ def adjusted(bars, ticker, session):
 
 @deterministic
 def build_index(configuration, theme_id, bars, sessions, start, target, *,
-                bootstrap_symbols=None, formal_rebalances=()):
+                bootstrap_symbols=None, formal_rebalances=(), terminal_values=()):
     """Initialize at explicit start close, then earn subsequent sessions only.
 
     Bootstrap symbols must be supplied explicitly for a synthetic indicator seed.
@@ -49,6 +49,19 @@ def build_index(configuration, theme_id, bars, sessions, start, target, *,
     if any(s not in sessions for s in formal_rebalances):
         raise ValueError('Rebalance must occur at a configured session close')
     bootstrap = bootstrap_symbols is not None
+    from ..corporate_actions import TerminalValue, resolve_values
+    if any(not isinstance(v,TerminalValue) for v in terminal_values):
+        raise ValueError('Typed, approved terminal accounting required')
+    relevant={m.ticker for m in configuration.memberships if m.theme_id==theme_id}
+    selected=tuple(v for v in terminal_values if v.ticker in relevant)
+    terminal={(v.ticker,v.valuation_session):v for v in selected}
+    if selected:
+        actions=tuple(a for a in configuration.corporate_actions if a.ticker in relevant and a.valuation_session<=target)
+        expected={(v.ticker,v.valuation_session):v for v in resolve_values(actions,bars,target)}
+        if len(terminal)!=len(selected) or terminal!=expected:
+            raise ValueError('Terminal accounting differs from approved terms and prices')
+    if bootstrap and terminal:
+        raise ValueError('Terminal accounting is not a bootstrap trading price')
     symbols = unique_symbols(bootstrap_symbols) if bootstrap else None
     minimum = configuration.methodology['theme_minimum']
 
@@ -69,8 +82,14 @@ def build_index(configuration, theme_id, bars, sessions, start, target, *,
         earned = tuple(sorted(weights))
         if earned != members(session):
             raise ValueError('Holdings and earned-session membership disagree')
-        grown = {ticker: weight*adjusted(bars,ticker,session)/adjusted(bars,ticker,previous)
-                 for ticker, weight in weights.items()}
+        def factor(ticker):
+            value=terminal.get((ticker,session))
+            if value is not None:
+                if previous!=value.last_trading_session or (ticker,session) in bars:
+                    raise IndexUnavailable('Invalid terminal holding boundary: '+ticker)
+                return value.value/value.previous_raw_close
+            return adjusted(bars,ticker,session)/adjusted(bars,ticker,previous)
+        grown = {ticker: weight*factor(ticker) for ticker, weight in weights.items()}
         growth = sum(grown.values())
         level *= growth
         weights = {ticker: value/growth for ticker,value in grown.items()}

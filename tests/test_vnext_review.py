@@ -57,6 +57,7 @@ class ReviewTests(unittest.TestCase):
         before = config.memberships
         diff = proposed_diff(config, validate_review_csv(self.path, common_stock_attested=True))
         self.assertIn('SYNTH', diff['newly_eligible'])
-        self.assertEqual(len(diff['members_absent_from_review']), 668)
+        self.assertEqual(len(diff['members_absent_from_review']), 667)
+        self.assertNotIn('ROKU',diff['members_absent_from_review'])
         self.assertFalse(diff['membership_modified'])
         self.assertEqual(config.memberships, before)

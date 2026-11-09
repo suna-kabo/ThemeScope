@@ -185,7 +185,8 @@ def project_snapshot(source, expected):
     result = fields(source, dict(schema=text, methodology=text, session=text, synthetic_fixture=boolean,
         market_direction=text, market=MARKET, themes=sequence(THEME), relationships=sequence(RELATIONSHIP),
         theme_layer=LAYER, today_plan=text, refreshed_at=text, production_blockers=sequence(text),
-        completeness=object_rule(dict(complete=boolean, required=numeric, valid_target=numeric)),
+        completeness=object_rule(dict(complete=boolean, required=numeric, valid_target=numeric,
+            **{'trading_target?':numeric,'terminal_target?':numeric,'historical_inputs?':numeric})),
         provider_health=object_rule(dict(status=text))))
     if not re.fullmatch(r'themescope-vnext-\d+', result['methodology']) or not result['themes']:
         raise SnapshotError('A supported vNext methodology and theme list are required.')

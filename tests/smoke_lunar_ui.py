@@ -270,6 +270,11 @@ def main():
                 state={'snapshot':deepcopy(actual),'status':service.status()}
                 page.route('**/api/dashboard-data',lambda r:r.fulfill(body=json.dumps(state['snapshot']),content_type='application/json'))
                 page.route('**/api/status',lambda r:r.fulfill(json=state['status']))
+                coverage=dict(state['status']['completeness'])
+                state['status']['completeness'].update(trading_target=coverage['required']-1,terminal_target=1)
+                expect(page.locator('#completeness')).to_have_text(f"Data complete · {coverage['valid_target']}/{coverage['required']} inputs · {coverage['required']-1} trading · 1 terminal",timeout=6000)
+                state['status']['completeness']=coverage
+                expect(page.locator('#completeness')).to_have_text(f"Data complete · {coverage['valid_target']}/{coverage['required']} symbols",timeout=6000)
                 def update(label):
                     state['snapshot']['refreshed_at']=label
                     expect(page.locator('#progress')).to_have_text(state['status']['progress'],timeout=6000)

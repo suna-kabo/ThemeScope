@@ -116,13 +116,17 @@ class Refresh:
         self.db, self.run, self.session = db, run, session
         self.target_symbols = set()
         self.published = False
+        self._bars = {}
+        self._identities = set()
 
     def bars(self, bars, identity="synthetic:gate-b"):
         from .observations import put
+        self._identities.add(identity)
         for bar in bars:
+            self._bars[bar.ticker,bar.session]=bar
             oid=put(self.db,identity,bar.ticker,bar.session,canonical(bar))
             self.db.execute('INSERT INTO daily_bars VALUES(?,?,?,?)', (self.run, bar.ticker, bar.session, oid))
-            if bar.session == self.session and usable(bar):
+            if bar.session == self.session and usable(bar) and bar.volume>0:
                 self.target_symbols.add(bar.ticker)
 
     def theme(self, theme_id, payload):
@@ -136,9 +140,18 @@ class Refresh:
             raise ValueError('Invalid index session')
         self.db.execute('INSERT INTO theme_index VALUES(?,?,?,?)', (self.run, theme_id, session, canonical(payload)))
 
-    def publish(self, payload, *, required_symbols):
+    def publish(self, payload, *, required_symbols, terminal_actions=()):
+        from ..corporate_actions import resolve_values, action_audit
+        values=resolve_values(terminal_actions,self._bars,self.session)
+        terminal={v.ticker for v in values if v.valuation_session==self.session}
+        if values:
+            if len(self._identities)!=1:
+                raise ValueError('Terminal accounting requires pinned provider identity')
+            expected=action_audit(terminal_actions,values,next(iter(self._identities)))
+            if canonical(payload.get('corporate_actions'))!=canonical(expected):
+                raise ValueError('Terminal accounting audit differs from pinned observations')
         required = set(required_symbols)
-        if not required or not required <= self.target_symbols:
+        if not required or not required <= self.target_symbols|terminal:
             raise ValueError('Required target-session data missing')
         previous = self.db.execute('SELECT r.session FROM publication p JOIN refresh_run r ON r.id=p.run_id').fetchone()
         # Older replay is retained for inspection but cannot replace the active session.
