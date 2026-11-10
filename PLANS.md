@@ -898,3 +898,46 @@ All five browser programs pass; 30 axe audits have zero violations, with no exte
 requests or page errors. Both static modes also make zero API requests. Both config/
 evidence validators, Python compilation, JS syntax/helpers and diff checks pass.
 No native Windows SIP success is claimed; actual Nov 9 rerun and Nov 10 remain open.
+
+## Additive research context and readability — 10 November 2026
+
+Completed from 1469d1d, isolated from open Gate E evidence. User approved Long Bias
+symmetry: Score >=50, Bullish/Mixed; negative W Relative Weakness ascending, positive
+W Strong Leaders / Pullback Watch descending. Pullback Watch warns against chasing
+market extension; it is not a W-based prediction.
+
+Separate versioned research context supplies Wilder ATR20, an explicit Extension
+truth table, Focus, canonical competition ranks and compatible-session rank/EMA
+comparisons. Optional adjusted SPY/QQQ high/low retention/backfill is required for
+ATR; request semantics, ordinary warm-cache repair, frozen calculations, official
+series/launch/terminal accounting and Directional exports remain unchanged. Original
+close-only observations retain their canonical bytes. SQLite stays schema v2 with
+no DDL migration or historical rewrite. Public projection explicitly whitelists the
+new nested fields. See `docs/vnext_research_context.md` for exact rules/contracts.
+
+Candidates contains Directional/Countertrend. Terminology, diagnostics hierarchy,
+Untracked empty states, contextual W, Saved wording and Methodology updated within
+Lunar Lounge. Nested inspector Back restores the parent sheet and its filters,
+scroll and focus; Escape closes the owned chain. Manual lens choice survives polls.
+Saved retains its original browser storage key. Responsive review found and fixed
+200% text overflow in preview headings, mobile header/market headlines, theme
+breadth/priority and inspector headings. Candidate cards and container-aware
+inspector reflow preserve enlarged text rather than shrinking or clipping content.
+Full Theme Detail retains its six-metric grid with rank in compact context.
+
+Acceptance: full suite 377 tests (375 passed/two existing Windows skips); focused
+vNext 150 (149 passed/one skip); all 19 new research tests pass. Existing numerical,
+corporate-action, lifecycle, roster, provider/cache, locking and all 64 frozen Market
+Matrix cases remain intact. All six browser programs pass. 57 axe audits report
+zero violations. The new matrix covers 1440/1024/768/480/320px at 100/200% text,
+Compact/Comfortable, high contrast, reduced motion, keyboard/history, both Candidate
+lenses and both inspector sheets. No document overflow; no external requests/page
+errors; both static modes make zero API requests. Desktop density is 31 Theme rows
+and 25 Directional rows at 1440p. Configuration/evidence validators, compilation,
+JavaScript helpers/syntax and diff checks pass. Review PNGs/reports remain external
+artifacts, not repository binaries or real market data.
+
+No deployment, main merge, membership/roster/action amendment or real credentials.
+Gate E remains OPEN. Real Nov 9 SIP rerun and Nov 10 chronological validation remain
+pending; fixture dates and browser-manufactured transitions are not live evidence.
+Native Windows/manual assistive-technology validation is not claimed.

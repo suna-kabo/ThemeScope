@@ -36,7 +36,7 @@ class PrelaunchFixture:
             for i,day in enumerate(self.sessions):
                 if any(a.ticker==name and day>a.last_trading_session for a in self.config.corporate_actions):continue
                 price=D(100)+i*rate
-                data.append(Bar(name,day,price,price,2000000))
+                data.append(Bar(name,day,price,price,2000000,adjusted_high=price+D(2) if name in ('SPY','QQQ') else None,adjusted_low=price-D(2) if name in ('SPY','QQQ') else None))
         self.bars=tuple(data)
         folder=self.root/'config';folder.mkdir(parents=True)
         (folder/'tradingview_symbols.json').write_bytes((ROOT/'config/tradingview_symbols.json').read_bytes())

@@ -18,6 +18,7 @@ from ..themes.calculations import bar_map,usable
 from ..themes.index import build_index,IndexUnavailable
 from ..themes.history import ThemeHistory
 from ..research.engine import calculate_session
+from ..research.context import enrich
 from ..research.exports import reviewed_mapping
 from ..research.universe import approved_launch_universe,approved_launch_close_membership,contiguous_suffix
 from ..research_policy import ACTION_SENTENCES
@@ -201,7 +202,7 @@ class RefreshService:
             validate_actions(tuple(a for a in actions if a.last_trading_session<=target),days)
             self._status(target_session=target,progress='Fetching missing sessions and repair window')
             store=Store(self.db)
-            prepared=prepare(store,provider,names,sessions,terminal_actions=actions,target_symbols=target_names)
+            prepared=prepare(store,provider,names,sessions,terminal_actions=actions,target_symbols=target_names,ohlc_symbols=('SPY','QQQ'))
             bars=bar_map(prepared.bars)
             self._status(progress='Calculating market, themes and peer comparisons',provider_health='Healthy')
             market=market_layer(bars,sessions,rosters)
@@ -262,6 +263,9 @@ class RefreshService:
             self._status(progress='Checking optional earnings')
             earnings=None if self.mode=='fixture' else AlphaVantageEarnings(os.environ.get('ALPHAVANTAGE_API_KEY'))
             snapshot['earnings']=optional_earnings(earnings,{r['ticker'] for r in snapshot['relationships']})
+            previous_context=store.research_at(sessions[-2],config.methodology['version']) if len(sessions)>1 else None
+            snapshot=enrich(snapshot,bars,sessions,previous_context,
+                {m.ticker:m.company for m in config.memberships if m.company})
             snapshot['refreshed_at']=datetime.now(timezone.utc).isoformat()
             snapshot['completeness']={'required':len(target_names),'valid_target':len(target_names),'complete':True}
             if prepared.terminal_values:

@@ -65,7 +65,7 @@ class AlpacaMarketDataProvider:
                         if not close.is_finite() or close<=0 or not volume.is_finite() or volume<0:raise ValueError()
                         key=(symbol,session)
                         if key in result:raise ValueError()
-                        result[key]=(close,volume)
+                        result[key]=(close,volume,row.get('h'),row.get('l'))
                     except (KeyError,ValueError,TypeError,ArithmeticError,AttributeError):
                         raise ProviderError('malformed_bar') from None
             token=body.get('next_page_token')
@@ -83,7 +83,7 @@ class AlpacaMarketDataProvider:
         adjusted,p1=self._fetch(symbols,start,end,'split,spin-off')
         raw,p2=self._fetch(symbols,start,end,'raw')
         if adjusted.keys()!=raw.keys():raise ProviderError('raw_adjusted_mismatch')
-        bars=tuple(Bar(s,d,adjusted[s,d][0],raw[s,d][0],raw[s,d][1]) for s,d in sorted(raw))
+        bars=tuple(Bar(s,d,adjusted[s,d][0],raw[s,d][0],raw[s,d][1],adjusted_high=adjusted[s,d][2],adjusted_low=adjusted[s,d][3]) for s,d in sorted(raw))
         return Batch(self.identity,bars,p1+p2)
 
     def get_latest_completed_session(self):return self.schedule.latest()

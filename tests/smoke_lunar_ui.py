@@ -49,7 +49,9 @@ def main():
                 expect(page.locator('#overview-title')).to_be_visible()
                 expect(page.locator('#theme-layer')).to_contain_text('Pre-launch research')
                 results['states'].append('real configured pre-launch research')
-                nav=lambda name:page.locator(f'[data-nav="{name}"]').click()
+                def nav(name):
+                    page.locator(f'[data-nav="{name}"]').click()
+                    if name=='primary':page.locator('[data-candidate-lens="directional"]').click()
                 def open_map():
                     if not page.locator('#theme-map-panel').evaluate('e=>e.open'):page.locator('#theme-map-panel > summary').click()
                 expect(page.locator('#theme-map-panel')).to_have_attribute('open','')
@@ -81,8 +83,8 @@ def main():
                         assert abs(y[0]-y[1])<1,(width,y)
                     nav('themes');table=page.locator('#theme-table')
                     widths=table.locator('th').evaluate_all('nodes=>nodes.map(e=>e.getBoundingClientRect().width)')
-                    assert len(widths)==8
-                    ratios=[3,33,8,9,9,12,14,12]
+                    assert len(widths)==9
+                    ratios=[5,24,11,10,9,9,10,11,11]
                     total=sum(widths)
                     assert all(abs(actual-total*ratio/100)<1 for actual,ratio in zip(widths,ratios)),(width,widths)
                     for row in table.locator('tbody tr').all():
@@ -117,7 +119,7 @@ def main():
                     sizes=[page.locator('.market-card').nth(i).locator(selector).first.evaluate('e=>getComputedStyle(e).fontSize') for i in [0,1,2]]
                     assert len(set(sizes))==1,(selector,sizes)
                 assert page.locator('.market-card.context .breadth-bar').count()==0
-                expect(page.locator('.market-card.context')).to_contain_text('Context only')
+                expect(page.locator('.market-card.context')).to_contain_text('Small-cap context')
                 # Snapshot-only visuals: correct breadth lengths, raw axes and inspectable points.
                 nav('overview');open_map()
                 map_rows=[t for t in actual['themes'] if t['status']=='active' and t['returns'] and all(t['returns'][i]['value'] is not None for i in [0,1])]
@@ -151,9 +153,9 @@ def main():
                 assert all(family in row.text_content() for row in page.locator('#theme-table tbody tr').all())
                 page.locator('#theme-trend').select_option('Unavailable');expect(page.locator('#theme-table')).to_contain_text('No themes match')
                 page.locator('#theme-filters [data-reset]').click()
-                page.get_by_role('button',name='Watch-only',exact=False).click();expect(page.locator('#theme-table tbody tr')).to_have_count(8)
+                page.get_by_role('button',name='Untracked Concepts',exact=False).click();expect(page.locator('#theme-table tbody tr')).to_have_count(8)
                 page.get_by_role('button',name='Active',exact=False).click()
-                page.locator('[data-theme-sort="score"]').click()
+                page.locator('[data-theme-sort="score"]').click();page.locator('[data-theme-sort="score"]').click()
                 scores=page.locator('#theme-table tbody tr td:nth-child(3)').all_text_contents();assert list(map(float,scores))==sorted(map(float,scores))
                 assert page.locator('[aria-sort="ascending"]').count()==1
                 results['interactions'].append('theme search, family/priority/trend filters, Watch-only, sort')
@@ -165,7 +167,7 @@ def main():
                 detail_link=page.locator('#theme-table a').first;detail_link.focus();detail_link.press('Enter')
                 expect(page.locator('#inspector-title')).to_have_text('Semiconductors');expect(page.locator('#inspector-title')).to_be_focused()
                 expect(page.locator('#research-inspector')).to_be_visible();expect(page.locator('#themes-title')).to_be_visible()
-                expect(page.locator('#inspector-members')).to_contain_text('Not qualified')
+                expect(page.locator('#inspector-members')).to_contain_text('Does not meet candidate criteria')
                 page.locator('[data-inspector-filter="Primary"]').click()
                 expected_members=sum(r['qualifies'] for r in actual['relationships'] if r['theme_id']=='semiconductors')
                 expect(page.locator('#inspector-members tbody tr')).to_have_count(expected_members)
@@ -181,13 +183,17 @@ def main():
                 page.keyboard.press('Escape');expect(page.locator('#research-inspector')).not_to_be_visible()
                 expect(page.locator('#theme-search')).to_have_value('semiconductors');expect(detail_link).to_be_focused()
                 expect(page.locator('[data-theme-row="semiconductors"]')).to_have_class('selected-row')
+                page.go_forward();expect(page.locator('#inspector-title')).to_have_text('Semiconductors')
                 page.go_forward();expect(page.locator('#inspector-title')).to_have_text('NVDA')
+                page.go_back();expect(page.locator('#inspector-title')).to_have_text('Semiconductors')
+                expect(page.locator('#inspector-search')).to_have_value('NVDA')
+                expect(page.locator('#inspector-members [data-inspect-ticker="NVDA"]')).to_be_focused()
                 page.go_back();expect(page.locator('#research-inspector')).not_to_be_visible()
                 detail_link.click();page.get_by_role('link',name='Open full theme',exact=False).click()
                 expect(page.locator('#detail-title')).to_have_text('Semiconductors');expect(page.locator('#detail-title')).to_be_focused()
                 page.locator('#member-search').fill('NVDA');expect(page.locator('#member-table tbody tr')).to_have_count(1)
                 assert page.locator('#member-table summary').count()==0
-                with page.expect_download() as item:page.get_by_role('link',name='Theme Primary TXT',exact=False).click()
+                with page.expect_download() as item:page.get_by_role('link',name='Theme Directional TXT',exact=False).click()
                 assert Path(item.value.path()).read_text()==actual['exports']['individual']['semiconductors']
                 capture('theme-detail-1440');audit('theme-detail')
                 page.get_by_role('link',name='Back to Themes',exact=False).click()
@@ -200,18 +206,18 @@ def main():
                 first.focus();first.press('Space');expect(first).to_have_attribute('aria-pressed','true')
                 page.wait_for_timeout(1800);expect(page.locator(f'[data-focus-key="{key}"]')).to_be_focused()
                 capture('primary-earnings-disabled-1440')
-                page.get_by_role('button',name='By theme',exact=True).click();expect(page.locator('#candidates tbody tr')).to_have_count(relationships)
+                page.get_by_role('button',name='Grouped by theme',exact=True).click();expect(page.locator('#candidates tbody tr')).to_have_count(relationships)
                 page.locator('#candidate-search').fill(ticker)
                 assert page.locator('#candidates tbody tr').count()>=1
                 expect(page.locator('#candidate-earnings')).to_be_hidden()
                 assert page.locator('#candidates th').all_text_contents()==['Ticker','Theme','Role','W · pp','Save']
                 assert page.locator('#candidates td[data-label="Earnings"]').count()==0
-                with page.expect_download() as item:page.get_by_role('link',name='Export all Primary',exact=False).click()
+                with page.expect_download() as item:page.get_by_role('link',name='Export Directional',exact=False).click()
                 text=Path(item.value.path()).read_text();assert text==actual['exports']['combined']
                 identifiers=[s for s in text.splitlines() if s and not s.startswith('###')];assert len(identifiers)==len(set(identifiers))
                 page.locator('#candidate-filters [data-reset]').click()
                 page.locator('#candidate-role').select_option('Core');assert page.locator('#candidates tbody tr').count()>0
-                page.locator('#candidate-w').select_option('negative');expect(page.locator('#candidates')).to_contain_text('No Primary stocks match')
+                page.locator('#candidate-w').select_option('negative');expect(page.locator('#candidates')).to_contain_text('No Directional stocks match')
                 results['interactions'].append('multi-theme and unique candidate views, filters, stable poll focus, canonical combined TXT')
                 nav('saved');expect(page.locator('#saved')).to_contain_text(ticker);capture('saved-populated-1440');audit('saved-populated')
                 page.reload();expect(page.locator('#saved')).to_contain_text(ticker)
@@ -342,8 +348,8 @@ def main():
                     state['snapshot']['today_plan']='Illustrative browser state · not a live signal'
                     for t in state['snapshot']['themes']:t['priority']='Watch'
                     for r in state['snapshot']['relationships']:r['qualifies']=False
-                    update(label);expect(page.locator('#market-direction')).to_contain_text(direction);expect(page.locator('#primary-themes')).to_contain_text('No Primary themes')
-                    nav('primary');expect(page.locator('#candidates')).to_contain_text('No Primary stocks');nav('overview')
+                    update(label);expect(page.locator('#market-direction')).to_contain_text(direction);expect(page.locator('#primary-themes')).to_contain_text('No Directional themes')
+                    nav('primary');expect(page.locator('#candidates')).to_contain_text('No Directional stocks');nav('overview')
                 # An explicit illustrative short qualification, not a recalculation of market rules.
                 state['snapshot']=deepcopy(actual)
                 short=next(r for r in state['snapshot']['relationships'] if r['relative']['w'] is not None and float(r['relative']['w'])<0)
@@ -352,7 +358,7 @@ def main():
                 for r in state['snapshot']['relationships']:r['qualifies']=r is short
                 short['assigned_section']=short['theme_id'];short['also_qualifies_in']=[]
                 state['snapshot']['earnings'][short['ticker']]={'status':'Available','dates':['2026-11-12']}
-                update('illustrative short candidate and earnings date');nav('primary');page.locator('#candidate-filters [data-reset]').click();page.get_by_role('button',name='Unique tickers',exact=True).click()
+                update('illustrative short candidate and earnings date');nav('primary');page.locator('#candidate-filters [data-reset]').click();page.get_by_role('button',name='Stocks',exact=True).click()
                 page.locator('#candidate-earnings').select_option('available');expect(page.locator('#candidates tbody tr')).to_have_count(1);expect(page.locator('#candidates')).to_contain_text('2026-11-12');capture('short-candidate-1440')
                 # Explicit Available-without-date and an ambiguous failure remain distinct.
                 state['snapshot']['earnings'][short['ticker']]={'status':'Available','dates':[]}

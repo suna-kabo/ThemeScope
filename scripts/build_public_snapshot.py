@@ -154,6 +154,28 @@ LAYER = object_rule({key+'?':rule for key,rule in dict(state=text, research_sess
     launch_rebalance_session=optional(text), first_earned_session=optional(text), official_live_history=boolean).items()})
 
 
+
+def keyed(rule, pattern):
+    def copy(value):
+        if not isinstance(value, dict) or any(not isinstance(key, str) or not pattern.fullmatch(key) for key in value):
+            raise SnapshotError('Research map identifiers are invalid.')
+        return {key: rule(row) for key, row in value.items()}
+    return copy
+
+
+EXTENSION_INDEX = object_rule(dict(atr20=numeric, distance=numeric, state=text, side=optional(text), magnitude=optional(text)))
+EMA_CHANGE = object_rule(dict(relation=text, previous_relation=text, changed=optional(boolean), message=optional(text), previous_session=optional(text)))
+RANK_ROW = object_rule(dict(rank=numeric, previous_rank=numeric, change=numeric, reason=text, previous_session=optional(text)))
+POINTER = object_rule(dict(ticker=text, theme_id=text))
+BUCKET = object_rule(dict(label=text, rows=sequence(POINTER), stocks=sequence(POINTER), stock_count=numeric, relationship_count=numeric))
+RESEARCH = object_rule(dict(schema=text, policy_version=text, policy_hash=text,
+    extension=object_rule(dict(state=text, indices=object_rule(dict(SPY=EXTENSION_INDEX, QQQ=EXTENSION_INDEX)), history_start=optional(text), atr_period=numeric)),
+    focus=object_rule(dict(label=text, preferred_mode=text)),
+    ema_transitions=object_rule({ticker:object_rule(dict(ema21=EMA_CHANGE, ema50=EMA_CHANGE)) for ticker in ('SPY','QQQ','IWM')}),
+    ranks=object_rule(dict(method=text, ranked_total=numeric, active_universe=sequence(text), themes=keyed(RANK_ROW,SLUG))),
+    countertrend=object_rule(dict(available=boolean, side=optional(text), buckets=object_rule(dict(resilient=BUCKET,snapback=BUCKET)), stock_count=numeric, relationship_count=numeric, ordering_note=text)),
+    companies=keyed(text,SYMBOL)))
+
 def project_snapshot(source, expected):
     if not iso_session(expected):
         raise SnapshotError('Use an explicit ISO session: --session YYYY-MM-DD.')
@@ -187,15 +209,20 @@ def project_snapshot(source, expected):
         theme_layer=LAYER, today_plan=text, refreshed_at=text, production_blockers=sequence(text),
         completeness=object_rule(dict(complete=boolean, required=numeric, valid_target=numeric,
             **{'trading_target?':numeric,'terminal_target?':numeric,'historical_inputs?':numeric})),
-        provider_health=object_rule(dict(status=text))))
+        provider_health=object_rule(dict(status=text)), **{'research?':RESEARCH}))
     if not re.fullmatch(r'themescope-vnext-\d+', result['methodology']) or not result['themes']:
         raise SnapshotError('A supported vNext methodology and theme list are required.')
     themes = [t['theme_id'] for t in result['themes']]
     if len(set(themes)) != len(themes) or any(not SLUG.fullmatch(t) for t in themes):
         raise SnapshotError('Invalid or duplicate theme identifiers.')
+    if 'research' in result and result['research']['schema'] != 'themescope-research-1':
+        raise SnapshotError('Unsupported research context contract.')
     pairs = [(r['ticker'], r['theme_id']) for r in result['relationships']]
     if len(set(pairs)) != len(pairs) or any(not SYMBOL.fullmatch(s) or t not in themes for s,t in pairs):
         raise SnapshotError('Invalid or duplicate theme relationships.')
+    research = result.get('research')
+    if research and (any(t not in themes for t in research['ranks']['themes']) or any((r['ticker'],r['theme_id']) not in pairs for bucket in research['countertrend']['buckets'].values() for r in [*bucket['rows'],*bucket['stocks']])):
+        raise SnapshotError('Research references an unknown theme relationship.')
     exported = source.get('exports')
     if not isinstance(exported, dict) or not isinstance(exported.get('individual'), dict) or not isinstance(exported.get('assignments'), dict):
         raise SnapshotError('Published exports are missing or malformed.')

@@ -50,11 +50,11 @@ def main(public=False):
                 page.on('request',request)
                 page.goto(origin)
                 if public:
-                    expect(page.locator('#public-banner')).to_have_text('Public snapshot · Completed US session 2026-11-06 · Read-only')
+                    expect(page.locator('#public-banner')).to_have_text('Public snapshot · Completed US session 2026-11-06 · Market data fixed')
                     expect(page.locator('#public-banner')).to_be_visible()
                     expect(page.locator('#fixture-banner')).to_be_hidden()
                     expect(page.locator('#refresh')).to_be_hidden()
-                    expect(page.locator('#progress')).to_have_text('Read-only snapshot')
+                    expect(page.locator('#progress')).to_have_text('Market data fixed')
                     assert 'Synthetic inspection fixture' not in page.locator('body').inner_text()
                     assert 'Replay fixture' not in page.locator('body').inner_text()
                 else:
@@ -67,12 +67,14 @@ def main(public=False):
                 if public:
                     # A programmatic click also cannot escape the static-mode guard.
                     page.locator('#refresh').evaluate('(button)=>button.click()')
-                    expect(page.locator('#progress')).to_have_text('Read-only snapshot')
+                    expect(page.locator('#progress')).to_have_text('Market data fixed')
                 else:
                     page.get_by_role('button',name='Replay fixture',exact=True).click()
                     expect(page.locator('#progress')).to_have_text('Synthetic fixture replayed')
                 assert page.locator('#market-cards').inner_text()==before
-                nav=lambda name:page.locator(f'[data-nav="{name}"]').click()
+                def nav(name):
+                    page.locator(f'[data-nav="{name}"]').click()
+                    if name=='primary':page.locator('[data-candidate-lens="directional"]').click()
                 nav('themes');expect(page.locator('#theme-table tbody tr')).to_have_count(5)
                 page.locator('#theme-search').fill('alpha');expect(page.locator('#theme-table tbody tr')).to_have_count(1)
                 page.locator('#theme-table [data-inspect-theme]').first.click()
@@ -84,9 +86,9 @@ def main(public=False):
                 nav('primary');expect(page.locator('#candidates tbody tr')).to_have_count(2)
                 ticker=page.locator('#candidates [data-save]').first.get_attribute('data-save')
                 page.locator('#candidates [data-save]').first.click()
-                page.get_by_role('button',name='By theme',exact=True).click();expect(page.locator('#candidates tbody tr')).to_have_count(4)
+                page.get_by_role('button',name='Grouped by theme',exact=True).click();expect(page.locator('#candidates tbody tr')).to_have_count(4)
                 page.locator('#candidate-sort').select_option('w-desc')
-                with page.expect_download() as item:page.get_by_role('link',name='Export all Primary',exact=False).click()
+                with page.expect_download() as item:page.get_by_role('link',name='Export Directional',exact=False).click()
                 export=Path(item.value.path()).read_text()
                 assert 'DEMO:DEMO' in export and 'NASDAQ:' not in export
                 nav('saved');expect(page.locator('#saved')).to_contain_text(ticker)

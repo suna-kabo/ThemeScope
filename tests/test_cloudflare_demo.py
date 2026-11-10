@@ -22,7 +22,8 @@ class CloudflareDemoTests(unittest.TestCase):
             for folder in ('src','scripts','static/vnext'):
                 shutil.copytree(ROOT/folder,clean/folder,ignore=shutil.ignore_patterns('__pycache__','*.pyc'))
             policy=clean/'config/vnext';policy.mkdir(parents=True)
-            shutil.copyfile(ROOT/'config/vnext/methodology.json',policy/'methodology.json')
+            for name in ('methodology.json','research_context.json'):
+                shutil.copyfile(ROOT/'config/vnext'/name,policy/name)
             env=dict(os.environ,APCA_API_KEY_ID='synthetic_not_for_output',APCA_API_SECRET_KEY='synthetic_not_for_output',ALPHAVANTAGE_API_KEY='synthetic_not_for_output')
             subprocess.run([sys.executable,'-I',str(clean/'scripts/build_cloudflare_demo.py')],cwd=clean,env=env,check=True,capture_output=True)
             output=clean/'dist/cloudflare-pages'

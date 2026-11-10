@@ -53,6 +53,8 @@ class Bar:
     currency: str = 'USD'
     completed: bool = True
     regular_session: bool = True
+    adjusted_high: Decimal | None = None
+    adjusted_low: Decimal | None = None
 
     def __post_init__(self):
         if not self.ticker or self.ticker != self.ticker.upper() or not iso_date(self.session):
@@ -62,6 +64,13 @@ class Bar:
             if value is None or value < 0 or (field != 'volume' and value == 0):
                 raise ValueError('Invalid bar ' + field)
             object.__setattr__(self, field, value)
+        # Optional volatility inputs never substitute for close/volume or block
+        # legacy research. Invalid/missing pairs make Extension unavailable.
+        high,low=number(self.adjusted_high),number(self.adjusted_low)
+        if high is None or low is None or not 0<low<=self.adjusted_close<=high:
+            high=low=None
+        object.__setattr__(self,'adjusted_high',high)
+        object.__setattr__(self,'adjusted_low',low)
         if self.adjustment != POLICY['adjustment'] or self.currency != 'USD':
             raise ValueError('Only split/spin-off price adjustment and USD are supported')
 

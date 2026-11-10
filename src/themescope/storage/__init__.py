@@ -6,7 +6,7 @@ import json
 import sqlite3
 from pathlib import Path
 from ..domain import iso_date
-from ..themes.calculations import usable
+from ..themes.calculations import Bar, usable
 
 SCHEMA_VERSION = 2
 # Finite wait for short local writer/commit locks; no WAL/journal-mode change.
@@ -27,7 +27,11 @@ def canonical(value):
                 raise ValueError('Nonfinite persisted number')
             return str(item)
         if is_dataclass(item):
-            return asdict(item)
+            result=asdict(item)
+            if isinstance(item,Bar):
+                for key in ('adjusted_high','adjusted_low'):
+                    if result[key] is None:result.pop(key)
+            return result
         raise TypeError(type(item).__name__)
     return json.dumps(value, default=convert, sort_keys=True, separators=(',', ':'), allow_nan=False)
 
@@ -101,6 +105,17 @@ class Store:
             "WHERE t.theme_id=? AND r.session=? AND r.methodology=? AND r.status='success' "
             "ORDER BY r.id DESC LIMIT 1", (theme_id, session, methodology)).fetchone()
         return json.loads(row[0]) if row else None
+
+    def research_at(self, session, methodology):
+        """One successful run's entire theme universe and market context, read only."""
+        row=self.connection.execute(
+            "SELECT r.id,m.payload FROM refresh_run r JOIN market_snapshot m ON m.run_id=r.id "
+            "WHERE r.session=? AND r.methodology=? AND r.status='success' ORDER BY r.id DESC LIMIT 1",
+            (session,methodology)).fetchone()
+        if row is None:return None
+        themes=[json.loads(t[0]) for t in self.connection.execute(
+            'SELECT payload FROM theme_snapshot WHERE run_id=? ORDER BY theme_id',(row['id'],))]
+        return {'session':session,'methodology':methodology,'market':json.loads(row['payload']),'themes':themes}
 
     def active_publication(self):
         """Version and payload from ONE committed publication-pointer read."""

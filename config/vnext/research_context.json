@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "version": "themescope-research-context-1",
+  "atr_period": 20,
+  "ema_period": 21,
+  "atr_seed": "SMA of first 20 true ranges, each with a previous completed close",
+  "atr_smoothing": "Wilder",
+  "stretched_at": "1.0",
+  "extended_at": "1.5",
+  "aggregate": "both benchmarks at least stretched on the same side; both extended for Extended",
+  "rank_method": "competition",
+  "countertrend_version": "theme-relative-lens-1"
+}

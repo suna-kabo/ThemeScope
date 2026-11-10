@@ -7,7 +7,7 @@
   --positive:#8ee0bd; --negative:#ffa9aa; --warning:#f2cf91; --info:#96dbe6;
   --radius-control:6px; --fast:90ms; --ease:cubic-bezier(.2,0,0,1);
   --type-caption:.75rem; --type-small:.8125rem; --type-body:.875rem; --type-heading:1.125rem; --type-title:1.75rem;
-  --row-pad:4px; --rail-width:11rem;
+  --row-pad:4px; --cell-inline:8px; --rail-width:11rem;
   font:100%/1.5 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
 }
@@ -565,4 +565,124 @@ td>.save-button { line-height:1; }
   .theme-wrap td:nth-child(6) { padding-inline-start:20px; }
   .theme-wrap td:nth-child(7) { text-align:start; }
 }
+}
+
+/* Supplied research context: structural bias, extension and focus stay distinct. */
+.research-context { display:grid; grid-template-columns:1fr 1fr 1.2fr; gap:18px; }
+.research-context>div { min-width:0; }
+.research-context strong { display:block; font-size:1.25rem; line-height:1.35; margin-top:4px; overflow-wrap:anywhere; }
+.research-context.compact strong { font-size:var(--type-body); }
+.bias-support { margin:12px 0 8px; font-size:var(--type-small); }
+.extension-help,.candidate-lens-help { color:var(--muted); font-size:var(--type-small); line-height:1.5; max-width:90ch; }
+.extension-help { margin-bottom:0; }
+.candidate-lens-help { margin-bottom:6px; }
+.candidate-lenses { margin:6px 0 8px; }
+.compact-context:empty { display:none; }
+.ema-context { flex-wrap:wrap; }
+.ema-transition { flex-basis:100%; color:var(--text); font-size:var(--type-caption); }
+.index-extension { color:var(--muted); font-size:var(--type-caption); padding-top:4px; }
+.market-card:not(.context) { grid-row:span 5; }
+.market-grid { grid-template-rows:repeat(5,auto); }
+.countertrend-group { margin-block:18px 28px; }
+.countertrend-group .section-heading { flex-wrap:wrap; gap:6px; }
+.countertrend-jumps { display:flex; flex-wrap:wrap; gap:8px; margin-block:8px; }
+.saved-w-theme { display:block; color:var(--muted); font-size:var(--type-caption); max-width:22ch; white-space:normal; }
+abbr[title] { text-decoration:underline dotted var(--muted); text-underline-offset:3px; cursor:help; }
+.canonical-rank { font-variant-numeric:tabular-nums; color:var(--muted); }
+.rank-change { font-size:var(--type-caption); }
+.operational-strip { justify-content:flex-end; padding-bottom:5px; }
+.diagnostics-body { overflow-wrap:anywhere; }
+#research-inspector { container-type:inline-size; }
+.inspector-header>div { min-width:0; }
+.inspector-metrics .priority { white-space:normal; }
+#inspector-content .section-heading { flex-wrap:wrap; gap:8px; }
+
+@media(min-width:1101px) {
+ @container(min-width:70rem) {
+  .theme-wrap table:not(.concept-table) { table-layout:fixed; }
+  .theme-wrap th:nth-child(1) { width:5%; }
+  .theme-wrap th:nth-child(2) { width:24%; }
+  .theme-wrap th:nth-child(3) { width:11%; }
+  .theme-wrap th:nth-child(4) { width:10%; }
+  .theme-wrap th:nth-child(5),.theme-wrap th:nth-child(6) { width:9%; }
+  .theme-wrap th:nth-child(7) { width:10%; }
+  .theme-wrap th:nth-child(8),.theme-wrap th:nth-child(9) { width:11%; }
+  .theme-wrap th:nth-child(6),.theme-wrap td:nth-child(6) { padding-inline-start:var(--cell-inline); }
+  .theme-wrap td:nth-child(7) { text-align:start; }
+  .theme-wrap th,.theme-wrap .sort-button { white-space:normal; }
+  .theme-wrap .sort-button { text-align:inherit; }
+  .theme-wrap .concept-table th { width:auto; }
+ }
+}
+@media(max-width:1100px) {
+  .research-context { grid-template-columns:1fr 1fr; }
+  .research-context>div:last-child { grid-column:1 / -1; }
+}
+@container(max-width:70rem) {
+  .theme-wrap .canonical-rank { display:flex; }
+  .theme-wrap td:nth-child(7),.theme-wrap td:nth-child(8),.theme-wrap td:nth-child(9) { grid-column:auto; }
+  .theme-wrap .theme-name { grid-column:1 / -1; grid-row:1; }
+}
+@container(max-width:52rem) {
+  .overview-research { grid-template-columns:1fr; }
+  .overview-research .section-heading { flex-wrap:wrap; }
+  #candidates .table-wrap { overflow:visible; }
+  #candidates table { min-width:0; }
+  #candidates table,#candidates tbody { display:block; }
+  #candidates thead { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+  #candidates tr { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px 12px; padding:10px 0; border-bottom:1px solid var(--border); }
+  #candidates td { display:flex; flex-direction:column; min-width:0; border:0; padding:0; white-space:normal; overflow-wrap:anywhere; text-align:start; }
+  #candidates td::before { content:attr(data-label); color:var(--muted); font-size:var(--type-caption); }
+  #candidates td[data-label="Ticker"] { grid-column:1; grid-row:1; }
+  #candidates td[data-label="Theme"] { grid-column:1 / -1; grid-row:2; }
+  #candidates td[data-label="Role"] { grid-column:1; grid-row:3; }
+  #candidates td[data-label="W"] { grid-column:2; grid-row:3; text-align:end; }
+  #candidates td[data-label="Save"] { grid-column:2; grid-row:1; align-items:end; }
+  #candidates td[data-label="Save"]::before { display:none; }
+  #candidates td[data-label="Earnings"] { grid-column:1 / -1; grid-row:4; }
+}
+@container(max-width:30rem) {
+  .market-breadth { grid-template-columns:1fr; }
+  .market-card-head,.context .market-card-head { display:flex; flex-wrap:wrap; gap:8px 12px; }
+  .market-card-head .market-price { white-space:nowrap; }
+  .preview-row { grid-template-columns:max-content minmax(0,1fr); }
+  .preview-row>div { min-width:0; overflow-wrap:anywhere; }
+  .preview-row:not(.stock-row) .preview-value { grid-column:2; text-align:start; display:flex; flex-wrap:wrap; gap:8px; }
+  .preview-row.stock-row { grid-template-columns:minmax(0,1fr) auto; }
+  .stock-row>div:first-child { grid-column:1 / -1; }
+  .stock-row .preview-value { text-align:start; }
+  .theme-wrap tr { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .theme-wrap td[data-label="Members above EMA21 / EMA50"],.theme-wrap td[data-label="Research Priority"],.theme-wrap .concept-table td { grid-column:1 / -1; }
+  .theme-wrap .priority { white-space:normal; }
+  .inspector-breadth { grid-template-columns:1fr; }
+  .inspector-metrics:not(.ticker-metrics)>.metric-block:first-child { grid-column:1 / -1; }
+  .inspector-search-row { flex-wrap:wrap; }
+  .inspector-search-row label { flex-basis:100%; }
+}
+@container(max-width:20rem) {
+  .inspector-metrics,.relationship-metrics { grid-template-columns:minmax(0,1fr); }
+  .relationship-metrics>div,.relationship-metrics>div:nth-child(-n+3) { grid-column:1; }
+}
+/* Mobile header wraps enlarged Display instead of covering the brand. */
+@media(max-width:800px) {
+  .rail { flex-direction:row; align-items:center; flex-wrap:wrap; gap:8px; }
+  .brand { max-width:100%; }
+  .rail-footer { position:static; margin-left:auto; }
+  .main-nav { order:3; flex-basis:100%; margin-top:0; }
+}
+@media(max-width:520px) {
+  .app-header { flex-direction:column; gap:8px; }
+  .session-label { width:100%; }
+  .header-actions { flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:space-between; max-width:100%; width:100%; }
+  #progress { order:2; flex:1 1 100%; max-width:none; text-align:start; }
+  .diagnostics-body { left:auto; right:0; width:min(360px,calc(100vw - 24px)); }
+}
+@media(max-width:480px) {
+  .research-context { grid-template-columns:1fr; gap:12px; }
+  .research-context strong { font-size:1.125rem; }
+  .countertrend-group h2 { overflow-wrap:anywhere; }
+}
+@container(max-width:30rem) {
+  .saved-row .numeric { grid-column:1 / -1; text-align:start; }
+  .saved-w-theme { max-width:none; text-align:start; }
 }

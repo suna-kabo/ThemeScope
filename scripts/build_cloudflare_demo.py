@@ -17,6 +17,7 @@ from scripts.build_inspection_bundle import safe_file
 from src.themescope.domain import MarketRoster, ThemeStatus
 from src.themescope.market.layer import market_layer
 from src.themescope.research.engine import calculate_session
+from src.themescope.research.context import enrich
 from src.themescope.storage import canonical
 from src.themescope.themes.calculations import Bar, deterministic
 from src.themescope.themes.index import build_index
@@ -52,7 +53,7 @@ def demo_snapshot():
     for ticker, rate in [('SPY',D('.5')), ('QQQ',D('.35')), ('IWM',D('-.25'))]:
         for i, day in enumerate(sessions):
             price = D(100)+i*rate
-            bars[ticker, day] = Bar(ticker,day,price,price,D(2000000))
+            bars[ticker, day] = Bar(ticker,day,price,price,D(2000000),adjusted_high=price+1,adjusted_low=price-1)
     market = market_layer(bars,sessions[:sessions.index(target)+1],(
         MarketRoster('SPY',sessions[0],tuple(m.ticker for m in alpha),'Synthetic demo roster'),
         MarketRoster('QQQ',sessions[0],tuple(rename[m.ticker] for m in weak),'Synthetic demo roster'),
@@ -69,6 +70,7 @@ def demo_snapshot():
                     completeness={'required':len(names)+3,'valid_target':len(names)+3,'complete':True},
                     earnings={s:{'status':'Unavailable','dates':[]} for s in sorted(names)})
     snapshot['earnings'][sorted(names)[0]]={'status':'Available','dates':['2024-04-15']}
+    snapshot=enrich(snapshot,bars,sessions[:sessions.index(target)+1],companies={m.ticker:m.company for m in memberships})
     return json.loads(canonical(snapshot))
 
 

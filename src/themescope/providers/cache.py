@@ -17,7 +17,7 @@ class Prepared:
 
 
 def prepare(store,provider,symbols,sessions,*,repair_sessions=2,full_repair=False,
-            terminal_actions=(),target_symbols=None):
+            terminal_actions=(),target_symbols=None,ohlc_symbols=()):
     sessions=calendar(sessions);symbols=tuple(sorted(set(symbols)))
     required=tuple(sorted(set(symbols if target_symbols is None else target_symbols)))
     if not symbols or not required or not set(required)<=set(symbols) or repair_sessions<1:
@@ -54,7 +54,8 @@ def prepare(store,provider,symbols,sessions,*,repair_sessions=2,full_repair=Fals
     # Identical missing/repair ranges are batched, including valuation dependencies.
     groups={}
     for symbol,days in wanted.items():
-        needed=[i for i,d in enumerate(days) if full_repair or (symbol,d) not in cached or d in repair_window]
+        needed=[i for i,d in enumerate(days) if full_repair or (symbol,d) not in cached or d in repair_window
+                or symbol in ohlc_symbols and (cached[symbol,d].adjusted_high is None or cached[symbol,d].adjusted_low is None)]
         if not needed:continue
         begin=previous=needed[0]
         for i in needed[1:]+[len(days)+1]:
@@ -76,7 +77,7 @@ def prepare(store,provider,symbols,sessions,*,repair_sessions=2,full_repair=Fals
         anchor=fetch(names,day,day)
         if any((s,day) not in anchor for s in names):raise ProviderError('adjustment_anchor_missing')
         for symbol in names:
-            if anchor[symbol,day]!=cached[symbol,day]:
+            if any(getattr(anchor[symbol,day],k)!=getattr(cached[symbol,day],k) for k in ('adjusted_close','close','volume','completed','regular_session')):
                 revisions.setdefault((wanted[symbol][0],wanted[symbol][-1]),[]).append(symbol)
     for (start,end),names in revisions.items():
         replacement=fetch(names,start,end)
