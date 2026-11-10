@@ -664,6 +664,6 @@ return; replacement requires separate approved successor membership.
 
 The first reviewed event is ROKU under Nasdaq ECA2026-806: Nov 6 last trade,
 Nov 9 terminal valuation, Nov 10 exclusive removal, USD 95.30 + 0.9799 FOXA shares.
-Nov 6 initialization and history are preserved; real Nov 9/10 validation remains
+Nov 6 initialization and history are preserved; user-reported Nov 9 validation is PASS; real Nov 10 validation remains
 required. The separate versioned ledger and provenance/completeness conventions
 are documented in [terminal corporate actions](../vnext_terminal_actions.md).

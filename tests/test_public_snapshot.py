@@ -18,6 +18,7 @@ from scripts import build_public_snapshot as builder
 from scripts import publish_public_snapshot as publisher
 from public_snapshot_support import public_contract_fixture
 
+from scripts.static_pages import copy_fonts
 ROOT=Path(__file__).resolve().parents[1]
 
 
@@ -29,6 +30,7 @@ class PublicSnapshotTests(unittest.TestCase):
         self.root=Path(self.temp.name)
         assets=self.root/'static/vnext';assets.mkdir(parents=True)
         for name in builder.ASSETS:shutil.copyfile(ROOT/'static/vnext'/name,assets/name)
+        copy_fonts(ROOT,self.root/'static')
 
     def build(self,source=None,session='2026-11-06'):
         with patch.object(builder,'fetch_snapshot',return_value=source if source is not None else self.source):
@@ -52,6 +54,30 @@ class PublicSnapshotTests(unittest.TestCase):
         encoded=json.dumps(result)
         for key in ('performance','raw_payload','configuration_hash','environment','account','history','internal-data-version','private'):
             self.assertNotIn('"'+key+'"',encoded)
+
+    def test_countertrend_public_projection_both_sides_and_malformed_files(self):
+        from src.themescope.research.countertrend_exports import attach
+        mapping={ticker:{'status':'verified','symbol':symbol} for ticker,symbol in self.source['research']['countertrend']['exports']['symbols'].items()}
+        for side,filenames in [('long',{'Countertrend.txt','Strong-Leaders.txt','Relative-Weakness.txt'}),('short',{'Countertrend.txt','Resilient.txt','Snapback.txt'})]:
+            source=copy.deepcopy(self.source);source['research']['countertrend']['side']=side
+            source=attach(source,mapping)
+            result=builder.project_snapshot(source,'2026-11-06')
+            self.assertEqual(result['exports'],source['exports'])
+            published=result['research']['countertrend']['exports']
+            self.assertEqual(set(published['files']),filenames)
+            self.assertNotIn('symbols',published)
+            self.assertEqual(published['files'],source['research']['countertrend']['exports']['files'])
+            source['research']['countertrend']['exports']['files']['Countertrend.txt']='TEST:UNKNOWN\n'
+            with self.assertRaisesRegex(builder.SnapshotError,'published lens'):builder.project_snapshot(source,'2026-11-06')
+
+    def test_bundled_font_and_license_are_pinned(self):
+        for name in ('InterVariable.woff2','Inter-LICENSE.txt'):
+            with self.subTest(asset=name):
+                path=self.root/'static'/name;original=path.read_bytes();path.write_bytes(original+b'unapproved')
+                with self.assertRaises(ValueError):self.build()
+                path.write_bytes(original)
+        output=self.build();(output/'InterVariable.woff2').write_bytes(b'unknown binary')
+        with self.assertRaisesRegex(builder.SnapshotError,'font/license'):builder.validate_output(output)
 
     def test_current_assets_determinism_safety_no_network_database_or_calculation(self):
         with patch('socket.socket',side_effect=AssertionError('No network')),patch.object(sqlite3,'connect',side_effect=AssertionError('No DB')),patch('scripts.build_cloudflare_demo.demo_snapshot',side_effect=AssertionError('No calculations')):
@@ -182,6 +208,7 @@ class PublisherTests(unittest.TestCase):
         self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
         self.root=Path(self.temp.name);assets=self.root/'static/vnext';assets.mkdir(parents=True)
         for name in builder.ASSETS:shutil.copyfile(ROOT/'static/vnext'/name,assets/name)
+        copy_fonts(ROOT,self.root/'static')
         with patch.object(builder,'fetch_snapshot',return_value=public_contract_fixture()):
             self.output=builder.build('2026-11-06',self.root)
         self.before=[{'Id':'old','Environment':'Production','Branch':publisher.BRANCH,'Source':'previous','Status':'1 minute ago'}]

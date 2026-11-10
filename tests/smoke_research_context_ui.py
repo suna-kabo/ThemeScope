@@ -13,6 +13,8 @@ from vnext_prelaunch_fixture import PrelaunchFixture
 from src.themescope.research.context import enrich
 from src.themescope.storage import canonical
 
+from ui_smoke_helpers import open_exports,open_filters
+
 
 def main():
     from playwright.sync_api import sync_playwright,expect
@@ -109,15 +111,15 @@ def main():
                         assert area.evaluate('e=>e.scrollHeight<=e.clientHeight+1'),label
                 page.goto(origin)
                 expect(page.locator('#market-direction')).to_contain_text('Downside Extended')
-                expect(page.locator('#market-direction')).to_contain_text('Countertrend Highlighted')
-                expect(page.locator('#market-direction')).to_contain_text('Prioritise short-side research; assess entries independently.')
+                expect(page.locator('#market-direction')).to_contain_text('Countertrend review')
+                expect(page.locator('#market-direction')).to_contain_text('Prioritises short-side research. Entry evaluation remains separate.')
                 expect(page.locator('.market-card').first).to_contain_text('Crossed below EMA21 on 2026-11-10')
                 assert page.locator('.market-card.context .index-extension').count()==0
                 assert not page.locator('#completeness').is_visible()
                 capture('overview-1440');audit('overview')
-                nav('primary');expect(page.locator('[data-candidate-lens="countertrend"]')).to_have_attribute('aria-pressed','true')
-                expect(page.locator('#candidates')).to_contain_text('Resilient');expect(page.locator('#candidates')).to_contain_text('Snapback')
-                expect(page.locator('#candidate-results')).to_contain_text('not reversal probability')
+                nav('primary');expect(page.locator('[data-candidate-lens="countertrend"]')).to_have_attribute('aria-selected','true')
+                expect(page.locator('#candidates')).to_contain_text('Peer outperformers');expect(page.locator('#candidates')).to_contain_text('Weak-theme laggards')
+                assert page.locator('#candidates [data-help="countertrend"]').count()==1
                 expect(page.locator('#combined')).to_be_hidden()
                 for key in ('resilient','snapback'):
                     expected=[r['ticker'] for r in data['research']['countertrend']['buckets'][key]['stocks']]
@@ -126,7 +128,8 @@ def main():
                 capture('candidates-countertrend-1440');audit('countertrend')
                 first=page.locator('#candidates [data-save]').first;first.click()
                 assert not page.locator('dialog').is_visible()
-                lens('directional');expect(page.locator('#combined')).to_be_visible()
+                lens('directional');open_exports(page);expect(page.locator('#combined')).to_be_visible()
+                open_exports(page)
                 with page.expect_download() as item:page.locator('#combined').click()
                 assert Path(item.value.path()).read_text()==data['exports']['combined']
                 page.locator('#candidates [data-save]').first.click()
@@ -135,7 +138,7 @@ def main():
                 page.locator('#candidate-search').fill('A')
                 state['snapshot']=deepcopy(data);state['snapshot']['research']['focus']['preferred_mode']='countertrend';state['snapshot']['refreshed_at']='test revision'
                 page.wait_for_timeout(1800)
-                expect(page.locator('[data-candidate-lens="directional"]')).to_have_attribute('aria-pressed','true')
+                expect(page.locator('[data-candidate-lens="directional"]')).to_have_attribute('aria-selected','true')
                 expect(page.locator('#candidate-search')).to_have_value('A')
                 page.locator('#candidate-search').fill('')
                 nav('themes');ranks=page.locator('[data-theme-row]').evaluate_all("els=>Object.fromEntries(els.map(e=>[e.dataset.themeRow,e.cells[0].textContent]))")
@@ -147,7 +150,7 @@ def main():
                 page.locator('#theme-table [data-inspect-theme="semiconductors"]').first.click()
                 page.locator('#inspector-search').fill('NVDA');ticker=page.locator('#inspector-members [data-inspect-ticker="NVDA"]');ticker.click()
                 expect(page.locator('#inspector-content')).to_contain_text('1M return vs peers')
-                expect(page.locator('#inspector-content')).to_contain_text('W · pp vs this theme')
+                expect(page.locator('[data-current-theme]')).to_have_attribute('data-current-theme','semiconductors')
                 capture('ticker-inspector-1440');audit('ticker-inspector')
                 page.go_back();expect(page.locator('#inspector-title')).to_have_text('Semiconductors')
                 expect(page.locator('#inspector-search')).to_have_value('NVDA');expect(ticker).to_be_focused()

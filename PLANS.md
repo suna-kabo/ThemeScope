@@ -16,12 +16,12 @@ Phase 9 is complete at 327fc2375ae0e4981af87d4b5136170ee542b60d.
 SQLite lifecycle fix 0b51a0f and pre-launch research fix ed12ba4 are complete.
 Current checkpoint: non-live Gate E correctness review and regression validation
 completed after 860f87c / 4bc6656; no demonstrated runtime blockers. The user reports native Windows Nov 6 launch validation PASSED
-(899/899 SIP symbols, ~52.5 seconds). UI remains frozen; Gate E stays OPEN for
-real Nov 9/10 chronological checks. See docs/vnext_gate_e_review.md.
+(899/899 SIP symbols, ~52.5 seconds). Financial/runtime rules remain frozen; Gate E stays OPEN for
+real Nov 10 adjacent-live validation. Nov 9 first-earned validation is PASS per the user. See docs/vnext_gate_e_review.md.
 Launch rebalance 2026-11-06 close; all 726 retained relationships effective 2026-11-09.
 Production enabled; zero config blockers. Runtime SPY/QQQ roster gates remain.
 Preserve inspection/vnext-d-ui at 02e7d63 and every original gate ref.
-Gate E is open pending real Nov 9/10 chronological checks. Do not close Gate E,
+Gate E is open pending real Nov 10 adjacent-live validation; Nov 6 and Nov 9 are PASS per the user. Do not close Gate E,
 move inspection refs, merge or deploy. SQLite schema remains 2.
 Historical phase notes below record restrictions/results applicable at each gate.
 Do not restart the baseline or reimport/reclassify the proposed launch ledger.
@@ -941,3 +941,46 @@ No deployment, main merge, membership/roster/action amendment or real credential
 Gate E remains OPEN. Real Nov 9 SIP rerun and Nov 10 chronological validation remain
 pending; fixture dates and browser-manufactured transitions are not live evidence.
 Native Windows/manual assistive-technology validation is not claimed.
+
+
+## Professional workspace refinement and Countertrend exports — 10 November 2026
+
+Continued from 967dab6, preserving the interrupted working tree and completed research
+context implementation. User reports real Nov 6 launch PASS and real Nov 9 first
+earned-session chronology PASS. Nov 10 adjacent-live validation is PENDING; Gate E
+remains OPEN. Do not rerun/reclassify Nov 9 or manufacture evidence. Earlier dated
+phase notes record the status at those checkpoints and are not current blockers.
+
+Added Countertrend exports from existing published buckets and verified identifiers,
+with local HTTP/static support and unchanged Directional bytes. Ten focused tests
+pass, including unknown-identifier preservation of the last good snapshot. Existing
+Inter/SIL assets are explicitly loaded in local/static modes, hash-pinned for public
+output. CSS is consolidated into one token/component/responsive/motion system;
+DESIGN.md now matches it. Candidates selects the displayed relationship under a
+Theme filter and carries it into inspection. Saved's original ticker key stays
+unchanged; a separate optional context key records chosen theme/lens. Quick sheets,
+help, tab/segment motion, map selection/roving focus, loading/connection copy and
+Methodology structure are implemented. Final acceptance: full Python 389 run (387 passed/two existing Windows skips);
+focused vNext 160 (159 passed/one skip); all ten new Countertrend export tests and
+19 public snapshot tests pass. All seven browser programs pass, with 78 axe audits
+reporting zero violations. The professional and existing context suites each cover
+20 combinations of 1440/1024/768/480/320px, 100/200% text and both densities;
+high contrast, forced colours, reduced motion, keyboard help/tabs, nested Back,
+connection recovery and both lenses/sheets pass. Static modes have zero API/external
+requests; other UI modes introduce no external requests. The one existing local
+favicon 404 remains a documented browser diagnostic. Desktop density is 32 Theme
+rows and 26 Candidate rows at 1440p. Visual inspection covered desktop, 768px table,
+mobile sheets and enlarged text. Known incomplete axe checks are retained in reports;
+manual assistive-technology/native-Windows review is not claimed.
+
+Browser review fixed member-preview indent/premature reflow, menu closure after
+exports, tooltip dismissal on Methodology navigation, enlarged narrow headings and
+an anchor collision. Existing browser checks now exercise visible responsive sort
+controls and benchmark column alignment rather than obsolete card geometry; their
+financial assertions remain. JS syntax/helpers, compilation, config/evidence and
+diff checks pass. Diff review confirms no formula, configuration, provider/cache,
+SQLite, lifecycle, corporate-action or financial regression-test edits. External
+fixture screenshots/reports: `/workspace/artifacts/themescope-professional-workspace/`
+and `/workspace/artifacts/ThemeScope_Professional_Workspace_Review.zip`; none enter
+Git. See docs/vnext_professional_workspace.md and DESIGN.md for the final contract.
+No deployment/main merge/inspection-ref changes; Nov 10 and Gate E remain open.

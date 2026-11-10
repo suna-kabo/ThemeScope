@@ -2,7 +2,8 @@
 
 User-approved research expansion, 10 November 2026. Implementation remains on
 `refactor/themescope-vnext`. Gate E is **open**: manufactured browser/numerical
-fixtures do not pass the real Nov 9 SIP rerun or Nov 10 chronological validation.
+fixtures do not supply live validation evidence. User reports Nov 6 and Nov 9 PASS;
+Nov 10 adjacent-live validation remains PENDING.
 No deployment, main merge, membership amendment or financial-core rewrite.
 
 ## Additive contract and price inputs
@@ -121,9 +122,9 @@ Stocks view selects the first relationship per ticker in each bucket's supplied
 W order. A ticker may appear in both buckets through different themes. Global
 stock counts deduplicate across both; relationship counts remain separate.
 Grouped by theme retains every relationship, ordered within theme using that same
-supplied order. Group order follows first appearance in bucket order. Theme filters
-in Stocks view match any eligible lens relationship, while displayed W retains its
-explicit representative theme. Countertrend never changes Directional TXT files.
+supplied order. Group order follows first appearance in bucket order. Without a Theme filter, Stocks view retains its representative relationship. With
+a Theme filter, the displayed Theme/Role/W and initial ticker inspection use that
+selected relationship. Countertrend never changes Directional TXT files.
 
 ## Presentation and navigation
 
@@ -166,4 +167,11 @@ Candidate lenses. At 1440p, 31 Theme and 25 Directional rows remain visible. Bot
 static modes make zero API/external requests. Configuration/evidence validation,
 compilation, JavaScript syntax/helpers and diff checks pass. No new runtime package.
 Automated Chromium/axe does not substitute for native Windows or manual screen-reader
-review. Actual Nov 9 SIP rerun and Nov 10 chronological evidence remain outstanding.
+review. The user reports Nov 9 PASS; Nov 10 adjacent-live evidence remains outstanding.
+
+## Professional workspace and additive downloads
+
+See [professional workspace](vnext_professional_workspace.md) for selected-theme
+Role/W presentation, contextual inspection, descriptive operational bucket labels
+and the additive Countertrend TXT contract. Qualification/ordering here and the
+existing Directional exports remain unchanged.

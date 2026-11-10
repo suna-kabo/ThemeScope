@@ -10,6 +10,7 @@ import unittest
 from unittest.mock import patch
 from scripts.build_cloudflare_demo import build, demo_snapshot, ASSETS
 from scripts.build_inspection_bundle import safe_file
+from scripts.static_pages import copy_fonts,FONT_HASHES
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -21,6 +22,7 @@ class CloudflareDemoTests(unittest.TestCase):
             # Source plus the approved formula settings: no .env, memberships, tests, DB or runtime.
             for folder in ('src','scripts','static/vnext'):
                 shutil.copytree(ROOT/folder,clean/folder,ignore=shutil.ignore_patterns('__pycache__','*.pyc'))
+            copy_fonts(ROOT,clean/'static')
             policy=clean/'config/vnext';policy.mkdir(parents=True)
             for name in ('methodology.json','research_context.json'):
                 shutil.copyfile(ROOT/'config/vnext'/name,policy/name)
@@ -28,7 +30,7 @@ class CloudflareDemoTests(unittest.TestCase):
             subprocess.run([sys.executable,'-I',str(clean/'scripts/build_cloudflare_demo.py')],cwd=clean,env=env,check=True,capture_output=True)
             output=clean/'dist/cloudflare-pages'
             first={p.name:p.read_bytes() for p in output.iterdir()}
-            self.assertEqual(set(first),{*ASSETS,'preview.js','_headers','favicon.ico'})
+            self.assertEqual(set(first),{*ASSETS,*FONT_HASHES,'preview.js','_headers','favicon.ico'})
             for asset in ASSETS:self.assertEqual(first[asset],(ROOT/'static/vnext'/asset).read_bytes())
             (output/'stale.txt').write_text('stale artifact')
             subprocess.run([sys.executable,'-I',str(clean/'scripts/build_cloudflare_demo.py')],cwd=clean,env=env,check=True,capture_output=True)

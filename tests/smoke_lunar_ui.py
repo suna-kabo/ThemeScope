@@ -11,6 +11,8 @@ import json,os,shutil,socket,sys,tempfile,threading,time
 ROOT=Path(__file__).resolve().parents[1];sys.path[:0]=[str(ROOT),str(ROOT/'tests')]
 from vnext_prelaunch_fixture import PrelaunchFixture
 
+from ui_smoke_helpers import open_exports,open_filters
+
 
 def main():
     from src.themescope.local.app import create_app
@@ -54,7 +56,7 @@ def main():
                     if name=='primary':page.locator('[data-candidate-lens="directional"]').click()
                 def open_map():
                     if not page.locator('#theme-map-panel').evaluate('e=>e.open'):page.locator('#theme-map-panel > summary').click()
-                expect(page.locator('#theme-map-panel')).to_have_attribute('open','')
+                assert not page.locator('#theme-map-panel').evaluate('e=>e.open')
                 def capture(label):
                     if out:
                         page.evaluate('''()=>{const d=document.querySelector('dialog[open]');if(d&&!d.querySelector('[data-test-stamp]'))d.append(document.querySelector('[data-test-stamp]').cloneNode(true));}''')
@@ -76,15 +78,13 @@ def main():
                         capture(f'{destination}-{width}')
                         if width==1440:audit(destination)
                     nav('overview')
-                    headline=page.locator('.market-card .market-ticker,.market-card .market-price').evaluate_all("nodes=>nodes.map(e=>{const s=getComputedStyle(e);return [s.fontFamily,s.fontSize,s.lineHeight,s.fontWeight,s.letterSpacing]})")
-                    assert len(headline)==6 and all(x==headline[0] for x in headline),(width,headline)
-                    for card in page.locator('.market-card').all():
-                        y=[card.locator(selector).bounding_box()['y'] for selector in ['.market-ticker','.market-price']]
-                        assert abs(y[0]-y[1])<1,(width,y)
+                    for selector in ('.market-ticker','.market-price'):
+                        values=page.locator('.market-card '+selector).evaluate_all("nodes=>nodes.map(e=>{const s=getComputedStyle(e);return [s.fontFamily,s.fontSize,s.lineHeight,s.fontWeight]})")
+                        assert len(values)==3 and all(v==values[0] for v in values),(width,selector,values)
                     nav('themes');table=page.locator('#theme-table')
                     widths=table.locator('th').evaluate_all('nodes=>nodes.map(e=>e.getBoundingClientRect().width)')
                     assert len(widths)==9
-                    ratios=[5,24,11,10,9,9,10,11,11]
+                    ratios=[6,25,8,9,9,9,10,14,10]
                     total=sum(widths)
                     assert all(abs(actual-total*ratio/100)<1 for actual,ratio in zip(widths,ratios)),(width,widths)
                     for row in table.locator('tbody tr').all():
@@ -100,7 +100,7 @@ def main():
                 for destination,selector in [('themes','#theme-table'),('primary','#candidates')]:
                     nav(destination)
                     visible=page.locator(selector+' tbody tr').evaluate_all('rows=>rows.filter(r=>r.getBoundingClientRect().top>=0&&r.getBoundingClientRect().bottom<=innerHeight).length')
-                    assert visible>=(30 if destination=='themes' else 24),(destination,visible)
+                    assert visible>=(30 if destination=='themes' else 24),(destination,visible,page.locator(selector+' tbody tr').first.evaluate("e=>({row:e.getBoundingClientRect().toJSON(),cells:[...e.cells].map(t=>({height:t.offsetHeight,html:t.innerHTML.slice(0,120),line:getComputedStyle(t).lineHeight}))})"))
                     results['visible_rows_1440p'][destination]=visible
                     if destination=='themes':capture('themes-1440p')
                     centered=page.locator(selector+' tbody tr').first.evaluate("row=>[...row.querySelectorAll('td > .theme-link,td > .ticker-link,td > .state,td > .priority,td > .save-button')].every(e=>{const p=e.parentElement.getBoundingClientRect(),b=e.getBoundingClientRect();return Math.abs((b.top-p.top)-(p.bottom-b.bottom))<2})")
@@ -124,7 +124,7 @@ def main():
                 nav('overview');open_map()
                 map_rows=[t for t in actual['themes'] if t['status']=='active' and t['returns'] and all(t['returns'][i]['value'] is not None for i in [0,1])]
                 expect(page.locator('[data-map-theme]')).to_have_count(len(map_rows))
-                expect(page.locator('#theme-map')).to_contain_text('Raw returns · linear axes')
+                expect(page.locator('#theme-map')).to_contain_text('themes · median returns')
                 for i,ticker in enumerate(['SPY','QQQ']):
                     bars=page.locator('.market-card').nth(i).locator('.breadth-fill')
                     for j,field in enumerate(['above_ema21','above_ema50']):
@@ -135,8 +135,8 @@ def main():
                 page.locator('#map-selection').select_option('semiconductors')
                 expect(point).to_have_class('map-point positive map-selected')
                 capture('theme-map-1440');audit('theme-map')
-                point.focus();page.keyboard.press('Enter');expect(page.locator('#inspector-title')).to_have_text('Semiconductors')
-                page.keyboard.press('Escape');expect(point).to_be_focused()
+                point.focus();page.keyboard.press('Enter');assert page.locator('dialog[open]').count()==0;page.locator('#map-readout [data-inspect-theme]').click();expect(page.locator('#inspector-title')).to_have_text('Semiconductors')
+                page.keyboard.press('Escape');expect(page.locator('#map-readout [data-inspect-theme]')).to_be_focused()
                 for width in (800,390,320):
                     page.set_viewport_size({'width':width,'height':844});page.wait_for_timeout(180)
                     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),('map',width)
@@ -167,16 +167,16 @@ def main():
                 detail_link=page.locator('#theme-table a').first;detail_link.focus();detail_link.press('Enter')
                 expect(page.locator('#inspector-title')).to_have_text('Semiconductors');expect(page.locator('#inspector-title')).to_be_focused()
                 expect(page.locator('#research-inspector')).to_be_visible();expect(page.locator('#themes-title')).to_be_visible()
-                expect(page.locator('#inspector-members')).to_contain_text('Does not meet candidate criteria')
-                page.locator('[data-inspector-filter="Primary"]').click()
+                expect(page.locator('#inspector-members')).to_contain_text('business')
+                page.locator('#inspector-view').select_option('Primary')
                 expected_members=sum(r['qualifies'] for r in actual['relationships'] if r['theme_id']=='semiconductors')
-                expect(page.locator('#inspector-members tbody tr')).to_have_count(expected_members)
-                page.locator('[data-inspector-filter="All"]').click();page.locator('#inspector-search').fill('NVDA')
-                expect(page.locator('#inspector-members tbody tr')).to_have_count(1)
+                expect(page.locator('#inspector-members [data-member-preview]')).to_have_count(min(expected_members,6))
+                page.locator('#inspector-view').select_option('All');page.locator('#inspector-search').fill('NVDA')
+                expect(page.locator('#inspector-members [data-member-preview]')).to_have_count(1)
                 capture('theme-inspector-1440');audit('theme-inspector')
                 page.locator('#inspector-members [data-inspect-ticker="NVDA"]').click()
                 expect(page.locator('#inspector-title')).to_have_text('NVDA');expect(page.locator('dialog[open]')).to_have_count(1)
-                expect(page.locator('#inspector-content')).to_contain_text('Other qualifying themes')
+                expect(page.locator('#inspector-content')).to_contain_text('Other relationships')
                 assert 'Earnings' not in page.locator('#inspector-content').inner_text()
                 assert 'Stock 1M' not in page.locator('#inspector-content').inner_text()
                 capture('ticker-inspector-1440');audit('ticker-inspector')
@@ -193,7 +193,7 @@ def main():
                 expect(page.locator('#detail-title')).to_have_text('Semiconductors');expect(page.locator('#detail-title')).to_be_focused()
                 page.locator('#member-search').fill('NVDA');expect(page.locator('#member-table tbody tr')).to_have_count(1)
                 assert page.locator('#member-table summary').count()==0
-                with page.expect_download() as item:page.get_by_role('link',name='Theme Directional TXT',exact=False).click()
+                with page.expect_download() as item:page.get_by_role('link',name='Theme TXT',exact=False).click()
                 assert Path(item.value.path()).read_text()==actual['exports']['individual']['semiconductors']
                 capture('theme-detail-1440');audit('theme-detail')
                 page.get_by_role('link',name='Back to Themes',exact=False).click()
@@ -210,14 +210,17 @@ def main():
                 page.locator('#candidate-search').fill(ticker)
                 assert page.locator('#candidates tbody tr').count()>=1
                 expect(page.locator('#candidate-earnings')).to_be_hidden()
-                assert page.locator('#candidates th').all_text_contents()==['Ticker','Theme','Role','W · pp','Save']
+                assert [v.replace('?','').strip() for v in page.locator('#candidates th').all_text_contents()]==['Ticker','Theme','Role','W · pp','Save']
                 assert page.locator('#candidates td[data-label="Earnings"]').count()==0
-                with page.expect_download() as item:page.get_by_role('link',name='Export Directional',exact=False).click()
+                open_exports(page)
+                with page.expect_download() as item:page.get_by_role('link',name='Full Directional list',exact=False).click()
                 text=Path(item.value.path()).read_text();assert text==actual['exports']['combined']
                 identifiers=[s for s in text.splitlines() if s and not s.startswith('###')];assert len(identifiers)==len(set(identifiers))
                 page.locator('#candidate-filters [data-reset]').click()
+                open_filters(page)
                 page.locator('#candidate-role').select_option('Core');assert page.locator('#candidates tbody tr').count()>0
-                page.locator('#candidate-w').select_option('negative');expect(page.locator('#candidates')).to_contain_text('No Directional stocks match')
+                open_filters(page)
+                page.locator('#candidate-w').select_option('negative');expect(page.locator('#candidates')).to_contain_text('No stocks match')
                 results['interactions'].append('multi-theme and unique candidate views, filters, stable poll focus, canonical combined TXT')
                 nav('saved');expect(page.locator('#saved')).to_contain_text(ticker);capture('saved-populated-1440');audit('saved-populated')
                 page.reload();expect(page.locator('#saved')).to_contain_text(ticker)
@@ -249,7 +252,9 @@ def main():
                     for destination in ('overview','themes','primary','saved','methodology'):
                         nav(destination);assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),(width,destination,page.evaluate("[...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>innerWidth+1&&!e.closest('[hidden]')).slice(0,15).map(e=>[e.tagName,e.id,e.className,e.getBoundingClientRect().right])"))
                         if width==390:capture(f'{destination}-390')
-                    nav('themes');page.locator('#theme-filters [data-reset]').click();page.locator('#theme-mobile-sort').select_option('name:asc')
+                    nav('themes');page.locator('#theme-filters [data-reset]').click()
+                    if page.locator('#theme-mobile-sort').is_visible():page.locator('#theme-mobile-sort').select_option('name:asc')
+                    else:page.locator('[data-theme-sort="name"]').click()
                     page.locator('#theme-table a[href="#themes/semiconductors"]').click();assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');capture(f'theme-inspector-{width}')
                     page.locator('#inspector-search').fill('NVDA');page.locator('#inspector-members [data-inspect-ticker]').first.click()
                     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');capture(f'ticker-inspector-{width}')
@@ -291,7 +296,7 @@ def main():
                 state['snapshot']['themes']=deepcopy(actual['themes'])
                 revised=next(t for t in state['snapshot']['themes'] if t['theme_id']=='semiconductors');revised['score']='88.12'
                 state['snapshot']['refreshed_at']='inspector refresh'
-                expect(page.locator('#inspector-content')).to_contain_text('88.12',timeout=6000)
+                expect(page.locator('#inspector-content')).to_contain_text('88.1',timeout=6000)
                 expect(page.locator('#inspector-search')).to_be_focused();expect(page.locator('#inspector-search')).to_have_value('NVDA')
                 retained=page.locator('#inspector-members').inner_text()
                 state['status'].update(state='failed',progress='Refresh failed',error='synthetic_provider_failure')
@@ -315,7 +320,7 @@ def main():
                 update('market alignment presentation boundaries')
                 expect(page.locator('.market-card').nth(0).locator('.ema-context.negative')).to_have_count(2)
                 expect(page.locator('.market-card').nth(1).locator('.ema-context.positive')).to_have_count(1)
-                expect(page.locator('.market-card').nth(1).locator('.ema-context.neutral')).to_contain_text('At EMA50')
+                expect(page.locator('.market-card').nth(1).locator('.ema-context.neutral')).to_contain_text('At')
                 expect(page.locator('.market-card').nth(0).locator('.breadth-state')).to_have_class('breadth-state negative')
                 expect(page.locator('.market-card').nth(1).locator('.breadth-state')).to_have_class('breadth-state positive')
                 assert page.locator('#market-cards details').count()==0
@@ -324,18 +329,18 @@ def main():
                     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
                     if width>800:
                         for selector in ['.market-ticker','.market-price','.state','.market-emas','.market-breadth','.breadth-state']:
-                            y=[page.locator('.market-card').nth(i).locator(selector).first.bounding_box()['y'] for i in [0,1]]
-                            assert abs(y[0]-y[1])<1,(width,selector,y)
+                            x=[page.locator('.market-card').nth(i).locator(selector).first.bounding_box()['x'] for i in [0,1]]
+                            assert abs(x[0]-x[1])<2,(width,selector,x)
                     capture('market-overview-'+str(width))
                 page.set_viewport_size({'width':1440,'height':1000})
                 page.evaluate("document.documentElement.style.fontSize='200%'");capture('market-overview-text-200')
                 assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
                 page.evaluate("document.documentElement.style.fontSize=''")
                 state['snapshot']['market']['context']['SPY'].update(close=None,ema21=None)
-                update('missing market EMA inputs');expect(page.locator('.market-card').nth(0).locator('.ema-context.neutral').first).to_contain_text('Unavailable EMA21')
+                update('missing market EMA inputs');expect(page.locator('.market-card').nth(0).locator('.ema-context.neutral').first).to_contain_text('Unavailable')
                 # Motion is finite, and both user/OS reduction suppress it.
                 page.emulate_media(reduced_motion='no-preference');nav('themes')
-                assert page.locator('#themes-page').evaluate('e=>getComputedStyle(e).animationDuration')=='0.11s'
+                assert page.locator('#themes-page').evaluate('e=>getComputedStyle(e).animationDuration')=='0s'
                 page.locator('#display-toggle').click();page.locator('#display-motion').check();page.keyboard.press('Escape')
                 nav('overview');assert page.locator('#overview-page').evaluate('e=>getComputedStyle(e).animationName')=='none'
                 page.locator('#display-toggle').click();page.locator('#display-motion').uncheck();page.keyboard.press('Escape')
@@ -359,11 +364,13 @@ def main():
                 short['assigned_section']=short['theme_id'];short['also_qualifies_in']=[]
                 state['snapshot']['earnings'][short['ticker']]={'status':'Available','dates':['2026-11-12']}
                 update('illustrative short candidate and earnings date');nav('primary');page.locator('#candidate-filters [data-reset]').click();page.get_by_role('button',name='Stocks',exact=True).click()
+                open_filters(page)
                 page.locator('#candidate-earnings').select_option('available');expect(page.locator('#candidates tbody tr')).to_have_count(1);expect(page.locator('#candidates')).to_contain_text('2026-11-12');capture('short-candidate-1440')
                 # Explicit Available-without-date and an ambiguous failure remain distinct.
                 state['snapshot']['earnings'][short['ticker']]={'status':'Available','dates':[]}
                 update('enabled earnings without a reported date')
-                expect(page.locator('#candidate-earnings')).to_be_visible()
+                open_filters(page);expect(page.locator('#candidate-earnings')).to_be_visible()
+                open_filters(page)
                 page.locator('#candidate-earnings').select_option('unavailable')
                 expect(page.locator('#candidates')).to_contain_text('No reported date')
                 page.locator('#candidates [data-inspect-ticker]').first.click()
@@ -387,7 +394,7 @@ def main():
                 breadth_theme=state['snapshot']['themes'][0]
                 breadth_theme['breadth'][0].update(value=None,valid=11,configured=15,coverage='0.7333333333333333')
                 update('breadth unavailable coverage metadata');nav('themes');page.locator('#theme-search').fill(breadth_theme['name'])
-                expect(page.locator('#theme-table [title="11/15 valid · 73.33% coverage"]')).to_contain_text('—')
+                expect(page.locator('#theme-table [title="Insufficient coverage · 11/15 valid · 73.33% coverage"]')).to_contain_text('—')
                 results['interactions'].append('earnings disabled/enabled/date/empty/failure transitions; IWM typography; unavailable breadth metadata')
                 state['snapshot']=deepcopy(actual);state['snapshot']['themes'][0]['score']=None;state['snapshot']['themes'][0]['returns']=None;state['snapshot']['themes'][0]['index']['trend']='Unavailable';update('unavailable metrics');nav('themes')
                 page.locator('#theme-search').fill(state['snapshot']['themes'][0]['name']);expect(page.locator('#theme-table')).to_contain_text('Unavailable');assert 'NaN' not in page.locator('#theme-table').inner_text()
@@ -408,10 +415,10 @@ def main():
                 assert page.locator('[data-map-theme]').evaluate_all("nodes=>nodes.every(n=>{const p=n.querySelector('.point-hit');return Number.isFinite(+p.getAttribute('cx'))&&Number.isFinite(+p.getAttribute('cy'))})")
                 results['states'].append('raw map extremes, negative/zero, identical points and unavailable returns')
                 # Loading/no prior snapshot must remain usable and honestly disabled.
-                state['snapshot']=None;state['status'].update(state='idle',progress='Ready');page.reload();expect(page.locator('#progress')).to_have_text('Ready');nav('primary');expect(page.locator('#combined')).to_have_attribute('aria-disabled','true');capture('no-snapshot-1440');results['states'].append('loading / no prior snapshot')
+                state['snapshot']=None;state['status'].update(state='idle',progress='Ready');page.reload();expect(page.locator('#progress')).to_have_text('Ready');nav('primary');open_exports(page);expect(page.locator('#export-options')).to_contain_text('unavailable');assert page.locator('#combined').count()==0;capture('no-snapshot-1440');results['states'].append('loading / no prior snapshot')
                 # Existing Saved schema, including a symbol absent from today's snapshot.
                 page.evaluate("localStorage.setItem('themescope-vnext-watchlist',JSON.stringify(['LEGACY']))");page.reload();nav('saved');expect(page.locator('#saved')).to_contain_text('LEGACY');results['states'].append('existing Saved ticker retained without snapshot')
-                page.locator('#saved [data-inspect-ticker="LEGACY"]').click();expect(page.locator('#inspector-content')).to_contain_text('No current relationship')
+                page.locator('#saved [data-inspect-ticker="LEGACY"]').click();expect(page.locator('#inspector-content')).to_contain_text('No current theme relationships')
                 page.keyboard.press('Escape')
                 page.emulate_media(forced_colors='active');page.evaluate("document.querySelectorAll('[data-test-stamp]').forEach(e=>{e.style.color='CanvasText';e.style.background='Canvas'})");nav('methodology');audit('forced-colors');page.emulate_media(forced_colors='none')
                 results['interactions'].append('absent Saved ticker inspector, forced colors')

@@ -2,6 +2,8 @@
 from pathlib import Path
 import json,shutil,socket,sys,tempfile,threading,time
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
+from ui_smoke_helpers import open_exports,open_filters
+
 
 def main():
     from src.themescope.local.service import fixture_service
@@ -35,12 +37,13 @@ def main():
                 page.locator('[data-nav="saved"]').click()
                 expect(page.locator('#saved')).to_contain_text('AAA')
                 page.locator('[data-nav="primary"]').click();page.locator('[data-candidate-lens="directional"]').click()
+                open_exports(page)
                 with page.expect_download() as download:
-                    page.get_by_role('link',name='Export Directional').click()
+                    page.get_by_role('link',name='Full Directional list').click()
                 text=Path(download.value.path()).read_text()
                 assert text.count('NASDAQ:AAA')==1 and text.count('NASDAQ:BBB')==1
                 page.locator('#candidates [data-inspect-ticker]').first.click()
-                expect(page.locator('#inspector-content')).to_contain_text('Other qualifying themes')
+                expect(page.locator('#inspector-content')).to_contain_text('Other relationships')
                 page.keyboard.press('Escape')
                 page.locator('[data-nav="overview"]').click()
                 page.locator('[data-nav="methodology"]').click()

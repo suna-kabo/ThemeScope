@@ -1,10 +1,39 @@
 """Shared static presentation assets only; no financial or provider imports."""
+from hashlib import sha256
+from pathlib import Path
 import struct
 import zlib
 
-ASSETS = ('index.html', 'app.css', 'app.js')
+ASSETS = ('index.html', 'app.css', 'workspace.js', 'app.js')
+# Existing bundled Inter (SIL OFL 1.1), pinned so public builds cannot ship
+# arbitrary binary payloads. No remote font fetch or new repository binary.
+FONT_HASHES = {
+    'InterVariable.woff2':'693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3',
+    'Inter-LICENSE.txt':'262481e844521b326f5ecd053e59b98c8b2da78c8ee1bdbb6e8174305e54935a',
+}
+
+
+def validate_font(name, data):
+    if name not in FONT_HASHES or sha256(data).hexdigest()!=FONT_HASHES[name]:
+        raise ValueError('Unexpected bundled font/license payload')
+    return data
+
+
+def font_assets(root):
+    result={}
+    for name in FONT_HASHES:
+        path=Path(root)/'static'/name
+        if path.is_symlink():raise ValueError('Font assets cannot be symlinks')
+        result[name]=validate_font(name,path.read_bytes())
+    return result
+
+
+def copy_fonts(source_root, target_static):
+    target_static=Path(target_static);target_static.mkdir(parents=True,exist_ok=True)
+    for name,data in font_assets(source_root).items():(target_static/name).write_bytes(data)
+
 HEADERS = """/*
-  Content-Security-Policy: default-src 'self'; connect-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; connect-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer
   Permissions-Policy: camera=(), microphone=(), geolocation=()

@@ -18,11 +18,12 @@ from src.themescope.domain import MarketRoster, ThemeStatus
 from src.themescope.market.layer import market_layer
 from src.themescope.research.engine import calculate_session
 from src.themescope.research.context import enrich
+from src.themescope.research.countertrend_exports import attach as attach_countertrend_exports
 from src.themescope.storage import canonical
 from src.themescope.themes.calculations import Bar, deterministic
 from src.themescope.themes.index import build_index
 
-from scripts.static_pages import ASSETS, HEADERS, favicon
+from scripts.static_pages import ASSETS, HEADERS, favicon, font_assets
 
 @deterministic
 def demo_snapshot():
@@ -71,6 +72,7 @@ def demo_snapshot():
                     earnings={s:{'status':'Unavailable','dates':[]} for s in sorted(names)})
     snapshot['earnings'][sorted(names)[0]]={'status':'Available','dates':['2024-04-15']}
     snapshot=enrich(snapshot,bars,sessions[:sessions.index(target)+1],companies={m.ticker:m.company for m in memberships})
+    snapshot=attach_countertrend_exports(snapshot,mapping)
     return json.loads(canonical(snapshot))
 
 
@@ -80,6 +82,7 @@ def build(root=ROOT):
     if any(p.is_symlink() for p in (root/'dist',output)):
         raise ValueError('Demo output must not be a symlink')
     assets = {name:(root/'static/vnext'/name).read_bytes() for name in ASSETS}
+    assets.update(font_assets(root))
     payload = canonical(demo_snapshot()).replace('<','\\u003c').replace('>','\\u003e').replace('&','\\u0026')
     assets.update({'preview.js':('window.FIXTURE_SNAPSHOT = '+payload+';\n').encode('utf-8'),
                    '_headers':HEADERS.encode('utf-8'), 'favicon.ico':favicon()})

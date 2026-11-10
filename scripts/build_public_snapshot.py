@@ -16,12 +16,13 @@ from urllib.request import HTTPRedirectHandler, ProxyHandler, Request, build_ope
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from scripts.build_inspection_bundle import safe_file
-from scripts.static_pages import ASSETS, HEADERS, favicon
+from scripts.static_pages import ASSETS, HEADERS, favicon, FONT_HASHES, font_assets, validate_font
 from src.themescope.local_refresh_lock import RefreshLock, RefreshBusy
+from src.themescope.research.countertrend_exports import public_exports
 
 API = 'http://127.0.0.1:8766/api/dashboard-data'
 LIMIT = 25 * 1024 * 1024
-FILES = {*ASSETS, 'preview.js', '_headers', 'favicon.ico'}
+FILES = {*ASSETS, *FONT_HASHES, 'preview.js', '_headers', 'favicon.ico'}
 PUBLIC_HEADERS = HEADERS+'  Cache-Control: no-store\n'
 IDENTIFIER = re.compile(r'[A-Z0-9_]+:[A-Z0-9_.-]+\Z')
 SLUG = re.compile(r'[a-z0-9]+(?:-[a-z0-9]+)*\Z')
@@ -223,6 +224,13 @@ def project_snapshot(source, expected):
     research = result.get('research')
     if research and (any(t not in themes for t in research['ranks']['themes']) or any((r['ticker'],r['theme_id']) not in pairs for bucket in research['countertrend']['buckets'].values() for r in [*bucket['rows'],*bucket['stocks']])):
         raise SnapshotError('Research references an unknown theme relationship.')
+    if research:
+        try:
+            countertrend_files=public_exports(source['research']['countertrend'])
+        except (ValueError,KeyError,TypeError):
+            raise SnapshotError('Countertrend exports do not match the published lens.') from None
+        if countertrend_files is not None:
+            research['countertrend']['exports']=countertrend_files
     exported = source.get('exports')
     if not isinstance(exported, dict) or not isinstance(exported.get('individual'), dict) or not isinstance(exported.get('assignments'), dict):
         raise SnapshotError('Published exports are missing or malformed.')
@@ -286,7 +294,10 @@ def validate_output(output):
     for path in output.iterdir():
         if not path.is_file() or path.is_symlink():
             raise SnapshotError('Public output must contain regular files only.')
-        if path.name != 'favicon.ico':
+        if path.name in FONT_HASHES:
+            try:validate_font(path.name,path.read_bytes())
+            except ValueError:raise SnapshotError('Unexpected bundled font/license payload.') from None
+        elif path.name != 'favicon.ico':
             scan_text(path)
     if (output/'favicon.ico').read_bytes() != favicon():
         raise SnapshotError('Unexpected favicon payload.')
@@ -323,6 +334,7 @@ def build_locked(expected, root=ROOT):
         stage = Path(temporary)/'site';stage.mkdir()
         for name in ASSETS:
             shutil.copyfile(root/'static/vnext'/name, stage/name)
+        for name,data in font_assets(root).items():(stage/name).write_bytes(data)
         (stage/'preview.js').write_text('window.THEMESCOPE_STATIC_SOURCE = '+payload+';\n', encoding='utf-8')
         (stage/'_headers').write_text(PUBLIC_HEADERS, encoding='utf-8')
         (stage/'favicon.ico').write_bytes(favicon())

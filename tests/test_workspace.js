@@ -1,0 +1,17 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const context={window:{}};vm.createContext(context);vm.runInContext(fs.readFileSync('static/vnext/workspace.js','utf8'),context);
+const ui=context.window.ThemeScopeUI;
+const a={ticker:'A',theme_id:'one',role:'Core',relative:{w:'.1'}},b={ticker:'A',theme_id:'two',role:'Enabler',relative:{w:'-.2'}},c={ticker:'B',theme_id:'two',role:'Core',relative:{w:'.3'}};
+assert.equal(ui.displayRows([a,b,c],[a,c],'')[0],a);
+assert.equal(ui.displayRows([a,b,c],[a,c],'two')[0],b);
+assert.equal(ui.displayRows([a,b,c],[a,c],'two')[1],c);
+assert.equal(a.theme_id,'one');assert.equal(b.role,'Enabler');
+const axis=ui.axis(-.3913,1.237,5);
+assert.ok(axis.low<=-.3913&&axis.high>=1.237);
+assert.ok(axis.ticks.some(v=>v===0));assert.ok(axis.ticks.every(v=>Number.isInteger(v*100)));
+assert.equal(ui.bucketLabel('short','resilient'),'Peer outperformers');
+assert.equal(ui.bucketLabel('short','snapback'),'Weak-theme laggards');
+assert.equal(ui.bucketLabel('long','resilient'),'Strong leaders');
+assert.equal(ui.focusLabel('Countertrend Highlighted'),'Countertrend review');
+console.log('Workspace presentation, selected-theme context and axis checks passed.');
