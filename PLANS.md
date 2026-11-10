@@ -984,3 +984,42 @@ fixture screenshots/reports: `/workspace/artifacts/themescope-professional-works
 and `/workspace/artifacts/ThemeScope_Professional_Workspace_Review.zip`; none enter
 Git. See docs/vnext_professional_workspace.md and DESIGN.md for the final contract.
 No deployment/main merge/inspection-ref changes; Nov 10 and Gate E remain open.
+
+
+## Tidal Vector identity and interaction pass — 10 November 2026
+
+Completed from ee6a7aa on the existing implementation branch, preserving all
+valid interrupted work. Read both
+user briefs; the later brief adds deterministic Windows font/license checkout,
+structural table columns, grouped Theme-column removal and regime/lens clarity.
+Inspected the running fixture app across every research surface, grouped modes,
+menus, Display, map, enlarged text, high contrast and mobile. Rendered two external
+concepts (Tidal Vector and Blue Hour Ledger); chose Tidal Vector for compact research
+continuity, one selected-plane grammar and scalable cyan/navy hierarchy.
+Public Impeccable/frontend-design/motion-director guidance and Motion Prompt are
+references, not runtime dependencies. No global installation or hooks.
+Financial/context/export/lifecycle/provider/storage contracts remain frozen.
+Nov 6 and Nov 9 user-reported PASS; Nov 10 PENDING, Gate E OPEN.
+
+Acceptance: full Python 391 (389 passed/two existing Windows skips); focused vNext
+160 (159 passed/one skip). All eight browser programs pass, 96 axe audits report
+zero violations. Main matrices each cover 20 width/text/density combinations; the
+new identity suite adds ten Full Theme/grouped width/text checks. Shared column
+anchors, selected-theme context, unmodified full-lens exports, grouped counts,
+Back/search/View/scroll/focus, interrupted navigation, map selection, reduced motion,
+contrast, unavailable/connection states and Saved compatibility pass. Density stays
+32 Theme / 26 Candidate rows at 1440p. Actual fixture app/screenshot/motion review
+completed; no runtime data is used as chronological evidence.
+
+The normalization test passes with fresh Windows-style and Unix Git checkouts:
+pinned font/license hashes unchanged, full public output byte-identical, checkout
+and post-build trees clean. Integrity validation is retained. Static UI sources
+are LF; license LF and font binary. Compilation, JS syntax/helpers, config/evidence
+and diff checks pass. Financial/Matrix/lifecycle/export tests remain intact.
+Final diff has no src/config changes, binaries, runtime state or prototypes.
+
+See DESIGN.md, MOTION.md and docs/vnext_tidal_vector.md. External gallery:
+`/workspace/artifacts/themescope-tidal-vector/index.html`; review ZIP:
+`/workspace/artifacts/ThemeScope_Tidal_Vector_Review.zip`. Native Windows smoothness
+and manual assistive-technology testing are unclaimed. Nov 6/9 PASS, Nov 10 PENDING,
+Gate E OPEN. No merge/deployment or original inspection-ref movement.

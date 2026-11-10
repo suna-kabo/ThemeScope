@@ -9,7 +9,7 @@
   const percent = (value, scale = 1, signed = false) => valid(value) ? `${signed && Number(value) > 0 ? '+' : ''}${number(Number(value) * scale)}%` : '—';
   const points = value => valid(value) ? `${Number(value) > 0 ? '+' : ''}${number(Number(value) * 100)} pp` : '—';
   const money = value => valid(value) ? `$${number(value)}` : '—';
-  const iconPaths = {up:'M6 18 18 6M6 6h12v12',down:'M6 6l12 12M6 18h12V6',flat:'M4 12h16m-4-4 4 4-4 4M8 8l-4 4 4 4',overview:'M4 4h16v16H4zM4 10h16M12 10v10',themes:'m12 3 9 9-9 9-9-9 9-9zM8 12l4-4 4 4-4 4-4-4z',primary:'M10 17a7 7 0 1 0 0-14 7 7 0 0 0 0 14zm5-2 6 6',saved:'m12 3 2.8 5.8 6.4.9-4.6 4.5 1.1 6.4-5.7-3-5.7 3 1.1-6.4L2.8 9.7l6.4-.9L12 3z',methodology:'M5 5h14M5 10h14M5 15h9M5 20h9',orbit:'M20 12a8 8 0 1 1-8-8M12 4v8h8'};
+  const iconPaths = {back:'M19 12H5m6-6-6 6 6 6',up:'M6 18 18 6M6 6h12v12',down:'M6 6l12 12M6 18h12V6',flat:'M4 12h16m-4-4 4 4-4 4M8 8l-4 4 4 4',overview:'M4 4h16v16H4zM4 10h16M12 10v10',themes:'m12 3 9 9-9 9-9-9 9-9zM8 12l4-4 4 4-4 4-4-4z',primary:'M10 17a7 7 0 1 0 0-14 7 7 0 0 0 0 14zm5-2 6 6',saved:'m12 3 2.8 5.8 6.4.9-4.6 4.5 1.1 6.4-5.7-3-5.7 3 1.1-6.4L2.8 9.7l6.4-.9L12 3z',methodology:'M5 5h14M5 10h14M5 15h9M5 20h9',orbit:'M20 12a8 8 0 1 1-8-8M12 4v8h8'};
   const icon = key => `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${iconPaths[key] || iconPaths.flat}"/></svg>`;
   const tone = value => /bullish|positive|long/i.test(value || '') ? 'positive' : /bearish|negative|short/i.test(value || '') ? 'negative' : /mixed/i.test(value || '') ? 'mixed' : 'neutral';
   const signTone = value => !valid(value) || Number(value) === 0 ? 'neutral' : Number(value) > 0 ? 'positive' : 'negative';
@@ -21,13 +21,13 @@
   const preview = publicSnapshot || Boolean(window.FIXTURE_SNAPSHOT);
   const savedKey = 'themescope-vnext-watchlist';
   let snapshot = null, snapshotSignature = '', currentStatus = {}, route = '', origin = '#themes', feedbackTimer, requestError = '';
-  let initialLoading=true, connectionLost=false;
+  let initialLoading=true;
   const savedContextKey='themescope-vnext-saved-context';
   let savedContexts={};
   try{const data=JSON.parse(localStorage.getItem(savedContextKey)||'{}');if(data&&typeof data==='object'&&!Array.isArray(data))savedContexts=data;}catch{}
   let watched = [];
   try { const values = JSON.parse(localStorage.getItem(savedKey) || '[]'); if (Array.isArray(values)) watched = [...new Set(values.filter(s => typeof s === 'string' && s.trim()))]; } catch { /* A blocked or malformed browser store must not stop research. */ }
-  const ui = {universe:'active', themeSort:'score', themeDescending:true, selectedTheme:'', candidateMode:'unique', candidateLens:'directional', lensChosen:false, memberSearch:'', memberRole:'', memberEligibility:'', memberSort:'ticker'};
+  const ui = {universe:'active', themeSort:'score', themeDescending:true, selectedTheme:'', selectedTicker:'', selectedTickerTheme:'', candidateMode:'unique', candidateLens:'directional', lensChosen:false, memberSearch:'', memberRole:'', memberEligibility:'', memberSort:'ticker'};
   const positions = new Map(), blobUrls = new Map();
   let inspector = null, inspectorTrigger = '', inspectorOrigin = '', inspectorScroll = 0;
   const inspectorViews = new Map();
@@ -37,12 +37,11 @@
   const mapHeight = 280, mapPadding = {left:66,right:24,top:24,bottom:50};
   const name = id => snapshot?.themes?.find(t => t.theme_id === id)?.name || id || 'Unavailable';
   const themeHref = id => '#themes/' + encodeURIComponent(id);
-  const chevron = '<span class="chevron" aria-hidden="true">›</span>';
   const helpButton = key => `<button type="button" class="metric-help" data-help="${key}" data-focus-key="help:${key}" aria-label="About ${esc(UX.help[key]?.[0]||key)}" aria-expanded="false" aria-controls="metric-tooltip">?</button>`;
   const tickerLink = (ticker,themeId='',lens='') => `<a class="ticker ticker-link" href="#primary?ticker=${encodeURIComponent(ticker)}${themeId?'&context='+encodeURIComponent(themeId):''}${lens?'&lens='+encodeURIComponent(lens):''}" data-inspect-ticker="${esc(ticker)}" data-context-theme="${esc(themeId)}" data-context-lens="${esc(lens)}" data-focus-key="ticker:${esc(ticker)}${themeId?':'+esc(themeId):''}">${esc(ticker)}</a>`;
   const themeLink = (id,lens='directional') => `<a class="theme-link" href="${themeHref(id)}" data-inspect-theme="${esc(id)}" data-context-lens="${esc(lens)}" data-focus-key="theme:${esc(id)}">${esc(name(id))}</a>`;
   const saveButton = (ticker,location,themeId='',lens='') => `<button class="save-button" data-save="${esc(ticker)}" data-save-theme="${esc(themeId)}" data-save-lens="${esc(lens)}" data-focus-key="${esc(location+':'+ticker)}" aria-pressed="${watched.includes(ticker)}" aria-label="${watched.includes(ticker)?'Saved '+esc(ticker)+'; remove from Saved':'Save '+esc(ticker)}"><span aria-hidden="true">${watched.includes(ticker)?'★':'☆'}</span><span class="sr-only">${watched.includes(ticker)?'Saved':'Save'}</span></button>`;
-  const empty = (title, message, action = '') => `<div class="empty-state"><span class="quiet-orbit" aria-hidden="true">◌</span><h3>${esc(title)}</h3><p>${esc(message)}</p>${action}</div>`;
+  const empty = (title, message, action = '') => `<div class="empty-state"><h3>${esc(title)}</h3><p>${esc(message)}</p>${action}</div>`;
   const displayKey = 'themescope-vnext-display';
   let display = {density:'compact', text:100, motion:false, contrast:false};
   try {
@@ -67,7 +66,7 @@
   function focusKey() { return document.activeElement?.dataset?.focusKey; }
   function restoreFocus(key) { if (key) [...(inspector ? $('research-inspector') : document).querySelectorAll(`[data-focus-key="${CSS.escape(key)}"]`)].find(node => !node.closest('[hidden]'))?.focus({preventScroll:true}); }
   function announce(text) {
-    clearTimeout(feedbackTimer); $('feedback').textContent = text; $('feedback').classList.add('visible');
+    clearTimeout(feedbackTimer); $('feedback').textContent = text; $('feedback').classList.add('visible');UX.move($('feedback'),'confirm');
     feedbackTimer = setTimeout(() => $('feedback').classList.remove('visible'), 3200);
   }
   function earningsDates(ticker) { return snapshot?.earnings?.[ticker]?.dates || []; }
@@ -82,11 +81,9 @@
     return `<span title="${esc(detail)}">—<span class="sr-only"> breadth unavailable; ${esc(detail)}</span></span>`;
   }
   const research = () => snapshot?.research || {};
-  const wHelp = 'Weighted 1M/3M excess return versus the other Core + Enabler members of the same theme. Positive = stronger; negative = weaker. Unit: percentage points. Not expected return or a trading signal.';
-  const scoreHelp = '0–100 relative strength across active themes. Higher means stronger. Not expected return, probability or Research Priority.';
   const roleName = value => value === 'Core' ? 'Core business' : value === 'Enabler' ? 'Supporting business' : value;
   const roleLabel = value => `<span title="${value === 'Core' ? 'Business directly participates in this theme.' : value === 'Enabler' ? 'Provides products or services that enable this theme.' : ''}">${esc(roleName(value))}</span>`;
-  const wHeading='W · pp '+helpButton('w');
+  const wHeading='Peer delta (pp) '+helpButton('w');
   function rankInfo(id) { return research().ranks?.themes?.[id] || {}; }
   function rankLabel(id) { const r=rankInfo(id); return valid(r.rank) ? '#' + r.rank : '—'; }
   function rankChange(id) {
@@ -94,9 +91,6 @@
     const text=valid(r.change) ? Number(r.change)>0 ? 'Up '+r.change : Number(r.change)<0 ? 'Down '+Math.abs(r.change) : 'Unchanged' : '—';
     const help=valid(r.change) ? `Compared with ${r.previous_session}; previous rank #${r.previous_rank}` : reasons[r.reason] || 'Previous session unavailable';
     return `<span title="${esc(help)}">${text}<span class="sr-only"> · ${esc(help)}</span></span>`;
-  }
-  function researchContext() {
-    return `${esc(snapshot?.market_direction||'Market context unavailable')} · ${esc(research().extension?.state||'Extension unavailable')} · ${esc(UX.focusLabel(research().focus?.label))}`;
   }
 
   function comparison(theme) { const value = theme.transition?.priority_change; return value == null ? 'Change unavailable' : value === '—' ? 'Continuing' : value; }
@@ -136,8 +130,10 @@
     body+='<p class="menu-scope">Exports use the full published lens, not current filters.</p>';
     if($('export-options').innerHTML!==body)$('export-options').innerHTML=body;
   }
+  const columns = keys => `<colgroup>${keys.map(key=>`<col class="col-${key}">`).join('')}</colgroup>`;
   function table(headers, rows, caption, className = '') {
-    return `<table class="${className}"><caption class="sr-only">${esc(caption)}</caption><thead><tr>${headers.map(h => `<th scope="col"${h.numeric ? ' class="numeric"' : ''}>${h.label || h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>`;
+    const keys=headers.map(h=>h.column||'');
+    return `<table class="${className}"><caption class="sr-only">${esc(caption)}</caption>${keys.every(Boolean)?columns(keys):''}<thead><tr>${headers.map(h=>`<th scope="col" class="${h.column?'col-'+h.column:''}${h.numeric?' numeric':''}">${h.label||h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>`;
   }
   function renderLayer() {
     $('fixture-banner').hidden = publicSnapshot || !snapshot?.synthetic_fixture;
@@ -203,6 +199,7 @@
     const t=mapThemes().find(t=>t.theme_id===id);if(!t||!$('map-readout'))return;
     if(select){mapSelected=id;mapFocusId=id;$('map-selection').value=id;document.querySelectorAll('[data-map-theme]').forEach(n=>{const selected=n.dataset.mapTheme===id;n.classList.toggle('map-selected',selected);n.setAttribute('aria-pressed',String(selected));n.tabIndex=selected?0:-1;});}
     $('map-readout').innerHTML=`<h3>${esc(name(id))}</h3><dl><div><dt>Strength</dt><dd>${number(t.score,1)}</dd></div><div><dt>1M</dt><dd class="${signTone(t.returns[0].value)}">${percent(t.returns[0].value,100,true)}</dd></div><div><dt>3M</dt><dd class="${signTone(t.returns[1].value)}">${percent(t.returns[1].value,100,true)}</dd></div></dl>${state(t.index?.trend)}<p>${priority(t.priority)}</p><a class="button secondary" href="${themeHref(id)}" data-inspect-theme="${esc(id)}" data-focus-key="map-open:${esc(id)}">Open theme</a>`;
+    if(select){UX.move($('map-readout'),'lock');UX.pulse(document.querySelector('[data-map-theme="'+CSS.escape(id)+'"] .point-ring'));}
   }
 
   function marketEMA(label,close,value,ticker) {
@@ -226,7 +223,7 @@
     if(!snapshot){$('market-direction').innerHTML=empty('No completed snapshot','Refresh Data to load completed-session research.');$('market-cards').innerHTML='';return;}
     const decision=snapshot?.market?.decision||{},direction=snapshot?.market_direction||'Market context unavailable';
     const support=/short/i.test(direction)?'Prioritises short-side research. Entry evaluation remains separate.':/long/i.test(direction)?'Prioritises long-side research. Entry evaluation remains separate.':'Observe market conditions. Entry evaluation remains separate.';
-    $('market-direction').innerHTML=`<div class="market-conclusion"><div><span class="metric-label">Market Bias</span><h2 class="direction-name ${tone(direction)}">${esc(direction)}</h2><div class="direction-support"><span>${esc(research().extension?.state||'Extension unavailable')} ${helpButton('extension')}</span><span class="focus-label">${esc(UX.focusLabel(research().focus?.label))}</span></div><p class="bias-support">${support}</p></div><details class="decision-details"><summary>Why this bias?</summary><p id="decision-path">${esc(decision.reason||'Market context unavailable.')}</p><p id="today-plan">${esc(snapshot?.today_plan||'')}</p><p>Breadth: ${esc(snapshot?.market?.breadth_consensus||'Unavailable')}${decision.breadth_qualifier?' · '+esc(decision.breadth_qualifier):''}</p></details></div>`;
+    $('market-direction').innerHTML=`<div class="market-conclusion direction-plane"><div class="bias-identity"><h2 class="direction-name ${tone(direction)}" aria-label="Market Bias: ${esc(direction)}">${esc(direction)}</h2><span class="plane-label">Market Bias</span></div><div class="direction-step"><strong>${esc(research().extension?.state||'Extension unavailable')} ${helpButton('extension')}</strong><span class="plane-label">Extension</span></div><div class="direction-step"><strong class="focus-label">${esc(UX.focusLabel(research().focus?.label))}</strong><span class="plane-label">Market focus</span></div><details class="decision-details"><summary>Why this bias?</summary><p id="decision-path">${esc(decision.reason||'Market context unavailable.')}</p><p id="today-plan">${esc(snapshot?.today_plan||'')}</p><p>Breadth: ${esc(snapshot?.market?.breadth_consensus||'Unavailable')}${decision.breadth_qualifier?' · '+esc(decision.breadth_qualifier):''}</p><p>${support}</p></details></div>`;
     renderBenchmarks();renderThemeMap();
     $('theme-preview-order').textContent=/short/i.test(direction)?'Strength ↑':'Strength ↓';
     const themes=primaryThemes().slice(0,4);
@@ -263,7 +260,8 @@
   }
   function sortHeading(label, key, numeric = false, help = '') {
     const selected = ui.themeSort === key;
-    return `<th scope="col"${numeric ? ' class="numeric"' : ''}${selected ? ` aria-sort="${ui.themeDescending ? 'descending' : 'ascending'}"` : ''}><div class="th-content"><button class="sort-button" data-theme-sort="${key}" data-focus-key="sort:${key}">${label}<span aria-hidden="true">${selected ? ui.themeDescending ? '↓' : '↑' : '↕'}</span><span class="sr-only">, sort ${selected && !ui.themeDescending ? 'descending' : 'ascending'}</span></button>${help?helpButton(help):''}</div></th>`;
+    const column=({name:'theme',score:'strength',rankchange:'rank-change'})[key]||key;
+    return `<th scope="col" class="col-${column}${numeric?' numeric':''}"${selected ? ` aria-sort="${ui.themeDescending ? 'descending' : 'ascending'}"` : ''}><div class="th-content"><button class="sort-button" data-theme-sort="${key}" data-focus-key="sort:${key}">${label}<span aria-hidden="true">${selected ? ui.themeDescending ? '↓' : '↑' : '↕'}</span><span class="sr-only">, sort ${selected && !ui.themeDescending ? 'descending' : 'ascending'}</span></button>${help?helpButton(help):''}</div></th>`;
   }
   function renderThemes() {
     if(initialLoading)return;
@@ -276,18 +274,19 @@
     $('theme-results').textContent=`${rows.length} ${tracked?'themes':'concepts'} · ${labels[ui.themeSort]}${order}`;
     if(!rows.length){$('theme-table').innerHTML=empty(snapshot?'No themes match this view':'Your theme universe is waiting',snapshot?'Try another search or reset the filters.':'Refresh Data to load a completed-session snapshot.','<button class="button secondary" data-reset="themes">Reset filters</button>');return;}
     if(!tracked){$('theme-table').innerHTML=table(['Concept','Family','Research status'],rows.map(t=>`<tr><td data-label="Concept">${themeLink(t.theme_id)}</td><td data-label="Family">${esc(t.family)}</td><td data-label="Research status">No active calculation basket</td></tr>`),'Untracked Concepts. No active calculation basket.','concept-table');return;}
-    const heading=`<thead><tr><th scope="col"><span class="th-content">Rank ${helpButton('rank')}</span></th>${sortHeading('Theme','name')}${sortHeading('Strength','score',true,'strength')}${sortHeading('Rank Change','rankchange')}${sortHeading('1M Return','return1',true)}${sortHeading('3M Return','return3',true)}${sortHeading('Trend','trend')}${sortHeading('Above EMA21 / EMA50','breadth',true)}${sortHeading('Research','priority',false,'priority')}</tr></thead>`;
-    const body=rows.map(t=>`<tr data-theme-row="${esc(t.theme_id)}" class="${ui.selectedTheme===t.theme_id?'selected-row':''}"><td class="canonical-rank" data-label="Rank">${rankLabel(t.theme_id)}</td><td class="theme-name" data-label="Theme">${themeLink(t.theme_id)}${ui.selectedTheme===t.theme_id?'<span class="sr-only"> · Last opened theme</span>':''}<small class="theme-family">${esc(t.family)}</small></td><td class="numeric" data-label="Strength">${number(t.score,1)}</td><td class="rank-change" data-label="Rank Change">${rankChange(t.theme_id)}</td><td class="numeric ${signTone(t.returns?.[0]?.value)}" data-label="1M Return">${percent(t.returns?.[0]?.value,100,true)}</td><td class="numeric ${signTone(t.returns?.[1]?.value)}" data-label="3M Return">${percent(t.returns?.[1]?.value,100,true)}</td><td data-label="Trend">${state(t.index?.trend)}</td><td class="numeric" data-label="Members above EMA21 / EMA50"><span class="breadth-values"><span title="Members above EMA21">${themeBreadth(t.breadth?.[0])}</span><span title="Members above EMA50">${themeBreadth(t.breadth?.[1])}</span></span></td><td data-label="Research">${priority(t.priority)}</td></tr>`).join('');
+    const heading=`<thead><tr><th scope="col" class="col-rank numeric"><span class="th-content">Rank ${helpButton('rank')}</span></th>${sortHeading('Theme','name')}${sortHeading('Strength','score',true,'strength')}${sortHeading('Rank Δ','rankchange',true)}${sortHeading('1M','return1',true)}${sortHeading('3M','return3',true)}${sortHeading('Trend','trend')}${sortHeading('EMA21 / 50','breadth',true)}${sortHeading('Research','priority',false,'priority')}</tr></thead>`;
+    const body=rows.map(t=>`<tr data-theme-row="${esc(t.theme_id)}" class="${ui.selectedTheme===t.theme_id?'selected-row':''}"><td class="numeric col-rank canonical-rank" data-label="Rank">${rankLabel(t.theme_id)}</td><td class="col-theme theme-name" data-label="Theme">${themeLink(t.theme_id)}${ui.selectedTheme===t.theme_id?'<span class="sr-only"> · Last opened theme</span>':''}<small class="theme-family">${esc(t.family)}</small></td><td class="col-strength numeric" data-label="Strength">${number(t.score,1)}</td><td class="numeric col-rank-change rank-change" data-label="Rank Change">${rankChange(t.theme_id)}</td><td class="col-return1 numeric ${signTone(t.returns?.[0]?.value)}" data-label="1M Return">${percent(t.returns?.[0]?.value,100,true)}</td><td class="col-return3 numeric ${signTone(t.returns?.[1]?.value)}" data-label="3M Return">${percent(t.returns?.[1]?.value,100,true)}</td><td data-label="Trend" class="col-trend">${state(t.index?.trend)}</td><td class="col-breadth numeric" data-label="Members above EMA21 / EMA50"><span class="breadth-values"><span title="Members above EMA21">${themeBreadth(t.breadth?.[0])}</span><span title="Members above EMA50">${themeBreadth(t.breadth?.[1])}</span></span></td><td data-label="Research" class="col-priority">${priority(t.priority)}</td></tr>`).join('');
     const sortControl=`<label class="theme-mobile-sort inline-label">Sort themes<select id="theme-mobile-sort"><option value="score:desc">Strength strongest first</option><option value="score:asc">Strength weakest first</option><option value="name:asc">Theme A–Z</option><option value="return1:desc">1M Return descending</option><option value="return3:desc">3M Return descending</option><option value="trend:asc">Trend: Bullish / Mixed / Bearish</option><option value="priority:asc">Priority: Directional long / short / Watch</option><option value="rankchange:desc">Rank gains first</option></select></label>`;
-    $('theme-table').innerHTML=sortControl+`<table role="table"><caption class="sr-only">Theme research. Rank compares all scored Active themes; it is not Research Priority. Breadth shows members above EMA21 then EMA50.</caption>${heading}<tbody role="rowgroup">${body}</tbody></table>`;
+    $('theme-table').innerHTML=sortControl+`<table role="table" class="theme-research-table"><caption class="sr-only">Theme research. Rank compares all scored Active themes; it is not Research Priority. Breadth shows members above EMA21 then EMA50.</caption>${columns(['rank','theme','strength','rank-change','return1','return3','trend','breadth','priority'])}${heading}<tbody role="rowgroup">${body}</tbody></table>`;
     const mobile=$('theme-mobile-sort');if([...mobile.options].some(o=>o.value===`${ui.themeSort}:${ui.themeDescending?'desc':'asc'}`))mobile.value=`${ui.themeSort}:${ui.themeDescending?'desc':'asc'}`;
   }
 
   function eligibility(row) { return !row.eligibility?.available ? 'Unavailable' : row.eligibility.eligible ? 'Liquidity eligible' : 'Liquidity ineligible'; }
-  function candidateRow(row,location) {
-    return `<tr><td data-label="Ticker">${tickerLink(row.ticker,row.theme_id,ui.candidateLens)}</td><td data-label="Theme">${themeLink(row.theme_id,ui.candidateLens)}</td><td data-label="Role">${roleLabel(row.role)}</td><td data-label="W" class="numeric ${signTone(row.relative?.w)}">${points(row.relative?.w)}</td>${earningsEnabled()?`<td data-label="Earnings" class="table-note">${earnings(row.ticker)}</td>`:''}<td data-label="Save">${saveButton(row.ticker,location+':'+row.theme_id,row.theme_id,ui.candidateLens)}</td></tr>`;
+  function candidateRow(row,location,withTheme=true) {
+    const selected=ui.selectedTicker===row.ticker&&ui.selectedTickerTheme===row.theme_id;
+    return `<tr data-ticker-row="${esc(row.ticker)}" data-relationship-theme="${esc(row.theme_id)}" class="${selected?'selected-row':''}"><td class="col-ticker" data-label="Ticker">${tickerLink(row.ticker,row.theme_id,ui.candidateLens)}</td>${withTheme?`<td class="col-theme" data-label="Theme">${themeLink(row.theme_id,ui.candidateLens)}</td>`:''}<td class="col-role" data-label="Role">${roleLabel(row.role)}</td><td data-label="W" class="col-w numeric ${signTone(row.relative?.w)}">${points(row.relative?.w)}</td>${earningsEnabled()?`<td data-label="Earnings" class="col-earnings table-note">${earnings(row.ticker)}</td>`:''}<td class="col-save" data-label="Save">${saveButton(row.ticker,location+':'+row.theme_id,row.theme_id,ui.candidateLens)}</td></tr>`;
   }
-  const candidateHeaders=()=>['Ticker','Theme','Role',{label:wHeading,numeric:true},...(earningsEnabled()?['Earnings']:[]),'Save'];
+  const candidateHeaders=(withTheme=true)=>[{label:'Ticker',column:'ticker'},...(withTheme?[{label:'Theme',column:'theme'}]:[]),{label:'Role',column:'role'},{label:wHeading,column:'w',numeric:true},...(earningsEnabled()?[{label:'Earnings',column:'earnings'}]:[]),{label:'Save',column:'save'}];
   function matchesCandidate(row) {
     const query=$('candidate-search').value.trim().toLowerCase(),filter=$('candidate-theme').value,w=row.relative?.w;
     return (!query||`${row.ticker} ${name(row.theme_id)}`.toLowerCase().includes(query))&&(!filter||row.theme_id===filter)&&(!$('candidate-role').value||row.role===$('candidate-role').value)&&(!$('candidate-w').value||valid(w)&&($('candidate-w').value==='positive'?Number(w)>0:Number(w)<0))&&(!$('candidate-earnings').value||(earningsDates(row.ticker).length>0)===($('candidate-earnings').value==='available'));
@@ -298,7 +297,8 @@
     return(snapshot?.relationships||[]).filter(r=>keys.has(r.ticker+':'+r.theme_id));
   }
   function renderCandidateContext() {
-    $('primary-context').textContent=[snapshot?.market_direction||'Market context unavailable',research().extension?.state||'Extension unavailable',UX.focusLabel(research().focus?.label)].join(' · ');
+    $('primary-context').innerHTML=`<span><span class="context-label">Market</span> ${esc(snapshot?.market_direction||'Unavailable')} · ${esc(research().extension?.state||'Extension unavailable')}</span><span><span class="context-label">Market focus</span> ${esc(UX.focusLabel(research().focus?.label))}</span>`;
+    $('candidate-page').dataset.lens=ui.candidateLens;
     document.querySelectorAll('[data-candidate-lens]').forEach(b=>{const selected=b.dataset.candidateLens===ui.candidateLens;b.setAttribute('aria-selected',String(selected));b.tabIndex=selected?0:-1;});
     $('candidate-panel').setAttribute('aria-labelledby',ui.candidateLens+'-tab');
     $('candidate-sort').closest('label').hidden=ui.candidateLens==='countertrend';
@@ -320,10 +320,11 @@
     $('candidates').innerHTML=candidateTables(rows,'Directional candidates');
   }
   function candidateTables(rows,label) {
-    const render=(members,title)=>`<div class="table-wrap" role="region" tabindex="0" aria-label="${esc(title)}">${table(candidateHeaders(),members.map(r=>candidateRow(r,ui.candidateLens)),title+'; W is relative to the displayed theme.')}</div>`;
+    const withTheme=ui.candidateMode==='unique';
+    const render=(members,title)=>`<div class="table-wrap" role="region" tabindex="0" aria-label="${esc(title)}">${table(candidateHeaders(withTheme),members.map(r=>candidateRow(r,ui.candidateLens,withTheme)),title+'; peer delta (W) is relative to '+(withTheme?'the displayed theme.':name(members[0].theme_id)+'.'),withTheme?'candidate-table':'candidate-table grouped-table')}</div>`;
     if(ui.candidateMode==='unique')return render(rows,label);
     const groups=new Map();for(const row of rows){if(!groups.has(row.theme_id))groups.set(row.theme_id,[]);groups.get(row.theme_id).push(row);}
-    return [...groups].map(([id,members])=>`<section class="qualification-group"><div class="group-heading"><h3>${themeLink(id)}</h3><span class="table-meta">${members.length} relationships</span></div>${render(members,name(id))}</section>`).join('');
+    return [...groups].map(([id,members])=>`<section class="qualification-group"><div class="group-heading"><h3>${themeLink(id,ui.candidateLens)}</h3><span class="table-meta">${members.length} relationships</span></div>${render(members,name(id))}</section>`).join('');
   }
   function renderCountertrend() {
     const ct=research().countertrend;
@@ -346,8 +347,8 @@
   }
   function renderMembers(themeId) {
     const rows = memberRows(themeId), total = (snapshot?.relationships || []).filter(r => r.theme_id === themeId).length;
-    $('member-count').textContent = `${rows.length} of ${total} supplied Core + Enabler relationships`;
-    $('member-table').innerHTML = rows.length ? table(['Ticker','Role',{label:'Relative Strength vs Theme Peers (W)',numeric:true},'Eligibility','Qualification',...(earningsEnabled() ? ['Earnings'] : []),'Saved'], rows.map(r => `<tr><td>${tickerLink(r.ticker,r.theme_id,'directional')}</td><td>${roleLabel(r.role)}</td><td class="numeric ${signTone(r.relative?.w)}">${points(r.relative?.w)}</td><td class="table-note">${esc(eligibility(r))}</td><td><span class="table-note">${r.qualifies ? 'Meets candidate criteria' : 'Does not meet candidate criteria'}</span></td>${earningsEnabled() ? `<td class="table-note">${earnings(r.ticker)}</td>` : ''}<td>${saveButton(r.ticker,'member:'+themeId,r.theme_id,'directional')}</td></tr>`), name(themeId) + ' calculation members; Related members are not present in this snapshot.') : empty(total ? 'No members match this view' : 'No calculation members supplied', total ? 'Try another ticker, role or eligibility filter.' : 'Untracked Concepts and Related members do not enter calculations. No member rows are invented.');
+    $('member-count').textContent = `${rows.length} of ${total} Core + Enabler relationships`;
+    $('member-table').innerHTML = rows.length ? table(['Ticker','Role',{label:'Peer delta (pp)',numeric:true},'Eligibility','Qualification',...(earningsEnabled() ? ['Earnings'] : []),'Saved'], rows.map(r => `<tr><td>${tickerLink(r.ticker,r.theme_id,'directional')}</td><td>${roleLabel(r.role)}</td><td class="numeric ${signTone(r.relative?.w)}">${points(r.relative?.w)}</td><td class="table-note">${esc(eligibility(r))}</td><td><span class="table-note">${r.qualifies ? 'Meets candidate criteria' : 'Does not meet candidate criteria'}</span></td>${earningsEnabled() ? `<td class="table-note">${earnings(r.ticker)}</td>` : ''}<td>${saveButton(r.ticker,'member:'+themeId,r.theme_id,'directional')}</td></tr>`), name(themeId) + ' calculation members; Related members are not present in this snapshot.') : empty(total ? 'No members match this view' : 'No calculation members supplied', total ? 'Try another ticker, role or eligibility filter.' : 'Untracked Concepts and Related members do not enter calculations. No member rows are invented.');
   }
   function renderDetail(themeId) {
     if(initialLoading){$('detail-content').innerHTML='<p class="loading-state">Loading theme research…</p>';return;}
@@ -356,7 +357,7 @@
     if(theme.status!=='active'){$('detail-content').innerHTML=`<a href="#themes" class="back-link">← Back to Themes</a><h1 id="detail-title" tabindex="-1">${esc(theme.name||themeId)}</h1>${empty('Untracked Concept','No active calculation basket exists for this concept. It does not enter theme returns, strength ranks or candidate calculations.')}`;return;}
     const originName = origin.startsWith('#primary') ? 'Candidates' : origin.startsWith('#saved') ? 'Saved' : origin.startsWith('#overview') ? 'Overview' : 'Themes';
     const metric = (label,value,note = '') => `<div class="metric-block"><span class="metric-label">${label}</span><div class="metric-value">${value}</div>${note ? `<small>${note}</small>` : ''}</div>`;
-    $('detail-content').innerHTML = `<div class="crumbs"><a href="${esc(origin)}" class="back-link" data-return-theme="${esc(themeId)}">← Back to ${originName}</a>${themeDownload(themeId)}</div><div class="detail-heading"><p class="eyebrow">${esc(theme.family)} · ${theme.status === 'active' ? 'ACTIVE THEME' : 'UNTRACKED CONCEPT'}</p><h1 id="detail-title" tabindex="-1">${esc(theme.name || themeId)}</h1>${priority(theme.priority)}</div><div class="detail-summary">${metric('<abbr title="'+scoreHelp+'">Theme Strength Score</abbr>',number(theme.score),'0–100 across Active themes')}${metric('Median 1M', `<span class="${signTone(theme.returns?.[0]?.value)}">${percent(theme.returns?.[0]?.value,100,true)}</span>`, '21 completed sessions')}${metric('Median 3M', `<span class="${signTone(theme.returns?.[1]?.value)}">${percent(theme.returns?.[1]?.value,100,true)}</span>`, '63 completed sessions')}${metric(prelaunch() ? 'Pre-launch research trend' : 'Theme Trend', state(theme.index?.trend), 'Index vs EMA21 / EMA50')}${metric('Members above EMA21', percent(theme.breadth?.[0]?.value), `${theme.breadth?.[0]?.valid ?? 0}/${theme.breadth?.[0]?.configured ?? 0} valid members`)}${metric('Members above EMA50', percent(theme.breadth?.[1]?.value), `${theme.breadth?.[1]?.valid ?? 0}/${theme.breadth?.[1]?.configured ?? 0} valid members`)}</div><div class="detail-context"><span>Strength Rank <strong>${rankLabel(themeId)}</strong> · ${rankChange(themeId)}</span><span>Research Priority Change: <strong>${esc(comparison(theme))}</strong></span><span>Index <strong>${number(theme.index?.level)}</strong></span><span>EMA21 <strong>${number(theme.index?.ema21)}</strong> / EMA50 <strong>${number(theme.index?.ema50)}</strong></span></div><p class="detail-explainer">${comparison(theme) === 'Change unavailable' ? 'Previous session unavailable. ' : ''}Breadth is context only. <a href="#methodology">Metric definitions →</a></p><div class="section-heading"><h2>Member research</h2><span id="member-count" class="muted table-note"></span></div><form id="member-filters" class="filter-bar" role="search" aria-label="Filter theme members"><label class="search-field">Search members<input id="member-search" type="search" placeholder="Ticker…" value="${esc(ui.memberSearch)}"></label><label>Role<select id="member-role"><option value="">All roles</option><option value="Core">Core business</option><option value="Enabler">Supporting business</option></select></label><label>Eligibility<select id="member-eligibility"><option value="">All states</option><option>Liquidity eligible</option><option>Liquidity ineligible</option><option>Unavailable</option></select></label><label>Sort<select id="member-sort"><option value="ticker">Ticker A–Z</option><option value="w-desc">W high to low</option><option value="w-asc">W low to high</option></select></label></form><div id="member-table" class="table-wrap member-table" role="region" tabindex="0" aria-label="Theme member research"></div>`;
+    $('detail-content').innerHTML = `<div class="crumbs"><a href="${esc(origin)}" class="back-link" data-return-theme="${esc(themeId)}">← Back to ${originName}</a>${themeDownload(themeId)}</div><div class="detail-heading"><h1 id="detail-title" tabindex="-1">${esc(theme.name || themeId)}</h1><p class="detail-family">${esc(theme.family)} · Active theme</p></div><div class="detail-primary">${metric('Strength '+helpButton('strength'),number(theme.score,1))}${metric('Strength Rank '+helpButton('rank'),rankLabel(themeId))}${metric('Research Priority',priority(theme.priority))}${metric(prelaunch()?'Pre-launch research trend':'Theme Trend',state(theme.index?.trend))}</div><div class="detail-summary">${metric('Median 1M',`<span class="${signTone(theme.returns?.[0]?.value)}">${percent(theme.returns?.[0]?.value,100,true)}</span>`,'21 completed sessions')}${metric('Median 3M',`<span class="${signTone(theme.returns?.[1]?.value)}">${percent(theme.returns?.[1]?.value,100,true)}</span>`,'63 completed sessions')}${metric('Members above EMA21',percent(theme.breadth?.[0]?.value),`${theme.breadth?.[0]?.valid??0}/${theme.breadth?.[0]?.configured??0} valid members`)}${metric('Members above EMA50',percent(theme.breadth?.[1]?.value),`${theme.breadth?.[1]?.valid??0}/${theme.breadth?.[1]?.configured??0} valid members`)}</div><div class="detail-context"><span>Rank change ${rankChange(themeId)}</span><span>Research Priority Change: <strong>${esc(comparison(theme))}</strong></span><span>Index <strong>${number(theme.index?.level)}</strong></span><span>EMA21 <strong>${number(theme.index?.ema21)}</strong> / EMA50 <strong>${number(theme.index?.ema50)}</strong></span></div><p class="detail-explainer">${comparison(theme) === 'Change unavailable' ? 'Previous session unavailable. ' : ''}Breadth is context only. <a href="#methodology">Metric definitions →</a></p><div class="section-heading"><h2>Member research</h2><span id="member-count" class="muted table-note"></span></div><form id="member-filters" class="filter-bar" role="search" aria-label="Filter theme members"><label class="search-field">Search members<input id="member-search" type="search" placeholder="Ticker…" value="${esc(ui.memberSearch)}"></label><label>Role<select id="member-role"><option value="">All roles</option><option value="Core">Core business</option><option value="Enabler">Supporting business</option></select></label><label>Eligibility<select id="member-eligibility"><option value="">All states</option><option>Liquidity eligible</option><option>Liquidity ineligible</option><option>Unavailable</option></select></label><label>Sort<select id="member-sort"><option value="ticker">Ticker A–Z</option><option value="w-desc">W high to low</option><option value="w-asc">W low to high</option></select></label></form><div id="member-table" class="table-wrap member-table" role="region" tabindex="0" aria-label="Theme member research"></div>`;
     $('member-role').value = ui.memberRole; $('member-eligibility').value = ui.memberEligibility; $('member-sort').value = ui.memberSort;
     renderMembers(themeId);
   }
@@ -444,11 +445,13 @@
     if (!next) { dismissInspector(); return; }
     const unchanged=inspector?.kind===next.kind&&inspector?.id===next.id&&(inspector?.context||'')===(next.context||'');
     if (!inspector) { inspectorScroll = window.scrollY; if (inspectorOrigin !== route) inspectorTrigger = ''; }
-    inspector = next;
+    const previousDepth=inspector?.depth||0,wasOpen=$('research-inspector').open;
+    inspector = {...next,depth:Number(history.state?.researchDepth)||0};
+    if(inspector.kind==='ticker'){ui.selectedTicker=inspector.id;ui.selectedTickerTheme=inspector.context;document.querySelectorAll('[data-ticker-row]').forEach(row=>row.classList.toggle('selected-row',row.dataset.tickerRow===inspector.id&&row.dataset.relationshipTheme===inspector.context));}
     if (inspector.kind === 'theme') { ui.selectedTheme = inspector.id; document.querySelectorAll('[data-theme-row]').forEach(row=>row.classList.toggle('selected-row',row.dataset.themeRow === inspector.id)); }
     renderInspector(unchanged);
     if (!$('research-inspector').open) { closeDisplay(); $('research-inspector').showModal(); document.documentElement.classList.add('inspecting'); }
-    if(!unchanged){const view=inspectorView();$('research-inspector').scrollTop=view.scroll||0;if(view.focus)restoreFocus(view.focus);else $('inspector-title').focus({preventScroll:true});}
+    if(!unchanged){if(wasOpen){UX.move($('inspector-content'),'slide',inspector.depth<previousDepth?-1:1);UX.move($('inspector-title'),'slide',inspector.depth<previousDepth?-1:1);}const view=inspectorView();$('research-inspector').scrollTop=view.scroll||0;if(view.focus)restoreFocus(view.focus);else $('inspector-title').focus({preventScroll:true});}
   }
   function metric(label,value) { return `<div class="metric-block"><span class="metric-label">${label}</span><div class="metric-value">${value}</div></div>`; }
   function renderInspector(preserve = false) {
@@ -456,6 +459,7 @@
     const dialog = $('research-inspector'), focused = dialog.contains(document.activeElement) ? focusKey() : null;
     const textSelection = document.activeElement?.id === 'inspector-search' ? document.activeElement.selectionStart : null;
     const scroll = dialog.scrollTop;
+    $('inspector-back').hidden=(inspector.depth||0)<2;
     $('inspector-kind').textContent = inspector.kind === 'theme' ? 'Theme research' : 'Ticker research';
     $('inspector-title').textContent = inspector.kind === 'theme' ? name(inspector.id) : inspector.id;
     $('inspector-status').textContent = ['failed','interrupted'].includes(currentStatus.state) ? 'Refresh failed · previous successful snapshot retained' : 'Completed session ' + (snapshot?.session || '—');
@@ -467,9 +471,9 @@
   function renderThemeInspector() {
     const t=snapshot?.themes?.find(row=>row.theme_id===inspector.id);
     if(!t){$('inspector-content').innerHTML=empty('Theme unavailable','This theme is not in the current snapshot.');return;}
-    if(t.status!=='active'){$('inspector-content').innerHTML=`<p class="eyebrow">${esc(t.family)} · Untracked Concept</p>${empty('No active calculation basket','This concept does not enter Strength, returns or candidate calculations.')}`;return;}
+    if(t.status!=='active'){$('inspector-content').innerHTML=`<p class="detail-family">${esc(t.family)} · Untracked Concept</p>${empty('No active calculation basket','This concept does not enter Strength, returns or candidate calculations.')}`;return;}
     const v=inspectorView();
-    $('inspector-content').innerHTML=`<div class="inspector-subhead"><span>${esc(t.family)}</span>${priority(t.priority)}</div><div class="inspector-metrics">${metric('Strength '+helpButton('strength'),number(t.score,1))}${metric('Strength Rank '+helpButton('rank'),rankLabel(t.theme_id))}${metric('Trend',state(t.index?.trend))}${metric('1M Return',percent(t.returns?.[0]?.value,100,true))}${metric('3M Return',percent(t.returns?.[1]?.value,100,true))}${metric('Rank Change',rankChange(t.theme_id))}</div><div class="inspector-breadth">${breadthBar('Above EMA21',t.breadth?.[0]?.value)}${breadthBar('Above EMA50',t.breadth?.[1]?.value)}</div><p class="inspector-reason">${esc(priorityName(t.priority))} under ${esc(snapshot?.market_direction||'unavailable market context')}. ${helpButton('priority')}</p><div class="section-heading"><h3>Member preview</h3><span class="table-meta">W · pp ${helpButton('w')}</span></div><form class="inspector-member-tools" aria-label="Filter member preview"><label>Search<input id="inspector-search" type="search" placeholder="Ticker" value="${esc(v.search)}" data-focus-key="inspector-search"></label><label>View<select id="inspector-view" data-focus-key="inspector-view"><option value="All">All members</option><option value="Primary">Directional</option><option value="Eligible">Liquidity eligible</option><option value="Core">Core business</option><option value="Enabler">Supporting business</option></select></label></form><p id="inspector-member-count" class="table-meta" role="status"></p><div id="inspector-members"></div><div class="inspector-footer"><a class="button secondary" href="${themeHref(t.theme_id)}">Open full theme</a><a class="text-link" href="#methodology?metric=strength">Metric definitions</a></div>`;
+    $('inspector-content').innerHTML=`<div class="inspector-subhead"><span>${esc(t.family)}</span>${priority(t.priority)}</div><div class="inspector-metrics">${metric('Strength '+helpButton('strength'),number(t.score,1))}${metric('Strength Rank '+helpButton('rank'),rankLabel(t.theme_id))}${metric('Trend',state(t.index?.trend))}${metric('1M Return',percent(t.returns?.[0]?.value,100,true))}${metric('3M Return',percent(t.returns?.[1]?.value,100,true))}${metric('Rank Change',rankChange(t.theme_id))}</div><div class="inspector-breadth">${breadthBar('Above EMA21',t.breadth?.[0]?.value)}${breadthBar('Above EMA50',t.breadth?.[1]?.value)}</div><p class="inspector-reason">${esc(priorityName(t.priority))} under ${esc(snapshot?.market_direction||'unavailable market context')}. ${helpButton('priority')}</p><div class="section-heading"><h3>Member preview</h3><span class="table-meta">Peer delta (pp) ${helpButton('w')}</span></div><form class="inspector-member-tools" aria-label="Filter member preview"><label>Search<input id="inspector-search" type="search" placeholder="Ticker" value="${esc(v.search)}" data-focus-key="inspector-search"></label><label>View<select id="inspector-view" data-focus-key="inspector-view"><option value="All">All members</option><option value="Primary">Directional</option><option value="Eligible">Liquidity eligible</option><option value="Core">Core business</option><option value="Enabler">Supporting business</option></select></label></form><p id="inspector-member-count" class="table-meta" role="status"></p><div id="inspector-members"></div><div class="inspector-footer"><a class="button secondary" href="${themeHref(t.theme_id)}">Open full theme</a><a class="text-link" href="#methodology?metric=strength">Metric definitions</a></div>`;
     $('inspector-view').value=v.filter;renderInspectorMembers();
   }
   function renderInspectorMembers() {
@@ -507,6 +511,7 @@
     const key=new URLSearchParams((location.hash||'').split('?')[1]||'').get('metric');
     const target=key&&document.getElementById('method-'+key);
     if(!target||!target.classList.contains('method-item'))return false;
+    document.querySelectorAll('.method-item.research-anchor').forEach(node=>node.classList.remove('research-anchor'));target.classList.add('research-anchor');
     target.open=true;target.querySelector('summary').focus({preventScroll:true});target.scrollIntoView({block:'start'});return true;
   }
   function showRoute(initial = false) {
@@ -519,8 +524,10 @@
     route = next;
     const part = route.slice(1).split('/')[0], isDetail = route.startsWith('#themes/');
     const viewId = isDetail ? 'theme-detail' : ({overview:'overview-page',themes:'themes-page',primary:'candidate-page',saved:'saved-page',methodology:'methodology-page'})[part];
-    document.querySelectorAll('.view').forEach(view => { view.hidden = view.id !== viewId; view.classList.remove('entering'); });
-    const view = $(viewId); view?.classList.add('entering');
+    document.querySelectorAll('.view').forEach(view => { view.hidden = view.id !== viewId;  });
+    const view = $(viewId);
+    if(!initial)UX.move(view,isDetail||previousRoute.startsWith('#themes/')?'slide':'shift');
+    requestAnimationFrame(UX.indicators);
     document.querySelectorAll('[data-nav]').forEach(link => { if (link.dataset.nav === part) link.setAttribute('aria-current','page'); else link.removeAttribute('aria-current'); });
     if (isDetail) renderDetail(detailId());
     if (part === 'themes' && !isDetail) {
@@ -547,11 +554,12 @@
     const signature=JSON.stringify(data);
     if (signature === snapshotSignature) return; // Polling must not replace a focused or expanded research control.
     const focused = focusKey(), memberFocused = document.activeElement?.id?.startsWith('member-') ? {id:document.activeElement.id,start:document.activeElement.selectionStart} : null;
-    const scroll = window.scrollY, themeScroll = $('theme-table').scrollTop;
+    const scroll = window.scrollY, themeScroll = $('theme-table').scrollTop,previousMarket=snapshot?.market_direction;
     interactions.closeHelp();snapshot=data;snapshotSignature=signature;
     if(!ui.lensChosen){ui.candidateLens=research().focus?.preferred_mode||'directional';ui.lensChosen=true;}
     for (const url of blobUrls.values()) URL.revokeObjectURL(url); blobUrls.clear();
     renderLayer(); renderOverview();
+    if(previousMarket&&previousMarket!==snapshot.market_direction&&route==='#overview')UX.move($('market-direction'),'sweep');
     setOptions('theme-family',[...new Set((snapshot.themes || []).map(t => t.family).filter(Boolean))].sort().map(f => [f,f]));
     renderThemes(); renderCandidates(); renderSaved();
     if (inspector) renderInspector(true);
@@ -591,10 +599,9 @@
       const response = await fetch('/api/status'); if (!response.ok) throw Error('status');
       showStatus(await response.json());
       const data = await fetch('/api/dashboard-data'); if (!data.ok) throw Error('snapshot');
-      render(await data.json());connectionLost=false;
+      render(await data.json());
     } catch {
       const message=snapshot?`Connection lost · showing completed session ${snapshot.session}`:'Connection lost · no snapshot loaded';
-      connectionLost=true;
       if ($('progress').textContent !== message) $('progress').textContent = message;
     } finally { polling = false; }
   }
@@ -618,6 +625,7 @@
       return;
     }
     if (!button) return;
+    if (button.id === 'inspector-back') { history.back();return; }
     if (button.id === 'inspector-close') { closeInspector(); return; }
     if (button.dataset.inspectorFilter) { inspectorView().filter = button.dataset.inspectorFilter; renderInspector(true); restoreFocus('inspect-filter:' + button.dataset.inspectorFilter); return; }
     if (button.id === 'display-toggle') { const open = $('display-panel').hidden; $('display-panel').hidden = !open; button.setAttribute('aria-expanded',String(open)); if (open) $('display-close').focus(); return; }
@@ -632,8 +640,8 @@
       ui.themeDescending = ui.themeSort === key ? !ui.themeDescending : ['score','return1','return3','breadth'].includes(key); ui.themeSort = key; renderThemes(); restoreFocus(focused); return;
     }
     if(button.dataset.countertrendJump){const heading=document.querySelector(`[data-countertrend="${CSS.escape(button.dataset.countertrendJump)}"] h2`);heading?.scrollIntoView({block:'start'});heading?.focus({preventScroll:true});return;}
-    if(button.dataset.candidateLens){const changed=ui.candidateLens!==button.dataset.candidateLens;ui.candidateLens=button.dataset.candidateLens;ui.lensChosen=true;$('export-menu').open=false;renderCandidates();if(changed)UX.fade($('candidate-panel'));return;}
-    if (button.dataset.candidateMode) { ui.candidateMode=button.dataset.candidateMode;renderCandidates();UX.indicators(); return; }
+    if(button.dataset.candidateLens){const changed=ui.candidateLens!==button.dataset.candidateLens;ui.candidateLens=button.dataset.candidateLens;ui.lensChosen=true;$('export-menu').open=false;renderCandidates();if(changed)UX.move($('candidate-panel'),'sweep');return;}
+    if (button.dataset.candidateMode) { const changed=ui.candidateMode!==button.dataset.candidateMode;ui.candidateMode=button.dataset.candidateMode;renderCandidates();UX.indicators();if(changed)UX.move($('candidates'),'sweep');return; }
     if (button.dataset.reset === 'themes') { $('theme-filters').reset(); renderThemes(); }
     if (button.dataset.reset === 'candidates') { $('candidate-filters').reset(); renderCandidates(); }
   });
@@ -686,6 +694,7 @@
   history.scrollRestoration = 'manual';
   document.querySelectorAll('[data-nav]').forEach(link => { link.querySelector('.nav-icon').innerHTML = icon(link.dataset.nav); });
   document.querySelector('.brand-mark').innerHTML = icon('orbit');
+  $('inspector-back').innerHTML=icon('back');
   document.querySelectorAll('a span[aria-hidden="true"]').forEach(span => { if (span.textContent === '↗') span.innerHTML = icon('up'); });
   renderSaved();showRoute(true);
   if (publicSnapshot) { render(window.THEMESCOPE_STATIC_SOURCE.snapshot); showStatus({state:'success',progress:'Market data fixed',target_session:snapshot.session,last_successful_refresh:snapshot.refreshed_at,completeness:snapshot.completeness,provider_health:snapshot.provider_health}); }

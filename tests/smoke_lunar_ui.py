@@ -84,9 +84,12 @@ def main():
                     nav('themes');table=page.locator('#theme-table')
                     widths=table.locator('th').evaluate_all('nodes=>nodes.map(e=>e.getBoundingClientRect().width)')
                     assert len(widths)==9
-                    ratios=[6,25,8,9,9,9,10,14,10]
-                    total=sum(widths)
-                    assert all(abs(actual-total*ratio/100)<1 for actual,ratio in zip(widths,ratios)),(width,widths)
+                    # Structural columns own shared header/body anchors; Theme takes the remainder.
+                    expected={'col-rank':80,'col-strength':120,'col-rank-change':88,'col-return1':88,'col-return3':88,'col-trend':96,'col-breadth':136,'col-priority':140}
+                    assert table.locator('colgroup col').count()==9
+                    for column,pixels in expected.items():
+                        actual_width=table.locator('th.'+column).evaluate('e=>e.getBoundingClientRect().width')
+                        assert abs(actual_width-pixels)<1,(width,column,actual_width,pixels)
                     for row in table.locator('tbody tr').all():
                         body=row.locator('td').evaluate_all('nodes=>nodes.map(e=>e.getBoundingClientRect().width)')
                         assert all(abs(a-b)<1 for a,b in zip(widths,body))
@@ -210,7 +213,7 @@ def main():
                 page.locator('#candidate-search').fill(ticker)
                 assert page.locator('#candidates tbody tr').count()>=1
                 expect(page.locator('#candidate-earnings')).to_be_hidden()
-                assert [v.replace('?','').strip() for v in page.locator('#candidates th').all_text_contents()]==['Ticker','Theme','Role','W · pp','Save']
+                assert [v.replace('?','').strip() for v in page.locator('#candidates th').all_text_contents()]==['Ticker','Role','Peer delta (pp)','Save']
                 assert page.locator('#candidates td[data-label="Earnings"]').count()==0
                 open_exports(page)
                 with page.expect_download() as item:page.get_by_role('link',name='Full Directional list',exact=False).click()

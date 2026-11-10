@@ -47,7 +47,7 @@ def favicon():
         rows.append(0)
         for x in range(16):
             lit = (x-7.5)**2+(y-7.5)**2<=49 and (x-10)**2+(y-5)**2>36
-            rows.extend((206,187,255,255) if lit else (0,0,0,0))
+            rows.extend((101,227,255,255) if lit else (0,0,0,0))
     def chunk(kind, data):
         return struct.pack('>I',len(data))+kind+data+struct.pack('>I',zlib.crc32(kind+data))
     png = b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',16,16,8,6,0,0,0))+chunk(b'IDAT',zlib.compress(bytes(rows),9))+chunk(b'IEND',b'')

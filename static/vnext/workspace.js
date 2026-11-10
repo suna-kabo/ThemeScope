@@ -24,18 +24,40 @@ window.ThemeScopeUI = (() => {
     return {low:start*step/100,high:end*step/100,ticks:Array.from({length:end-start+1},(_,i)=>Number(((start+i)*step/100).toPrecision(12)))};
   }
   const reduced = () => document.documentElement.dataset.motion==='reduce'||matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function fade(element) { if(element&&!reduced())element.animate([{opacity:.65},{opacity:1}],{duration:160,easing:'ease-out'}); }
+  const motion=Object.freeze({shift:180,slide:240,sweep:200,reveal:160,confirm:140,lock:180});
+  const ease={enter:'cubic-bezier(.22,1,.36,1)',exit:'cubic-bezier(.4,0,1,1)',travel:'cubic-bezier(.2,.8,.2,1)'};
+  const running=new WeakMap(),selections=new WeakMap();
+  function move(element,kind='shift',direction=1) {
+    if(!element)return;
+    running.get(element)?.cancel();
+    if(reduced())return;
+    const distance=kind==='slide'?14:kind==='sweep'?8:kind==='reveal'?4:kind==='shift'?5:0;
+    const transform=kind==='slide'||kind==='sweep'?`translateX(${distance*direction}px)`:`translateY(${distance}px)`;
+    const animation=element.animate([{opacity:kind==='confirm'?.5:.65,transform},{opacity:1,transform:'translate(0,0)'}],{duration:motion[kind]||motion.shift,easing:kind==='sweep'?ease.travel:ease.enter});
+    running.set(element,animation);
+  }
+  function pulse(ring) {
+    if(!ring||reduced())return;
+    ring.getAnimations().forEach(a=>a.cancel());
+    ring.animate([{opacity:1,transform:'scale(.8)'},{opacity:0,transform:'scale(1.8)'}],{duration:motion.lock,easing:ease.enter});
+  }
   function indicator(group,selected) {
     if(!group||!selected)return;
     let mark=group.querySelector(':scope > .selection-indicator');
     if(!mark){mark=document.createElement('span');mark.className='selection-indicator';mark.setAttribute('aria-hidden','true');group.prepend(mark);}
-    const g=group.getBoundingClientRect(),r=selected.getBoundingClientRect();
-    group.style.setProperty('--selected-x',(r.left-g.left)+'px');group.style.setProperty('--selected-y',(r.top-g.top)+'px');
+    const g=group.getBoundingClientRect(),r=selected.getBoundingClientRect(),old=mark.getBoundingClientRect(),previous=selections.get(group);
+    const x=r.left-g.left,y=r.top-g.top;
+    if(previous?.selected===selected&&Math.abs(previous.x-x)<.5&&Math.abs(previous.y-y)<.5&&Math.abs(previous.width-r.width)<.5&&Math.abs(previous.height-r.height)<.5)return;
+    mark.getAnimations().forEach(a=>a.cancel());
+    group.style.setProperty('--selected-x',x+'px');group.style.setProperty('--selected-y',y+'px');
     group.style.setProperty('--selected-width',r.width+'px');group.style.setProperty('--selected-height',r.height+'px');
-    requestAnimationFrame(()=>group.classList.add('selection-ready'));
+    if(previous&&previous.selected!==selected&&!reduced()&&old.width&&r.width){
+      mark.animate([{transform:`translate(${old.left-g.left}px,${old.top-g.top}px) scale(${old.width/r.width},${old.height/r.height})`},{transform:`translate(${x}px,${y}px) scale(1)`}],{duration:motion.sweep,easing:ease.travel});
+    }
+    selections.set(group,{selected,x,y,width:r.width,height:r.height});
   }
   function indicators() {
-    document.querySelectorAll('.segmented,.research-tabs').forEach(g=>indicator(g,g.querySelector('[aria-pressed="true"],[aria-selected="true"]')));
+    document.querySelectorAll('.segmented,.research-tabs,.main-nav').forEach(g=>indicator(g,g.querySelector('[aria-pressed="true"],[aria-selected="true"],[aria-current="page"]')));
   }
   function install() {
     const pop=document.getElementById('metric-tooltip');let trigger=null,pinned=false,timer,suppressFocus=false;
@@ -78,9 +100,10 @@ window.ThemeScopeUI = (() => {
       }
     },true);
     new ResizeObserver(()=>{indicators();document.querySelectorAll('.table-wrap').forEach(e=>{e.dataset.scroll=String(e.scrollWidth>e.clientWidth+1);});}).observe(document.querySelector('.app-shell'));
+    document.addEventListener('toggle',e=>{if(e.target instanceof HTMLDetailsElement&&e.target.open){const panel=e.target.querySelector(':scope > div');if(panel&&!e.target.classList.contains('method-item'))move(panel,'reveal');}},true);
     window.addEventListener('resize',()=>close());
     matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',e=>{if(e.matches)document.getAnimations().forEach(a=>a.cancel());});
     return {closeHelp:close};
   }
-  return Object.freeze({help,bucketLabel,bucketHelp,focusLabel,displayRows,axis,reduced,fade,indicators,install});
+  return Object.freeze({help,bucketLabel,bucketHelp,focusLabel,displayRows,axis,reduced,motion,move,pulse,indicators,install});
 })();

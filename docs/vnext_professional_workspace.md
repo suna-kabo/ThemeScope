@@ -1,5 +1,8 @@
 # Professional research workspace — 10 November 2026
 
+Historical checkpoint: visual identity is superseded by [Tidal Vector](vnext_tidal_vector.md);
+its financial/export contracts below remain current.
+
 Continues `967dab6` on `refactor/themescope-vnext`. This is a presentation
 refinement plus additive Countertrend TXT publication. Existing financial formulas,
 qualification, history, launch lifecycle, corporate actions, provider/cache, schema

@@ -60,10 +60,10 @@
     <section id="candidate-page" class="view" aria-labelledby="candidates-title" hidden>
       <div class="page-heading"><div><h1 id="candidates-title" tabindex="-1">Candidates</h1><p id="primary-context" class="compact-context"></p></div></div>
       <div class="candidate-heading-tools">
-        <div class="research-tabs" role="tablist" aria-label="Research lens">
+        <div class="lens-controls"><span class="context-label">Research lens</span><div class="research-tabs" role="tablist" aria-label="Research lens">
           <button id="directional-tab" data-candidate-lens="directional" role="tab" aria-selected="true" aria-controls="candidate-panel" tabindex="0">Directional</button>
           <button id="countertrend-tab" data-candidate-lens="countertrend" role="tab" aria-selected="false" aria-controls="candidate-panel" tabindex="-1">Countertrend</button>
-        </div>
+        </div></div>
         <details id="export-menu" class="export-menu"><summary class="button secondary">Export <span aria-hidden="true">⌄</span></summary><div id="export-options" class="export-options"><p class="menu-title">Waiting for a completed snapshot</p></div></details>
       </div>
       <div id="candidate-panel" role="tabpanel" aria-labelledby="directional-tab">
@@ -72,12 +72,12 @@
           <label class="theme-filter">Theme<select id="candidate-theme"><option value="">All themes</option></select></label>
           <details class="secondary-filters"><summary class="button quiet">Filters <span aria-hidden="true">⌄</span></summary><div class="secondary-filter-body">
             <label>Role<select id="candidate-role"><option value="">All roles</option><option value="Core">Core business</option><option value="Enabler">Supporting business</option></select></label>
-            <label>W<select id="candidate-w"><option value="">Any W</option><option value="positive">Positive</option><option value="negative">Negative</option></select></label>
+            <label>Peer delta<select id="candidate-w"><option value="">Any delta</option><option value="positive">Positive</option><option value="negative">Negative</option></select></label>
             <label>Earnings<select id="candidate-earnings"><option value="">Any earnings state</option><option value="available">Date available</option><option value="unavailable">No date</option></select></label>
           </div></details>
           <button type="button" data-reset="candidates" class="button quiet">Reset</button>
         </form>
-        <div class="candidate-tools"><p id="candidate-results" class="table-meta" role="status" aria-live="polite">Loading candidates…</p><div class="candidate-view-tools"><div class="segmented" role="group" aria-label="Candidate view"><button data-candidate-mode="unique" aria-pressed="true">Stocks</button><button data-candidate-mode="relationships" aria-pressed="false">Grouped by theme</button></div><label class="inline-label">Sort<select id="candidate-sort"><option value="ticker">Ticker A–Z</option><option value="w-desc">W descending</option><option value="w-asc">W ascending</option><option value="theme">Theme A–Z</option></select></label></div></div>
+        <div class="candidate-tools"><p id="candidate-results" class="table-meta" role="status" aria-live="polite">Loading candidates…</p><div class="candidate-view-tools"><div class="segmented" role="group" aria-label="Candidate view"><button data-candidate-mode="unique" aria-pressed="true">Stocks</button><button data-candidate-mode="relationships" aria-pressed="false">Grouped by theme</button></div><label class="inline-label">Sort<select id="candidate-sort"><option value="ticker">Ticker A–Z</option><option value="w-desc">Peer delta descending</option><option value="w-asc">Peer delta ascending</option><option value="theme">Theme A–Z</option></select></label></div></div>
         <div id="candidates"><p class="loading-state">Loading candidates…</p></div>
       </div>
     </section>
@@ -109,7 +109,7 @@
   </main>
 </div>
 <dialog id="research-inspector" aria-labelledby="inspector-title">
-  <header class="inspector-header"><div><span id="inspector-kind" class="metric-label">Research</span><h2 id="inspector-title" tabindex="-1"></h2></div><button id="inspector-close" class="button quiet" aria-label="Close Research Inspector" data-focus-key="inspector-close">×</button></header>
+  <header class="inspector-header"><div><h2 id="inspector-title" tabindex="-1"></h2><span id="inspector-kind" class="metric-label">Research</span></div><button id="inspector-back" class="button quiet" aria-label="Return to previous research object" hidden data-focus-key="inspector-back">←</button><button id="inspector-close" class="button quiet" aria-label="Close Research Inspector" data-focus-key="inspector-close">×</button></header>
   <p id="inspector-status" class="inspector-status" role="status"></p><div id="inspector-content"></div>
 </dialog>
 <div id="feedback" class="feedback" role="status" aria-live="polite"></div>

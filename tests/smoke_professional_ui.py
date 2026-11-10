@@ -145,13 +145,14 @@ def main():
                 page.locator('#display-toggle').click();page.locator('#display-motion').uncheck();page.keyboard.press('Escape')
                 page.locator('#directional-tab').focus();page.keyboard.press('ArrowRight');expect(page.locator('#countertrend-tab')).to_be_focused()
                 page.keyboard.press('Home');expect(page.locator('#directional-tab')).to_be_focused();expect(page.locator('#directional-tab')).to_have_attribute('aria-selected','true')
-                assert page.locator('.research-tabs .selection-indicator').evaluate("e=>getComputedStyle(e).transitionDuration.split(', ').every(t=>t==='0.24s')")
-                assert page.evaluate("()=>{document.querySelector('#countertrend-tab').click();return document.querySelector('#candidate-panel').getAnimations().some(a=>a.effect.getTiming().duration===160)}")
+                page.locator('#countertrend-tab').click()
+                page.wait_for_function("document.querySelector('.research-tabs .selection-indicator').getAnimations().some(a=>a.effect.getTiming().duration===200)",polling='raf')
+                assert page.evaluate("()=>{document.querySelector('#directional-tab').click();return document.querySelector('#candidate-panel').getAnimations().some(a=>a.effect.getTiming().duration===200)}")
                 page.locator('#display-toggle').click();page.locator('#display-motion').check();page.keyboard.press('Escape')
                 assert page.evaluate("document.getAnimations().every(a=>a.playState!=='running')")
                 page.emulate_media(reduced_motion='reduce')
                 ids=page.locator('[id]').evaluate_all('nodes=>nodes.map(e=>e.id)');assert len(ids)==len(set(ids))
-                result['workflows'].append('Keyboard lens tabs, 240ms indicator/160ms switch, reduced-motion cancellation, unique anchors')
+                result['workflows'].append('Keyboard lens tabs, 200ms plane/200ms sweep, reduced-motion cancellation, unique anchors')
                 if not os.environ.get('THEMESCOPE_QUICK_UI'):
                     for width in (1440,1024,768,480,320):
                         page.set_viewport_size({'width':width,'height':1000 if width>=768 else 844})

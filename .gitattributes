@@ -5,3 +5,12 @@ config/vnext/industry_rule_registry.json text eol=lf
 config/vnext/primary_source_attachment_tasks.json text eol=lf
 config/vnext/membership_master_review.json text eol=lf
 config/vnext/membership_review_provenance.json text eol=lf
+
+# Hash-pinned bundled assets must have identical bytes on Windows and Unix.
+static/Inter-LICENSE.txt text eol=lf
+static/InterVariable.woff2 binary
+
+# Static source is copied verbatim into both public build modes.
+static/vnext/*.html text eol=lf
+static/vnext/*.css text eol=lf
+static/vnext/*.js text eol=lf

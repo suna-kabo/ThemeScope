@@ -1,120 +1,137 @@
-# ThemeScope: quiet personal research terminal
+# ThemeScope — Tidal Vector
 
-This document describes the implemented `static/vnext` workspace. The approved
-professional-refinement brief governs this pass; financial and lifecycle rules
-remain in their versioned methodology. Dark ThemeScope / Lunar Lounge identity is
-preserved. There is no light mode, remote font, UI library or motion dependency.
+ThemeScope is a completed-session personal equity-research terminal. This visual
+world replaces the warm Lunar Lounge palette at `ee6a7aa`; it preserves the
+research architecture and financial rules. Midnight surfaces, electric selection
+and precise data columns give it a recognisable identity across sizes.
 
-## Page responsibilities
+## Design thesis
 
-- **Overview:** Market Bias first, Extension/focus second, compact SPY/QQQ evidence
-  plus lighter IWM context, then four-item research destinations. The Returns Map
-  is available as a disclosure instead of dominating the first viewport.
-- **Themes:** cross-theme comparison. Strength Rank is the supplied complete-universe
-  rank; displayed Strength is separate from Research Priority. Filters do not rank.
-- **Candidates:** one workspace with Directional/Countertrend tabs. Search and Theme
-  lead the filter bar; Role/W/Earnings are in a secondary disclosure. View and sort
-  are quieter utilities. Export is scoped to the published lens, not current filters.
-- **Inspector:** current theme/ticker context, concise explanation and member preview.
-  Full Theme owns the complete member/filter/measurement surface. Back returns through
-  nested sheets with state, focus and scroll preserved.
-- **Saved:** continuation of a chosen theme/lens, independent of present qualification.
-- **Methodology:** meaning, interpretation, then exact rules in nested disclosures.
+The market is context; the selected research object is the user's working focus.
+A **cut selection plane** carries that focus through navigation, research lens,
+selected rows and relationship inspection. The same 12px diagonal means active
+context. Neutral data keeps straight geometry. Cyan is selection/focus, never a
+new financial signal. Green/red retain positive/negative financial meaning.
 
-## Executable tokens
+Two browser-rendered internal studies informed the choice: Tidal Vector's compact
+vertical working frame and Blue Hour Ledger's broader editorial composition.
+Tidal Vector won on repeated research navigation, table space and cross-surface
+continuity. The larger editorial headline/bright banner was rejected. Concepts and
+screenshots remain external, not production code or repository binaries.
 
-The single CSS foundation is `static/vnext/app.css`: tokens, components, responsive
-rules and motion, in that order. Do not append a parallel late-override design.
+## Tokens and typography
 
-| Foundation | Implemented choice |
+| Role | Token/value |
 | --- | --- |
-| Desktop rail | `--rail-width:11.5rem` (184px at default text) |
-| Desktop gutter | `--s6:24px`; narrow gutter 16px |
-| Spacing | `--s1/2/3/4/6/8/12`: 4,8,12,16,24,32,48px |
-| Controls | radius 4px, normally 32–36px; touch controls at least 44px high |
-| Floating utilities | radius 8px, border plus a quiet elevation shadow |
-| Research sections | flat; row/section dividers, no decorative card corners/shadows |
-| Compact / Comfortable | table cell vertical padding 4 / 8px |
-| Page / section title | 28 / 17px (24px page title below 520px); weight 600 |
-| Body / supporting | 14 / 12–13px; normal weight 400 |
-| Identity / labels | identity 600, labels 400–500; tabular numeric measurements |
+| Page / rail | `--page:#07111f`, `--rail:#0b192b` |
+| Section / focused sheet | `--surface:#0d2033`, `--surface-raised:#10283e` |
+| Selected context | `--selected:#123653` |
+| Electric / ice | `--electric:#3ea6ff`, `--accent:#65e3ff` |
+| Primary / secondary | `--text:#f3f7fb`, `--secondary:#afc3d5` |
+| Metadata / unavailable | `--muted:#8ba5bc`, `--unavailable:#8aa0b3` |
+| Positive / negative | `--positive:#65d6a4`, `--negative:#ff919c` |
+| Dividers / input border | `--rule:#203a52`, `--input-border:#718ba1` |
+| Spacing | 4, 8, 12, 16, 24, 32, 48px |
+| Geometry | 4px controls, 8px floating utilities; 12px context cut, 8px narrow |
+| Desktop rail / gutters | 192px / 24px; rail 160px at 801–1100px; narrow gutter 16px |
 
-Some dimensions are functional rather than spacing: 18px checkboxes, 24px desktop
-help and table-link targets, a 28px compact save target, and SVG axis/hit geometry. Text scales from
-100% to 200% using the existing Display preference; readable text is not shrunk to
-force table fit. Default displayed precision: Strength one decimal, breadth whole
-percent, W/returns two decimals, prices two decimals. Calculations keep full precision.
+The existing local **Inter Variable** is the only font, with system fallback and
+its existing SIL OFL 1.1 license. No remote font or added UI dependency.
 
-## Typography and assets
+Page titles: 30px/660 with −.035em tracking (24px narrow). Market Bias: 44px/740,
+uppercase as a compact directional identity, 32px narrow. Inspector identity:
+28px/700. Section titles: 17px/600. Research text: 14px; metadata 12–13px.
+Table identity: Theme 550/secondary, ticker 650/primary; selected Theme is primary.
+Ordinary numbers are secondary and use tabular lining numerals. Headers and labels
+are quieter; unavailable values remain readable and explicitly missing.
 
-`@font-face` loads the existing `static/InterVariable.woff2` as **ThemeScope Inter**,
-with a stable system sans-serif fallback. The existing SIL OFL 1.1 licence is shipped
-alongside it. Local runtime and both static builders serve the same font. The public
-builder pins font/licence SHA256 values and rejects replacements; this is not a new
-binary upload or a remote font dependency. Source UI/behaviour remains ordinary
-HTML/CSS/JavaScript. `workspace.js` supplies presentation/interaction helpers only.
+Text hierarchy relies on tone/weight/position, not tiny fonts. All four text tokens
+meet normal-text contrast against the page, raised and selected surfaces. Disabled
+controls are distinctly disabled; readable unavailable information is not treated
+as disabled. High contrast and native forced colours have explicit equivalents.
+Selection, caret, scrollbars, input affordances and visible focus use the same palette.
 
-## Colour and emphasis
+## Page composition
 
-Warm grounds: page `#191724`, rail `#1e1a2b`, sections `#24212f`; raised utility
-`#2d293b`. Text `#f1ece9`, secondary `#c9c1d3`, muted `#b5abbf`. Lavender `#cebbff`
-is for primary actions, selected tabs/views, focus and saved/selected entities.
-Identity links normally use primary text and a fine underline; hover/focus strengthens
-the affordance. Green/red carry defined financial positive/negative meanings only.
+- **Overview:** the compact Market Direction Plane connects Bias → Extension →
+  Market focus. It does not imply an entry signal. SPY/QQQ evidence stays compact;
+  IWM remains lighter non-voting small-cap context with equal ticker/price type.
+  Four-item destinations follow; the Returns Map opens on demand.
+- **Themes:** comparison stays table-first. Complete-universe Strength Rank never
+  changes with sorting/filtering. Research Priority remains separate from Strength.
+- **Candidates:** Market and Market focus are explicitly labelled context. The
+  separate Research lens control identifies Directional or Countertrend. Search /
+  Theme lead; secondary filters are disclosed, view/sort quieter, exports scoped.
+  Peer delta (pp) is the short label for unchanged theme-specific W.
+- **Grouped Candidates:** Theme is established by the group heading. Child tables
+  omit repeated Theme cells; their ticker/Save actions still carry that exact theme
+  and lens. Counts, relationships, qualification and export membership are unchanged.
+- **Full Theme:** Strength, Rank, Research Priority and Trend lead. Returns/breadth
+  are secondary; raw index/EMA values and comparisons are tertiary. No metric cards.
+- **Inspector:** a raised right sheet, cyan leading edge and selected relationship
+  plane. Summary first, secondary relationships expandable. A nested Back control
+  returns to the previous object with search/View/scroll/focus restored.
+- **Saved:** browser-local continuity, never a portfolio/trade journal. Original
+  `themescope-vnext-watchlist` array and companion context key are preserved.
+- **Methodology:** quiet reading surface; selected anchors, disclosures and metric
+  help carry the new language without decorating formulas.
 
-Navigation has one selected background. No skewed marks, asymmetric decorative
-radii, hover lift, ambient effects or stacks of badges. Controls communicate their
-job: underline tabs for lens, moving neutral selection for view segments, native
-selects for filters, quiet links for secondary navigation. No ambiguous Candidates
-sidebar count is displayed; Saved's count has one clear scope.
+## Table ownership
 
-## Comparison and responsive strategy
+Research tables use semantic `<colgroup>` definitions, shared header/body column
+classes and stable rem widths. They do not rely on nth-child percentage guesses.
 
-Tables remain tables at default-text laptop/tablet widths, including 1024 and 768px.
-Themes prioritises Rank, Theme, Strength, returns, Trend and Research. Rank Change
-is deprioritised below 64rem available width; breadth below 55rem. Local horizontal
-access is signposted only if needed. There is no bounded vertical results scroller.
+Themes: Rank 5rem; Theme flexible; Strength 7.5rem; Rank Δ/1M/3M each 5.5rem;
+Trend 6rem; breadth 8.5rem; Research 8.75rem. Theme names wrap within their own
+column. Numeric fields align right; descriptive identities, Trend and Research
+align left. Header help precedes right-aligned numeric headings, preserving their
+anchor. Save is centred. Horizontal padding is 12px, not column-specific nudges.
 
-Only below **36rem logical content width** do Theme rows become summaries prioritising
-identity, Strength, Trend and Research. The same threshold provides Candidate reflow;
-this is also appropriate when text is enlarged. Full details remain available through
-research links. Benchmark evidence follows the same readable narrow-width principle.
-The desktop rail moves above content at 800px. At 520px controls have touch-sized
-hit areas; the header wraps without covering the brand or hiding the completed date.
-Inspectors use a 38rem right sheet capped at viewport width, with content-based reflow.
+Candidates: Ticker 7rem; Theme flexible; Role 10.5rem; Peer delta 10rem; Save
+3.5rem; optional earnings 8rem. Grouped tables give the remaining space to Role.
+Compact/Comfortable retain 4/8px vertical padding and shared optical centring.
+Selected rows keep their plane even on hover. No hover lift or initial row animation.
 
-## Interaction and motion
+At default-text 1024/768px, Themes remains a reduced-column table. Rank Change,
+breadth and longer-horizon returns are progressively deprioritised at logical
+container widths. Local horizontal access is signposted where needed. Headers
+stick to the page when the table fits; horizontal-scroll tables keep local access.
+Only below 36rem logical content width do rows become labelled compact summaries.
+Column widths no longer constrain those reflowed cells. There is no bounded
+vertical research-results scroller. Text is not shrunk to force a fit.
 
-| Interaction | Purpose / timing |
-| --- | --- |
-| Lens tabs | sliding underline 240ms; explicit content switch fade 160ms |
-| View segments | moving selected background 240ms |
-| Metric help | focus/hover after 250ms; 160ms fade, 4px arrival; keyboard pin/escape |
-| Methodology | native disclosure, 240ms smooth content/chevron where supported |
-| Inspector | 200ms right-sheet appearance/disappearance; native dialog semantics |
-| Saved/export feedback | non-blocking 160ms toast; never an unverified “download succeeded” claim |
-| Text/control hover | 100–160ms colour/underline feedback, without movement |
+## Motion and state
 
-These are native CSS/JS equivalents of the requested motion vocabulary. No library
-code is copied. OS reduced-motion and Display Reduce Motion suppress transitions;
-programmatic fades are guarded/cancelled too. Financial values and initial table rows
-never animate. Older browsers fall back to immediate native disclosures.
+See [MOTION.md](MOTION.md) for the implemented grammar. Selection travels with one
+transform-based plane; workspace changes Shift, hierarchy Slide, modes Sweep,
+secondary information Reveal, actions Confirm. Lock is persistent state, not a
+loop. Map selection has one short ring response and linked readout; every valid
+point/outlier is retained and one roving Tab stop avoids dozens of Tab presses.
 
-The Returns Map keeps every valid observation and nice linear ticks. Hover/focus
-inspects, click/Enter selects, and **Open theme** deliberately enters research.
-Roving point focus makes this one Tab stop instead of dozens. Dropdown selection
-remains available for keyboard and touch users.
+State and focus update immediately. Transitions are interruptible and settle to
+the latest intent. Polling does not replay entrances. Both OS and user Reduce
+Motion remove positional travel and cancel work already in flight. No continuous
+animation, dramatic loading sequence, canvas decoration or motion dependency.
 
-## Accessibility and operational states
+## Responsive and operational durability
 
-Semantic headings, table headers, native controls and text states stay explicit.
-Help buttons have keyboard-accessible content and stable Methodology links; native
-`title` may supplement, never replace, that help. Native inspector focus management
-and nested Back are preserved. Contrast and forced-colour modes remain supported.
-Loading precedes genuine empty results. A failed/disconnected refresh preserves the
-committed snapshot and identifies its completed session. Missing comparisons remain
-missing; unavailable, insufficient coverage and no active basket are distinct causes.
+The rail becomes compact navigation above content below 800px. At 520px, geometry
+simplifies and controls are at least 44px high. At 200% text, controls wrap and
+metrics stack; long identities remain readable. Grouped mode and Full Theme are
+explicitly covered in addition to the ordinary five destinations and sheets.
 
-Browser fixtures/screenshots are review aids, never live chronological evidence.
-Current user-reported validation: Nov 6 PASS; Nov 9 PASS; Nov 10 PENDING; Gate E OPEN.
-No merge or deployment is authorised by this design document.
+Loading, empty results, unavailable history/comparisons, untracked concepts and
+connection loss retain their existing distinctions. Disconnection keeps useful
+research and names the completed session. Earnings behavior, exports and all
+financial/lifecycle/provider/storage rules remain unchanged.
+
+## Asset integrity and scope
+
+`.gitattributes` pins the license to LF and WOFF2 to binary. Static HTML/CSS/JS are
+also LF because builders copy their bytes verbatim. Fresh simulated Windows/Unix
+checkouts produce identical public output and clean trees. Hash verification stays
+strict with the original pinned font/license SHA256 values; no new binary asset.
+
+User-reported Nov 6 and Nov 9 validation PASS; Nov 10 PENDING; Gate E OPEN.
+Browser fixtures, screenshots and motion recordings are not real market evidence.
+No merge, deployment or new live credentials are part of this design pass.
