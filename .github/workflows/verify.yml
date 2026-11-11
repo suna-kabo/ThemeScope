@@ -25,3 +25,9 @@ jobs:
       - run: node tests/test_dashboard.js
       - name: Clean manual-CSV install, preservation, history and HTTP site checks
         run: python tests/smoke_local_install.py --browser
+
+      - name: Local vNext fixture browser and refresh smoke
+        run: python tests/smoke_vnext_ui.py
+
+      - name: Pre-launch research and official-launch boundary browser smoke
+        run: python tests/smoke_prelaunch_ui.py

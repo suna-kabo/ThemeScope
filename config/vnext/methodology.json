@@ -1,0 +1,36 @@
+{
+  "version": "themescope-vnext-1",
+  "schema_version": 1,
+  "return_sessions": [
+    21,
+    63
+  ],
+  "weights": [
+    0.6,
+    0.4
+  ],
+  "theme_minimum": 5,
+  "coverage": 0.8,
+  "peer_minimum": 4,
+  "score_boundary": 50,
+  "price_floor": 5,
+  "average_volume_sessions": 10,
+  "average_volume_floor_exclusive": 500000,
+  "turnover_floor": 10000000,
+  "adjustment": "split,spin-off",
+  "dividend_adjusted": false,
+  "ema_periods": [
+    21,
+    50
+  ],
+  "ema_seed": "SMA of first period valid contiguous session levels; alpha=2/(period+1)",
+  "bootstrap_sessions": 252,
+  "delay_minutes": 20,
+  "initial_index_level": 100,
+  "effective_from": "first earned US trading session; rebalance at previous session close after old holdings earn their return",
+  "effective_to": "exclusive",
+  "single_valid_theme_percentile": "unavailable because N-1 is zero",
+  "return_validity": "each horizon has its own required endpoint observations; Theme Score requires both available horizons",
+  "production_enabled": true,
+  "launch_rebalance_session": "2026-11-06"
+}

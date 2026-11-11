@@ -1,1 +1,4 @@
 playwright==1.62.0
+
+# vNext API tests and local fixture smoke
+-r requirements-vnext.txt

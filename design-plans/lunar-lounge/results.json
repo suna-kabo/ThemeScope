@@ -1,0 +1,96 @@
+{
+  "data": "Deterministic test bars; browser state fixtures are illustrative, not financial recommendations",
+  "widths": {
+    "1440": {
+      "width": 1166,
+      "scroll": 1166
+    },
+    "1600": {
+      "width": 1326,
+      "scroll": 1326
+    },
+    "1920": {
+      "width": 1606,
+      "scroll": 1606
+    },
+    "800": "all six surfaces: no document overflow",
+    "390": "all six surfaces: no document overflow",
+    "320": "all six surfaces: no document overflow",
+    "200% text resize": "five destinations reflow without document overflow"
+  },
+  "states": [
+    "real configured pre-launch research",
+    "refresh running",
+    "refresh failure with previous snapshot",
+    "refresh success",
+    "initialized launch",
+    "normal live",
+    "neutral",
+    "short-biased",
+    "unclassified",
+    "illustrative short candidate and earnings date",
+    "unavailable metrics",
+    "loading / no prior snapshot",
+    "existing Saved ticker retained without snapshot"
+  ],
+  "axe": {
+    "overview": {
+      "violations": [],
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    "themes": {
+      "violations": [],
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    "candidates": {
+      "violations": [],
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    "saved": {
+      "violations": [],
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    "methodology": {
+      "violations": [],
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    "theme-detail": {
+      "violations": [],
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    "saved-populated": {
+      "violations": [],
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    "theme-detail-320": {
+      "violations": [],
+      "incomplete": [
+        "color-contrast"
+      ]
+    }
+  },
+  "interactions": [
+    "theme search, family/priority/trend filters, Watch-only, sort",
+    "keyboard Theme Detail, real individual TXT, restored search/focus, browser Back/Forward",
+    "multi-theme and unique candidate views, filters, stable poll focus, canonical combined TXT",
+    "existing local bookmark persistence, current relationship context, Remove focus",
+    "keyboard navigation, disclosures, skip link, reduced motion"
+  ],
+  "page_errors": [],
+  "external_requests": [],
+  "passed": true
+}

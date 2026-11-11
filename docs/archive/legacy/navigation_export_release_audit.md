@@ -1,0 +1,58 @@
+> **Historical checkpoint.** Status, counts and instructions below describe that
+> checkpoint, not current operation. Gate E is now **CLOSED**; Nov 6, Nov 9 and
+> Nov 10 live validation passed per the user. See the [closure record](../../operations/gate-e-closure.md)
+> and [current documentation](../../README.md).
+
+> Historical record. Current setup and audit: [README](../../../README.md) and [repository audit](repository_audit.md). Bundle paths below refer to retained local files or historical Git commits, not current source downloads.
+
+# ThemeScope individual exports and navigation audit
+
+3 November 2026, Hong Kong time. Baseline: `e53850a`, branch `download`, current `/workspace/ThemeScope` checkout and its latest local outputs. Unrelated dirty/untracked work is preserved. The real data session remains **2026-10-30**; this update does not claim newer market data.
+
+## Export result
+
+Individual sector/theme watchlists are now the primary research export. **53 TXT files** are generated from the configured active exposures, available separately under `individual_watchlists/` and together in **one `individual_theme_watchlists.zip`**. The ZIP contains only those 53 TXT files, without an extra directory layer. The complete run bundle also includes that ZIP, the individual files, data and audits.
+
+Example: **`SMH_Semiconductors.txt`**, first instrument **`NASDAQ:SMH`**, followed by its 20 configured stocks in configured order. `XLE_Energy.txt` follows the same naming rule. The anchor is additional to the maximum 20 stock slots. Short lists remain short; ETF-only output is a single anchor instrument. Portable names are sanitized, case-insensitive collisions receive deterministic suffixes, and generation fails on unresolved identifiers. No new prefix is inferred. Individual files deliberately omit section headings: every comma-separated token is a validated instrument.
+
+The visible **Download all individual watchlists** action and the selected Watchlist's **Download selected watchlist** action use the same manifest/files. The selected action remains available for ETF-only lists. Individual lists need updating only when memberships or identifiers change.
+
+**Daily Data Stocks — export CSV only** remains `tradingview_configured_stocks.txt`: **563 unique stock identities**, stable sorted order, no anchors or sections. It uses configured members without daily metric/price/turnover/cap filtering. Missing daily rows remain configured. Import this stock-only list to collect the daily Stock CSV; importing all individual lists every day is unnecessary.
+
+The five retained groups and legacy all-theme filename are explicitly deduplicated, section-free **optional broad scans**, under a secondary disclosure. Current group unique-instrument counts: Core Sectors 231; Technology & Growth 120; Consumer & Financial 126; Healthcare & Industries 157; Energy & Resources 154. The optional all-exposure scan has 616 unique instruments. These are navigation/export counts, not a full live collection workload benchmark. They do not claim complete separate theme memberships. Existing unrelated files and archived bundles were not deleted.
+
+TradingView deduplication evidence: the latest user request reports a confirmed exported round-trip observation that repeated symbols survived only once, removing later section occurrences. The raw round-trip TXT artifacts are **not present in `/workspace/attachments/`**, so their contents were not independently inspected or re-imported here. The supplied instruction document records the user-confirmed observation; the audit distinguishes that observation from direct testing. It is not a guarantee about every TradingView version.
+
+## ETF 1D and navigation result
+
+Sectors & Themes now has a sortable **1D %** column immediately after ETF. The existing ETF CSV `Price change %, 1 day` is already normalized to fractional canonical `daily_change`; display multiplies by 100 once. Positive/negative values use semantic green/red, zero is muted, and unavailable canonical values display N/A. Sorting uses the unrounded fraction. Both full `themes.csv` and visible-table CSV expose `change_1d_pct` in percentage units. Every current full-export value was compared to the canonical fraction; no scoring input changed. Existing required-field validation of the ETF CSV remains intact.
+
+Upper **Find / Ticker or theme** is navigation; lower **Search** remains a filter inside the selected Watchlist. Find uses a local canonical index of active exposures and each Stock × Theme identity, including unavailable daily rows and configured company names. Exact ticker/anchor, prefix, substring and company/theme text ranks have stable name/identity ties and no Score/Performance influence. Stock anchor contexts remain separate (for example LLY in Health Care / XLV and Pharmaceuticals / XPH). Company text may also match: searching LLY correctly includes lower-ranked O'Reilly results.
+
+The independent combobox/listbox supports active-descendant state, arrow keys, Enter, Escape, outside click, mouse and touch. It initially renders up to 12 matches per group, reports exact displayed/total and additional counts, and offers Show more. Labels are escaped; synthetic markup is rendered as text. No framework, symbol API or automatic external request is added. The 300px desktop field and responsive dropdown fit the viewport. Focus explicitly reveals the field below the sticky header after restored scrolling.
+
+Stock selection preserves the chosen view, opens the selected anchor context, clears only search/EMA/RS filters that hide the stock, reports adjustments, renders the full remaining table, focuses/scrolls to the row and applies a 1.6-second subtle tint. Layout is synchronous before target scrolling; the timer only removes the highlight. Filters that already reveal the target remain intact. Theme results use the theme's saved scroll and create no stock highlight. History entries now include their own route/filter/table-scroll snapshot, so Back also restores the pre-navigation state when a stock is found in the *same* theme/view. Explicit stock targets override saved scroll only for that navigation.
+
+## Verification
+
+- **159 Python tests passed** (3.830s), plus Node helper/syntax tests, Python compilation and whitespace checks. Added/updated coverage includes portable/colliding filenames, 20 stocks plus anchor, short/ETF-only lists, overlaps in separate files, broad-scan deduplication/splitting, unresolved identities, missing daily rows, percentage normalization, precise sorting, navigation matching/ties and CSV units.
+- `tests/check_scanning_exports.py` checks all 53 individual files against canonical configured order, ZIP contents, JSON/manifest/download paths, stock-only deduplication, optional flat scans and bounded splitting. The complete run ZIP matches its constituent files. Actual selected TXT and all-individual ZIP downloads pass over local HTTP.
+- `tests/browser_check_navigation.py` passes keyboard/mouse/touch selection, separate LLY contexts, missing-data VC navigation, both views, preserved revealing filters, clearing hiding filters, same-theme Back/Forward restoration, target focus/scroll/tint, theme selection, no-result/Escape/outside-click/Show-more interactions (including Tab/Enter access), escaped labels, synthetic zero/N/A display and ETF visible-CSV precision. Existing terminal and manual browser acceptance also pass: page/theme/view restoration, RS configured positions, header/body boundaries, tooltips and plain Priority labels remain intact.
+- **32 focused screenshots were inspected**, through labeled contact sheets and full-resolution views: ETF 1D table, readable empty Find field, open search results and target row in light/dark at 1920×1080, 1536×864, 1366×768 and 390×844. The initial focus/header overlap found by screenshot inspection was fixed and regression-tested. All 16 ETF columns and both stock-table schemas fit at 1920/1536, 100% zoom; header/body boundaries agree within 0.6px. Smaller tables scroll inside their wrappers. No page-level overflow, JavaScript errors or automatic external requests were detected. Existing terminal/manual passes generated 42/32 additional regression screenshots; those are supplemental automated evidence, not a claim of separate manual inspection of every image.
+- Comparison with the actual preceding local run proves unchanged Theme Score, Theme State, canonical rank, final Priority, ETF daily values, configured membership order and the byte-identical real local-history record. The independent publication/history test passes first-run, temporary synthetic prior-session comparison and injected rollback of all outputs/history. No synthetic session is published.
+
+The current five-file production command succeeded. Measured wall time through process exit was **0.951s**; its internal pre-publication audit subtotal was **0.498s** (0.222s input validation/calculation, 0.276s output generation/validation). This fixture measurement does not include browser testing or agent investigation and is not longitudinal reliability evidence.
+
+## Changed files and usage
+
+Reusable implementation: `config/watchlist_exports.json`, `src/themescope/tradingview.py`, `src/themescope/daily_lists.py`, `scripts/generate_dashboard.py`, `static/dashboard.js`, `static/dashboard_template.html`, `static/dashboard.css`.
+
+Checks: `tests/test_daily_lists.py`, `tests/test_manual_release_audit.py`, `tests/test_manual_csv.py`, `tests/test_dashboard.js`, `tests/check_scanning_exports.py`, new `tests/browser_check_navigation.py`, and updated manual/terminal browser scripts. README, the preceding audit's historical label, download guide and current bundle were updated.
+
+Extract the entire updated `downloads/ThemeScope_manual_csv_session_2026-10-30.zip` and open `dashboard.html`, retaining sibling files and `individual_watchlists/`. Generate new data with the existing README five-CSV command and a declared US session; preserve the output directory's `local_history/`. Manual CSV generation requires no credentials.
+
+## Specific validation limits
+
+Actual TradingView import of the revised files, resolution in the user's account and future duplicate behavior were **not directly tested**. The existing evidence-backed identifier mapping is reused. A manual platform check can import `SMH_Semiconductors.txt`, verify the intended SMH ETF first followed by the configured stocks, and import `XLV_Health_Care.txt` and `XPH_Pharmaceuticals.txt` separately to confirm LLY in both contexts. No credentials should be shared in chat.
+
+Direct `file://` browser testing was attempted but managed Chromium returned **`ERR_BLOCKED_BY_ADMINISTRATOR`**. The regression reports this as blocked, not passed; browser policy was not changed. Local HTTP rendering and downloads are verified. Native expanded selector popup appearance remains unverified; this task's custom Find listbox was visually inspected. These limits do not imply that current-session data completeness, every metric, live collection or broader approved-release reliability has been established by this UI update.

@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>Overview · ThemeScope</title><link rel="stylesheet" href="app.css"></head>
+<body>
+<a class="skip-link" href="#workspace">Skip to research</a>
+<aside class="rail">
+  <a class="brand" href="#overview" aria-label="ThemeScope home"><span class="brand-mark" aria-hidden="true">◔</span><span>ThemeScope</span></a>
+  <nav aria-label="Research" class="main-nav">
+    <a href="#overview" data-nav="overview"><span aria-hidden="true" class="nav-icon">◫</span>Overview</a>
+    <a href="#themes" data-nav="themes"><span aria-hidden="true" class="nav-icon">◈</span>Themes</a>
+    <a href="#primary" data-nav="primary"><span aria-hidden="true" class="nav-icon">⌕</span>Candidates</a>
+    <a href="#saved" data-nav="saved"><span aria-hidden="true" class="nav-icon">☆</span>Saved<span id="saved-count" class="nav-count">0</span></a>
+    <a href="#methodology" data-nav="methodology" class="secondary-nav"><span aria-hidden="true" class="nav-icon">≡</span>Methodology</a>
+  </nav>
+  <div class="rail-footer"><button id="display-toggle" class="button quiet" aria-expanded="false" aria-controls="display-panel"><span aria-hidden="true">Aa</span> Display</button></div>
+  <section id="display-panel" class="display-panel" aria-labelledby="display-title" hidden>
+    <div class="section-heading"><h2 id="display-title">Display</h2><button id="display-close" class="button quiet small" aria-label="Close Display">×</button></div>
+    <fieldset><legend>Density</legend><div class="segmented"><button data-density="compact" aria-pressed="true">Compact</button><button data-density="comfortable" aria-pressed="false">Comfortable</button></div></fieldset>
+    <div class="display-text"><span>Text size</span><button class="button quiet small" data-text-step="-25" aria-label="Decrease text size">−</button><output id="text-size">100%</output><button class="button quiet small" data-text-step="25" aria-label="Increase text size">+</button></div>
+    <label class="display-check"><input id="display-motion" type="checkbox">Reduce motion</label>
+    <label class="display-check"><input id="display-contrast" type="checkbox">High contrast</label>
+  </section>
+</aside>
+<div class="app-shell">
+  <header class="app-header">
+    <div class="session-label"><span class="status-dot" aria-hidden="true"></span><span id="target">Completed US session —</span></div>
+    <div class="header-actions"><span id="progress" role="status" aria-live="polite">Connecting…</span><button id="refresh" class="button primary"><span aria-hidden="true">↻</span><span id="refresh-label">Refresh Data</span></button></div>
+  </header>
+  <div class="operational-strip">
+
+    <details class="diagnostics"><summary>Snapshot details</summary><div class="diagnostics-body"><p id="completeness">Completeness —</p><p id="provider">Provider —</p><p id="last-success">Last successful refresh —</p><p id="target-detail">Target session —</p><p id="read-status"></p><p id="lifecycle-detail" hidden></p><div id="market-data-details"></div><p>Refresh publishes one complete snapshot. Failed refreshes preserve the previous results and exports.</p></div></details>
+  </div>
+  <main id="workspace" tabindex="-1" aria-busy="true">
+    <div id="public-banner" class="notice info" hidden></div>
+    <div id="fixture-banner" class="notice warning" hidden>Synthetic inspection fixture · fictional symbols and results · no live signals.</div>
+    <p id="theme-layer" class="notice info" hidden></p>
+    <div id="error" class="notice negative" role="alert" hidden></div>
+    <section id="overview-page" class="view" aria-labelledby="overview-title">
+      <div class="page-heading"><div><h1 id="overview-title" tabindex="-1">Overview</h1></div><a href="#themes" class="button secondary">Explore themes <span aria-hidden="true">↗</span></a></div>
+      <div id="market-direction" class="direction-panel"><p class="loading-state">Loading completed-session research…</p></div>
+      <div id="market-cards" class="market-grid"></div>
+      <div class="overview-research">
+        <section class="research-panel" aria-labelledby="top-themes-title"><div class="section-heading"><div><h2 id="top-themes-title">Themes to research</h2><span id="theme-preview-order" class="table-meta"></span></div><a href="#themes" class="text-link">All themes <span aria-hidden="true">↗</span></a></div><div id="primary-themes"></div></section>
+        <section class="research-panel" aria-labelledby="preview-candidates-title"><div class="section-heading"><div><h2 id="preview-candidates-title">Directional stocks</h2><span class="table-meta">A–Z</span></div><a href="#primary" class="text-link">All Candidates <span aria-hidden="true">↗</span></a></div><div id="candidate-preview"></div></section>
+      </div>
+      <details id="theme-map-panel" class="theme-map-panel"><summary>Theme Returns Map <span>1M × 3M median member returns</span></summary><div id="theme-map"></div></details>
+    </section>
+    <section id="themes-page" class="view" aria-labelledby="themes-title" hidden>
+      <div class="page-heading"><div><h1 id="themes-title" tabindex="-1">Themes</h1></div><div class="segmented" role="group" aria-label="Theme universe"><button data-universe="active" aria-pressed="true">Active Themes <span id="active-count">—</span></button><button data-universe="watch_only" aria-pressed="false">Untracked Concepts <span id="watch-count">—</span></button></div></div>
+      <form id="theme-filters" class="filter-bar" role="search" aria-label="Filter themes">
+        <label class="search-field">Search themes<input id="theme-search" type="search" placeholder="Theme or family…" autocomplete="off"></label>
+        <label>Family<select id="theme-family"><option value="">All families</option></select></label>
+        <label>Research<select id="theme-priority"><option value="">All priorities</option><option value="Primary long">Directional long</option><option value="Primary short">Directional short</option><option>Watch</option></select></label>
+        <label>Trend<select id="theme-trend"><option value="">All trends</option><option>Bullish</option><option>Bearish</option><option>Mixed</option><option>Unavailable</option></select></label>
+        <button type="button" data-reset="themes" class="button quiet">Reset</button>
+      </form>
+      <div class="candidate-tools"><p class="table-meta" id="theme-results" role="status" aria-live="polite">Loading themes…</p></div>
+      <div id="theme-table" class="table-wrap theme-wrap" role="region" aria-label="Theme research results" tabindex="0"><p class="loading-state">Loading themes…</p></div>
+    </section>
+    <section id="theme-detail" class="view" aria-labelledby="detail-title" hidden><div id="detail-content"></div></section>
+    <section id="candidate-page" class="view" aria-labelledby="candidates-title" hidden>
+      <div class="page-heading"><div><h1 id="candidates-title" tabindex="-1">Candidates</h1><p id="primary-context" class="compact-context"></p></div></div>
+      <div class="candidate-heading-tools">
+        <div class="lens-controls"><span class="context-label">Research lens</span><div class="research-tabs" role="tablist" aria-label="Research lens">
+          <button id="directional-tab" data-candidate-lens="directional" role="tab" aria-selected="true" aria-controls="candidate-panel" tabindex="0">Directional</button>
+          <button id="countertrend-tab" data-candidate-lens="countertrend" role="tab" aria-selected="false" aria-controls="candidate-panel" tabindex="-1">Countertrend</button>
+        </div></div>
+        <details id="export-menu" class="export-menu"><summary class="button secondary">Export <span aria-hidden="true">⌄</span></summary><div id="export-options" class="export-options"><p class="menu-title">Waiting for a completed snapshot</p></div></details>
+      </div>
+      <div id="candidate-panel" role="tabpanel" aria-labelledby="directional-tab">
+        <form id="candidate-filters" class="filter-bar candidate-filter-bar" role="search" aria-label="Filter Candidates">
+          <label class="search-field">Search<input id="candidate-search" type="search" placeholder="Ticker or theme" autocomplete="off"></label>
+          <label class="theme-filter">Theme<select id="candidate-theme"><option value="">All themes</option></select></label>
+          <details class="secondary-filters"><summary class="button quiet">Filters <span aria-hidden="true">⌄</span></summary><div class="secondary-filter-body">
+            <label>Role<select id="candidate-role"><option value="">All roles</option><option value="Core">Core business</option><option value="Enabler">Supporting business</option></select></label>
+            <label>Peer delta<select id="candidate-w"><option value="">Any delta</option><option value="positive">Positive</option><option value="negative">Negative</option></select></label>
+            <label>Earnings<select id="candidate-earnings"><option value="">Any earnings state</option><option value="available">Date available</option><option value="unavailable">No date</option></select></label>
+          </div></details>
+          <button type="button" data-reset="candidates" class="button quiet">Reset</button>
+        </form>
+        <div class="candidate-tools"><p id="candidate-results" class="table-meta" role="status" aria-live="polite">Loading candidates…</p><div class="candidate-view-tools"><div class="segmented" role="group" aria-label="Candidate view"><button data-candidate-mode="unique" aria-pressed="true">Stocks</button><button data-candidate-mode="relationships" aria-pressed="false">Grouped by theme</button></div><label class="inline-label">Sort<select id="candidate-sort"><option value="ticker">Ticker A–Z</option><option value="w-desc">Peer delta descending</option><option value="w-asc">Peer delta ascending</option><option value="theme">Theme A–Z</option></select></label></div></div>
+        <div id="candidates"><p class="loading-state">Loading candidates…</p></div>
+      </div>
+    </section>
+    <section id="saved-page" class="view" aria-labelledby="saved-title" hidden>
+      <div class="page-heading"><div><h1 id="saved-title" tabindex="-1">Saved</h1></div><a href="#primary" class="button secondary">Browse Candidates <span aria-hidden="true">↗</span></a></div>
+      <div id="saved"></div>
+    </section>
+    <section id="methodology-page" class="view" aria-labelledby="methodology-title" hidden>
+      <div class="page-heading"><div><h1 id="methodology-title" tabindex="-1">Methodology</h1></div></div>
+
+<nav class="method-toc" aria-label="Methodology sections"><a href="#methodology?metric=market">Market</a><a href="#methodology?metric=strength">Themes</a><a href="#methodology?metric=w">Stocks</a><a href="#methodology?metric=sessions">System</a></nav><div class="method-grid"><section class="method-group" aria-labelledby="method-group-market"><h2 id="method-group-market">Market</h2><details class="method-item" id="method-market"><summary><span>Market Bias</span></summary><div><p>The structural direction to prioritise in research.</p><p>Long or Short Bias organises research; entry evaluation remains separate.</p><details class="exact-rule"><summary>Exact rule</summary><p>SPY and QQQ price states and constituent breadth feed the frozen Market Matrix. Unanimous Bullish or Bearish prices establish direction, with breadth context; other combinations retain the existing Matrix. IWM is small-cap context only and affects neither Bias nor Extension.</p></details></div></details>
+<details class="method-item" id="method-extension"><summary><span>Market Extension</span></summary><div><p>How far the benchmarks have moved from their short-term trend relative to recent volatility.</p><p>Stretched or Extended calls for more care about chasing. It changes attention, never Bias or qualification.</p><details class="exact-rule"><summary>Exact rule</summary><p>For SPY and QQQ: (completed adjusted close − EMA21) / Wilder ATR20. True Range = max(H−L, |H−previous C|, |L−previous C|). The seed is the mean of 20 True Ranges; subsequent ATR = (19 × prior ATR + TR) / 20. Absolute distance &lt;1 is Normal; 1 to below 1.5 Stretched; ≥1.5 Extended. Both benchmarks Extended on the same side give Extended; both at least Stretched on the same side give Stretched; other complete combinations give Normal. Missing/invalid history or zero ATR is Unavailable. EMA50, breadth, IWM, VIX and theme metrics are excluded.</p></details></div></details>
+<details class="method-item" id="method-focus"><summary><span>Research focus and EMA changes</span></summary><div><p>Where to spend research attention under the current context.</p><p>Countertrend review and pullback-risk review are context labels, not reversal or entry signals.</p><details class="exact-rule"><summary>Exact rule</summary><p>Short Bias: Directional normally, Countertrend watch for Downside Stretched, Countertrend review for Downside Extended. Long Bias mirrors this on the upside with pullback-risk watch/review. Other directional combinations remain Directional; non-directional Bias remains Observe. Candidates stay inspectable in Normal conditions. EMA21/EMA50 Above/Below/At changes use a compatible previous completed session, separately for SPY, QQQ and IWM; missing history produces no crossing.</p></details></div></details>
+</section><section class="method-group" aria-labelledby="method-group-themes"><h2 id="method-group-themes">Themes</h2><details class="method-item" id="method-strength"><summary><span>Theme Strength</span></summary><div><p>Relative strength across Active themes.</p><p>Read the 0–100 value as stronger or weaker than other themes, not expected return, probability or Research Priority.</p><details class="exact-rule"><summary>Exact rule</summary><p>Theme 1M/3M are median Core + Enabler stock price returns over 21/63 completed trading sessions, requiring five valid members and 80% coverage. Strength = 60% 1M cross-theme percentile + 40% 3M percentile. Related members and thematic ETFs do not enter calculations.</p></details></div></details>
+<details class="method-item" id="method-trend"><summary><span>Theme Trend</span></summary><div><p>The direction of the theme’s synthetic index.</p><p>Bullish, Bearish or Mixed is separate from cross-theme Strength.</p><details class="exact-rule"><summary>Exact rule</summary><p>The chain-linked index has drifting weights between rebalances. Above both EMA21 and EMA50 is Bullish; below both is Bearish; other combinations, including equality, are Mixed. Indicator-only history cannot create official earned returns or live transitions.</p></details></div></details>
+<details class="method-item" id="method-breadth"><summary><span>Theme breadth</span></summary><div><p>How broadly members participate in the theme’s trend.</p><p>Read members above EMA21 and EMA50 as context, not as a candidate rule.</p><details class="exact-rule"><summary>Exact rule</summary><p>At least five valid Core + Enabler members and 80% coverage are required. Each needs a current close and the corresponding EMA. Breadth changes neither Strength nor candidate qualification. Missing breadth is shown as a dash.</p></details></div></details>
+<details class="method-item" id="method-rank"><summary><span>Strength Rank and Rank Change</span></summary><div><p>A stable comparison across all scored Active themes.</p><p>Filters and sorting never change Strength Rank. Rank Change describes movement against the previous completed session.</p><details class="exact-rule"><summary>Exact rule</summary><p>Scores rank descending using competition ties: 1,2,2,4. Theme ID only stabilises tied display order. Change = previous rank − current rank. Missing/incompatible adjacent history, newly active/scored themes or changed Active/scored universes yield no comparable change.</p></details></div></details>
+<details class="method-item" id="method-priority"><summary><span>Research Priority</span></summary><div><p>A theme’s current Directional research relevance.</p><p>A high Strength Rank may still be Watch under Short Bias. Research Priority is a separate judgement from rank.</p><details class="exact-rule"><summary>Exact rule</summary><p>Existing Long theme rules require Strength ≥50 with Bullish/Mixed trend or a valid Newly bullish exception; Short requires Strength &lt;50 with Bearish/Mixed trend or a valid Newly bearish exception. Research Priority Change compares the previous compatible completed session. Core business participates directly; Supporting business supplies products/services enabling the theme.</p></details></div></details>
+</section><section class="method-group" aria-labelledby="method-group-stocks"><h2 id="method-group-stocks">Stocks</h2><details class="method-item" id="method-w"><summary><span>Peer-relative strength (W)</span></summary><div><p>A stock’s strength or weakness relative to the other members of its theme.</p><p>Positive is stronger than peers; negative is weaker. W is theme-specific and measured in percentage points, not expected return.</p><details class="exact-rule"><summary>Exact rule</summary><p>Leave the stock itself out of the Core + Enabler peer median. W = 60% 1M excess return + 40% 3M excess return. A ticker may have a different W in each theme. W predicts neither reversal, rebound, pullback nor trade success.</p></details></div></details>
+<details class="method-item" id="method-liquidity"><summary><span>Liquidity eligibility</span></summary><div><p>Whether a stock meets the existing trading-liquidity requirements.</p><p>Liquidity eligible is distinct from Meets candidate criteria. Earnings are optional.</p><details class="exact-rule"><summary>Exact rule</summary><p>Require a completed regular-session bar, close ≥$5, average volume over 10 completed sessions &gt;500,000 shares and daily turnover ≥$10 million. Missing trading bars are unavailable/ineligible; terminal merger valuations never imply tradeability.</p></details></div></details>
+<details class="method-item" id="method-directional"><summary><span>Directional Candidates</span></summary><div><p>Stocks meeting the current Directional research criteria.</p><p>Use them to choose chart research, not as entry instructions.</p><details class="exact-rule"><summary>Exact rule</summary><p>Existing theme Research Priority, valid W and liquidity requirements apply. Long requires W&gt;0; Short W&lt;0; zero W never qualifies. Newly bullish/bearish theme exceptions, where already valid, remain unchanged.</p></details></div></details>
+<details class="method-item" id="method-countertrend"><summary><span>Countertrend Candidates</span></summary><div><p>Relative strength and weakness inside the directional theme universe.</p><p>Peer outperformers and weak-theme laggards are observations, not predicted rebounds. Under Long Bias, strong leaders and underperforming theme peers support careful research; extension may make chasing less attractive.</p><details class="exact-rule"><summary>Exact rule</summary><p>Use Active Core + Enabler relationships with normal available/pass liquidity and nonzero W. Short themes: Strength &lt;50, Bearish/Mixed; positive W is internal Resilient, negative W internal Snapback. Long themes: Strength ≥50, Bullish/Mixed; positive W is Strong Leaders, negative W Relative Weakness. Positive buckets order W descending then Strength descending; negative buckets W ascending then Strength ascending; ticker/theme ID stabilise ties. No new score or technical-entry rule.</p></details></div></details>
+<details class="method-item" id="method-exports"><summary><span>Multi-theme research and TXT exports</span></summary><div><p>A stock can deserve research in more than one theme.</p><p>The Theme filter chooses the relationship shown on screen. Exports always use the complete published lens, independently of current filters.</p><details class="exact-rule"><summary>Exact rule</summary><p>Directional exports retain their existing bytes and assignment: Core first, then stronger directional W, then theme ID. Countertrend combined TXT deduplicates across both buckets, ticker alphabetical; bucket TXT preserves supplied W order with first occurrence per ticker. Only verified TradingView identifiers are allowed. Short files: Countertrend.txt, Resilient.txt, Snapback.txt. Long files: Countertrend.txt, Strong-Leaders.txt, Relative-Weakness.txt. Unavailable Countertrend has no export. Saved remains independent of qualification.</p></details></div></details>
+</section><section class="method-group" aria-labelledby="method-group-system"><h2 id="method-group-system">System</h2><details class="method-item" id="method-sessions"><summary><span>Completed-session data</span></summary><div><p>One completed US session underlies the whole workspace.</p><p>Connection loss preserves the last successful session; a failed refresh never replaces it.</p><details class="exact-rule"><summary>Exact rule</summary><p>Alpaca SIP supplies completed historical daily data. Values, ranks and transitions are calculated before transactional publication. Public snapshots fix market data while navigation, Saved, display preferences and downloads remain interactive. No credentials, provider calls or SQLite are exposed in static output.</p></details></div></details>
+<details class="method-item" id="method-lifecycle"><summary><span>Launch and history</span></summary><div><p>The approved history begins at the Nov 6 close.</p><p>Launch and earned-session comparisons remain distinct. Gate E is open until real Nov 10 validation passes.</p><details class="exact-rule"><summary>Exact rule</summary><p>Official indices initialise exactly at 100 on 2026-11-06; the first earned session is Nov 9 and the first possible adjacent-live comparison Nov 10. Old holdings earn approval session t; rebalance at t close; new holdings first earn the next trading session. effective_from is first earned session; effective_to is exclusive. Approved terminal corporate actions affect existing-holding accounting only, never tradeability. User-reported status: Nov 6 PASS; Nov 9 PASS; Nov 10 PENDING; Gate E OPEN. No new live evidence is generated by UI fixtures.</p></details></div></details>
+<details class="method-item activation-details"><summary>Configuration status</summary><div><ul id="blockers"><li>Load a snapshot to check activation.</li></ul><p>Effective SPY and QQQ rosters are required. Staleness is advisory. Gate E remains open.</p></div></details></section></div>
+    </section>
+
+  </main>
+</div>
+<dialog id="research-inspector" aria-labelledby="inspector-title">
+  <header class="inspector-header"><div><h2 id="inspector-title" tabindex="-1"></h2><span id="inspector-kind" class="metric-label">Research</span></div><button id="inspector-back" class="button quiet" aria-label="Return to previous research object" hidden data-focus-key="inspector-back">←</button><button id="inspector-close" class="button quiet" aria-label="Close Research Inspector" data-focus-key="inspector-close">×</button></header>
+  <p id="inspector-status" class="inspector-status" role="status"></p><div id="inspector-content"></div>
+</dialog>
+<div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+<div id="metric-tooltip" class="metric-tooltip" hidden><strong id="metric-tooltip-title"></strong><p id="metric-tooltip-copy" role="tooltip"></p><a href="#methodology">Methodology</a></div>
+<script src="preview.js"></script><script src="workspace.js"></script><script src="app.js"></script>
+</body></html>

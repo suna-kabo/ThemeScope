@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "imports": [
+    {
+      "benchmark": "SPY",
+      "source_file": "SPY_2026-11-05.csv",
+      "source_sha256": "0027390d21a044cc0ad7fe0ab5ddfc95fdff0870795541d1bab0035f186af775",
+      "snapshot_date": "2026-11-05",
+      "effective_from": "2026-11-05",
+      "source": "TradingView SPY constituent scanner export, user supplied 2026-11-05",
+      "symbol_column": "Symbol",
+      "row_count": 501,
+      "unique_symbol_count": 501,
+      "symbols_sha256": "d1840756d43747192d32a7cbfcd1d071895ff281f4e8fcf3b64b87d12ecf6f94",
+      "duplicates": [],
+      "invalid_symbols": [],
+      "dotted_symbols": [
+        "BF.B",
+        "BRK.B"
+      ]
+    },
+    {
+      "benchmark": "QQQ",
+      "source_file": "QQQ_2026-11-05.csv",
+      "source_sha256": "e78f2d78eeb1f83f13b2d72de39f3695c4d7f3500de9db93d20589d45e0335a6",
+      "snapshot_date": "2026-11-05",
+      "effective_from": "2026-11-05",
+      "source": "TradingView QQQ constituent scanner export, user supplied 2026-11-05",
+      "symbol_column": "Symbol",
+      "row_count": 101,
+      "unique_symbol_count": 101,
+      "symbols_sha256": "772843fa542c36416973214ea66b6d89a3e4d5b092cd2a847a1c7de54aa901cd",
+      "duplicates": [],
+      "invalid_symbols": [],
+      "dotted_symbols": []
+    }
+  ],
+  "market_data_columns_imported": false,
+  "alpaca_compatibility": {
+    "static_symbol_syntax": "passed",
+    "live_retrieval": "pending_local_credentials"
+  }
+}

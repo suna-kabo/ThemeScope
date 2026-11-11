@@ -1,0 +1,25 @@
+<!doctype html><meta charset="utf-8"><title>ThemeScope vNext inspection</title><style>body{font:16px system-ui;max-width:1000px;margin:3rem auto;padding:0 1rem}table{border-collapse:collapse}td,th{padding:.5rem;border:1px solid #aaa;text-align:left}pre{white-space:pre-wrap;background:#eee;padding:1rem}a{color:#1463b8}</style><h1>ThemeScope vNext — provisional configuration</h1><p>No live market data. Production cutover is blocked.</p><pre>{
+  &quot;methodology&quot;: &quot;themescope-vnext-1&quot;,
+  &quot;active_themes&quot;: 44,
+  &quot;watch_only_themes&quot;: 8,
+  &quot;proposed_relationships&quot;: 729,
+  &quot;unique_tickers&quot;: 671,
+  &quot;review_universe_tickers&quot;: 1525,
+  &quot;launch_effective_dates&quot;: &quot;pending&quot;,
+  &quot;production_blockers&quot;: [
+    &quot;335 primary-source reviews pending&quot;,
+    &quot;4 inherited-evidence findings pending&quot;,
+    &quot;Deterministic industry-rule registry is not documented/approved&quot;,
+    &quot;Launch effective dates pending&quot;,
+    &quot;Launch rebalance session not approved&quot;,
+    &quot;Production cutover not enabled&quot;
+  ],
+  &quot;data_kind&quot;: &quot;configuration and synthetic fixtures only&quot;
+}</pre><p><a href="methodology.md">Methodology</a> · <a href="migration-report.md">Migration comparison</a> · <a href="test-report.txt">Tests</a></p><h2>Synthetic calculation fixture</h2><p><a href="engine-report.json">Full formulas, peer results and exports</a></p><h3>Long bias</h3><table><tr><th>Theme</th><th>Score</th><th>Trend</th><th>Priority</th></tr><tr><td>alpha</td><td>100.0</td><td>Bullish</td><td>Primary long</td></tr><tr><td>beta</td><td>50.00</td><td>Bullish</td><td>Primary long</td></tr><tr><td>weak</td><td>0.0</td><td>Bearish</td><td>Watch</td></tr></table><h4>Combined TXT</h4><pre>###alpha
+NASDAQ:AAA
+###beta
+NASDAQ:BBB
+</pre><p>AAA → alpha; also qualifies in: beta</p><p>BBB → beta; also qualifies in: alpha</p><h3>Short bias</h3><table><tr><th>Theme</th><th>Score</th><th>Trend</th><th>Priority</th></tr><tr><td>alpha</td><td>100.0</td><td>Bullish</td><td>Watch</td></tr><tr><td>beta</td><td>50.00</td><td>Bullish</td><td>Watch</td></tr><tr><td>weak</td><td>0.0</td><td>Bearish</td><td>Primary short</td></tr></table><h4>Combined TXT</h4><pre>###weak
+NASDAQ:WWA
+NASDAQ:WWB
+</pre><p>WWA → weak; also qualifies in: </p><p>WWB → weak; also qualifies in: </p><h2>Gate C provider</h2><p><a href="provider-report.md">Provider, cache migration and local SIP command</a></p><h2>Gate D local UI</h2><p><a href="ui/index.html">Open synthetic interactive UI preview</a> · <a href="ui-report.md">Local launch and validation report</a></p>

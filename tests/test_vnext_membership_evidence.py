@@ -1,0 +1,138 @@
+from collections import Counter
+from copy import deepcopy
+from pathlib import Path
+import csv,json,shutil,tempfile,unittest
+from scripts.apply_membership_review import apply
+from src.themescope.domain import load_configuration
+from src.themescope.membership_evidence import validate_evidence,read_review,rule_coverage,validate_supplied_files,reviewed_json_sha256
+ROOT=Path(__file__).resolve().parents[1]
+
+class MembershipEvidenceTests(unittest.TestCase):
+    def setUp(self):
+        self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
+        self.root=Path(self.temp.name)
+        shutil.copytree(ROOT/'config/vnext',self.root/'config/vnext')
+        shutil.copytree(ROOT/'config/calendars',self.root/'config/calendars')
+    def pending_review_copy(self):
+        folder=self.root/'config/vnext'
+        (folder/'launch_approval.json').unlink()
+        (folder/'corporate_actions.json').unlink()  # Historical pre-launch review has no later terminal amendment.
+        path=folder/'methodology.json';data=json.loads(path.read_text())
+        data.update(production_enabled=False,launch_rebalance_session=None);path.write_text(json.dumps(data))
+        path=folder/'memberships.csv'
+        with path.open(newline='') as f:reader=csv.DictReader(f);fields=reader.fieldnames;rows=list(reader)
+        for row in rows:row['effective_from']=''
+        with path.open('w',newline='') as f:writer=csv.DictWriter(f,fields);writer.writeheader();writer.writerows(rows)
+        apply(self.root)
+    def test_authoritative_roles_removals_related_and_minimums(self):
+        config=load_configuration(self.root);report=validate_evidence(self.root,config)
+        self.assertEqual(report['relationships'],726)
+        self.assertEqual(report['roles'],{'Core':659,'Enabler':62,'Related':5})
+        self.assertEqual((report['verified_source_tasks'],report['supplemental_verified'],report['remaining_queue']),(167,1,0))
+        rows={(m.ticker,m.theme_id):m for m in config.memberships}
+        for k in [('EXC','nuclear-energy'),('ZG','internet-commerce'),('SMG','agribusiness')]:self.assertNotIn(k,rows)
+        self.assertIn(('Z','internet-commerce'),rows)
+        related={('AQN','clean-energy'),('TSLA','robotics-automation'),('F','ev-autonomy'),('GM','ev-autonomy'),('TTC','agribusiness')}
+        self.assertEqual({k for k,m in rows.items() if m.role=='Related'},related)
+        self.assertTrue(all(not rows[k].calculation_eligible for k in related))
+        for k in [('AKAM','cybersecurity'),('ZETA','ai-applications'),('HOOD','fintech-payments')]:self.assertEqual(rows[k].role,'Core')
+        self.assertTrue(all(n>=5 for n in report['per_theme_eligible'].values()))
+        self.assertTrue(all(m.effective_from == '2026-11-09' and m.effective_to == ('2026-11-10' if m.ticker == 'ROKU' else None) for m in config.memberships))
+        self.assertTrue(config.methodology['production_enabled'])
+        self.assertEqual(config.methodology['launch_rebalance_session'],'2026-11-06')
+        self.assertEqual(config.production_blockers(),[])
+    def test_industry_rules_cover_exact_tuples_and_explicit_allowlists_only(self):
+        master,registry,_=read_review(self.root)
+        self.assertEqual(rule_coverage(master,registry),451)
+        self.assertEqual(len(registry['registry']['rules']),75)
+        copied=deepcopy(master)
+        row=next(d for d in copied['decisions'] if d['industry_rule_id'].startswith('EXC-'))
+        row['ticker']='UNREVIEWED'
+        with self.assertRaisesRegex(ValueError,'allowlist'):rule_coverage(copied,registry)
+        copied=deepcopy(master)
+        row=next(d for d in copied['decisions'] if d['industry_rule_id'])
+        row['industry_snapshot']='Broader industry inference'
+        with self.assertRaisesRegex(ValueError,'tuple mismatch'):rule_coverage(copied,registry)
+    def test_reapply_is_byte_identical_including_food_and_removed_rows(self):
+        self.pending_review_copy()
+        folder=self.root/'config/vnext'
+        names=('memberships.csv','evidence_review_queue.csv','evidence_gate.json')
+        before={name:(folder/name).read_bytes() for name in names}
+        apply(self.root);apply(self.root)
+        self.assertEqual(before,{name:(folder/name).read_bytes() for name in names})
+        self.assertEqual(sum(m.theme_id=='food-beverage' for m in load_configuration(self.root).memberships),23)
+    def test_unsupported_source_stays_unresolved_and_queue_never_forced_to_zero(self):
+        self.pending_review_copy()
+        path=self.root/'config/vnext/primary_source_attachments.json'
+        data=json.loads(path.read_text());data['attachments'][0].update(status='evidence_mismatch',unresolved_reason='Synthetic required fact not supported')
+        path.write_text(json.dumps(data))
+        report=apply(self.root)
+        self.assertEqual(report['remaining_queue'],1)
+        config=load_configuration(self.root)
+        self.assertIn('1 primary-source reviews pending',config.production_blockers())
+        with (self.root/'config/vnext/evidence_review_queue.csv').open() as f:queue=list(csv.DictReader(f))
+        self.assertEqual(len(queue),1)
+        self.assertEqual(queue[0]['ticker'],data['attachments'][0]['ticker'])
+    def test_stale_gate_queue_or_undocumented_registry_fails_closed(self):
+        folder=self.root/'config/vnext'
+        p=folder/'evidence_gate.json';original=p.read_text();data=json.loads(original)
+        data['source_evidence_queue_count']=335;p.write_text(json.dumps(data))
+        with self.assertRaisesRegex(ValueError,'Stale'):load_configuration(self.root)
+        p.write_text(original)
+        p=folder/'industry_rule_registry.json';data=json.loads(p.read_text());data['registry']['rules'][0]['tickers'].append('UNREVIEWED');p.write_text(json.dumps(data))
+        with self.assertRaisesRegex(ValueError,'Supplied review file changed'):load_configuration(self.root)
+    def test_inherited_findings_and_task_source_records_are_complete(self):
+        _,_,evidence=read_review(self.root)
+        self.assertEqual(len(evidence['attachments']),168)
+        self.assertEqual(len({r['source_url'] for r in evidence['attachments']}),158)
+        self.assertTrue(all(r['status']=='verified' for r in evidence['attachments']))
+        self.assertEqual({(r['ticker'],r['theme_id']) for r in evidence['inherited_findings']},
+                         {(s,t) for s in ('AMZN','GOOGL') for t in ('cloud-platforms','internet-commerce')})
+        self.assertTrue(all(r['status']=='verified' for r in evidence['inherited_findings']))
+    def test_application_refuses_to_rewrite_activated_membership(self):
+        path=self.root/'config/vnext/memberships.csv'
+        with path.open(newline='') as f:reader=csv.DictReader(f);fields=reader.fieldnames;rows=list(reader)
+        rows[0]['effective_from']='2026-11-09'
+        with path.open('w',newline='') as f:writer=csv.DictWriter(f,fields);writer.writeheader();writer.writerows(rows)
+        original=path.read_bytes()
+        with self.assertRaisesRegex(ValueError,'activated historical'):apply(self.root)
+        self.assertEqual(path.read_bytes(),original)
+
+    def test_lf_and_windows_crlf_review_documents_preserve_approved_hashes(self):
+        folder=self.root/'config/vnext'
+        names=('industry_rule_registry.json','primary_source_attachment_tasks.json',
+               'membership_master_review.json','membership_review_provenance.json')
+        originals={n:(folder/n).read_bytes().replace(b'\r\n',b'\n') for n in names}
+        provenance=json.loads(originals['membership_review_provenance.json'])
+        for newline in (b'\n',b'\r\n'):
+            with self.subTest(newline=newline):
+                for n,raw in originals.items():(folder/n).write_bytes(raw.replace(b'\n',newline))
+                validate_supplied_files(folder)
+                self.assertEqual(validate_evidence(self.root,load_configuration(self.root))['remaining_queue'],0)
+                self.assertEqual(json.loads((folder/'membership_review_provenance.json').read_bytes()),provenance)
+                self.assertEqual(reviewed_json_sha256(folder/'industry_rule_registry.json'),
+                    provenance['source_files_sha256']['themescope_industry_rule_registry_2026-11-06.json'])
+                self.assertEqual(reviewed_json_sha256(folder/'membership_master_review.json'),provenance['normalized_master_sha256'])
+
+    def test_actual_content_and_formatting_edits_still_fail_for_each_hashed_json(self):
+        folder=self.root/'config/vnext'
+        for name in ('industry_rule_registry.json','primary_source_attachment_tasks.json','membership_master_review.json'):
+            path=folder/name;original=path.read_bytes()
+            for edited in (original+b' ',original.replace(b'2026',b'2025',1)):
+                with self.subTest(file=name,edit=edited[-12:]):
+                    self.assertNotEqual(edited,original)
+                    path.write_bytes(edited)
+                    with self.assertRaises(ValueError):validate_supplied_files(folder)
+            path.write_bytes(original)
+        path=folder/'membership_review_provenance.json'
+        data=json.loads(path.read_bytes());data['normalized_master_sha256']='0'*64
+        path.write_text(json.dumps(data),encoding='utf-8')
+        with self.assertRaisesRegex(ValueError,'Master decisions changed'):validate_supplied_files(folder)
+
+    def test_review_hash_is_strict_utf8_and_does_not_ignore_lone_cr(self):
+        path=self.root/'review.json'
+        path.write_bytes(b'{"a":1}\n');expected=reviewed_json_sha256(path)
+        path.write_bytes(b'{"a":1}\r\n');self.assertEqual(reviewed_json_sha256(path),expected)
+        path.write_bytes(b'{"a":1}\r');self.assertNotEqual(reviewed_json_sha256(path),expected)
+        path.write_bytes(b'\xff')
+        with self.assertRaises(UnicodeDecodeError):reviewed_json_sha256(path)

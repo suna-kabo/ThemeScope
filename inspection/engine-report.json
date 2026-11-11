@@ -1,0 +1,424 @@
+{
+  "formulas": {
+    "benchmark": "median; >=5 valid and >=80% configured coverage",
+    "liquidity": "raw Close >=5; raw AvgVol10 >500000; raw Close*Volume >=10000000",
+    "relative": "0.60*(stock1M - LOO median1M) + 0.40*(stock3M - LOO median3M)",
+    "returns": "close[t]/close[t-21 or 63]-1; split/spin-off adjusted, no dividends",
+    "score": "0.60 * average-rank percentile(1M) + 0.40 * average-rank percentile(3M)"
+  },
+  "purpose": "Gate B deterministic formula and multi-theme inspection; no live signals",
+  "rebalance_regression": {
+    "initial": 100,
+    "new_earns_next_session": 132,
+    "old_earns_approval_session": 110,
+    "test": "test_numerical_rebalance_boundary_old_t_new_t_plus_one"
+  },
+  "scenarios": {
+    "Long bias": {
+      "exports": {
+        "assignments": {
+          "AAA": {
+            "also_qualifies_in": [
+              "beta"
+            ],
+            "assigned_section": "alpha"
+          },
+          "BBB": {
+            "also_qualifies_in": [
+              "alpha"
+            ],
+            "assigned_section": "beta"
+          }
+        },
+        "combined": "###alpha\nNASDAQ:AAA\n###beta\nNASDAQ:BBB\n",
+        "individual": {
+          "alpha": "NASDAQ:AAA\nNASDAQ:BBB\n",
+          "beta": "NASDAQ:AAA\nNASDAQ:BBB\n"
+        }
+      },
+      "formula_checks": [
+        {
+          "actual_3m": "0.07",
+          "actual_score": "100.0",
+          "expected_3m": ".07",
+          "expected_score": 100,
+          "passed": true,
+          "theme_id": "alpha"
+        },
+        {
+          "actual_3m": "0.03",
+          "actual_score": "50.00",
+          "expected_3m": ".03",
+          "expected_score": 50,
+          "passed": true,
+          "theme_id": "beta"
+        },
+        {
+          "actual_3m": "-0.07",
+          "actual_score": "0.0",
+          "expected_3m": "-.07",
+          "expected_score": 0,
+          "passed": true,
+          "theme_id": "weak"
+        }
+      ],
+      "qualifying_relationships": [
+        {
+          "also_qualifies_in": [
+            "beta"
+          ],
+          "assigned_section": "alpha",
+          "relative": {
+            "er1": "0.038061647981093466293915900510131",
+            "er3": "0.135",
+            "peer1": {
+              "configured": 4,
+              "coverage": "1",
+              "valid": 4,
+              "value": "0.020761881430671239588437040666340"
+            },
+            "peer3": {
+              "configured": 4,
+              "coverage": "1",
+              "valid": 4,
+              "value": "0.065"
+            },
+            "w": "0.0768369887886560797763495403060786"
+          },
+          "role": "Core",
+          "theme_id": "alpha",
+          "ticker": "AAA"
+        },
+        {
+          "also_qualifies_in": [
+            "alpha"
+          ],
+          "assigned_section": "beta",
+          "relative": {
+            "er1": "0.016275155606365797448599996370697",
+            "er3": "0.055",
+            "peer1": {
+              "configured": 4,
+              "coverage": "1",
+              "valid": 4,
+              "value": "0.020761881430671239588437040666340"
+            },
+            "peer3": {
+              "configured": 4,
+              "coverage": "1",
+              "valid": 4,
+              "value": "0.065"
+            },
+            "w": "0.0317650933638194784691599978224182"
+          },
+          "role": "Enabler",
+          "theme_id": "alpha",
+          "ticker": "BBB"
+        },
+        {
+          "also_qualifies_in": [
+            "beta"
+          ],
+          "assigned_section": "alpha",
+          "relative": {
+            "er1": "0.050632094943240454076367389060888",
+            "er3": "0.175",
+            "peer1": {
+              "configured": 4,
+              "coverage": "1",
+              "valid": 4,
+              "value": "0.008191434468524251805985552115583"
+            },
+            "peer3": {
+              "configured": 4,
+              "coverage": "1",
+              "valid": 4,
+              "value": "0.025"
+            },
+            "w": "0.1003792569659442724458204334365328"
+          },
+          "role": "Enabler",
+          "theme_id": "beta",
+          "ticker": "AAA"
+        },
+        {
+          "also_qualifies_in": [
+            "alpha"
+          ],
+          "assigned_section": "beta",
+          "relative": {
+            "er1": "0.028845602568512785231051484921454",
+            "er3": "0.095",
+            "peer1": {
+              "configured": 4,
+              "coverage": "1",
+              "valid": 4,
+              "value": "0.008191434468524251805985552115583"
+            },
+            "peer3": {
+              "configured": 4,
+              "coverage": "1",
+              "valid": 4,
+              "value": "0.025"
+            },
+            "w": "0.0553073615411076711386308909528724"
+          },
+          "role": "Core",
+          "theme_id": "beta",
+          "ticker": "BBB"
+        }
+      ],
+      "themes": [
+        {
+          "priority": "Primary long",
+          "returns": [
+            {
+              "configured": 5,
+              "coverage": "1",
+              "valid": 5,
+              "value": "0.022292993630573248407643312101911"
+            },
+            {
+              "configured": 5,
+              "coverage": "1",
+              "valid": 5,
+              "value": "0.07"
+            }
+          ],
+          "score": "100.0",
+          "theme_id": "alpha",
+          "transition": {
+            "newly_bearish": null,
+            "newly_bullish": null,
+            "priority_change": null
+          },
+          "trend": "Bullish"
+        },
+        {
+          "priority": "Primary long",
+          "returns": [
+            {
+              "configured": 5,
+              "coverage": "1",
+              "valid": 5,
+              "value": "0.009803921568627450980392156862745"
+            },
+            {
+              "configured": 5,
+              "coverage": "1",
+              "valid": 5,
+              "value": "0.03"
+            }
+          ],
+          "score": "50.00",
+          "theme_id": "beta",
+          "transition": {
+            "newly_bearish": null,
+            "newly_bullish": null,
+            "priority_change": null
+          },
+          "trend": "Bullish"
+        },
+        {
+          "priority": "Watch",
+          "returns": [
+            {
+              "configured": 5,
+              "coverage": "1",
+              "valid": 5,
+              "value": "-0.0244755244755244755244755244755244"
+            },
+            {
+              "configured": 5,
+              "coverage": "1",
+              "valid": 5,
+              "value": "-0.07"
+            }
+          ],
+          "score": "0.0",
+          "theme_id": "weak",
+          "transition": {
+            "newly_bearish": null,
+            "newly_bullish": null,
+            "priority_change": null
+          },
+          "trend": "Bearish"
+        }
+      ]
+    },
+    "Short bias": {
+      "exports": {
+        "assignments": {
+          "WWA": {
+            "also_qualifies_in": [],
+            "assigned_section": "weak"
+          },
+          "WWB": {
+            "also_qualifies_in": [],
+            "assigned_section": "weak"
+          }
+        },
+        "combined": "###weak\nNASDAQ:WWA\nNASDAQ:WWB\n",
+        "individual": {
+          "weak": "NASDAQ:WWA\nNASDAQ:WWB\n"
+        }
+      },
+      "formula_checks": [
+        {
+          "actual_3m": "0.07",
+          "actual_score": "100.0",
+          "expected_3m": ".07",
+          "expected_score": 100,
+          "passed": true,
+          "theme_id": "alpha"
+        },
+        {
+          "actual_3m": "0.03",
+          "actual_score": "50.00",
+          "expected_3m": ".03",
+          "expected_score": 50,
+          "passed": true,
+          "theme_id": "beta"
+        },
+        {
+          "actual_3m": "-0.07",
+          "actual_score": "0.0",
+          "expected_3m": "-.07",
+          "expected_score": 0,
+          "passed": true,
+          "theme_id": "weak"
+        }
+      ],
+      "qualifying_relationships": [
+        {
+          "also_qualifies_in": [],
+          "assigned_section": "weak",
+          "relative": {
+            "er1": "-0.05426864801864801864801864801864815",
+            "er3": "-0.135",
+            "peer1": {
+              "configured": 4,
+              "coverage": "1",
+              "valid": 4,
+              "value": "-0.02265442890442890442890442890442885"
+            },
+            "peer3": {
+              "configured": 4,
+              "coverage": "1",
+              "valid": 4,
+              "value": "-0.065"
+            },
+            "w": "-0.08656118881118881118881118881118889"
+          },
+          "role": "Core",
+          "theme_id": "weak",
+          "ticker": "WWA"
+        },
+        {
+          "also_qualifies_in": [],
+          "assigned_section": "weak",
+          "relative": {
+            "er1": "-0.02082383196513631296239991892165815",
+            "er3": "-0.055",
+            "peer1": {
+              "configured": 4,
+              "coverage": "1",
+              "valid": 4,
+              "value": "-0.02265442890442890442890442890442885"
+            },
+            "peer3": {
+              "configured": 4,
+              "coverage": "1",
+              "valid": 4,
+              "value": "-0.065"
+            },
+            "w": "-0.03449429917908178777743995135299489"
+          },
+          "role": "Core",
+          "theme_id": "weak",
+          "ticker": "WWB"
+        }
+      ],
+      "themes": [
+        {
+          "priority": "Watch",
+          "returns": [
+            {
+              "configured": 5,
+              "coverage": "1",
+              "valid": 5,
+              "value": "0.022292993630573248407643312101911"
+            },
+            {
+              "configured": 5,
+              "coverage": "1",
+              "valid": 5,
+              "value": "0.07"
+            }
+          ],
+          "score": "100.0",
+          "theme_id": "alpha",
+          "transition": {
+            "newly_bearish": null,
+            "newly_bullish": null,
+            "priority_change": null
+          },
+          "trend": "Bullish"
+        },
+        {
+          "priority": "Watch",
+          "returns": [
+            {
+              "configured": 5,
+              "coverage": "1",
+              "valid": 5,
+              "value": "0.009803921568627450980392156862745"
+            },
+            {
+              "configured": 5,
+              "coverage": "1",
+              "valid": 5,
+              "value": "0.03"
+            }
+          ],
+          "score": "50.00",
+          "theme_id": "beta",
+          "transition": {
+            "newly_bearish": null,
+            "newly_bullish": null,
+            "priority_change": null
+          },
+          "trend": "Bullish"
+        },
+        {
+          "priority": "Primary short",
+          "returns": [
+            {
+              "configured": 5,
+              "coverage": "1",
+              "valid": 5,
+              "value": "-0.0244755244755244755244755244755244"
+            },
+            {
+              "configured": 5,
+              "coverage": "1",
+              "valid": 5,
+              "value": "-0.07"
+            }
+          ],
+          "score": "0.0",
+          "theme_id": "weak",
+          "transition": {
+            "newly_bearish": null,
+            "newly_bullish": null,
+            "priority_change": null
+          },
+          "trend": "Bearish"
+        }
+      ]
+    }
+  },
+  "schema": "themescope-vnext-snapshot-1",
+  "sqlite_schema": 1,
+  "synthetic_fixture": true
+}

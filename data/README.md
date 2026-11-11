@@ -1,3 +1,8 @@
 # Run data
 
-Generated dashboards and raw run payloads are local outputs under the ignored `output/` or `dist/` directory. Historical schema samples live under `tests/fixtures/` with their version in the path; production generation never reads test fixtures implicitly.
+Live SQLite data is private under ignored `runtime/vnext/`; fictional app data uses
+`runtime/vnext-fixture/`. Generated current static builds live under ignored `dist/`;
+legacy dashboards/raw runs use `output/`. Never commit runtime data or force-add a
+real public projection. Historical schema samples in `tests/fixtures/` are explicitly
+synthetic; normal generation never selects them implicitly. See
+[storage and backup](../docs/operations/refresh-and-maintenance.md).

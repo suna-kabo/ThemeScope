@@ -14,6 +14,7 @@ __pycache__/
 /.themescope-site-*/
 .env
 .env.*
+.env*
 
 # Local publication recovery stays private, outside the served site.
 /.site-publication.lock
@@ -23,3 +24,17 @@ __pycache__/
 /downloads/*.zip
 /reports/latest_run.md
 /reports/v7_browser_verification.json
+
+# vNext private runtime. Inspection contains generated synthetic summaries only.
+/.venv-vnext/
+/runtime/
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.db
+*.db-*
+/work/
+
+# Playwright/screenshots and local vNext state stay outside inspection unless synthetic.
+/playwright-report/

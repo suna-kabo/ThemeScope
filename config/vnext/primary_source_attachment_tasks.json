@@ -1,0 +1,1510 @@
+{
+  "schema": 1,
+  "review_date": "2026-11-06",
+  "instruction": "These decisions are already reviewed. Mechanically attach the latest suitable SEC annual filing or official issuer/IR source that supports each supplied required_fact. Do not reclassify. If the required fact cannot be supported, report the row as a mismatch and leave it unresolved.",
+  "tasks": [
+    {
+      "ticker": "MTH",
+      "company": "Meritage Homes Corporation",
+      "theme_id": "homebuilders",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is residential home construction",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "PLNT",
+      "company": "Planet Fitness, Inc.",
+      "theme_id": "leisure-entertainment",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is an included leisure or entertainment activity such as live entertainment, cruises, hotels/resorts, fitness or consumer leisure experiences",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "PTON",
+      "company": "Peloton Interactive, Inc.",
+      "theme_id": "leisure-entertainment",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is an included leisure or entertainment activity such as live entertainment, cruises, hotels/resorts, fitness or consumer leisure experiences",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "BE",
+      "company": "Bloom Energy Corporation",
+      "theme_id": "clean-energy",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "business has material renewable generation, clean-energy equipment/storage, or grid-transition exposure",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "CWEN",
+      "company": "Clearway Energy, Inc.",
+      "theme_id": "clean-energy",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "business has material renewable generation, clean-energy equipment/storage, or grid-transition exposure",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "FRVO",
+      "company": "Fervo Energy Company",
+      "theme_id": "clean-energy",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "business has material renewable generation, clean-energy equipment/storage, or grid-transition exposure",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "RNW",
+      "company": "ReNew Energy Global plc",
+      "theme_id": "clean-energy",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "business has material renewable generation, clean-energy equipment/storage, or grid-transition exposure",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "AES",
+      "company": "The AES Corporation",
+      "theme_id": "clean-energy",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business has material renewable generation, clean-energy equipment/storage, or grid-transition exposure",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "ETN",
+      "company": "Eaton Corporation, PLC",
+      "theme_id": "clean-energy",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business has material renewable generation, clean-energy equipment/storage, or grid-transition exposure",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "GEV",
+      "company": "GE Vernova Inc.",
+      "theme_id": "clean-energy",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business has material renewable generation, clean-energy equipment/storage, or grid-transition exposure",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "HUBB",
+      "company": "Hubbell Inc",
+      "theme_id": "clean-energy",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business has material renewable generation, clean-energy equipment/storage, or grid-transition exposure",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "NEE",
+      "company": "NextEra Energy, Inc.",
+      "theme_id": "clean-energy",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business has material renewable generation, clean-energy equipment/storage, or grid-transition exposure",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "PWR",
+      "company": "Quanta Services, Inc.",
+      "theme_id": "clean-energy",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business has material renewable generation, clean-energy equipment/storage, or grid-transition exposure",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "BWXT",
+      "company": "BWX Technologies, Inc.",
+      "theme_id": "nuclear-energy",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "business directly operates nuclear generation or materially supplies nuclear reactor technology, components/services, or uranium",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "CEG",
+      "company": "Constellation Energy Corporation",
+      "theme_id": "nuclear-energy",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "business directly operates nuclear generation or materially supplies nuclear reactor technology, components/services, or uranium",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "OKLO",
+      "company": "Oklo Inc.",
+      "theme_id": "nuclear-energy",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "business directly operates nuclear generation or materially supplies nuclear reactor technology, components/services, or uranium",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "SMR",
+      "company": "NuScale Power Corporation",
+      "theme_id": "nuclear-energy",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "business directly operates nuclear generation or materially supplies nuclear reactor technology, components/services, or uranium",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "XE",
+      "company": "X-Energy, Inc.",
+      "theme_id": "nuclear-energy",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "business directly operates nuclear generation or materially supplies nuclear reactor technology, components/services, or uranium",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "DUK",
+      "company": "Duke Energy Corporation (Holding Company)",
+      "theme_id": "nuclear-energy",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business directly operates nuclear generation or materially supplies nuclear reactor technology, components/services, or uranium",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "ETR",
+      "company": "Entergy Corporation",
+      "theme_id": "nuclear-energy",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business directly operates nuclear generation or materially supplies nuclear reactor technology, components/services, or uranium",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "GEV",
+      "company": "GE Vernova Inc.",
+      "theme_id": "nuclear-energy",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business directly operates nuclear generation or materially supplies nuclear reactor technology, components/services, or uranium",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "PEG",
+      "company": "Public Service Enterprise Group Incorporated",
+      "theme_id": "nuclear-energy",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business directly operates nuclear generation or materially supplies nuclear reactor technology, components/services, or uranium",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "SO",
+      "company": "Southern Company (The)",
+      "theme_id": "nuclear-energy",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business directly operates nuclear generation or materially supplies nuclear reactor technology, components/services, or uranium",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "VST",
+      "company": "Vistra Corp.",
+      "theme_id": "nuclear-energy",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business directly operates nuclear generation or materially supplies nuclear reactor technology, components/services, or uranium",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "MWH",
+      "company": "SOLV Energy, Inc.",
+      "theme_id": "solar",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material business directly develops, installs, manufactures or operates solar systems",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "BMI",
+      "company": "Badger Meter, Inc.",
+      "theme_id": "water",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material business supplies, treats, measures or distributes water/wastewater, or materially enables those activities",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "MWA",
+      "company": "MUELLER WATER PRODUCTS",
+      "theme_id": "water",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material business supplies, treats, measures or distributes water/wastewater, or materially enables those activities",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "PNR",
+      "company": "Pentair plc.",
+      "theme_id": "water",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material business supplies, treats, measures or distributes water/wastewater, or materially enables those activities",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "XYL",
+      "company": "Xylem Inc.",
+      "theme_id": "water",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material business supplies, treats, measures or distributes water/wastewater, or materially enables those activities",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "ECL",
+      "company": "Ecolab Inc.",
+      "theme_id": "water",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "principal/material business supplies, treats, measures or distributes water/wastewater, or materially enables those activities",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "ACIW",
+      "company": "ACI Worldwide, Inc.",
+      "theme_id": "fintech-payments",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is a digital payments/network/processor, digital bank, BNPL, fintech lender, cross-border payments or qualifying fintech platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "AFRM",
+      "company": "Affirm Holdings, Inc.",
+      "theme_id": "fintech-payments",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is a digital payments/network/processor, digital bank, BNPL, fintech lender, cross-border payments or qualifying fintech platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "BILL",
+      "company": "BILL Holdings, Inc.",
+      "theme_id": "fintech-payments",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is a digital payments/network/processor, digital bank, BNPL, fintech lender, cross-border payments or qualifying fintech platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "CHYM",
+      "company": "Chime Financial, Inc.",
+      "theme_id": "fintech-payments",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is a digital payments/network/processor, digital bank, BNPL, fintech lender, cross-border payments or qualifying fintech platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "DLO",
+      "company": "DLocal Limited",
+      "theme_id": "fintech-payments",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is a digital payments/network/processor, digital bank, BNPL, fintech lender, cross-border payments or qualifying fintech platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "FIS",
+      "company": "Fidelity National Information Services, Inc.",
+      "theme_id": "fintech-payments",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is a digital payments/network/processor, digital bank, BNPL, fintech lender, cross-border payments or qualifying fintech platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "FISV",
+      "company": "Fiserv, Inc.",
+      "theme_id": "fintech-payments",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is a digital payments/network/processor, digital bank, BNPL, fintech lender, cross-border payments or qualifying fintech platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "GPN",
+      "company": "Global Payments Inc.",
+      "theme_id": "fintech-payments",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is a digital payments/network/processor, digital bank, BNPL, fintech lender, cross-border payments or qualifying fintech platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "MA",
+      "company": "Mastercard Incorporated",
+      "theme_id": "fintech-payments",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is a digital payments/network/processor, digital bank, BNPL, fintech lender, cross-border payments or qualifying fintech platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "PAGS",
+      "company": "PagSeguro Digital Ltd.",
+      "theme_id": "fintech-payments",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is a digital payments/network/processor, digital bank, BNPL, fintech lender, cross-border payments or qualifying fintech platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "PAYO",
+      "company": "Payoneer Global Inc.",
+      "theme_id": "fintech-payments",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is a digital payments/network/processor, digital bank, BNPL, fintech lender, cross-border payments or qualifying fintech platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "PYPL",
+      "company": "PayPal Holdings, Inc.",
+      "theme_id": "fintech-payments",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is a digital payments/network/processor, digital bank, BNPL, fintech lender, cross-border payments or qualifying fintech platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "RELY",
+      "company": "Remitly Global, Inc.",
+      "theme_id": "fintech-payments",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is a digital payments/network/processor, digital bank, BNPL, fintech lender, cross-border payments or qualifying fintech platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "SEZL",
+      "company": "Sezzle Inc.",
+      "theme_id": "fintech-payments",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is a digital payments/network/processor, digital bank, BNPL, fintech lender, cross-border payments or qualifying fintech platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "SOFI",
+      "company": "SoFi Technologies, Inc.",
+      "theme_id": "fintech-payments",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is a digital payments/network/processor, digital bank, BNPL, fintech lender, cross-border payments or qualifying fintech platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "UPST",
+      "company": "Upstart Holdings, Inc.",
+      "theme_id": "fintech-payments",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is a digital payments/network/processor, digital bank, BNPL, fintech lender, cross-border payments or qualifying fintech platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "V",
+      "company": "Visa Inc.",
+      "theme_id": "fintech-payments",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is a digital payments/network/processor, digital bank, BNPL, fintech lender, cross-border payments or qualifying fintech platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "XYZ",
+      "company": "Block, Inc.",
+      "theme_id": "fintech-payments",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is a digital payments/network/processor, digital bank, BNPL, fintech lender, cross-border payments or qualifying fintech platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "TEM",
+      "company": "Tempus AI, Inc.",
+      "theme_id": "genomics",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "business is materially focused on sequencing, gene editing, molecular diagnostics or precision-medicine platforms",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "CVS",
+      "company": "CVS Health Corporation",
+      "theme_id": "healthcare-providers",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business delivers, finances, administers or supports healthcare services",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "SARO",
+      "company": "StandardAero, Inc.",
+      "theme_id": "aerospace-defense",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business supplies aircraft, aerospace systems/components, defense platforms/electronics or defense/aerospace services",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "URI",
+      "company": "United Rentals, Inc.",
+      "theme_id": "construction-infrastructure",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material business builds, supplies or equips large physical infrastructure or construction projects",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "ETN",
+      "company": "Eaton Corporation, PLC",
+      "theme_id": "construction-infrastructure",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "principal/material business builds, supplies or equips large physical infrastructure or construction projects",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "HUBB",
+      "company": "Hubbell Inc",
+      "theme_id": "construction-infrastructure",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "principal/material business builds, supplies or equips large physical infrastructure or construction projects",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "MBLY",
+      "company": "Mobileye Global Inc.",
+      "theme_id": "ev-autonomy",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "business has material direct EV/autonomous-driving exposure or supplies dedicated autonomy components/platforms",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "RIVN",
+      "company": "Rivian Automotive, Inc.",
+      "theme_id": "ev-autonomy",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "business has material direct EV/autonomous-driving exposure or supplies dedicated autonomy components/platforms",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "TSLA",
+      "company": "Tesla, Inc.",
+      "theme_id": "ev-autonomy",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "business has material direct EV/autonomous-driving exposure or supplies dedicated autonomy components/platforms",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "APTV",
+      "company": "Aptiv PLC",
+      "theme_id": "ev-autonomy",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business has material direct EV/autonomous-driving exposure or supplies dedicated autonomy components/platforms",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "GNTX",
+      "company": "Gentex Corporation",
+      "theme_id": "ev-autonomy",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business has material direct EV/autonomous-driving exposure or supplies dedicated autonomy components/platforms",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "UBER",
+      "company": "Uber Technologies, Inc.",
+      "theme_id": "ev-autonomy",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business has material direct EV/autonomous-driving exposure or supplies dedicated autonomy components/platforms",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "ASTS",
+      "company": "AST SpaceMobile, Inc.",
+      "theme_id": "space-economy",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material business directly provides launch, spacecraft, satellites, satellite communications, earth observation or space infrastructure",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "ECHO",
+      "company": "EchoStar Corporation",
+      "theme_id": "space-economy",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material business directly provides launch, spacecraft, satellites, satellite communications, earth observation or space infrastructure",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "GSAT",
+      "company": "Globalstar, Inc.",
+      "theme_id": "space-economy",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material business directly provides launch, spacecraft, satellites, satellite communications, earth observation or space infrastructure",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "IRDM",
+      "company": "Iridium Communications Inc",
+      "theme_id": "space-economy",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material business directly provides launch, spacecraft, satellites, satellite communications, earth observation or space infrastructure",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "LUNR",
+      "company": "Intuitive Machines, Inc.",
+      "theme_id": "space-economy",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material business directly provides launch, spacecraft, satellites, satellite communications, earth observation or space infrastructure",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "MDA",
+      "company": "MDA Space Ltd.",
+      "theme_id": "space-economy",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material business directly provides launch, spacecraft, satellites, satellite communications, earth observation or space infrastructure",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "PL",
+      "company": "Planet Labs PBC",
+      "theme_id": "space-economy",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material business directly provides launch, spacecraft, satellites, satellite communications, earth observation or space infrastructure",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "RKLB",
+      "company": "Rocket Lab Corporation",
+      "theme_id": "space-economy",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material business directly provides launch, spacecraft, satellites, satellite communications, earth observation or space infrastructure",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "VSAT",
+      "company": "ViaSat, Inc.",
+      "theme_id": "space-economy",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material business directly provides launch, spacecraft, satellites, satellite communications, earth observation or space infrastructure",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "DAR",
+      "company": "Darling Ingredients Inc.",
+      "theme_id": "agribusiness",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "principal/material business supports agricultural production, inputs, machinery, crop processing or animal/agricultural commodities",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "APP",
+      "company": "Applovin Corporation",
+      "theme_id": "ai-applications",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "commercial value proposition materially centers on AI/ML applications rather than merely adding AI features",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "PATH",
+      "company": "UiPath, Inc.",
+      "theme_id": "ai-applications",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "commercial value proposition materially centers on AI/ML applications rather than merely adding AI features",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "PLTR",
+      "company": "Palantir Technologies Inc.",
+      "theme_id": "ai-applications",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "commercial value proposition materially centers on AI/ML applications rather than merely adding AI features",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "TEM",
+      "company": "Tempus AI, Inc.",
+      "theme_id": "ai-applications",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "commercial value proposition materially centers on AI/ML applications rather than merely adding AI features",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "UPST",
+      "company": "Upstart Holdings, Inc.",
+      "theme_id": "ai-applications",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "commercial value proposition materially centers on AI/ML applications rather than merely adding AI features",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "APLD",
+      "company": "Applied Digital Corporation",
+      "theme_id": "ai-infrastructure",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "business materially supplies compute, cloud capacity, servers, networking, optics, memory, power/cooling or rack connectivity used for large AI workloads",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "ANET",
+      "company": "Arista Networks, Inc.",
+      "theme_id": "ai-infrastructure",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business materially supplies compute, cloud capacity, servers, networking, optics, memory, power/cooling or rack connectivity used for large AI workloads",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "APH",
+      "company": "Amphenol Corporation",
+      "theme_id": "ai-infrastructure",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business materially supplies compute, cloud capacity, servers, networking, optics, memory, power/cooling or rack connectivity used for large AI workloads",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "CIEN",
+      "company": "Ciena Corporation",
+      "theme_id": "ai-infrastructure",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business materially supplies compute, cloud capacity, servers, networking, optics, memory, power/cooling or rack connectivity used for large AI workloads",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "CLS",
+      "company": "Celestica, Inc.",
+      "theme_id": "ai-infrastructure",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business materially supplies compute, cloud capacity, servers, networking, optics, memory, power/cooling or rack connectivity used for large AI workloads",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "DELL",
+      "company": "Dell Technologies Inc.",
+      "theme_id": "ai-infrastructure",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business materially supplies compute, cloud capacity, servers, networking, optics, memory, power/cooling or rack connectivity used for large AI workloads",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "FLEX",
+      "company": "Flex Ltd.",
+      "theme_id": "ai-infrastructure",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business materially supplies compute, cloud capacity, servers, networking, optics, memory, power/cooling or rack connectivity used for large AI workloads",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "GLW",
+      "company": "Corning Incorporated",
+      "theme_id": "ai-infrastructure",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business materially supplies compute, cloud capacity, servers, networking, optics, memory, power/cooling or rack connectivity used for large AI workloads",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "HPE",
+      "company": "Hewlett Packard Enterprise Company",
+      "theme_id": "ai-infrastructure",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business materially supplies compute, cloud capacity, servers, networking, optics, memory, power/cooling or rack connectivity used for large AI workloads",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "LITE",
+      "company": "Lumentum Holdings Inc.",
+      "theme_id": "ai-infrastructure",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business materially supplies compute, cloud capacity, servers, networking, optics, memory, power/cooling or rack connectivity used for large AI workloads",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "SMCI",
+      "company": "Super Micro Computer, Inc.",
+      "theme_id": "ai-infrastructure",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business materially supplies compute, cloud capacity, servers, networking, optics, memory, power/cooling or rack connectivity used for large AI workloads",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "AKAM",
+      "company": "Akamai Technologies, Inc.",
+      "theme_id": "cloud-platforms",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "business directly provides a public-cloud, cloud-native compute/database/edge/infrastructure platform, or materially enables such platforms if Enabler",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "IBM",
+      "company": "International Business Machines Corporation",
+      "theme_id": "cloud-platforms",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "business directly provides a public-cloud, cloud-native compute/database/edge/infrastructure platform, or materially enables such platforms if Enabler",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "MSFT",
+      "company": "Microsoft Corporation",
+      "theme_id": "cloud-platforms",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "business directly provides a public-cloud, cloud-native compute/database/edge/infrastructure platform, or materially enables such platforms if Enabler",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "ANET",
+      "company": "Arista Networks, Inc.",
+      "theme_id": "cloud-platforms",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business directly provides a public-cloud, cloud-native compute/database/edge/infrastructure platform, or materially enables such platforms if Enabler",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "HPE",
+      "company": "Hewlett Packard Enterprise Company",
+      "theme_id": "cloud-platforms",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "business directly provides a public-cloud, cloud-native compute/database/edge/infrastructure platform, or materially enables such platforms if Enabler",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "CHKP",
+      "company": "Check Point Software Technologies Ltd.",
+      "theme_id": "cybersecurity",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal products protect identities, endpoints, networks, cloud workloads, data or digital systems, or materially enable such protection if Enabler",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "GEN",
+      "company": "Gen Digital Inc.",
+      "theme_id": "cybersecurity",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal products protect identities, endpoints, networks, cloud workloads, data or digital systems, or materially enable such protection if Enabler",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "NTSK",
+      "company": "Netskope, Inc.",
+      "theme_id": "cybersecurity",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal products protect identities, endpoints, networks, cloud workloads, data or digital systems, or materially enable such protection if Enabler",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "SAIL",
+      "company": "SailPoint, Inc.",
+      "theme_id": "cybersecurity",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal products protect identities, endpoints, networks, cloud workloads, data or digital systems, or materially enable such protection if Enabler",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "FFIV",
+      "company": "F5, Inc.",
+      "theme_id": "cybersecurity",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "principal products protect identities, endpoints, networks, cloud workloads, data or digital systems, or materially enable such protection if Enabler",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "APLD",
+      "company": "Applied Digital Corporation",
+      "theme_id": "data-centers",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "business owns/operates data centers, colocation or dedicated digital-infrastructure assets",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "BMNR",
+      "company": "BitMine Immersion Technologies, Inc.",
+      "theme_id": "digital-assets",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material economics are directly tied to crypto trading, stablecoins, blockchain infrastructure, digital-asset treasury exposure or crypto mining/data-center operations",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "CIFR",
+      "company": "Cipher Digital Inc.",
+      "theme_id": "digital-assets",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material economics are directly tied to crypto trading, stablecoins, blockchain infrastructure, digital-asset treasury exposure or crypto mining/data-center operations",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "COIN",
+      "company": "Coinbase Global, Inc.",
+      "theme_id": "digital-assets",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material economics are directly tied to crypto trading, stablecoins, blockchain infrastructure, digital-asset treasury exposure or crypto mining/data-center operations",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "CORZ",
+      "company": "Core Scientific, Inc.",
+      "theme_id": "digital-assets",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material economics are directly tied to crypto trading, stablecoins, blockchain infrastructure, digital-asset treasury exposure or crypto mining/data-center operations",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "CRCL",
+      "company": "Circle Internet Group, Inc.",
+      "theme_id": "digital-assets",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material economics are directly tied to crypto trading, stablecoins, blockchain infrastructure, digital-asset treasury exposure or crypto mining/data-center operations",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "GLXY",
+      "company": "Galaxy Digital Inc.",
+      "theme_id": "digital-assets",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material economics are directly tied to crypto trading, stablecoins, blockchain infrastructure, digital-asset treasury exposure or crypto mining/data-center operations",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "HUT",
+      "company": "Hut 8 Corp.",
+      "theme_id": "digital-assets",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material economics are directly tied to crypto trading, stablecoins, blockchain infrastructure, digital-asset treasury exposure or crypto mining/data-center operations",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "MARA",
+      "company": "MARA Holdings, Inc.",
+      "theme_id": "digital-assets",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material economics are directly tied to crypto trading, stablecoins, blockchain infrastructure, digital-asset treasury exposure or crypto mining/data-center operations",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "MSTR",
+      "company": "Strategy Inc",
+      "theme_id": "digital-assets",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material economics are directly tied to crypto trading, stablecoins, blockchain infrastructure, digital-asset treasury exposure or crypto mining/data-center operations",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "RIOT",
+      "company": "Riot Platforms, Inc.",
+      "theme_id": "digital-assets",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material economics are directly tied to crypto trading, stablecoins, blockchain infrastructure, digital-asset treasury exposure or crypto mining/data-center operations",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "WULF",
+      "company": "TeraWulf Inc.",
+      "theme_id": "digital-assets",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material economics are directly tied to crypto trading, stablecoins, blockchain infrastructure, digital-asset treasury exposure or crypto mining/data-center operations",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "HOOD",
+      "company": "Robinhood Markets, Inc.",
+      "theme_id": "digital-assets",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "principal/material economics are directly tied to crypto trading, stablecoins, blockchain infrastructure, digital-asset treasury exposure or crypto mining/data-center operations",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "ADBE",
+      "company": "Adobe Inc.",
+      "theme_id": "enterprise-software",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is enterprise/application/productivity/workflow/design/developer/data-management software",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "ADSK",
+      "company": "Autodesk, Inc.",
+      "theme_id": "enterprise-software",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is enterprise/application/productivity/workflow/design/developer/data-management software",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "APPN",
+      "company": "Appian Corporation",
+      "theme_id": "enterprise-software",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is enterprise/application/productivity/workflow/design/developer/data-management software",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "BOX",
+      "company": "Box, Inc.",
+      "theme_id": "enterprise-software",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is enterprise/application/productivity/workflow/design/developer/data-management software",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "DBX",
+      "company": "Dropbox, Inc.",
+      "theme_id": "enterprise-software",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is enterprise/application/productivity/workflow/design/developer/data-management software",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "DOCS",
+      "company": "Doximity, Inc.",
+      "theme_id": "enterprise-software",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is enterprise/application/productivity/workflow/design/developer/data-management software",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "DOCU",
+      "company": "DocuSign, Inc.",
+      "theme_id": "enterprise-software",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is enterprise/application/productivity/workflow/design/developer/data-management software",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "ESTC",
+      "company": "Elastic N.V.",
+      "theme_id": "enterprise-software",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is enterprise/application/productivity/workflow/design/developer/data-management software",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "FROG",
+      "company": "JFrog Ltd.",
+      "theme_id": "enterprise-software",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is enterprise/application/productivity/workflow/design/developer/data-management software",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "GTLB",
+      "company": "GitLab Inc.",
+      "theme_id": "enterprise-software",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is enterprise/application/productivity/workflow/design/developer/data-management software",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "HUBS",
+      "company": "HubSpot, Inc.",
+      "theme_id": "enterprise-software",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is enterprise/application/productivity/workflow/design/developer/data-management software",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "INTU",
+      "company": "Intuit Inc.",
+      "theme_id": "enterprise-software",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is enterprise/application/productivity/workflow/design/developer/data-management software",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "MANH",
+      "company": "Manhattan Associates, Inc.",
+      "theme_id": "enterprise-software",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is enterprise/application/productivity/workflow/design/developer/data-management software",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "MNDY",
+      "company": "monday.com Ltd.",
+      "theme_id": "enterprise-software",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is enterprise/application/productivity/workflow/design/developer/data-management software",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "MSFT",
+      "company": "Microsoft Corporation",
+      "theme_id": "enterprise-software",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is enterprise/application/productivity/workflow/design/developer/data-management software",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "OTEX",
+      "company": "Open Text Corporation",
+      "theme_id": "enterprise-software",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is enterprise/application/productivity/workflow/design/developer/data-management software",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "PAYC",
+      "company": "Paycom Software, Inc.",
+      "theme_id": "enterprise-software",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is enterprise/application/productivity/workflow/design/developer/data-management software",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "PCOR",
+      "company": "Procore Technologies, Inc.",
+      "theme_id": "enterprise-software",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is enterprise/application/productivity/workflow/design/developer/data-management software",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "PCTY",
+      "company": "Paylocity Holding Corporation",
+      "theme_id": "enterprise-software",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is enterprise/application/productivity/workflow/design/developer/data-management software",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "PEGA",
+      "company": "Pegasystems Inc.",
+      "theme_id": "enterprise-software",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is enterprise/application/productivity/workflow/design/developer/data-management software",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "PTC",
+      "company": "PTC Inc.",
+      "theme_id": "enterprise-software",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is enterprise/application/productivity/workflow/design/developer/data-management software",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "TTAN",
+      "company": "ServiceTitan, Inc.",
+      "theme_id": "enterprise-software",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is enterprise/application/productivity/workflow/design/developer/data-management software",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "VEEV",
+      "company": "Veeva Systems Inc.",
+      "theme_id": "enterprise-software",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is enterprise/application/productivity/workflow/design/developer/data-management software",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "WDAY",
+      "company": "Workday, Inc.",
+      "theme_id": "enterprise-software",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is enterprise/application/productivity/workflow/design/developer/data-management software",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "WK",
+      "company": "Workiva Inc.",
+      "theme_id": "enterprise-software",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is enterprise/application/productivity/workflow/design/developer/data-management software",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "ABNB",
+      "company": "Airbnb, Inc.",
+      "theme_id": "internet-commerce",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal economics come from an online marketplace, digital community, streaming, online travel, advertising or internet-commerce platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "BKNG",
+      "company": "Booking Holdings Inc. Common Stock",
+      "theme_id": "internet-commerce",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal economics come from an online marketplace, digital community, streaming, online travel, advertising or internet-commerce platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "CARG",
+      "company": "CarGurus, Inc.",
+      "theme_id": "internet-commerce",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal economics come from an online marketplace, digital community, streaming, online travel, advertising or internet-commerce platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "CPNG",
+      "company": "Coupang, Inc.",
+      "theme_id": "internet-commerce",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal economics come from an online marketplace, digital community, streaming, online travel, advertising or internet-commerce platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "EBAY",
+      "company": "eBay Inc.",
+      "theme_id": "internet-commerce",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal economics come from an online marketplace, digital community, streaming, online travel, advertising or internet-commerce platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "ETSY",
+      "company": "Etsy, Inc.",
+      "theme_id": "internet-commerce",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal economics come from an online marketplace, digital community, streaming, online travel, advertising or internet-commerce platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "GRND",
+      "company": "Grindr Inc.",
+      "theme_id": "internet-commerce",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal economics come from an online marketplace, digital community, streaming, online travel, advertising or internet-commerce platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "MELI",
+      "company": "MercadoLibre, Inc.",
+      "theme_id": "internet-commerce",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal economics come from an online marketplace, digital community, streaming, online travel, advertising or internet-commerce platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "META",
+      "company": "Meta Platforms, Inc.",
+      "theme_id": "internet-commerce",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal economics come from an online marketplace, digital community, streaming, online travel, advertising or internet-commerce platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "MMYT",
+      "company": "MakeMyTrip Limited",
+      "theme_id": "internet-commerce",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal economics come from an online marketplace, digital community, streaming, online travel, advertising or internet-commerce platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "MTCH",
+      "company": "Match Group, Inc.",
+      "theme_id": "internet-commerce",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal economics come from an online marketplace, digital community, streaming, online travel, advertising or internet-commerce platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "NFLX",
+      "company": "Netflix, Inc.",
+      "theme_id": "internet-commerce",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal economics come from an online marketplace, digital community, streaming, online travel, advertising or internet-commerce platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "PINS",
+      "company": "Pinterest, Inc.",
+      "theme_id": "internet-commerce",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal economics come from an online marketplace, digital community, streaming, online travel, advertising or internet-commerce platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "RDDT",
+      "company": "Reddit, Inc.",
+      "theme_id": "internet-commerce",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal economics come from an online marketplace, digital community, streaming, online travel, advertising or internet-commerce platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "ROKU",
+      "company": "Roku, Inc.",
+      "theme_id": "internet-commerce",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal economics come from an online marketplace, digital community, streaming, online travel, advertising or internet-commerce platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "SHOP",
+      "company": "Shopify Inc.",
+      "theme_id": "internet-commerce",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal economics come from an online marketplace, digital community, streaming, online travel, advertising or internet-commerce platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "SNAP",
+      "company": "Snap Inc.",
+      "theme_id": "internet-commerce",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal economics come from an online marketplace, digital community, streaming, online travel, advertising or internet-commerce platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "SPOT",
+      "company": "Spotify Technology S.A.",
+      "theme_id": "internet-commerce",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal economics come from an online marketplace, digital community, streaming, online travel, advertising or internet-commerce platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "STUB",
+      "company": "StubHub Holdings, Inc.",
+      "theme_id": "internet-commerce",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal economics come from an online marketplace, digital community, streaming, online travel, advertising or internet-commerce platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "Z",
+      "company": "Zillow Group, Inc.",
+      "theme_id": "internet-commerce",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal economics come from an online marketplace, digital community, streaming, online travel, advertising or internet-commerce platform",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "CGNX",
+      "company": "Cognex Corporation",
+      "theme_id": "robotics-automation",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material products automate physical processes through robotics, machine vision, industrial control, autonomous machinery or robotic surgery",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "ROK",
+      "company": "Rockwell Automation, Inc.",
+      "theme_id": "robotics-automation",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material products automate physical processes through robotics, machine vision, industrial control, autonomous machinery or robotic surgery",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "SYM",
+      "company": "Symbotic Inc.",
+      "theme_id": "robotics-automation",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal/material products automate physical processes through robotics, machine vision, industrial control, autonomous machinery or robotic surgery",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "DE",
+      "company": "Deere & Company",
+      "theme_id": "robotics-automation",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "principal/material products automate physical processes through robotics, machine vision, industrial control, autonomous machinery or robotic surgery",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "EMR",
+      "company": "Emerson Electric Company",
+      "theme_id": "robotics-automation",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "principal/material products automate physical processes through robotics, machine vision, industrial control, autonomous machinery or robotic surgery",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "HON",
+      "company": "Honeywell International Inc.",
+      "theme_id": "robotics-automation",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "principal/material products automate physical processes through robotics, machine vision, industrial control, autonomous machinery or robotic surgery",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "TER",
+      "company": "Teradyne, Inc.",
+      "theme_id": "robotics-automation",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "principal/material products automate physical processes through robotics, machine vision, industrial control, autonomous machinery or robotic surgery",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "ZBRA",
+      "company": "Zebra Technologies Corporation",
+      "theme_id": "robotics-automation",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "principal/material products automate physical processes through robotics, machine vision, industrial control, autonomous machinery or robotic surgery",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "ONTO",
+      "company": "Onto Innovation Inc.",
+      "theme_id": "semiconductors",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is semiconductor design/manufacturing/foundry/memory/equipment/test, or supplies specialized EDA if Enabler",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "TER",
+      "company": "Teradyne, Inc.",
+      "theme_id": "semiconductors",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is semiconductor design/manufacturing/foundry/memory/equipment/test, or supplies specialized EDA if Enabler",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "VECO",
+      "company": "Veeco Instruments Inc.",
+      "theme_id": "semiconductors",
+      "final_role": "Core",
+      "decision": "keep",
+      "required_fact": "principal business is semiconductor design/manufacturing/foundry/memory/equipment/test, or supplies specialized EDA if Enabler",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "CDNS",
+      "company": "Cadence Design Systems, Inc.",
+      "theme_id": "semiconductors",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "principal business is semiconductor design/manufacturing/foundry/memory/equipment/test, or supplies specialized EDA if Enabler",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    },
+    {
+      "ticker": "SNPS",
+      "company": "Synopsys, Inc.",
+      "theme_id": "semiconductors",
+      "final_role": "Enabler",
+      "decision": "keep",
+      "required_fact": "principal business is semiconductor design/manufacturing/foundry/memory/equipment/test, or supplies specialized EDA if Enabler",
+      "preferred_source": "latest annual SEC filing (10-K/20-F/40-F); official IR/business description only if SEC filing is unavailable or less directly informative"
+    }
+  ]
+}

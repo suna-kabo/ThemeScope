@@ -1,0 +1,39 @@
+ThemeScope vNext — Gate D local UI checkpoint
+Approved Gate C: 7d3bf2e. Actual-account SIP PoC passed per user report:
+2026-11-04; 3 symbols; positive raw volume; 6 pages; SIP; 1Day;
+split,spin-off plus raw liquidity request; no IEX fallback.
+
+Phase 6 a8958f3: 266 full cases; 265 pass / 1 Windows skip; 3 focused cases pass.
+Phase 7 9080337: 268 full cases; 267 pass / 1 Windows skip; 2 focused cases pass.
+Phase 8 this checkpoint: 275 full cases; 274 pass / 1 Windows skip.
+Six focused local application/refresh cases pass. Compilation and JS checks pass.
+All 64 frozen Market Matrix cells and the legacy migration baselines remain passing.
+
+Rosters: separate SPY/QQQ effective/source metadata, exclusive interval updates,
+manual imports, advisory staleness, full configured coverage denominator, >=80%,
+same valid set for EMA21/50. IWM context only. No constituent lists invented.
+Earnings: missing key/event, quota/malformed response and exceptions -> Unavailable;
+reported dates only; earnings failure does not fail market refresh.
+
+Concurrency: second process/thread cannot prepare/publish during full refresh;
+lock covers both network and calculation. SQLite is not write-locked during network.
+Failed refresh preserves exact prior dashboard and exports. Background refresh,
+status polling, route/download consistency, same-origin POST/Host guards tested.
+Pending production launch config produces no active relationships or Primary TXT.
+
+Browser: real Chromium against loopback FastAPI; Refresh Data, combined TXT (AAA/BBB
+once each), Watchlist, Methodology link and mobile layout pass. Zero external browser
+requests; zero page errors. Standalone static preview/replay/download passed over
+loopback HTTP. Managed browser blocks file-scheme navigation; direct extracted-file
+opening and native Windows CMD remain local checks.
+
+Measured fixture: 16 symbols x 64 sessions; cold 1024 observations / 1 batch / 0.027s;
+warm 48 observations / 2 batches / 0.029s. No full-live-universe timing claim.
+
+Gate D preview uses fictional synthetic results only. See ui/index.html and ui-report.md.
+Runtime schema remains 2; no runtime DB, credentials or provider observations included.
+All 729 launch dates remain pending; no launch session chosen; evidence untouched.
+Still needed: approved actual SPY/QQQ rosters, evidence/industry-rule clearance,
+launch approval, native Windows launch/locking checks and large-universe performance.
+No main merge, public deployment, Market Matrix edits or legacy retirement.
+Stop before Phase 9.

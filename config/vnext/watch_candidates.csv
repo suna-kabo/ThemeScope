@@ -1,0 +1,22 @@
+ticker,company,theme_id,candidate_role,review_snapshot
+ALB,Albemarle Corporation,lithium-batteries,Core,2026-11-05
+CCJ,Cameco Corporation,uranium-miners,Core,2026-11-05
+NXE,Nexgen Energy Ltd.,uranium-miners,Core,2026-11-05
+CWEN,"Clearway Energy, Inc.",wind-energy,Enabler,2026-11-05
+GEV,GE Vernova Inc.,wind-energy,Enabler,2026-11-05
+NEE,"NextEra Energy, Inc.",wind-energy,Enabler,2026-11-05
+RNW,ReNew Energy Global plc,wind-energy,Core,2026-11-05
+ALM,Almonty Industries Inc.,rare-earths,Core,2026-11-05
+MP,MP Materials Corp.,rare-earths,Core,2026-11-05
+USAR,"USA Rare Earth, Inc.",rare-earths,Core,2026-11-05
+CLF,Cleveland-Cliffs Inc.,steel,Core,2026-11-05
+CMC,Commercial Metals Company,steel,Core,2026-11-05
+NUE,Nucor Corporation,steel,Core,2026-11-05
+STLD,"Steel Dynamics, Inc.",steel,Core,2026-11-05
+IONQ,"IonQ, Inc.",quantum-computing,Core,2026-11-05
+QBTS,D-Wave Quantum Inc.,quantum-computing,Core,2026-11-05
+QNT,Quantinuum Inc.,quantum-computing,Core,2026-11-05
+RGTI,"Rigetti Computing, Inc.",quantum-computing,Core,2026-11-05
+RBLX,Roblox Corporation,video-games,Core,2026-11-05
+TTWO,"Take-Two Interactive Software, Inc.",video-games,Core,2026-11-05
+U,Unity Software Inc.,video-games,Core,2026-11-05
