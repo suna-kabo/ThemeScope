@@ -1,3 +1,8 @@
+> **Historical checkpoint.** Status, counts and instructions below describe that
+> checkpoint, not current operation. Gate E is now **CLOSED**; Nov 6, Nov 9 and
+> Nov 10 live validation passed per the user. See the [closure record](../operations/gate-e-closure.md)
+> and [current documentation](../README.md).
+
 # ThemeScope vNext Product and Methodology Specification
 
 Status: approved implementation methodology; launch approved 2026-11-06
@@ -666,4 +671,4 @@ The first reviewed event is ROKU under Nasdaq ECA2026-806: Nov 6 last trade,
 Nov 9 terminal valuation, Nov 10 exclusive removal, USD 95.30 + 0.9799 FOXA shares.
 Nov 6 initialization and history are preserved; user-reported Nov 9 validation is PASS; real Nov 10 validation remains
 required. The separate versioned ledger and provenance/completeness conventions
-are documented in [terminal corporate actions](../vnext_terminal_actions.md).
+are documented in [terminal corporate actions](../archive/migration/vnext_terminal_actions.md).

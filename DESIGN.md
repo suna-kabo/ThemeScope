@@ -132,6 +132,8 @@ also LF because builders copy their bytes verbatim. Fresh simulated Windows/Unix
 checkouts produce identical public output and clean trees. Hash verification stays
 strict with the original pinned font/license SHA256 values; no new binary asset.
 
-User-reported Nov 6 and Nov 9 validation PASS; Nov 10 PENDING; Gate E OPEN.
+User-confirmed real Nov 6, Nov 9 and Nov 10 validation PASS; Gate E CLOSED.
+See the [authoritative closure record](docs/operations/gate-e-closure.md).
 Browser fixtures, screenshots and motion recordings are not real market evidence.
-No merge, deployment or new live credentials are part of this design pass.
+The original design pass used no live credentials and performed no deployment;
+its fixture evidence remains separate from chronological acceptance.

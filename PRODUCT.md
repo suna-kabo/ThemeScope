@@ -1,17 +1,23 @@
-# ThemeScope
+# ThemeScope product boundary
 
-ThemeScope vNext is a private local end-of-day equity-theme research dashboard.
-The user reads the unchanged SPY/QQQ Market Matrix, compares custom themes, and
-examines stocks against their actual theme peers. Research priorities are not
-trade entries. IWM supplies context only.
+ThemeScope is a local, end-of-day US equity research workspace: **Market → Themes
+→ Stocks**. SPY/QQQ determine Market Bias; IWM is context only. Custom themes drive
+Strength and synthetic Trend; stocks are researched against actual theme peers.
+Directional and Countertrend are research lenses, not technical entries or orders.
 
-Normal operation uses Alpaca historical SIP, calculated EMAs/returns and atomic
-SQLite snapshots; no daily CSV upload. Effective-dated manual SPY/QQQ rosters and
-quarterly/ad-hoc membership reviews remain separate configuration workflows.
-Only Core and Enabler enter calculations; multi-theme qualification is independent
-and combined export placement is deterministic. Thematic ETFs have no runtime role.
+Daily operation uses Alpaca historical SIP and a transactional SQLite snapshot,
+without daily CSV uploads. Memberships and manual SPY/QQQ rosters are reviewed,
+effective-dated configuration. Core/Enabler enter calculations; Related does not.
+Multi-theme qualification is independent and combined exports deduplicate by the
+approved deterministic rules. Thematic ETFs have no runtime calculation role.
 
-Launch rebalance: 2026-11-06 close; first earned session: 2026-11-09. Pre-launch
-market context is useful without fabricated theme history. Bootstrap initializes
-indicators only, never signals. Legacy historical readers remain explicitly
-available and their series cannot be spliced into vNext. No trading or deployment.
+The UI presents supplied results, contextual research inspectors, browser-local
+Saved and TradingView TXT exports. Optional public snapshots are frozen/read-only;
+the live backend remains local. No trade execution, stops, position sizing, intraday
+feed, automatic constituent scraping or silent data-source substitution.
+
+Launch rebalance remains Nov 6, 2026 close; first earned session is Nov 9.
+Legacy series are retained separately, never spliced into current history.
+[Gate E is CLOSED](docs/operations/gate-e-closure.md) after user-confirmed Nov 6,
+Nov 9 and Nov 10 real validation. See the [README](README.md) for setup and
+[current methodology](docs/methodology/README.md) for exact rules.

@@ -1,4 +1,4 @@
-# AGENTS.md — ThemeScope vNext
+# AGENTS.md — ThemeScope
 
 ## Product scope
 ThemeScope is a local, private, end-of-day research dashboard.
@@ -31,12 +31,12 @@ It is not a trade-execution or signal-execution system.
 - Alpaca integration is market-data only. Never call order/trading endpoints.
 - Never silently fall back from SIP to IEX.
 - Never commit credentials, .env files, local DBs or raw private market data.
-- Never publish market data or deploy a public site during this migration.
+- Never publish market data or deploy a public site without explicit authorization.
 - Local web server must bind 127.0.0.1 by default.
 
-## Migration safety
+## Branch and compatibility safety
 - main must stay usable.
-- Work only on refactor/themescope-vnext unless explicitly told otherwise.
+- Use a task branch for changes; keep main usable. Merge only within user-authorized scope.
 - Preserve legacy history.
 - Old ETF history and vNext history are incompatible.
 - Failed refresh must preserve the prior successful snapshot.
@@ -48,10 +48,17 @@ It is not a trade-execution or signal-execution system.
 - SQLite is standard-library sqlite3 unless a strong reason requires otherwise.
 - Provider calls must be mockable.
 - Every calculation has unit tests with edge cases.
-- Every phase ends with tests and a commit.
+- Each bounded implementation change ends with relevant checks and a commit.
 - Keep methodology constants centralized and versioned.
 
 ## Inspection workflow
-At major gates, generate a safe inspection/ directory and push a dedicated
-inspection/vnext-* checkpoint branch for user ZIP download. Never include secrets,
-runtime DB, raw market data or absolute personal paths.
+Original inspection/vnext-* branches and the historical inspection/ fixture are
+review provenance. Preserve them unless explicitly authorized to update them.
+New inspection bundles must be allowlisted and explicitly requested; never include
+secrets, runtime DB, raw market data or absolute personal paths.
+
+## Current milestone and documentation
+Gate E is CLOSED after user-confirmed real Nov 6, Nov 9 and Nov 10 validation.
+See [the closure record](docs/operations/gate-e-closure.md) and
+[current docs](docs/README.md). Original gate/phase reports are historical and do
+not reinstate obsolete blockers. Stable vnext schema/path identifiers remain intact.

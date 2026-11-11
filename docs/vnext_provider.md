@@ -1,5 +1,10 @@
+> **Historical checkpoint.** Status, counts and instructions below describe that
+> checkpoint, not current operation. Gate E is now **CLOSED**; Nov 6, Nov 9 and
+> Nov 10 live validation passed per the user. See the [closure record](operations/gate-e-closure.md)
+> and [current documentation](README.md).
+
 > Historical gate report. Launch/evidence status below describes that gate.
-> Current approved activation and Phase 9: [vnext_launch.md](vnext_launch.md).
+> Current approved activation and Phase 9: [vnext_launch.md](archive/migration/vnext_launch.md).
 
 # Gate C — provider and incremental cache
 

@@ -1,3 +1,8 @@
+> **Historical checkpoint.** Status, counts and instructions below describe that
+> checkpoint, not current operation. Gate E is now **CLOSED**; Nov 6, Nov 9 and
+> Nov 10 live validation passed per the user. See the [closure record](operations/gate-e-closure.md)
+> and [current documentation](README.md).
+
 # Gate D — local market and research application
 
 Gate C 7d3bf2e is approved. The user reports that the actual-account historical
@@ -248,7 +253,7 @@ remain visible. No uncommitted candidate enters the cache, failed refresh preser
 previous dashboard/TXT, and RefreshLock remains exclusive. No WAL switch or DB reset.
 
 Exact native retest commands and test coverage:
-[vnext_sqlite_lifecycle.md](vnext_sqlite_lifecycle.md). Keep existing runtime data.
+[vnext_sqlite_lifecycle.md](archive/migration/vnext_sqlite_lifecycle.md). Keep existing runtime data.
 Gate E remains open until native validation is rerun. Main, original inspection
 checkpoints, launch dates, evidence, formulas and provider semantics are unchanged.
 
@@ -266,5 +271,5 @@ Research uses original future-dated Core/Enabler relationships through a separat
 selection, never backdating official membership. Bootstrap research series cannot
 become official live history. Automatic cutover preserves L index=100 and E's first
 earned return. Existing Windows SQLite/status/lock hardening is unchanged.
-See [vnext_prelaunch_research.md](vnext_prelaunch_research.md) for native retesting.
+See [vnext_prelaunch_research.md](archive/migration/vnext_prelaunch_research.md) for native retesting.
 Gate E remains open pending native Windows validation of this path.

@@ -1,149 +1,126 @@
-# ThemeScope vNext
+# ThemeScope
 
-Private, local, end-of-day US equity research. Custom equity themes drive Theme
-Score, synthetic trend and stock-versus-peer Primary qualification. SPY/QQQ define
-market context; IWM is context only. Thematic ETFs have no calculation role.
+ThemeScope is a local, end-of-day US equity research workspace. It organizes a
+large stock universe into a practical **Market → Themes → Stocks** workflow:
+understand the market, compare custom equity themes, then research liquid stocks
+against their actual theme peers. It does not place trades or generate entry signals.
 
-The implementation branch is `refactor/themescope-vnext`. Phase 9 is implemented;
-Gate E non-live review is complete; the real native Windows Nov 6 launch refresh
-has passed. Real Nov 9/10 chronological checks remain deferred. The existing `inspection/` directory
-is the preserved historical Gate D fixture, not current launch status. The optional
-static synthetic demo below is separate from the private live workflow.
+## Research workflow
 
-## Local operation
+1. **Market:** SPY and QQQ determine Market Bias; breadth and price/EMA evidence
+   explain the result. IWM supplies small-cap context only.
+2. **Themes:** compare Theme Strength, synthetic-index Trend, Research Priority,
+   returns and breadth. The Theme Returns Map adds a compact cross-theme view.
+3. **Stocks:** switch between Directional and Countertrend research, inspect a
+   ticker's theme relationships, save research locally, and export TradingView TXT lists.
 
-Use Python 3.12 on Windows. From this branch's checkout:
+The midnight/cyan **Tidal Vector** interface includes contextual inspectors,
+search and filters, grouped research tables, keyboard navigation, compact/comfortable
+layouts, enlarged text, high contrast and reduced motion. See the
+[UI and workflow guide](docs/getting-started/research-workflow.md) and
+[design system](DESIGN.md). Historical review screenshots are indexed in the
+[design archive](design-plans/README.md); no live market screenshots are bundled.
+
+## Quick start on Windows
+
+Install **Python 3.12 or newer** with the Python launcher, then clone or download
+this repository. Run PowerShell from the repository folder:
 
 ```powershell
 .\setup.cmd
-$env:APCA_API_KEY_ID = '<your local market-data key>'
-$env:APCA_API_SECRET_KEY = '<your local secret>'
+$env:APCA_API_KEY_ID = '<your local Alpaca key>'
+$env:APCA_API_SECRET_KEY = '<your local Alpaca secret>'
 .\ThemeScope.cmd
 ```
 
-Keep credentials in your local environment, never in a file committed to Git.
-The application binds `127.0.0.1:8766`; select **Refresh Data** to retrieve the
-latest safely completed US session. `refresh.cmd` and `open-dashboard.cmd` both
-open this same application. They no longer accept legacy CSV/session arguments.
-No daily Stock or ETF CSV uploads are needed. First use seeds history; later
-refreshes use the incremental SQLite cache with a bounded repair window.
+The app opens at **http://127.0.0.1:8766**. Select **Refresh Data** after a US
+session has completed. Alpaca historical **SIP access is required**; ThemeScope
+never falls back to IEX. Keep keys in your local process environment, never in
+Git, chat, screenshots or published output. Optional `ALPHAVANTAGE_API_KEY`
+enables earnings dates; earnings are not required for refresh or qualification.
 
-Alpaca historical SIP is explicit: `1Day`, split/spin-off adjustment, separate
-raw daily liquidity observations and complete pagination. No IEX fallback or
-trading endpoints. See [provider validation](docs/vnext_provider.md) for local
-account diagnostics. The optional `ALPHAVANTAGE_API_KEY` enables earnings dates;
-missing earnings never fail refresh.
-
-For fictional offline data in an isolated database:
+To try deterministic fictional data without credentials:
 
 ```powershell
 .\ThemeScope.cmd --fixture
 ```
 
-On Linux/macOS: `python3 scripts/bootstrap_dev.py`, then
-`.venv-vnext/bin/python scripts/run_vnext.py` (optionally `--fixture`).
+Fixture mode uses a separate database. Linux/macOS setup, local SIP diagnostics,
+updates and troubleshooting are in the [setup guide](docs/getting-started/setup.md).
+No daily CSV uploads are required.
 
-## Approved launch and history
+## What Refresh does
 
-The launch rebalance is **November 6, 2026 at close**. All **726** retained
-relationships are effective **November 9, 2026**, the next XNYS session. Roles
-remain 659 Core, 62 Enabler and 5 Related; Related never enters calculations.
-Evidence review is complete and the industry registry is approved.
+Refresh selects the latest safely completed US session, retrieves historical SIP
+bars and calculates the research snapshot locally. A first run seeds history;
+warm runs fetch missing/new sessions and a bounded repair window using an
+incremental, auditable SQLite cache. Successful results and TXT exports publish
+atomically. A failed refresh leaves the previous successful snapshot available;
+always check the reported session and refresh status.
 
-Before November 6 completes, the latest safely completed session (normally the
-previous US close) supports **pre-launch research** with the approved launch universe:
-Theme Scores, bootstrap-derived current trends, priorities, stock peer W, Primary
-candidates and TXT exports. Related stays context only. A compact banner identifies
-the research session and the future official-history start. These are real research
-calculations from Alpaca SIP, not fictional fixture results or backdated membership.
+SPY/QQQ constituent rosters and theme membership are versioned, manually reviewed
+configuration. They are not daily scanner inputs. TradingView CSV market-data
+columns are never runtime prices. See [operations](docs/operations/refresh-and-maintenance.md).
 
-At the November 6 close every valid Active theme initializes its official index at
-100 using November 9 Core+Enabler holdings, earning no launch-day return. Launch-close
-research independently uses that approved universe for Scores, W, eligibility,
-breadth, Primary candidates and exports. The first
-genuine return is November 6 close to November 9 close. Pre-launch bootstrap series
-are never stored as official index history and never supply transitions. The launch
-initialization cannot provide a prior earned live signal; November 9 transitions
-remain unavailable. November 10 is the first possible compatible adjacent-live
-transition; real Nov 9/10 chronological checks remain deferred.
-See [pre-launch research](docs/vnext_prelaunch_research.md) for the explicit distinction.
+## Methodology at a glance
 
-Effective SPY **501** / QQQ **101** constituent rosters dated November 5 remain
-separate manually maintained universes. Missing either effective roster blocks
-theme activation and Primary outputs; staleness is advisory. IWM needs no roster.
-Only roster symbols are configured from those TradingView files; Alpaca supplies
-all runtime prices/volumes and ThemeScope calculates its own EMAs/breadth.
+- **Theme Strength:** 60% of the 21-session cross-theme percentile plus 40% of
+  the 63-session percentile, using median Core/Enabler stock price returns.
+- **Theme Trend:** a chain-linked synthetic theme index versus EMA21/EMA50;
+  holdings drift between approved rebalances.
+- **Peer delta (W):** a 60%/40% blend of 1M/3M stock-minus-peer returns, using
+  leave-one-out theme-peer medians.
+  It measures relative performance, not an expected return or entry signal.
+- **Daily eligibility:** close ≥ $5, 10-session average volume > 500,000 shares,
+  and target-session turnover ≥ $10 million. Eligibility does not change membership.
+- **Directional / Countertrend:** separate research lenses using the approved
+  market, theme and peer-relative rules. One stock can qualify in multiple themes;
+  combined TXT output uses deterministic deduplicated placement.
 
-Dashboard and TXT exports read one committed SQLite snapshot. Provider/calculation
-failure preserves the previous successful snapshot. Operational status-file
-failure is nonfatal. Back up `runtime/vnext/` while the app is stopped; fixture
-storage is separate. Never delete a database or replace genuine history with a
-fixture. There is no legacy-to-vNext series splice or automatic backfill of signals.
+Thematic ETFs have no calculation role. Breadth does not enter Theme Strength.
+Prices are split/spin-off adjusted, not dividend adjusted. Read the
+[current methodology](docs/methodology/README.md) for validity, lifecycle and exact rules.
 
-## Legacy compatibility
+## Optional frozen public snapshots
 
-Existing manual-CSV historical snapshots and readers are preserved unchanged.
-Use **`legacy-open-dashboard.cmd`** to view an existing legacy dashboard. Explicit
-`legacy-setup.cmd` / `legacy-refresh.cmd` retain historical reproduction tools;
-they are not the daily runtime. The old workflow is archived in
-[legacy manual CSV documentation](docs/legacy_manual_csv.md). Old ETF history
-remains a distinct incompatible series; it cannot initialize vNext transitions.
-Do not overwrite legacy `output/manual_csv/local_history` during updates.
+The local Python/SQLite app remains the live research runtime. A separate workflow
+can freeze an already committed local dashboard into a **read-only static site**;
+it does not host the database, refresh data or call providers. A synthetic static
+demo is also available. Both preserve browser-local Saved and TXT downloads.
 
-TXT identifiers use existing verified mappings, supplemented only by explicit
-Symbol/Exchange identifiers in the validated user-supplied TradingView review
-universe. No venue is guessed; unresolved identifiers still fail closed. Actual
-TradingView TXT import and a separately measured cold/warm comparison remain local
-checks. The user reports a successful native Windows Nov 6 SIP refresh: 899/899
-symbols, 44 Active themes, available research outputs and initialized official
-indices at 100, in approximately 52.5 seconds. The user reports SIP roster compatibility passed for November 5:
-501 SPY, 101 QQQ, zero missing/unusable, 12 pages, adjusted plus raw requests.
+Publishing is explicit and requires an existing Cloudflare Pages project and local
+Wrangler authentication. The current publisher deliberately requires a clean
+`refactor/themescope-vnext` checkout and matching Pages production branch, even
+though `main` is the product branch. Disable automatic Git deployments before
+using the real snapshot publisher. See [public snapshot operations](docs/operations/public-snapshots.md).
 
-## Static public presentation
+## Project and documentation
 
-Two separate workflows use the current UI. The synthetic Git build remains
-`python scripts/build_cloudflare_demo.py` → `dist/cloudflare-pages`.
-To publish an already committed real local dashboard snapshot, keep ThemeScope
-running and use `publish-public-snapshot.cmd 2026-11-06 themescope`, supplying the
-exact completed session and existing Pages project. It builds `dist/cloudflare-public`
-and uploads only frozen static assets using your local Wrangler login.
+| Location | Purpose |
+| --- | --- |
+| [src/themescope](src/themescope/) | Providers, calculations, research, SQLite and local API |
+| [static/vnext](static/vnext/) | Current UI; the directory name is a compatibility identifier |
+| [config](config/) | Methodology, reviewed memberships, manual rosters and evidence provenance |
+| [scripts](scripts/) | Launch, validation, maintenance and explicit snapshot tools |
+| [tests](tests/) | Offline unit, integration, numerical and browser regressions |
+| [docs](docs/README.md) | Setup, methodology, operations, architecture, development and archive |
+| [Gate E closure](docs/operations/gate-e-closure.md) | User-confirmed real Nov 6, Nov 9 and Nov 10 validation |
 
-**First disable automatic production Git deployments in the existing Pages project**
-and confirm its production branch is `refactor/themescope-vnext`; otherwise a Git
-build could overwrite the real snapshot with synthetic demo data. The helper
-checks a clean implementation branch, validates/filters the committed loopback
-snapshot and confirms a new production upload. No real snapshot enters Git.
+Developer setup and checks: [development guide](docs/development/README.md).
+The [project map](docs/development/project-structure.md) explains retained legacy
+files and generated/private directories. Historical migration and Gate A–E records
+remain in the [archive](docs/archive/README.md).
 
-The public site is read-only: no refresh, provider calls or cloud database. Saved
-remains browser-local. The local research runtime and financial behavior remain
-unchanged. Historical `inspection/ui` is not a deployment source. See
-[exact setup, safety checks and local publishing instructions](docs/cloudflare_demo.md).
-No real snapshot deployment has been performed by this source change.
+## Limits and non-goals
 
-## Developer checks
-
-```sh
-python -m unittest discover -s tests -v
-python scripts/validate_vnext_config.py
-python scripts/validate_membership_evidence.py
-python -m compileall -q src scripts tests
-node --check static/vnext/app.js
-node --check static/dashboard.js
-node tests/test_dashboard.js
-```
-
-Tests use fixtures/mocks, never account credentials. See
-[Phase 9 details](docs/vnext_launch.md), [methodology](docs/vnext/ThemeScope_vNext_Product_and_Methodology_Spec.md)
-and [PLANS.md](PLANS.md). Gate E and merging to main remain deferred. Public
-hosting is limited to the synthetic demo or explicitly published frozen dashboard
-snapshot; the live research backend remains local.
-
-Current review evidence and deferred checks: [Gate E review](docs/vnext_gate_e_review.md).
-
-Real Nov 9 validation exposed a terminal-merger gap: ROKU has no trading bar.
-The generic approved corporate-action framework accounts for its final holding
-value separately from stock research, retains Nov 6 history, and removes it from
-Nov 10 earned membership. **The native Nov 9 SIP rerun is still pending; Gate E
-remains open and Nov 10 validation is still required.** See
-[terminal accounting and exact Windows rerun steps](docs/vnext_terminal_actions.md).
-Do not publish a new real snapshot yet.
+- End-of-day research only: no intraday monitoring, execution, technical entries,
+  stops, position sizes or trade recommendations.
+- Provider access and complete usable inputs are required; unknown missing bars
+  fail closed. Only explicitly approved terminal events may supply holding-accounting values.
+- Saved is local to the browser/origin, not account-synced. Export identifiers must
+  be verified; no venue is guessed.
+- Legacy ETF-based history remains readable but cannot be spliced into the current
+  custom-theme series. Back up runtime data before updates.
+- Public snapshot publication is opt-in. This repository supplies no provider
+  redistribution rights. A project-wide software license has not been declared;
+  bundled Inter retains its [SIL Open Font License](static/Inter-LICENSE.txt).
