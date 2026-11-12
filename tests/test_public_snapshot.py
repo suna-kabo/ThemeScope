@@ -87,7 +87,9 @@ class PublicSnapshotTests(unittest.TestCase):
         self.assertEqual(first,{p.name:p.read_bytes() for p in output.iterdir()})
         self.assertEqual(set(first),builder.FILES)
         for name in builder.ASSETS:self.assertEqual(first[name],(ROOT/'static/vnext'/name).read_bytes())
-        payload=json.loads(first['preview.js'].decode().removeprefix('window.THEMESCOPE_STATIC_SOURCE = ').removesuffix(';\n'))
+        # Windows write_text uses CRLF for the generated wrapper; the JSON and
+        # all byte-for-byte rebuild/source-asset assertions remain unchanged.
+        payload=json.loads(first['preview.js'].decode().replace('\r\n','\n').removeprefix('window.THEMESCOPE_STATIC_SOURCE = ').removesuffix(';\n'))
         self.assertEqual(payload['mode'],'public_snapshot')
         self.assertFalse(payload['snapshot']['synthetic_fixture'])
         self.assertIn(b'connect-src \'none\'',first['_headers'])
