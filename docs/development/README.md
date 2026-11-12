@@ -69,3 +69,8 @@ and private generated state. The original [implementation handoff](../archive/ha
 and gate documents remain provenance rather than current task instructions.
 
 Latest dated repository check: [productionization verification](verification.md).
+
+Production publication uses clean main. Future experiments start in
+[feature/ui-v3 or a separate worktree](production-and-ui.md); historical gates are
+preserved as [annotated checkpoint tags](branch-checkpoints.md). Daily automation
+regressions are `test_update_public.py` and `test_update_public_integration.py`.

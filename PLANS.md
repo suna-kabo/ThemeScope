@@ -1,29 +1,32 @@
-# Repository status
+# Production branch and daily publication maintenance
 
-ThemeScope is the current local end-of-day research product. The migration Gates
-A–E are complete; **Gate E is CLOSED**, with user-confirmed real Nov 6 launch,
-Nov 9 first-earned and Nov 10 adjacent-live checks all **PASS**. Exact Nov 10
-counters and evidence scope: [authoritative closure](docs/operations/gate-e-closure.md).
+Gate E stays **CLOSED**: user-confirmed real Nov 6, Nov 9 and Nov 10 PASS.
+[Closure evidence](docs/operations/gate-e-closure.md) is unchanged.
 
-## Final repository productionization
+Current work is scoped to publishing/orchestration, tests, documentation and safe
+branch retirement. No financial/research, membership, lifecycle, ranking, provider,
+corporate-action, SQLite or export calculation changes.
 
-- [x] Inspect the clean current branch and complete tracked tree.
-- [x] Replace migration-first README with product, setup and research workflow.
-- [x] Organize current documentation by audience; archive phase/gate history.
-- [x] Keep inspection inputs, legacy compatibility, evidence and historical fixtures.
-- [x] Correct current lifecycle/launch status without rewriting historical results.
-- [x] Review links, Markdown rendering, offline regressions and final merge scope.
+- Main is the stable source/publisher branch; enforce clean checkout and source commit.
+- Add update-public.cmd using the existing live loopback refresh/API and validated publisher.
+- Verify exact successful session, fresh timestamp and complete non-fixture snapshot.
+- Preserve normal manual launch/publish debugging and owned-process-only cleanup.
+- Five permanent annotated gate tags were created and remotely verified before retirement.
+- Retire nine zero-ahead historical heads only after fresh ancestry/head/tag checks.
+- Keep the unrelated October delivery branch because it holds unique historical artifacts.
+- Keep refactor/themescope-vnext until the external cutover and real main publication succeed.
 
-This pass changes documentation only; no financial/research, membership, provider,
-cache, SQLite, lifecycle, UI or export behavior. The user authorizes committing and
-pushing on `refactor/themescope-vnext`, then merging the completed implementation to
-`main` after verification. Deployment is excluded. Original inspection refs stay fixed.
+External limits: GitHub default-branch mutation returned integration HTTP 403;
+Wrangler reported no authenticated Cloudflare account. Neither setting nor real
+publication can be claimed from Codex. Exact cutover steps and future UI work:
+[operations](docs/operations/public-snapshots.md),
+[main / feature-ui workflow](docs/development/production-and-ui.md),
+[checkpoint provenance](docs/development/branch-checkpoints.md).
 
-The full earlier diary is preserved in the
-[historical implementation log](docs/archive/migration/implementation-log.md).
-Standing rules: [AGENTS.md](AGENTS.md). Ongoing product goals: [GOALS.md](GOALS.md).
+The earlier repository task is [archived](docs/archive/migration/repository-productionization.md).
 
-Verification: 391 tests (389 passed, two existing Windows skips), both configuration/
-evidence validators, local and frozen-public fixture browser smokes, JS helpers/
-syntax, compilation, Markdown link/rendering and whitespace checks passed.
-See the [dated verification record](docs/development/verification.md).
+Verification passed: 422 tests (420 passed/two existing Windows skips), 25 focused
+automation cases, the real-loopback/fake-Cloudflare integration, 24 public cases,
+all eight browser programs with 96 clear axe audits, config/evidence validators,
+compilation, JS helpers/syntax and documentation link checks.
+See [the verification record](docs/development/verification.md).

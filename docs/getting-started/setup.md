@@ -95,3 +95,20 @@ change. The snapshot publisher has a separate branch requirement documented in
 
 See [refresh and backup](../operations/refresh-and-maintenance.md) for cache,
 recovery, rosters and reviewed membership maintenance.
+
+## Daily public update from main
+
+For publication use a Git clone, not a plain ZIP. Select stable main explicitly
+while the external default-branch change is pending:
+
+```powershell
+git switch main
+$env:APCA_API_KEY_ID = '<your local Alpaca key>'
+$env:APCA_API_SECRET_KEY = '<your local Alpaca secret>'
+.\update-public.cmd
+```
+
+Closing that PowerShell session removes the temporary variables. One-time Wrangler
+login and the existing Pages project's main production setting are prerequisites;
+see [daily publication and manual fallback](../operations/public-snapshots.md).
+The command never pulls updates or publishes from a dirty/experimental checkout.

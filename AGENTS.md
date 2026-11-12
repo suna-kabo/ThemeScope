@@ -52,8 +52,10 @@ It is not a trade-execution or signal-execution system.
 - Keep methodology constants centralized and versioned.
 
 ## Inspection workflow
-Original inspection/vnext-* branches and the historical inspection/ fixture are
-review provenance. Preserve them unless explicitly authorized to update them.
+Permanent annotated gate-a, gate-b, gate-c, gate-d and gate-e-closed tags preserve
+the original reviewed checkpoints. Do not move or replace them. The historical
+inspection/ fixture remains unchanged provenance. Merged inspection heads may be
+retired only after tag verification and an explicit branch-cleanup authorization.
 New inspection bundles must be allowlisted and explicitly requested; never include
 secrets, runtime DB, raw market data or absolute personal paths.
 
@@ -62,3 +64,10 @@ Gate E is CLOSED after user-confirmed real Nov 6, Nov 9 and Nov 10 validation.
 See [the closure record](docs/operations/gate-e-closure.md) and
 [current docs](docs/README.md). Original gate/phase reports are historical and do
 not reinstate obsolete blockers. Stable vnext schema/path identifiers remain intact.
+
+## Production workflow
+main is stable production and the only public publishing source. Future visual
+experiments start from main on feature/ui-v3 (or another scoped task branch).
+Production maintenance lands on main only after relevant checks and preserves
+financial/research rules. Keep the old implementation
+branch until the external default/Pages cutover and a real main publication succeed.

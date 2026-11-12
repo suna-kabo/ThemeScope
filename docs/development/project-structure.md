@@ -6,6 +6,7 @@
 | `AGENTS.md`, `GOALS.md`, `PLANS.md` | Contributor rules, standing goals and current repository status |
 | `DESIGN.md`, `MOTION.md` | Current Tidal Vector design/interaction contracts |
 | `ThemeScope.cmd`, `setup.cmd` | Windows runtime launch/setup |
+| `update-public.cmd`, `scripts/update_public.py` | Clean-main live refresh and verified static publication |
 | `refresh.cmd`, `open-dashboard.cmd` | Compatibility aliases for the current local app |
 | `src/themescope/local/` | FastAPI, guarded status, refresh and snapshot reads |
 | `src/themescope/providers/`, `storage/`, `themes/`, `research/`, `market/` | Current provider/cache, persistence and pure research layers |
@@ -20,7 +21,7 @@
 | `docs/development/`, `architecture/` | Contributor guides and implementation contracts |
 | `docs/archive/` | Historical handoff, gate, migration, UI and legacy reports |
 | `reports/archive/`, `design-plans/` | Historical implementation/design provenance and approved fixture reviews |
-| `inspection/` | Preserved historical Gate D synthetic checkpoint, not current launch status |
+| `inspection/` | Historical Gate D fixture; original gates are preserved by annotated tags |
 | `legacy-*.cmd`, `prepare-site.cmd`, `preview-site.cmd` | Explicit historical workflow/site tools; not daily current refresh |
 | `.github/workflows/` | Offline Linux and native-Windows regression workflows |
 | `requirements-vnext.txt` | Current local runtime pins |
