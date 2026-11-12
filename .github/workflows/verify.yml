@@ -2,7 +2,7 @@ name: Verify ThemeScope
 
 on:
   push:
-    branches: [main, download]
+    branches: [main]
   pull_request:
 
 jobs:

@@ -76,5 +76,5 @@ existing-holding values; they never create OHLCV or liquidity.
 
 [Gate E is CLOSED](gate-e-closure.md): real Nov 6, Nov 9 and Nov 10 passed per the
 user. Ordinary future refresh failures remain real failures; closure is not a waiver
-of completeness, account access or methodology. Publishing remains a separate
-explicit [public snapshot workflow](public-snapshots.md).
+of completeness, account access or methodology. The normal public daily command is `update-public.cmd` from clean main, with
+[verified refresh/publication and manual fallback](public-snapshots.md).

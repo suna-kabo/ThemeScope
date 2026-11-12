@@ -88,11 +88,16 @@ can freeze an already committed local dashboard into a **read-only static site**
 it does not host the database, refresh data or call providers. A synthetic static
 demo is also available. Both preserve browser-local Saved and TXT downloads.
 
-Publishing is explicit and requires an existing Cloudflare Pages project and local
+Normal daily publication is **temporary keys → `update-public.cmd` → done**. The
+helper starts/reuses the normal local server, waits for a new complete successful
+refresh and publishes exactly the session ThemeScope selected. Closing PowerShell
+removes the temporary keys; neither command writes them into source or CMD files.
+
+Publishing requires initial local setup, an existing Cloudflare Pages project and
 Wrangler authentication. The current publisher deliberately requires a clean
-`refactor/themescope-vnext` checkout and matching Pages production branch, even
-though `main` is the product branch. Disable automatic Git deployments before
-using the real snapshot publisher. See [public snapshot operations](docs/operations/public-snapshots.md).
+`main` checkout and a verified Pages production branch of `main`. Disable
+automatic Git deployments before using the real snapshot publisher. See [public snapshot operations](docs/operations/public-snapshots.md). That guide also
+records the external GitHub/Pages settings still needed for the main cutover.
 
 ## Project and documentation
 

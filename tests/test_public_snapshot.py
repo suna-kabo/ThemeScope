@@ -230,8 +230,9 @@ class PublisherTests(unittest.TestCase):
             builder.validate_output(Path(arguments[2]))
             if deploy_error:raise builder.SnapshotError('Wrangler failed')
             return 'not used as proof of production'
-        with patch.object(publisher,'clean_checkout',return_value=self.commit),patch.object(publisher,'build_locked',return_value=self.output),patch.object(publisher,'publication_lock',return_value=nullcontext()),patch.object(publisher,'wrangler',side_effect=fake),patch.object(publisher.time,'sleep'):
+        with patch.object(publisher,'clean_checkout',return_value=self.commit),patch.object(publisher,'build_locked',return_value=self.output),patch.object(publisher,'production_project') as settings,patch.object(publisher,'publication_lock',return_value=nullcontext()),patch.object(publisher,'wrangler',side_effect=fake),patch.object(publisher.time,'sleep'):
             publisher.publish('2026-11-06','themescope',self.root)
+            settings.assert_called_once()
         return calls
 
     def test_existing_production_verified_and_upload_is_exact_static_allowlist(self):
@@ -242,14 +243,16 @@ class PublisherTests(unittest.TestCase):
                 self.assertFalse(any('create' in c for c in calls))
 
     def test_missing_project_wrong_production_preview_and_pending_fail_closed(self):
-        for kwargs in (dict(projects=[]),dict(before=[]),dict(before=[dict(self.before[0],Branch='main')]),
+        for kwargs in (dict(projects=[]),dict(before=[]),dict(before=[dict(self.before[0],Environment='Preview')]),
                        dict(after=self.before),dict(after=[dict(self.after[0],Environment='Preview')]),
+                       dict(after=[dict(self.after[0],Branch='refactor/themescope-vnext')]),
                        dict(after=[dict(self.after[0],Status='Active')]),dict(after=[dict(self.after[0],Status='Failure')]),
                        dict(after=[dict(self.after[0],Status='unknown')]),dict(after=[dict(self.after[0],Source='b'*7)]),dict(deploy_error=True)):
             with self.subTest(kwargs=kwargs),self.assertRaises(builder.SnapshotError):self.run_publish(**kwargs)
 
     def test_branch_dirty_tree_and_tracked_artifacts_guard(self):
-        for results in (['main'],[publisher.BRANCH,' M changed'],[publisher.BRANCH,'','dist/private']):
+        self.assertEqual(publisher.BRANCH,'main')
+        for results in (['refactor/themescope-vnext'],[publisher.BRANCH,' M changed'],[publisher.BRANCH,'','dist/private']):
             with patch.object(publisher,'git',side_effect=results),self.assertRaises(builder.SnapshotError):publisher.clean_checkout(self.root)
         with patch.object(publisher,'git',side_effect=[publisher.BRANCH,'','',self.commit]):self.assertEqual(publisher.clean_checkout(self.root),self.commit)
         with self.assertRaises(builder.SnapshotError):publisher.publish('2026-11-06','bad;project',self.root)
@@ -267,3 +270,55 @@ class PublisherTests(unittest.TestCase):
             self.assertNotIn('shell',options)
         with patch.object(shutil,'which',return_value='npx'),patch.object(subprocess,'run',return_value=subprocess.CompletedProcess([],1,'private token','private path')):
             with self.assertRaisesRegex(builder.SnapshotError,'login'):publisher.wrangler([],self.root)
+
+    def test_first_main_upload_accepts_old_deployment_only_after_actual_settings_check(self):
+        calls=self.run_publish(before=[dict(self.before[0],Branch='refactor/themescope-vnext')])
+        self.assertEqual(sum(c[:2]==['pages','deploy'] for c in calls),1)
+
+
+class ProductionProjectTests(unittest.TestCase):
+    def setUp(self):
+        self.account='a'*32
+        self.identity={'loggedIn':True,'accounts':[{'id':self.account}]}
+        self.auth={'type':'oauth','token':'manufactured-cloudflare-token'}
+        self.settings={'name':'themescope','production_branch':'main',
+                       'source':{'config':{'production_deployments_enabled':False}}}
+
+    def verify(self,*,settings=None,identity=None,auth=None,raw=None,status=200,content='application/json'):
+        response=BytesIO(raw if raw is not None else json.dumps({'success':True,'result':self.settings if settings is None else settings}).encode())
+        response.status=status;response.headers=Message();response.headers['Content-Type']=content
+        def wrangler(args,directory):
+            if args==['whoami','--json']:return json.dumps(self.identity if identity is None else identity)
+            self.assertEqual(args,['auth','token','--json'])
+            return json.dumps(self.auth if auth is None else auth)
+        with patch.dict(os.environ,{},clear=True),patch.object(publisher,'wrangler',side_effect=wrangler),patch.object(publisher,'build_opener') as factory:
+            factory.return_value.open.return_value=response
+            publisher.production_project('themescope',ROOT)
+            return factory.return_value.open.call_args.args[0]
+
+    def test_configured_main_branch_and_disabled_git_builds_are_verified_with_secret_safe_auth(self):
+        request=self.verify()
+        self.assertEqual(request.full_url,'https://api.cloudflare.com/client/v4/accounts/'+self.account+'/pages/projects/themescope')
+        self.assertEqual(request.get_method(),'GET')
+        self.assertEqual(request.get_header('Authorization'),'Bearer '+self.auth['token'])
+        self.assertFalse(any('APCA' in k.upper() or 'ALPHAVANTAGE' in k.upper() for k,v in request.header_items()))
+        self.verify(settings=dict(self.settings,source=None)) # Direct upload has no Git source.
+        self.verify(auth={'type':'api_key','key':'manufactured-key','email':'fixture@example.invalid'})
+
+    def test_wrong_project_branch_or_automatic_git_builds_cannot_upload(self):
+        for settings in (dict(self.settings,production_branch='refactor/themescope-vnext'),dict(self.settings,name='another'),
+                         dict(self.settings,source={}),dict(self.settings,source={'config':{'production_deployments_enabled':True}})):
+            with self.subTest(settings=settings),self.assertRaises(builder.SnapshotError):self.verify(settings=settings)
+
+    def test_missing_ambiguous_account_and_auth_fail_closed(self):
+        for identity in ({},{'loggedIn':False,'accounts':[]},{'loggedIn':True,'accounts':[{'id':'bad'}]},
+                         {'loggedIn':True,'accounts':[{'id':'a'*32},{'id':'b'*32}]}):
+            with self.subTest(identity=identity),self.assertRaises(builder.SnapshotError):self.verify(identity=identity)
+        with self.assertRaises(builder.SnapshotError):self.verify(auth={})
+
+    def test_malformed_failure_redirects_and_nonjson_responses_are_sanitized(self):
+        for kwargs in ({'raw':b'private-payload-canary'},{'raw':b'{"success":true,"success":false}'},
+                       {'raw':b'{"success":false}'},{'status':403},{'content':'text/html'}):
+            with self.subTest(kwargs=kwargs),self.assertRaises(builder.SnapshotError) as caught:self.verify(**kwargs)
+            self.assertNotIn('private-payload-canary',str(caught.exception))
+        with self.assertRaises(builder.SnapshotError):publisher.NoCloudflareRedirect().redirect_request(None,None,None,None,None,None)

@@ -9,13 +9,17 @@ import subprocess
 import sys
 import tempfile
 import time
+from http.client import HTTPException
+from urllib.error import URLError
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from scripts.build_public_snapshot import (SnapshotError, build_locked, iso_session,
-    publication_lock, validate_output)
+    publication_lock, validate_output, strict_json)
 
-BRANCH = 'refactor/themescope-vnext'
+BRANCH = 'main'
+PROJECT_NAME = re.compile(r'[a-z0-9](?:[a-z0-9-]{0,56}[a-z0-9])?\Z')
 
 
 def git(*args, root=ROOT):
@@ -28,7 +32,7 @@ def git(*args, root=ROOT):
 
 def clean_checkout(root=ROOT):
     if git('branch', '--show-current', root=root) != BRANCH:
-        raise SnapshotError('Publish only from refactor/themescope-vnext.')
+        raise SnapshotError('Publish only from main.')
     if git('status', '--porcelain', '--untracked-files=all', root=root):
         raise SnapshotError('Commit or resolve working-tree changes before publishing.')
     # An ignored real artifact must never have been explicitly staged/tracked.
@@ -58,9 +62,8 @@ def wrangler(arguments, directory):
     return result.stdout
 
 
-def listing(arguments, directory):
+def metadata(output, expected=list):
     try:
-        output = wrangler(arguments, directory)
         def unique_object(pairs):
             row = {}
             for key, value in pairs:
@@ -71,7 +74,7 @@ def listing(arguments, directory):
         def invalid_constant(_):
             raise ValueError
         decoder = json.JSONDecoder(object_pairs_hook=unique_object, parse_constant=invalid_constant)
-        # A JSON string containing brackets is not a top-level metadata array.
+        # A JSON string containing brackets is not a metadata payload.
         if output.lstrip('\ufeff \t\r\n').startswith('"'):
             raise ValueError
         data = None
@@ -88,7 +91,8 @@ def listing(arguments, directory):
             candidate, offset = decoder.raw_decode(output, start)
             # Never recover an inner array from a broken/object wrapper, choose
             # among multiple payloads, or ignore malformed JSON after a payload.
-            if data is not None or not isinstance(candidate, list) or any(not isinstance(row, dict) for row in candidate):
+            if (data is not None or not isinstance(candidate, expected) or
+                    expected is list and any(not isinstance(row, dict) for row in candidate)):
                 raise ValueError
             data = candidate
         if data is None:
@@ -98,12 +102,72 @@ def listing(arguments, directory):
         raise SnapshotError('Wrangler returned unexpected JSON; nothing further will be deployed.') from None
 
 
+def listing(arguments, directory):
+    return metadata(wrangler(arguments, directory))
+
+
+class NoCloudflareRedirect(HTTPRedirectHandler):
+    def redirect_request(self, *args, **kwargs):
+        raise SnapshotError('Cloudflare project verification redirected; publish stopped.')
+
+
+def production_project(project, directory):
+    """Read actual Pages settings using supported Wrangler auth, never log tokens.
+
+    The last production deployment may legitimately predate the branch cutover.
+    Its branch is historical evidence, not the project's configured production branch.
+    """
+    identity = metadata(wrangler(['whoami', '--json'], directory), dict)
+    accounts = identity.get('accounts')
+    if (identity.get('loggedIn') is not True or not isinstance(accounts, list) or
+            not accounts or any(not isinstance(a, dict) for a in accounts)):
+        raise SnapshotError('Cannot verify the authenticated Cloudflare account.')
+    ids = [a.get('id') for a in accounts]
+    if any(not isinstance(a, str) or not re.fullmatch(r'[a-fA-F0-9]{32}', a) for a in ids):
+        raise SnapshotError('Cannot verify the authenticated Cloudflare account.')
+    account = os.environ.get('CLOUDFLARE_ACCOUNT_ID')
+    if account is None and len(ids) == 1:
+        account = ids[0]
+    if account not in ids:
+        raise SnapshotError('Select the intended Cloudflare account with CLOUDFLARE_ACCOUNT_ID.')
+    auth = metadata(wrangler(['auth', 'token', '--json'], directory), dict)
+    headers = {'Accept': 'application/json'}
+    if auth.get('type') in ('oauth', 'api_token') and isinstance(auth.get('token'), str) and auth['token']:
+        headers['Authorization'] = 'Bearer ' + auth['token']
+    elif auth.get('type') == 'api_key' and all(isinstance(auth.get(k), str) and auth[k] for k in ('key', 'email')):
+        headers.update({'X-Auth-Key': auth['key'], 'X-Auth-Email': auth['email']})
+    else:
+        raise SnapshotError('Cannot verify local Wrangler authentication.')
+    request = Request('https://api.cloudflare.com/client/v4/accounts/' + account +
+                      '/pages/projects/' + project, headers=headers)
+    try:
+        # Keep the normal trusted HTTPS proxy/CA configuration. No redirects can
+        # forward Cloudflare auth to another host; market-data auth is never used.
+        with build_opener(NoCloudflareRedirect()).open(request, timeout=15) as response:
+            if response.status != 200 or response.headers.get_content_type() != 'application/json':
+                raise SnapshotError('Cannot verify Cloudflare Pages project settings.')
+            raw = response.read(1024 * 1024 + 1)
+        if len(raw) > 1024 * 1024:
+            raise SnapshotError('Cannot verify Cloudflare Pages project settings.')
+        payload = strict_json(raw.decode('utf-8'))
+    except (OSError, URLError, UnicodeError, HTTPException, ValueError, TypeError):
+        raise SnapshotError('Cannot verify Cloudflare Pages project settings; nothing will be uploaded.') from None
+    settings = payload.get('result') if isinstance(payload, dict) and payload.get('success') is True else None
+    if not isinstance(settings, dict) or settings.get('name') != project or settings.get('production_branch') != BRANCH:
+        raise SnapshotError('Set the existing Pages project production branch to main before publishing.')
+    source = settings.get('source')
+    if source is not None:
+        config = source.get('config') if isinstance(source, dict) else None
+        if not isinstance(config, dict) or config.get('production_deployments_enabled') is not False:
+            raise SnapshotError('Disable automatic production Git deployments in Pages before publishing.')
+
+
 def deployment_rows(project, directory):
     return listing(['pages','deployment','list','--project-name='+project,'--environment=production','--json'], directory)
 
 
 def publish(expected, project, root=ROOT):
-    if not iso_session(expected) or not re.fullmatch(r'[a-z0-9](?:[a-z0-9-]{0,56}[a-z0-9])?', project):
+    if not iso_session(expected) or not PROJECT_NAME.fullmatch(project):
         raise SnapshotError('Use YYYY-MM-DD and the exact existing Pages project name.')
     commit = clean_checkout(root)
     with publication_lock(root):
@@ -114,9 +178,10 @@ def publish(expected, project, root=ROOT):
             matches = [p for p in projects if p.get('Project Name') == project]
             if len(matches) != 1:
                 raise SnapshotError('Existing Pages project not found. No project will be created.')
+            production_project(project, directory)
             before = deployment_rows(project, directory)
-            if not before or before[0].get('Environment') != 'Production' or before[0].get('Branch') != BRANCH:
-                raise SnapshotError('Existing production deployment must use refactor/themescope-vnext. Check Pages branch settings first.')
+            if not before or before[0].get('Environment') != 'Production':
+                raise SnapshotError('Cannot verify the existing production deployment; publish stopped.')
             known_ids = {d.get('Id') for d in before}
             print('Target existing Pages production project: '+project+' · '+BRANCH)
             print('Automatic production Git builds must be disabled in Pages before publishing.')
