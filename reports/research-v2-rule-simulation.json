@@ -1,0 +1,6460 @@
+{
+  "broad_pullbacks": [
+    {
+      "research_stocks": 330,
+      "researchable_themes": 21,
+      "session": "2026-02-06",
+      "states": {
+        "Lagging": 22,
+        "Leading": 21,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 355,
+      "researchable_themes": 22,
+      "session": "2026-02-09",
+      "states": {
+        "Lagging": 21,
+        "Leading": 22,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 317,
+      "researchable_themes": 24,
+      "session": "2026-02-13",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 17,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 407,
+      "researchable_themes": 27,
+      "session": "2026-02-17",
+      "states": {
+        "Fading": 7,
+        "Improving": 2,
+        "Lagging": 16,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 393,
+      "researchable_themes": 25,
+      "session": "2026-02-18",
+      "states": {
+        "Fading": 3,
+        "Improving": 3,
+        "Lagging": 18,
+        "Leading": 19,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 335,
+      "researchable_themes": 24,
+      "session": "2026-02-19",
+      "states": {
+        "Fading": 4,
+        "Lagging": 19,
+        "Leading": 20,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 382,
+      "researchable_themes": 24,
+      "session": "2026-02-27",
+      "states": {
+        "Fading": 4,
+        "Improving": 1,
+        "Lagging": 19,
+        "Leading": 19,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 399,
+      "researchable_themes": 25,
+      "session": "2026-03-03",
+      "states": {
+        "Fading": 4,
+        "Improving": 1,
+        "Lagging": 18,
+        "Leading": 20,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 386,
+      "researchable_themes": 25,
+      "session": "2026-03-04",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 18,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 415,
+      "researchable_themes": 26,
+      "session": "2026-03-05",
+      "states": {
+        "Fading": 3,
+        "Improving": 5,
+        "Lagging": 17,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 429,
+      "researchable_themes": 27,
+      "session": "2026-03-06",
+      "states": {
+        "Fading": 4,
+        "Improving": 7,
+        "Lagging": 16,
+        "Leading": 16,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 382,
+      "researchable_themes": 26,
+      "session": "2026-03-09",
+      "states": {
+        "Fading": 2,
+        "Improving": 6,
+        "Lagging": 17,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 380,
+      "researchable_themes": 24,
+      "session": "2026-03-11",
+      "states": {
+        "Fading": 2,
+        "Improving": 9,
+        "Lagging": 19,
+        "Leading": 13,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 334,
+      "researchable_themes": 22,
+      "session": "2026-03-12",
+      "states": {
+        "Fading": 1,
+        "Improving": 3,
+        "Lagging": 21,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 429,
+      "researchable_themes": 25,
+      "session": "2026-03-13",
+      "states": {
+        "Fading": 1,
+        "Improving": 4,
+        "Lagging": 18,
+        "Leading": 20,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 368,
+      "researchable_themes": 23,
+      "session": "2026-03-16",
+      "states": {
+        "Fading": 4,
+        "Improving": 1,
+        "Lagging": 20,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 375,
+      "researchable_themes": 23,
+      "session": "2026-03-17",
+      "states": {
+        "Fading": 2,
+        "Improving": 5,
+        "Lagging": 20,
+        "Leading": 16,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 337,
+      "researchable_themes": 21,
+      "session": "2026-03-18",
+      "states": {
+        "Fading": 2,
+        "Improving": 3,
+        "Lagging": 22,
+        "Leading": 16,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 297,
+      "researchable_themes": 19,
+      "session": "2026-03-19",
+      "states": {
+        "Fading": 1,
+        "Lagging": 24,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 431,
+      "researchable_themes": 25,
+      "session": "2026-03-20",
+      "states": {
+        "Fading": 3,
+        "Improving": 3,
+        "Lagging": 18,
+        "Leading": 19,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 399,
+      "researchable_themes": 24,
+      "session": "2026-03-23",
+      "states": {
+        "Fading": 1,
+        "Improving": 2,
+        "Lagging": 19,
+        "Leading": 21,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 384,
+      "researchable_themes": 24,
+      "session": "2026-03-24",
+      "states": {
+        "Fading": 5,
+        "Improving": 5,
+        "Lagging": 19,
+        "Leading": 14,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 383,
+      "researchable_themes": 24,
+      "session": "2026-03-25",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 17,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 386,
+      "researchable_themes": 23,
+      "session": "2026-03-26",
+      "states": {
+        "Fading": 2,
+        "Improving": 4,
+        "Lagging": 20,
+        "Leading": 17,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 363,
+      "researchable_themes": 22,
+      "session": "2026-03-27",
+      "states": {
+        "Fading": 1,
+        "Improving": 3,
+        "Lagging": 21,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 370,
+      "researchable_themes": 23,
+      "session": "2026-03-30",
+      "states": {
+        "Fading": 1,
+        "Improving": 2,
+        "Lagging": 20,
+        "Leading": 20,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 331,
+      "researchable_themes": 19,
+      "session": "2026-03-31",
+      "states": {
+        "Fading": 3,
+        "Improving": 1,
+        "Lagging": 24,
+        "Leading": 15,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 344,
+      "researchable_themes": 20,
+      "session": "2026-04-01",
+      "states": {
+        "Fading": 2,
+        "Improving": 2,
+        "Lagging": 23,
+        "Leading": 16,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 419,
+      "researchable_themes": 28,
+      "session": "2026-05-18",
+      "states": {
+        "Fading": 1,
+        "Improving": 6,
+        "Lagging": 16,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 421,
+      "researchable_themes": 27,
+      "session": "2026-05-19",
+      "states": {
+        "Fading": 1,
+        "Improving": 6,
+        "Lagging": 17,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 357,
+      "researchable_themes": 24,
+      "session": "2026-05-20",
+      "states": {
+        "Fading": 2,
+        "Improving": 4,
+        "Lagging": 20,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 466,
+      "researchable_themes": 27,
+      "session": "2026-05-21",
+      "states": {
+        "Improving": 5,
+        "Lagging": 17,
+        "Leading": 22
+      }
+    },
+    {
+      "research_stocks": 381,
+      "researchable_themes": 25,
+      "session": "2026-06-05",
+      "states": {
+        "Fading": 3,
+        "Improving": 5,
+        "Lagging": 19,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 445,
+      "researchable_themes": 28,
+      "session": "2026-06-08",
+      "states": {
+        "Fading": 3,
+        "Improving": 7,
+        "Lagging": 16,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 404,
+      "researchable_themes": 26,
+      "session": "2026-06-09",
+      "states": {
+        "Fading": 3,
+        "Improving": 5,
+        "Lagging": 18,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 482,
+      "researchable_themes": 29,
+      "session": "2026-06-10",
+      "states": {
+        "Fading": 6,
+        "Improving": 6,
+        "Lagging": 15,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 406,
+      "researchable_themes": 26,
+      "session": "2026-06-11",
+      "states": {
+        "Fading": 2,
+        "Improving": 7,
+        "Lagging": 18,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 399,
+      "researchable_themes": 24,
+      "session": "2026-06-23",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 20,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 405,
+      "researchable_themes": 26,
+      "session": "2026-06-24",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 18,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 479,
+      "researchable_themes": 29,
+      "session": "2026-06-25",
+      "states": {
+        "Fading": 4,
+        "Improving": 7,
+        "Lagging": 15,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 485,
+      "researchable_themes": 29,
+      "session": "2026-06-26",
+      "states": {
+        "Fading": 5,
+        "Improving": 8,
+        "Lagging": 15,
+        "Leading": 16
+      }
+    },
+    {
+      "research_stocks": 476,
+      "researchable_themes": 28,
+      "session": "2026-06-29",
+      "states": {
+        "Fading": 6,
+        "Improving": 6,
+        "Lagging": 16,
+        "Leading": 16
+      }
+    },
+    {
+      "research_stocks": 435,
+      "researchable_themes": 24,
+      "session": "2026-07-08",
+      "states": {
+        "Fading": 2,
+        "Improving": 2,
+        "Lagging": 20,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 406,
+      "researchable_themes": 23,
+      "session": "2026-07-13",
+      "states": {
+        "Fading": 1,
+        "Improving": 2,
+        "Lagging": 21,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 453,
+      "researchable_themes": 27,
+      "session": "2026-07-16",
+      "states": {
+        "Fading": 2,
+        "Improving": 5,
+        "Lagging": 17,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 443,
+      "researchable_themes": 25,
+      "session": "2026-07-17",
+      "states": {
+        "Fading": 3,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 449,
+      "researchable_themes": 25,
+      "session": "2026-07-20",
+      "states": {
+        "Fading": 2,
+        "Improving": 4,
+        "Lagging": 19,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 443,
+      "researchable_themes": 24,
+      "session": "2026-07-21",
+      "states": {
+        "Fading": 2,
+        "Improving": 3,
+        "Lagging": 20,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 453,
+      "researchable_themes": 26,
+      "session": "2026-07-22",
+      "states": {
+        "Fading": 4,
+        "Improving": 4,
+        "Lagging": 18,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 471,
+      "researchable_themes": 27,
+      "session": "2026-07-23",
+      "states": {
+        "Fading": 4,
+        "Improving": 6,
+        "Lagging": 17,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 458,
+      "researchable_themes": 26,
+      "session": "2026-07-24",
+      "states": {
+        "Fading": 3,
+        "Improving": 3,
+        "Lagging": 18,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 470,
+      "researchable_themes": 27,
+      "session": "2026-07-27",
+      "states": {
+        "Fading": 5,
+        "Improving": 4,
+        "Lagging": 17,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 487,
+      "researchable_themes": 27,
+      "session": "2026-07-28",
+      "states": {
+        "Fading": 6,
+        "Improving": 3,
+        "Lagging": 17,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 484,
+      "researchable_themes": 28,
+      "session": "2026-07-29",
+      "states": {
+        "Fading": 8,
+        "Improving": 5,
+        "Lagging": 16,
+        "Leading": 15
+      }
+    },
+    {
+      "research_stocks": 339,
+      "researchable_themes": 23,
+      "session": "2026-08-11",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 21,
+        "Leading": 16
+      }
+    },
+    {
+      "research_stocks": 476,
+      "researchable_themes": 26,
+      "session": "2026-08-18",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 18,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 412,
+      "researchable_themes": 24,
+      "session": "2026-08-19",
+      "states": {
+        "Fading": 2,
+        "Improving": 2,
+        "Lagging": 20,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 395,
+      "researchable_themes": 22,
+      "session": "2026-08-20",
+      "states": {
+        "Fading": 3,
+        "Improving": 1,
+        "Lagging": 22,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 393,
+      "researchable_themes": 24,
+      "session": "2026-08-21",
+      "states": {
+        "Fading": 1,
+        "Improving": 3,
+        "Lagging": 20,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 400,
+      "researchable_themes": 25,
+      "session": "2026-08-24",
+      "states": {
+        "Fading": 1,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 397,
+      "researchable_themes": 24,
+      "session": "2026-08-25",
+      "states": {
+        "Fading": 2,
+        "Improving": 4,
+        "Lagging": 20,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 416,
+      "researchable_themes": 25,
+      "session": "2026-08-26",
+      "states": {
+        "Improving": 5,
+        "Lagging": 19,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 403,
+      "researchable_themes": 24,
+      "session": "2026-09-01",
+      "states": {
+        "Fading": 5,
+        "Improving": 1,
+        "Lagging": 20,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 459,
+      "researchable_themes": 27,
+      "session": "2026-09-02",
+      "states": {
+        "Fading": 2,
+        "Improving": 5,
+        "Lagging": 17,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 383,
+      "researchable_themes": 23,
+      "session": "2026-09-10",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 21,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 426,
+      "researchable_themes": 25,
+      "session": "2026-09-11",
+      "states": {
+        "Fading": 4,
+        "Improving": 2,
+        "Lagging": 19,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 388,
+      "researchable_themes": 23,
+      "session": "2026-09-14",
+      "states": {
+        "Fading": 2,
+        "Improving": 1,
+        "Lagging": 21,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 456,
+      "researchable_themes": 27,
+      "session": "2026-09-15",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 17,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 405,
+      "researchable_themes": 24,
+      "session": "2026-09-16",
+      "states": {
+        "Fading": 5,
+        "Improving": 1,
+        "Lagging": 20,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 431,
+      "researchable_themes": 27,
+      "session": "2026-09-28",
+      "states": {
+        "Fading": 2,
+        "Improving": 5,
+        "Lagging": 17,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 394,
+      "researchable_themes": 25,
+      "session": "2026-09-29",
+      "states": {
+        "Fading": 2,
+        "Improving": 5,
+        "Lagging": 19,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 416,
+      "researchable_themes": 24,
+      "session": "2026-09-30",
+      "states": {
+        "Fading": 2,
+        "Improving": 4,
+        "Lagging": 20,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 376,
+      "researchable_themes": 23,
+      "session": "2026-10-13",
+      "states": {
+        "Improving": 2,
+        "Lagging": 21,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 376,
+      "researchable_themes": 23,
+      "session": "2026-10-14",
+      "states": {
+        "Fading": 3,
+        "Lagging": 21,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 372,
+      "researchable_themes": 22,
+      "session": "2026-10-15",
+      "states": {
+        "Fading": 4,
+        "Improving": 1,
+        "Lagging": 22,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 439,
+      "researchable_themes": 28,
+      "session": "2026-10-16",
+      "states": {
+        "Fading": 6,
+        "Improving": 6,
+        "Lagging": 16,
+        "Leading": 16
+      }
+    },
+    {
+      "research_stocks": 416,
+      "researchable_themes": 26,
+      "session": "2026-10-19",
+      "states": {
+        "Fading": 6,
+        "Improving": 4,
+        "Lagging": 18,
+        "Leading": 16
+      }
+    },
+    {
+      "research_stocks": 446,
+      "researchable_themes": 27,
+      "session": "2026-10-20",
+      "states": {
+        "Fading": 5,
+        "Improving": 4,
+        "Lagging": 17,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 445,
+      "researchable_themes": 26,
+      "session": "2026-10-22",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 18,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 462,
+      "researchable_themes": 27,
+      "session": "2026-10-23",
+      "states": {
+        "Fading": 2,
+        "Improving": 3,
+        "Lagging": 17,
+        "Leading": 22
+      }
+    },
+    {
+      "research_stocks": 420,
+      "researchable_themes": 26,
+      "session": "2026-10-26",
+      "states": {
+        "Fading": 3,
+        "Improving": 4,
+        "Lagging": 18,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 430,
+      "researchable_themes": 25,
+      "session": "2026-10-30",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 469,
+      "researchable_themes": 28,
+      "session": "2026-11-02",
+      "states": {
+        "Fading": 5,
+        "Improving": 5,
+        "Lagging": 16,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 433,
+      "researchable_themes": 26,
+      "session": "2026-11-03",
+      "states": {
+        "Fading": 4,
+        "Improving": 6,
+        "Lagging": 18,
+        "Leading": 16
+      }
+    },
+    {
+      "research_stocks": 434,
+      "researchable_themes": 26,
+      "session": "2026-11-04",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 18,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 422,
+      "researchable_themes": 26,
+      "session": "2026-11-05",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 18,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 398,
+      "researchable_themes": 24,
+      "session": "2026-11-06",
+      "states": {
+        "Fading": 1,
+        "Improving": 1,
+        "Lagging": 20,
+        "Leading": 22
+      }
+    },
+    {
+      "research_stocks": 409,
+      "researchable_themes": 25,
+      "session": "2026-11-10",
+      "states": {
+        "Fading": 3,
+        "Improving": 1,
+        "Lagging": 19,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 382,
+      "researchable_themes": 22,
+      "session": "2026-11-11",
+      "states": {
+        "Fading": 3,
+        "Lagging": 22,
+        "Leading": 19
+      }
+    }
+  ],
+  "inputs": {
+    "identity": "alpaca:v2:sip:1Day:split,spin-off:raw-volume",
+    "observations": 229900,
+    "observations_sha256": "778e11e9ccb2b636f4be8812480cc949f9a3e2e8ccaffa92b1aa169b05ae05a5",
+    "official_available_trends": {
+      "Bearish": 18,
+      "Bullish": 16,
+      "Mixed": 3,
+      "Unavailable": 7
+    },
+    "official_sessions": [
+      "2026-11-05",
+      "2026-11-06",
+      "2026-11-09",
+      "2026-11-10",
+      "2026-11-11",
+      "2026-11-12"
+    ],
+    "pinned_run": 8,
+    "snapshot_session": "2026-11-12"
+  },
+  "liquidity_candidates": [
+    {
+      "daily_membership_changes": {
+        "maximum": 3,
+        "mean": 0.446,
+        "minimum": 0
+      },
+      "eligible_stocks": {
+        "maximum": 663,
+        "mean": 658.263,
+        "minimum": 649
+      },
+      "floor_millions": 5,
+      "latest_eligible": 662,
+      "latest_missing_history": 0,
+      "window": 10
+    },
+    {
+      "daily_membership_changes": {
+        "maximum": 4,
+        "mean": 0.736,
+        "minimum": 0
+      },
+      "eligible_stocks": {
+        "maximum": 663,
+        "mean": 655.469,
+        "minimum": 645
+      },
+      "floor_millions": 10,
+      "latest_eligible": 662,
+      "latest_missing_history": 0,
+      "window": 10
+    },
+    {
+      "daily_membership_changes": {
+        "maximum": 5,
+        "mean": 1.591,
+        "minimum": 0
+      },
+      "eligible_stocks": {
+        "maximum": 658,
+        "mean": 646.082,
+        "minimum": 629
+      },
+      "floor_millions": 20,
+      "latest_eligible": 656,
+      "latest_missing_history": 0,
+      "window": 10
+    },
+    {
+      "daily_membership_changes": {
+        "maximum": 10,
+        "mean": 3.295,
+        "minimum": 0
+      },
+      "eligible_stocks": {
+        "maximum": 652,
+        "mean": 630.108,
+        "minimum": 608
+      },
+      "floor_millions": 30,
+      "latest_eligible": 646,
+      "latest_missing_history": 0,
+      "window": 10
+    },
+    {
+      "daily_membership_changes": {
+        "maximum": 3,
+        "mean": 0.44,
+        "minimum": 0
+      },
+      "eligible_stocks": {
+        "maximum": 663,
+        "mean": 657.902,
+        "minimum": 650
+      },
+      "floor_millions": 5,
+      "latest_eligible": 662,
+      "latest_missing_history": 0,
+      "window": 20
+    },
+    {
+      "daily_membership_changes": {
+        "maximum": 5,
+        "mean": 0.58,
+        "minimum": 0
+      },
+      "eligible_stocks": {
+        "maximum": 663,
+        "mean": 655.082,
+        "minimum": 646
+      },
+      "floor_millions": 10,
+      "latest_eligible": 662,
+      "latest_missing_history": 0,
+      "window": 20
+    },
+    {
+      "daily_membership_changes": {
+        "maximum": 4,
+        "mean": 0.912,
+        "minimum": 0
+      },
+      "eligible_stocks": {
+        "maximum": 658,
+        "mean": 646.923,
+        "minimum": 632
+      },
+      "floor_millions": 20,
+      "latest_eligible": 653,
+      "latest_missing_history": 0,
+      "window": 20
+    },
+    {
+      "daily_membership_changes": {
+        "maximum": 6,
+        "mean": 1.902,
+        "minimum": 0
+      },
+      "eligible_stocks": {
+        "maximum": 649,
+        "mean": 631.742,
+        "minimum": 615
+      },
+      "floor_millions": 30,
+      "latest_eligible": 648,
+      "latest_missing_history": 0,
+      "window": 20
+    }
+  ],
+  "rank_absolute_daily_change": {
+    "maximum": 27,
+    "mean": 3.189,
+    "minimum": 0
+  },
+  "schema": "themescope-research-v2-diagnostics-1",
+  "scope": {
+    "first_session": "2026-02-06",
+    "last_session": "2026-11-12",
+    "membership": "Frozen current reviewed Core+Enabler; offline diagnostic only; not historical membership reconstruction",
+    "no_accounting_writes": true,
+    "no_profit_optimization": true,
+    "sessions": 194,
+    "themes": 44,
+    "unique_members": 663
+  },
+  "selected": {
+    "average_dollar_volume_floor": 10000000,
+    "breadth_ranking_weight": 0,
+    "change_sessions": 5,
+    "change_threshold": 10,
+    "liquidity_sessions": 20,
+    "price_exclusive": 5,
+    "small_breadth_below": 10,
+    "structural_boundary": 50,
+    "trend_is_filter": false,
+    "w_is_filter": false
+  },
+  "selected_session_counts": [
+    {
+      "research_stocks": 330,
+      "researchable_themes": 21,
+      "session": "2026-02-06",
+      "side": "long",
+      "states": {
+        "Lagging": 22,
+        "Leading": 21,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 355,
+      "researchable_themes": 22,
+      "session": "2026-02-09",
+      "side": "long",
+      "states": {
+        "Lagging": 21,
+        "Leading": 22,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 354,
+      "researchable_themes": 24,
+      "session": "2026-02-10",
+      "side": "long",
+      "states": {
+        "Lagging": 19,
+        "Leading": 24,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 314,
+      "researchable_themes": 21,
+      "session": "2026-02-11",
+      "side": "long",
+      "states": {
+        "Lagging": 22,
+        "Leading": 21,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 357,
+      "researchable_themes": 24,
+      "session": "2026-02-12",
+      "side": "long",
+      "states": {
+        "Lagging": 19,
+        "Leading": 24,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 317,
+      "researchable_themes": 24,
+      "session": "2026-02-13",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 17,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 407,
+      "researchable_themes": 27,
+      "session": "2026-02-17",
+      "side": "long",
+      "states": {
+        "Fading": 7,
+        "Improving": 2,
+        "Lagging": 16,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 393,
+      "researchable_themes": 25,
+      "session": "2026-02-18",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 3,
+        "Lagging": 18,
+        "Leading": 19,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 335,
+      "researchable_themes": 24,
+      "session": "2026-02-19",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Lagging": 19,
+        "Leading": 20,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 369,
+      "researchable_themes": 25,
+      "session": "2026-02-20",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 1,
+        "Lagging": 18,
+        "Leading": 21,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 349,
+      "researchable_themes": 23,
+      "session": "2026-02-23",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Lagging": 20,
+        "Leading": 22,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 381,
+      "researchable_themes": 25,
+      "session": "2026-02-24",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Improving": 2,
+        "Lagging": 18,
+        "Leading": 22,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 409,
+      "researchable_themes": 27,
+      "session": "2026-02-25",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 16,
+        "Leading": 22,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 367,
+      "researchable_themes": 25,
+      "session": "2026-02-26",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 18,
+        "Leading": 20,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 382,
+      "researchable_themes": 24,
+      "session": "2026-02-27",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 1,
+        "Lagging": 19,
+        "Leading": 19,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 363,
+      "researchable_themes": 23,
+      "session": "2026-03-02",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Lagging": 20,
+        "Leading": 20,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 399,
+      "researchable_themes": 25,
+      "session": "2026-03-03",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 1,
+        "Lagging": 18,
+        "Leading": 20,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 386,
+      "researchable_themes": 25,
+      "session": "2026-03-04",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 18,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 415,
+      "researchable_themes": 26,
+      "session": "2026-03-05",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 5,
+        "Lagging": 17,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 429,
+      "researchable_themes": 27,
+      "session": "2026-03-06",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 7,
+        "Lagging": 16,
+        "Leading": 16,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 382,
+      "researchable_themes": 26,
+      "session": "2026-03-09",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 6,
+        "Lagging": 17,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 377,
+      "researchable_themes": 26,
+      "session": "2026-03-10",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 9,
+        "Lagging": 17,
+        "Leading": 15,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 380,
+      "researchable_themes": 24,
+      "session": "2026-03-11",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 9,
+        "Lagging": 19,
+        "Leading": 13,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 334,
+      "researchable_themes": 22,
+      "session": "2026-03-12",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Improving": 3,
+        "Lagging": 21,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 429,
+      "researchable_themes": 25,
+      "session": "2026-03-13",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Improving": 4,
+        "Lagging": 18,
+        "Leading": 20,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 368,
+      "researchable_themes": 23,
+      "session": "2026-03-16",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 1,
+        "Lagging": 20,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 375,
+      "researchable_themes": 23,
+      "session": "2026-03-17",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 5,
+        "Lagging": 20,
+        "Leading": 16,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 337,
+      "researchable_themes": 21,
+      "session": "2026-03-18",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 3,
+        "Lagging": 22,
+        "Leading": 16,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 297,
+      "researchable_themes": 19,
+      "session": "2026-03-19",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Lagging": 24,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 431,
+      "researchable_themes": 25,
+      "session": "2026-03-20",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 3,
+        "Lagging": 18,
+        "Leading": 19,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 399,
+      "researchable_themes": 24,
+      "session": "2026-03-23",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Improving": 2,
+        "Lagging": 19,
+        "Leading": 21,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 384,
+      "researchable_themes": 24,
+      "session": "2026-03-24",
+      "side": "long",
+      "states": {
+        "Fading": 5,
+        "Improving": 5,
+        "Lagging": 19,
+        "Leading": 14,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 383,
+      "researchable_themes": 24,
+      "session": "2026-03-25",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 17,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 386,
+      "researchable_themes": 23,
+      "session": "2026-03-26",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 4,
+        "Lagging": 20,
+        "Leading": 17,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 363,
+      "researchable_themes": 22,
+      "session": "2026-03-27",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Improving": 3,
+        "Lagging": 21,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 370,
+      "researchable_themes": 23,
+      "session": "2026-03-30",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Improving": 2,
+        "Lagging": 20,
+        "Leading": 20,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 331,
+      "researchable_themes": 19,
+      "session": "2026-03-31",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 1,
+        "Lagging": 24,
+        "Leading": 15,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 344,
+      "researchable_themes": 20,
+      "session": "2026-04-01",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 2,
+        "Lagging": 23,
+        "Leading": 16,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 332,
+      "researchable_themes": 21,
+      "session": "2026-04-02",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 3,
+        "Lagging": 22,
+        "Leading": 16,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 358,
+      "researchable_themes": 23,
+      "session": "2026-04-06",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 20,
+        "Leading": 16,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 347,
+      "researchable_themes": 24,
+      "session": "2026-04-07",
+      "side": "long",
+      "states": {
+        "Fading": 5,
+        "Improving": 6,
+        "Lagging": 19,
+        "Leading": 13,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 360,
+      "researchable_themes": 24,
+      "session": "2026-04-08",
+      "side": "long",
+      "states": {
+        "Fading": 5,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 16,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 345,
+      "researchable_themes": 23,
+      "session": "2026-04-09",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 3,
+        "Lagging": 20,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 343,
+      "researchable_themes": 23,
+      "session": "2026-04-10",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 3,
+        "Lagging": 20,
+        "Leading": 17,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 429,
+      "researchable_themes": 26,
+      "session": "2026-04-13",
+      "side": "long",
+      "states": {
+        "Fading": 5,
+        "Improving": 8,
+        "Lagging": 17,
+        "Leading": 13,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 364,
+      "researchable_themes": 24,
+      "session": "2026-04-14",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 7,
+        "Lagging": 19,
+        "Leading": 15,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 446,
+      "researchable_themes": 29,
+      "session": "2026-04-15",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 9,
+        "Lagging": 14,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 429,
+      "researchable_themes": 26,
+      "session": "2026-04-16",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 4,
+        "Lagging": 17,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 346,
+      "researchable_themes": 23,
+      "session": "2026-04-17",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 3,
+        "Lagging": 20,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 309,
+      "researchable_themes": 20,
+      "session": "2026-04-20",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Improving": 2,
+        "Lagging": 23,
+        "Leading": 17,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 387,
+      "researchable_themes": 24,
+      "session": "2026-04-21",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 4,
+        "Lagging": 19,
+        "Leading": 16,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 376,
+      "researchable_themes": 23,
+      "session": "2026-04-22",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 20,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 402,
+      "researchable_themes": 25,
+      "session": "2026-04-23",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 4,
+        "Lagging": 18,
+        "Leading": 17,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 365,
+      "researchable_themes": 23,
+      "session": "2026-04-24",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 20,
+        "Leading": 16,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 338,
+      "researchable_themes": 22,
+      "session": "2026-04-27",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 21,
+        "Leading": 17,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 437,
+      "researchable_themes": 26,
+      "session": "2026-04-28",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 3,
+        "Lagging": 17,
+        "Leading": 21,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 362,
+      "researchable_themes": 21,
+      "session": "2026-04-29",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 22,
+        "Leading": 16,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 347,
+      "researchable_themes": 22,
+      "session": "2026-04-30",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Improving": 3,
+        "Lagging": 21,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 399,
+      "researchable_themes": 25,
+      "session": "2026-05-01",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Improving": 1,
+        "Lagging": 18,
+        "Leading": 23,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 386,
+      "researchable_themes": 24,
+      "session": "2026-05-04",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Improving": 2,
+        "Lagging": 19,
+        "Leading": 21,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 424,
+      "researchable_themes": 25,
+      "session": "2026-05-05",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 2,
+        "Lagging": 18,
+        "Leading": 21,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 354,
+      "researchable_themes": 22,
+      "session": "2026-05-06",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 1,
+        "Lagging": 21,
+        "Leading": 19,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 415,
+      "researchable_themes": 25,
+      "session": "2026-05-07",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 3,
+        "Lagging": 18,
+        "Leading": 19,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 392,
+      "researchable_themes": 24,
+      "session": "2026-05-08",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 17,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 416,
+      "researchable_themes": 25,
+      "session": "2026-05-11",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 18,
+        "Leading": 20,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 392,
+      "researchable_themes": 23,
+      "session": "2026-05-12",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Improving": 3,
+        "Lagging": 20,
+        "Leading": 19,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 405,
+      "researchable_themes": 25,
+      "session": "2026-05-13",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 375,
+      "researchable_themes": 24,
+      "session": "2026-05-14",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Improving": 2,
+        "Lagging": 20,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 378,
+      "researchable_themes": 24,
+      "session": "2026-05-15",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 3,
+        "Lagging": 20,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 419,
+      "researchable_themes": 28,
+      "session": "2026-05-18",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Improving": 6,
+        "Lagging": 16,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 421,
+      "researchable_themes": 27,
+      "session": "2026-05-19",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Improving": 6,
+        "Lagging": 17,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 357,
+      "researchable_themes": 24,
+      "session": "2026-05-20",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 4,
+        "Lagging": 20,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 466,
+      "researchable_themes": 27,
+      "session": "2026-05-21",
+      "side": "long",
+      "states": {
+        "Improving": 5,
+        "Lagging": 17,
+        "Leading": 22
+      }
+    },
+    {
+      "research_stocks": 370,
+      "researchable_themes": 25,
+      "session": "2026-05-22",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 6,
+        "Lagging": 19,
+        "Leading": 16
+      }
+    },
+    {
+      "research_stocks": 327,
+      "researchable_themes": 23,
+      "session": "2026-05-26",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 2,
+        "Lagging": 21,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 345,
+      "researchable_themes": 23,
+      "session": "2026-05-27",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Improving": 3,
+        "Lagging": 21,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 392,
+      "researchable_themes": 27,
+      "session": "2026-05-28",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 7,
+        "Lagging": 17,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 386,
+      "researchable_themes": 26,
+      "session": "2026-05-29",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Improving": 6,
+        "Lagging": 18,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 335,
+      "researchable_themes": 24,
+      "session": "2026-06-01",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 4,
+        "Lagging": 20,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 301,
+      "researchable_themes": 24,
+      "session": "2026-06-02",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Improving": 6,
+        "Lagging": 20,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 327,
+      "researchable_themes": 25,
+      "session": "2026-06-03",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 7,
+        "Lagging": 19,
+        "Leading": 15
+      }
+    },
+    {
+      "research_stocks": 324,
+      "researchable_themes": 24,
+      "session": "2026-06-04",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 4,
+        "Lagging": 20,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 381,
+      "researchable_themes": 25,
+      "session": "2026-06-05",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 5,
+        "Lagging": 19,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 445,
+      "researchable_themes": 28,
+      "session": "2026-06-08",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 7,
+        "Lagging": 16,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 404,
+      "researchable_themes": 26,
+      "session": "2026-06-09",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 5,
+        "Lagging": 18,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 482,
+      "researchable_themes": 29,
+      "session": "2026-06-10",
+      "side": "long",
+      "states": {
+        "Fading": 6,
+        "Improving": 6,
+        "Lagging": 15,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 406,
+      "researchable_themes": 26,
+      "session": "2026-06-11",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 7,
+        "Lagging": 18,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 412,
+      "researchable_themes": 26,
+      "session": "2026-06-12",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 6,
+        "Lagging": 18,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 447,
+      "researchable_themes": 27,
+      "session": "2026-06-15",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 7,
+        "Lagging": 17,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 365,
+      "researchable_themes": 25,
+      "session": "2026-06-16",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 5,
+        "Lagging": 19,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 400,
+      "researchable_themes": 25,
+      "session": "2026-06-17",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 6,
+        "Lagging": 19,
+        "Leading": 16
+      }
+    },
+    {
+      "research_stocks": 404,
+      "researchable_themes": 26,
+      "session": "2026-06-18",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 4,
+        "Lagging": 18,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 377,
+      "researchable_themes": 25,
+      "session": "2026-06-22",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 399,
+      "researchable_themes": 24,
+      "session": "2026-06-23",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 20,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 405,
+      "researchable_themes": 26,
+      "session": "2026-06-24",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 18,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 479,
+      "researchable_themes": 29,
+      "session": "2026-06-25",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 7,
+        "Lagging": 15,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 485,
+      "researchable_themes": 29,
+      "session": "2026-06-26",
+      "side": "long",
+      "states": {
+        "Fading": 5,
+        "Improving": 8,
+        "Lagging": 15,
+        "Leading": 16
+      }
+    },
+    {
+      "research_stocks": 476,
+      "researchable_themes": 28,
+      "session": "2026-06-29",
+      "side": "long",
+      "states": {
+        "Fading": 6,
+        "Improving": 6,
+        "Lagging": 16,
+        "Leading": 16
+      }
+    },
+    {
+      "research_stocks": 423,
+      "researchable_themes": 25,
+      "session": "2026-06-30",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 5,
+        "Lagging": 19,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 455,
+      "researchable_themes": 26,
+      "session": "2026-07-01",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 4,
+        "Lagging": 18,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 427,
+      "researchable_themes": 25,
+      "session": "2026-07-02",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 4,
+        "Lagging": 19,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 398,
+      "researchable_themes": 24,
+      "session": "2026-07-06",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 1,
+        "Lagging": 20,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 420,
+      "researchable_themes": 25,
+      "session": "2026-07-07",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 5,
+        "Lagging": 19,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 435,
+      "researchable_themes": 24,
+      "session": "2026-07-08",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 2,
+        "Lagging": 20,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 445,
+      "researchable_themes": 25,
+      "session": "2026-07-09",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 2,
+        "Lagging": 19,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 438,
+      "researchable_themes": 24,
+      "session": "2026-07-10",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 1,
+        "Lagging": 20,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 406,
+      "researchable_themes": 23,
+      "session": "2026-07-13",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Improving": 2,
+        "Lagging": 21,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 366,
+      "researchable_themes": 22,
+      "session": "2026-07-14",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 1,
+        "Lagging": 22,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 417,
+      "researchable_themes": 24,
+      "session": "2026-07-15",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 2,
+        "Lagging": 20,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 453,
+      "researchable_themes": 27,
+      "session": "2026-07-16",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 5,
+        "Lagging": 17,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 443,
+      "researchable_themes": 25,
+      "session": "2026-07-17",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 449,
+      "researchable_themes": 25,
+      "session": "2026-07-20",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 4,
+        "Lagging": 19,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 443,
+      "researchable_themes": 24,
+      "session": "2026-07-21",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 3,
+        "Lagging": 20,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 453,
+      "researchable_themes": 26,
+      "session": "2026-07-22",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 4,
+        "Lagging": 18,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 471,
+      "researchable_themes": 27,
+      "session": "2026-07-23",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 6,
+        "Lagging": 17,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 458,
+      "researchable_themes": 26,
+      "session": "2026-07-24",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 3,
+        "Lagging": 18,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 470,
+      "researchable_themes": 27,
+      "session": "2026-07-27",
+      "side": "long",
+      "states": {
+        "Fading": 5,
+        "Improving": 4,
+        "Lagging": 17,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 487,
+      "researchable_themes": 27,
+      "session": "2026-07-28",
+      "side": "long",
+      "states": {
+        "Fading": 6,
+        "Improving": 3,
+        "Lagging": 17,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 484,
+      "researchable_themes": 28,
+      "session": "2026-07-29",
+      "side": "long",
+      "states": {
+        "Fading": 8,
+        "Improving": 5,
+        "Lagging": 16,
+        "Leading": 15
+      }
+    },
+    {
+      "research_stocks": 445,
+      "researchable_themes": 24,
+      "session": "2026-07-30",
+      "side": "long",
+      "states": {
+        "Fading": 5,
+        "Improving": 3,
+        "Lagging": 20,
+        "Leading": 16
+      }
+    },
+    {
+      "research_stocks": 478,
+      "researchable_themes": 28,
+      "session": "2026-07-31",
+      "side": "long",
+      "states": {
+        "Fading": 6,
+        "Improving": 3,
+        "Lagging": 16,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 505,
+      "researchable_themes": 29,
+      "session": "2026-08-03",
+      "side": "long",
+      "states": {
+        "Fading": 6,
+        "Improving": 4,
+        "Lagging": 15,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 446,
+      "researchable_themes": 27,
+      "session": "2026-08-04",
+      "side": "long",
+      "states": {
+        "Fading": 5,
+        "Improving": 4,
+        "Lagging": 17,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 408,
+      "researchable_themes": 24,
+      "session": "2026-08-05",
+      "side": "long",
+      "states": {
+        "Fading": 6,
+        "Improving": 1,
+        "Lagging": 20,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 392,
+      "researchable_themes": 26,
+      "session": "2026-08-06",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 1,
+        "Lagging": 18,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 353,
+      "researchable_themes": 24,
+      "session": "2026-08-07",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 1,
+        "Lagging": 20,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 437,
+      "researchable_themes": 26,
+      "session": "2026-08-10",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 1,
+        "Lagging": 18,
+        "Leading": 22
+      }
+    },
+    {
+      "research_stocks": 339,
+      "researchable_themes": 23,
+      "session": "2026-08-11",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 21,
+        "Leading": 16
+      }
+    },
+    {
+      "research_stocks": 451,
+      "researchable_themes": 27,
+      "session": "2026-08-12",
+      "side": "long",
+      "states": {
+        "Fading": 6,
+        "Improving": 2,
+        "Lagging": 17,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 438,
+      "researchable_themes": 25,
+      "session": "2026-08-13",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 2,
+        "Lagging": 19,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 458,
+      "researchable_themes": 26,
+      "session": "2026-08-14",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 3,
+        "Lagging": 18,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 471,
+      "researchable_themes": 27,
+      "session": "2026-08-17",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 6,
+        "Lagging": 17,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 476,
+      "researchable_themes": 26,
+      "session": "2026-08-18",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 18,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 412,
+      "researchable_themes": 24,
+      "session": "2026-08-19",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 2,
+        "Lagging": 20,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 395,
+      "researchable_themes": 22,
+      "session": "2026-08-20",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 1,
+        "Lagging": 22,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 393,
+      "researchable_themes": 24,
+      "session": "2026-08-21",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Improving": 3,
+        "Lagging": 20,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 400,
+      "researchable_themes": 25,
+      "session": "2026-08-24",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 397,
+      "researchable_themes": 24,
+      "session": "2026-08-25",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 4,
+        "Lagging": 20,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 416,
+      "researchable_themes": 25,
+      "session": "2026-08-26",
+      "side": "long",
+      "states": {
+        "Improving": 5,
+        "Lagging": 19,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 408,
+      "researchable_themes": 25,
+      "session": "2026-08-27",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 6,
+        "Lagging": 19,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 505,
+      "researchable_themes": 29,
+      "session": "2026-08-28",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 15,
+        "Leading": 22
+      }
+    },
+    {
+      "research_stocks": 450,
+      "researchable_themes": 26,
+      "session": "2026-08-31",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 1,
+        "Lagging": 18,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 403,
+      "researchable_themes": 24,
+      "session": "2026-09-01",
+      "side": "long",
+      "states": {
+        "Fading": 5,
+        "Improving": 1,
+        "Lagging": 20,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 459,
+      "researchable_themes": 27,
+      "session": "2026-09-02",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 5,
+        "Lagging": 17,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 460,
+      "researchable_themes": 28,
+      "session": "2026-09-03",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 6,
+        "Lagging": 16,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 424,
+      "researchable_themes": 26,
+      "session": "2026-09-04",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 4,
+        "Lagging": 18,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 453,
+      "researchable_themes": 28,
+      "session": "2026-09-08",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 4,
+        "Lagging": 16,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 451,
+      "researchable_themes": 27,
+      "session": "2026-09-09",
+      "side": "long",
+      "states": {
+        "Fading": 5,
+        "Improving": 3,
+        "Lagging": 17,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 383,
+      "researchable_themes": 23,
+      "session": "2026-09-10",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 21,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 426,
+      "researchable_themes": 25,
+      "session": "2026-09-11",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 2,
+        "Lagging": 19,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 388,
+      "researchable_themes": 23,
+      "session": "2026-09-14",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 1,
+        "Lagging": 21,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 456,
+      "researchable_themes": 27,
+      "session": "2026-09-15",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 17,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 405,
+      "researchable_themes": 24,
+      "session": "2026-09-16",
+      "side": "long",
+      "states": {
+        "Fading": 5,
+        "Improving": 1,
+        "Lagging": 20,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 349,
+      "researchable_themes": 24,
+      "session": "2026-09-17",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 20,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 391,
+      "researchable_themes": 24,
+      "session": "2026-09-18",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 3,
+        "Lagging": 20,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 418,
+      "researchable_themes": 26,
+      "session": "2026-09-21",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 3,
+        "Lagging": 18,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 379,
+      "researchable_themes": 27,
+      "session": "2026-09-22",
+      "side": "long",
+      "states": {
+        "Fading": 6,
+        "Improving": 6,
+        "Lagging": 17,
+        "Leading": 15
+      }
+    },
+    {
+      "research_stocks": 413,
+      "researchable_themes": 27,
+      "session": "2026-09-23",
+      "side": "long",
+      "states": {
+        "Fading": 7,
+        "Improving": 4,
+        "Lagging": 17,
+        "Leading": 16
+      }
+    },
+    {
+      "research_stocks": 424,
+      "researchable_themes": 27,
+      "session": "2026-09-24",
+      "side": "long",
+      "states": {
+        "Fading": 5,
+        "Improving": 4,
+        "Lagging": 17,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 416,
+      "researchable_themes": 25,
+      "session": "2026-09-25",
+      "side": "long",
+      "states": {
+        "Fading": 5,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 431,
+      "researchable_themes": 27,
+      "session": "2026-09-28",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 5,
+        "Lagging": 17,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 394,
+      "researchable_themes": 25,
+      "session": "2026-09-29",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 5,
+        "Lagging": 19,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 416,
+      "researchable_themes": 24,
+      "session": "2026-09-30",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 4,
+        "Lagging": 20,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 373,
+      "researchable_themes": 24,
+      "session": "2026-10-01",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 2,
+        "Lagging": 20,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 420,
+      "researchable_themes": 27,
+      "session": "2026-10-02",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 4,
+        "Lagging": 17,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 378,
+      "researchable_themes": 25,
+      "session": "2026-10-05",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Improving": 4,
+        "Lagging": 19,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 404,
+      "researchable_themes": 27,
+      "session": "2026-10-06",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Improving": 5,
+        "Lagging": 17,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 375,
+      "researchable_themes": 23,
+      "session": "2026-10-07",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 1,
+        "Lagging": 21,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 408,
+      "researchable_themes": 24,
+      "session": "2026-10-08",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 20,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 359,
+      "researchable_themes": 22,
+      "session": "2026-10-09",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Improving": 3,
+        "Lagging": 22,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 368,
+      "researchable_themes": 23,
+      "session": "2026-10-12",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 2,
+        "Lagging": 21,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 376,
+      "researchable_themes": 23,
+      "session": "2026-10-13",
+      "side": "long",
+      "states": {
+        "Improving": 2,
+        "Lagging": 21,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 376,
+      "researchable_themes": 23,
+      "session": "2026-10-14",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Lagging": 21,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 372,
+      "researchable_themes": 22,
+      "session": "2026-10-15",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 1,
+        "Lagging": 22,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 439,
+      "researchable_themes": 28,
+      "session": "2026-10-16",
+      "side": "long",
+      "states": {
+        "Fading": 6,
+        "Improving": 6,
+        "Lagging": 16,
+        "Leading": 16
+      }
+    },
+    {
+      "research_stocks": 416,
+      "researchable_themes": 26,
+      "session": "2026-10-19",
+      "side": "long",
+      "states": {
+        "Fading": 6,
+        "Improving": 4,
+        "Lagging": 18,
+        "Leading": 16
+      }
+    },
+    {
+      "research_stocks": 446,
+      "researchable_themes": 27,
+      "session": "2026-10-20",
+      "side": "long",
+      "states": {
+        "Fading": 5,
+        "Improving": 4,
+        "Lagging": 17,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 467,
+      "researchable_themes": 27,
+      "session": "2026-10-21",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 5,
+        "Lagging": 17,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 445,
+      "researchable_themes": 26,
+      "session": "2026-10-22",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 18,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 462,
+      "researchable_themes": 27,
+      "session": "2026-10-23",
+      "side": "long",
+      "states": {
+        "Fading": 2,
+        "Improving": 3,
+        "Lagging": 17,
+        "Leading": 22
+      }
+    },
+    {
+      "research_stocks": 420,
+      "researchable_themes": 26,
+      "session": "2026-10-26",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 4,
+        "Lagging": 18,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 410,
+      "researchable_themes": 25,
+      "session": "2026-10-27",
+      "side": "long",
+      "states": {
+        "Fading": 5,
+        "Improving": 4,
+        "Lagging": 19,
+        "Leading": 16
+      }
+    },
+    {
+      "research_stocks": 392,
+      "researchable_themes": 24,
+      "session": "2026-10-28",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 20,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 393,
+      "researchable_themes": 25,
+      "session": "2026-10-29",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 4,
+        "Lagging": 19,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 430,
+      "researchable_themes": 25,
+      "session": "2026-10-30",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 469,
+      "researchable_themes": 28,
+      "session": "2026-11-02",
+      "side": "long",
+      "states": {
+        "Fading": 5,
+        "Improving": 5,
+        "Lagging": 16,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 433,
+      "researchable_themes": 26,
+      "session": "2026-11-03",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 6,
+        "Lagging": 18,
+        "Leading": 16
+      }
+    },
+    {
+      "research_stocks": 434,
+      "researchable_themes": 26,
+      "session": "2026-11-04",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 18,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 422,
+      "researchable_themes": 26,
+      "session": "2026-11-05",
+      "side": "long",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 18,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 398,
+      "researchable_themes": 24,
+      "session": "2026-11-06",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Improving": 1,
+        "Lagging": 20,
+        "Leading": 22
+      }
+    },
+    {
+      "research_stocks": 412,
+      "researchable_themes": 25,
+      "session": "2026-11-09",
+      "side": "long",
+      "states": {
+        "Fading": 1,
+        "Improving": 1,
+        "Lagging": 19,
+        "Leading": 23
+      }
+    },
+    {
+      "research_stocks": 409,
+      "researchable_themes": 25,
+      "session": "2026-11-10",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Improving": 1,
+        "Lagging": 19,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 382,
+      "researchable_themes": 22,
+      "session": "2026-11-11",
+      "side": "long",
+      "states": {
+        "Fading": 3,
+        "Lagging": 22,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 425,
+      "researchable_themes": 26,
+      "session": "2026-11-12",
+      "side": "long",
+      "states": {
+        "Fading": 6,
+        "Improving": 1,
+        "Lagging": 18,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 340,
+      "researchable_themes": 22,
+      "session": "2026-02-06",
+      "side": "short",
+      "states": {
+        "Lagging": 21,
+        "Leading": 22,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 315,
+      "researchable_themes": 21,
+      "session": "2026-02-09",
+      "side": "short",
+      "states": {
+        "Lagging": 22,
+        "Leading": 21,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 315,
+      "researchable_themes": 20,
+      "session": "2026-02-10",
+      "side": "short",
+      "states": {
+        "Lagging": 23,
+        "Leading": 20,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 350,
+      "researchable_themes": 22,
+      "session": "2026-02-11",
+      "side": "short",
+      "states": {
+        "Lagging": 21,
+        "Leading": 22,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 324,
+      "researchable_themes": 20,
+      "session": "2026-02-12",
+      "side": "short",
+      "states": {
+        "Lagging": 23,
+        "Leading": 20,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 411,
+      "researchable_themes": 26,
+      "session": "2026-02-13",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 4,
+        "Lagging": 17,
+        "Leading": 19,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 340,
+      "researchable_themes": 25,
+      "session": "2026-02-17",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 7,
+        "Lagging": 18,
+        "Leading": 16,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 359,
+      "researchable_themes": 24,
+      "session": "2026-02-18",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 378,
+      "researchable_themes": 23,
+      "session": "2026-02-19",
+      "side": "short",
+      "states": {
+        "Improving": 4,
+        "Lagging": 20,
+        "Leading": 19,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 358,
+      "researchable_themes": 22,
+      "session": "2026-02-20",
+      "side": "short",
+      "states": {
+        "Fading": 1,
+        "Improving": 3,
+        "Lagging": 21,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 332,
+      "researchable_themes": 21,
+      "session": "2026-02-23",
+      "side": "short",
+      "states": {
+        "Improving": 1,
+        "Lagging": 22,
+        "Leading": 20,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 319,
+      "researchable_themes": 21,
+      "session": "2026-02-24",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 1,
+        "Lagging": 22,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 318,
+      "researchable_themes": 21,
+      "session": "2026-02-25",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 3,
+        "Lagging": 22,
+        "Leading": 16,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 391,
+      "researchable_themes": 23,
+      "session": "2026-02-26",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 3,
+        "Lagging": 20,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 355,
+      "researchable_themes": 24,
+      "session": "2026-02-27",
+      "side": "short",
+      "states": {
+        "Fading": 1,
+        "Improving": 4,
+        "Lagging": 19,
+        "Leading": 19,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 347,
+      "researchable_themes": 23,
+      "session": "2026-03-02",
+      "side": "short",
+      "states": {
+        "Improving": 3,
+        "Lagging": 20,
+        "Leading": 20,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 363,
+      "researchable_themes": 23,
+      "session": "2026-03-03",
+      "side": "short",
+      "states": {
+        "Fading": 1,
+        "Improving": 4,
+        "Lagging": 20,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 398,
+      "researchable_themes": 25,
+      "session": "2026-03-04",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 3,
+        "Lagging": 18,
+        "Leading": 19,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 385,
+      "researchable_themes": 25,
+      "session": "2026-03-05",
+      "side": "short",
+      "states": {
+        "Fading": 5,
+        "Improving": 3,
+        "Lagging": 18,
+        "Leading": 17,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 423,
+      "researchable_themes": 27,
+      "session": "2026-03-06",
+      "side": "short",
+      "states": {
+        "Fading": 7,
+        "Improving": 4,
+        "Lagging": 16,
+        "Leading": 16,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 429,
+      "researchable_themes": 26,
+      "session": "2026-03-09",
+      "side": "short",
+      "states": {
+        "Fading": 7,
+        "Improving": 2,
+        "Lagging": 17,
+        "Leading": 17,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 444,
+      "researchable_themes": 28,
+      "session": "2026-03-10",
+      "side": "short",
+      "states": {
+        "Fading": 9,
+        "Improving": 2,
+        "Lagging": 15,
+        "Leading": 17,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 447,
+      "researchable_themes": 30,
+      "session": "2026-03-11",
+      "side": "short",
+      "states": {
+        "Fading": 9,
+        "Improving": 2,
+        "Lagging": 13,
+        "Leading": 19,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 365,
+      "researchable_themes": 25,
+      "session": "2026-03-12",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 1,
+        "Lagging": 18,
+        "Leading": 21,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 315,
+      "researchable_themes": 23,
+      "session": "2026-03-13",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 1,
+        "Lagging": 20,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 357,
+      "researchable_themes": 25,
+      "session": "2026-03-16",
+      "side": "short",
+      "states": {
+        "Fading": 1,
+        "Improving": 4,
+        "Lagging": 18,
+        "Leading": 20,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 424,
+      "researchable_themes": 27,
+      "session": "2026-03-17",
+      "side": "short",
+      "states": {
+        "Fading": 5,
+        "Improving": 2,
+        "Lagging": 16,
+        "Leading": 20,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 396,
+      "researchable_themes": 27,
+      "session": "2026-03-18",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 16,
+        "Leading": 22,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 382,
+      "researchable_themes": 25,
+      "session": "2026-03-19",
+      "side": "short",
+      "states": {
+        "Improving": 1,
+        "Lagging": 18,
+        "Leading": 24,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 336,
+      "researchable_themes": 24,
+      "session": "2026-03-20",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 326,
+      "researchable_themes": 22,
+      "session": "2026-03-23",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 1,
+        "Lagging": 21,
+        "Leading": 19,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 449,
+      "researchable_themes": 29,
+      "session": "2026-03-24",
+      "side": "short",
+      "states": {
+        "Fading": 5,
+        "Improving": 5,
+        "Lagging": 14,
+        "Leading": 19,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 381,
+      "researchable_themes": 26,
+      "session": "2026-03-25",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 4,
+        "Lagging": 17,
+        "Leading": 19,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 378,
+      "researchable_themes": 26,
+      "session": "2026-03-26",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 2,
+        "Lagging": 17,
+        "Leading": 20,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 348,
+      "researchable_themes": 25,
+      "session": "2026-03-27",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 1,
+        "Lagging": 18,
+        "Leading": 21,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 329,
+      "researchable_themes": 23,
+      "session": "2026-03-30",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 1,
+        "Lagging": 20,
+        "Leading": 20,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 415,
+      "researchable_themes": 28,
+      "session": "2026-03-31",
+      "side": "short",
+      "states": {
+        "Fading": 1,
+        "Improving": 3,
+        "Lagging": 15,
+        "Leading": 24,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 375,
+      "researchable_themes": 27,
+      "session": "2026-04-01",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 2,
+        "Lagging": 16,
+        "Leading": 23,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 386,
+      "researchable_themes": 27,
+      "session": "2026-04-02",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 16,
+        "Leading": 22,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 398,
+      "researchable_themes": 27,
+      "session": "2026-04-06",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 4,
+        "Lagging": 16,
+        "Leading": 20,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 427,
+      "researchable_themes": 30,
+      "session": "2026-04-07",
+      "side": "short",
+      "states": {
+        "Fading": 6,
+        "Improving": 5,
+        "Lagging": 13,
+        "Leading": 19,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 443,
+      "researchable_themes": 27,
+      "session": "2026-04-08",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 5,
+        "Lagging": 16,
+        "Leading": 19,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 408,
+      "researchable_themes": 25,
+      "session": "2026-04-09",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 18,
+        "Leading": 20,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 396,
+      "researchable_themes": 26,
+      "session": "2026-04-10",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 3,
+        "Lagging": 17,
+        "Leading": 20,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 473,
+      "researchable_themes": 30,
+      "session": "2026-04-13",
+      "side": "short",
+      "states": {
+        "Fading": 8,
+        "Improving": 5,
+        "Lagging": 13,
+        "Leading": 17,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 417,
+      "researchable_themes": 28,
+      "session": "2026-04-14",
+      "side": "short",
+      "states": {
+        "Fading": 7,
+        "Improving": 2,
+        "Lagging": 15,
+        "Leading": 19,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 370,
+      "researchable_themes": 25,
+      "session": "2026-04-15",
+      "side": "short",
+      "states": {
+        "Fading": 9,
+        "Improving": 2,
+        "Lagging": 18,
+        "Leading": 14,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 357,
+      "researchable_themes": 25,
+      "session": "2026-04-16",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 4,
+        "Lagging": 18,
+        "Leading": 17,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 392,
+      "researchable_themes": 25,
+      "session": "2026-04-17",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 18,
+        "Leading": 20,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 390,
+      "researchable_themes": 26,
+      "session": "2026-04-20",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 1,
+        "Lagging": 17,
+        "Leading": 23,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 390,
+      "researchable_themes": 27,
+      "session": "2026-04-21",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 4,
+        "Lagging": 16,
+        "Leading": 19,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 372,
+      "researchable_themes": 25,
+      "session": "2026-04-22",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 3,
+        "Lagging": 18,
+        "Leading": 20,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 381,
+      "researchable_themes": 26,
+      "session": "2026-04-23",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 4,
+        "Lagging": 17,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 428,
+      "researchable_themes": 27,
+      "session": "2026-04-24",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 4,
+        "Lagging": 16,
+        "Leading": 20,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 421,
+      "researchable_themes": 26,
+      "session": "2026-04-27",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 3,
+        "Lagging": 17,
+        "Leading": 21,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 332,
+      "researchable_themes": 22,
+      "session": "2026-04-28",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 21,
+        "Leading": 17,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 410,
+      "researchable_themes": 27,
+      "session": "2026-04-29",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 3,
+        "Lagging": 16,
+        "Leading": 22,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 389,
+      "researchable_themes": 25,
+      "session": "2026-04-30",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 1,
+        "Lagging": 18,
+        "Leading": 21,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 319,
+      "researchable_themes": 20,
+      "session": "2026-05-01",
+      "side": "short",
+      "states": {
+        "Fading": 1,
+        "Improving": 1,
+        "Lagging": 23,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 317,
+      "researchable_themes": 22,
+      "session": "2026-05-04",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 1,
+        "Lagging": 21,
+        "Leading": 19,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 298,
+      "researchable_themes": 22,
+      "session": "2026-05-05",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 2,
+        "Lagging": 21,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 350,
+      "researchable_themes": 24,
+      "session": "2026-05-06",
+      "side": "short",
+      "states": {
+        "Fading": 1,
+        "Improving": 2,
+        "Lagging": 19,
+        "Leading": 21,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 326,
+      "researchable_themes": 24,
+      "session": "2026-05-07",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 357,
+      "researchable_themes": 26,
+      "session": "2026-05-08",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 4,
+        "Lagging": 17,
+        "Leading": 19,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 318,
+      "researchable_themes": 23,
+      "session": "2026-05-11",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 3,
+        "Lagging": 20,
+        "Leading": 18,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 360,
+      "researchable_themes": 24,
+      "session": "2026-05-12",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 1,
+        "Lagging": 19,
+        "Leading": 20,
+        "Unavailable": 1
+      }
+    },
+    {
+      "research_stocks": 351,
+      "researchable_themes": 23,
+      "session": "2026-05-13",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 1,
+        "Lagging": 21,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 346,
+      "researchable_themes": 23,
+      "session": "2026-05-14",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 1,
+        "Lagging": 21,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 372,
+      "researchable_themes": 25,
+      "session": "2026-05-15",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 19,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 343,
+      "researchable_themes": 23,
+      "session": "2026-05-18",
+      "side": "short",
+      "states": {
+        "Fading": 6,
+        "Improving": 1,
+        "Lagging": 21,
+        "Leading": 16
+      }
+    },
+    {
+      "research_stocks": 347,
+      "researchable_themes": 24,
+      "session": "2026-05-19",
+      "side": "short",
+      "states": {
+        "Fading": 6,
+        "Improving": 1,
+        "Lagging": 20,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 380,
+      "researchable_themes": 26,
+      "session": "2026-05-20",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 2,
+        "Lagging": 18,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 307,
+      "researchable_themes": 22,
+      "session": "2026-05-21",
+      "side": "short",
+      "states": {
+        "Fading": 5,
+        "Lagging": 22,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 429,
+      "researchable_themes": 28,
+      "session": "2026-05-22",
+      "side": "short",
+      "states": {
+        "Fading": 6,
+        "Improving": 3,
+        "Lagging": 16,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 402,
+      "researchable_themes": 25,
+      "session": "2026-05-26",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 2,
+        "Lagging": 19,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 383,
+      "researchable_themes": 25,
+      "session": "2026-05-27",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 1,
+        "Lagging": 19,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 419,
+      "researchable_themes": 27,
+      "session": "2026-05-28",
+      "side": "short",
+      "states": {
+        "Fading": 7,
+        "Improving": 3,
+        "Lagging": 17,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 387,
+      "researchable_themes": 25,
+      "session": "2026-05-29",
+      "side": "short",
+      "states": {
+        "Fading": 6,
+        "Improving": 1,
+        "Lagging": 19,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 413,
+      "researchable_themes": 26,
+      "session": "2026-06-01",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 2,
+        "Lagging": 18,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 437,
+      "researchable_themes": 27,
+      "session": "2026-06-02",
+      "side": "short",
+      "states": {
+        "Fading": 6,
+        "Improving": 1,
+        "Lagging": 17,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 452,
+      "researchable_themes": 29,
+      "session": "2026-06-03",
+      "side": "short",
+      "states": {
+        "Fading": 7,
+        "Improving": 3,
+        "Lagging": 15,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 443,
+      "researchable_themes": 27,
+      "session": "2026-06-04",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 17,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 412,
+      "researchable_themes": 27,
+      "session": "2026-06-05",
+      "side": "short",
+      "states": {
+        "Fading": 5,
+        "Improving": 3,
+        "Lagging": 17,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 411,
+      "researchable_themes": 26,
+      "session": "2026-06-08",
+      "side": "short",
+      "states": {
+        "Fading": 7,
+        "Improving": 3,
+        "Lagging": 18,
+        "Leading": 16
+      }
+    },
+    {
+      "research_stocks": 407,
+      "researchable_themes": 26,
+      "session": "2026-06-09",
+      "side": "short",
+      "states": {
+        "Fading": 5,
+        "Improving": 3,
+        "Lagging": 18,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 382,
+      "researchable_themes": 27,
+      "session": "2026-06-10",
+      "side": "short",
+      "states": {
+        "Fading": 6,
+        "Improving": 6,
+        "Lagging": 17,
+        "Leading": 15
+      }
+    },
+    {
+      "research_stocks": 415,
+      "researchable_themes": 27,
+      "session": "2026-06-11",
+      "side": "short",
+      "states": {
+        "Fading": 7,
+        "Improving": 2,
+        "Lagging": 17,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 397,
+      "researchable_themes": 27,
+      "session": "2026-06-12",
+      "side": "short",
+      "states": {
+        "Fading": 6,
+        "Improving": 3,
+        "Lagging": 17,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 407,
+      "researchable_themes": 26,
+      "session": "2026-06-15",
+      "side": "short",
+      "states": {
+        "Fading": 7,
+        "Improving": 2,
+        "Lagging": 18,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 418,
+      "researchable_themes": 27,
+      "session": "2026-06-16",
+      "side": "short",
+      "states": {
+        "Fading": 5,
+        "Improving": 3,
+        "Lagging": 17,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 401,
+      "researchable_themes": 28,
+      "session": "2026-06-17",
+      "side": "short",
+      "states": {
+        "Fading": 6,
+        "Improving": 3,
+        "Lagging": 16,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 365,
+      "researchable_themes": 25,
+      "session": "2026-06-18",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 374,
+      "researchable_themes": 25,
+      "session": "2026-06-22",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 328,
+      "researchable_themes": 25,
+      "session": "2026-06-23",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 377,
+      "researchable_themes": 25,
+      "session": "2026-06-24",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 4,
+        "Lagging": 19,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 363,
+      "researchable_themes": 26,
+      "session": "2026-06-25",
+      "side": "short",
+      "states": {
+        "Fading": 7,
+        "Improving": 4,
+        "Lagging": 18,
+        "Leading": 15
+      }
+    },
+    {
+      "research_stocks": 377,
+      "researchable_themes": 28,
+      "session": "2026-06-26",
+      "side": "short",
+      "states": {
+        "Fading": 8,
+        "Improving": 5,
+        "Lagging": 16,
+        "Leading": 15
+      }
+    },
+    {
+      "research_stocks": 399,
+      "researchable_themes": 28,
+      "session": "2026-06-29",
+      "side": "short",
+      "states": {
+        "Fading": 6,
+        "Improving": 6,
+        "Lagging": 16,
+        "Leading": 16
+      }
+    },
+    {
+      "research_stocks": 367,
+      "researchable_themes": 27,
+      "session": "2026-06-30",
+      "side": "short",
+      "states": {
+        "Fading": 5,
+        "Improving": 3,
+        "Lagging": 17,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 339,
+      "researchable_themes": 26,
+      "session": "2026-07-01",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 4,
+        "Lagging": 18,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 353,
+      "researchable_themes": 26,
+      "session": "2026-07-02",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 18,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 311,
+      "researchable_themes": 24,
+      "session": "2026-07-06",
+      "side": "short",
+      "states": {
+        "Fading": 1,
+        "Improving": 3,
+        "Lagging": 20,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 349,
+      "researchable_themes": 26,
+      "session": "2026-07-07",
+      "side": "short",
+      "states": {
+        "Fading": 5,
+        "Improving": 2,
+        "Lagging": 18,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 318,
+      "researchable_themes": 24,
+      "session": "2026-07-08",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 2,
+        "Lagging": 20,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 316,
+      "researchable_themes": 25,
+      "session": "2026-07-09",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 4,
+        "Lagging": 19,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 255,
+      "researchable_themes": 23,
+      "session": "2026-07-10",
+      "side": "short",
+      "states": {
+        "Fading": 1,
+        "Improving": 2,
+        "Lagging": 21,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 295,
+      "researchable_themes": 24,
+      "session": "2026-07-13",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 1,
+        "Lagging": 20,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 320,
+      "researchable_themes": 25,
+      "session": "2026-07-14",
+      "side": "short",
+      "states": {
+        "Fading": 1,
+        "Improving": 2,
+        "Lagging": 19,
+        "Leading": 22
+      }
+    },
+    {
+      "research_stocks": 332,
+      "researchable_themes": 26,
+      "session": "2026-07-15",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 4,
+        "Lagging": 18,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 309,
+      "researchable_themes": 24,
+      "session": "2026-07-16",
+      "side": "short",
+      "states": {
+        "Fading": 5,
+        "Improving": 2,
+        "Lagging": 20,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 321,
+      "researchable_themes": 25,
+      "session": "2026-07-17",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 326,
+      "researchable_themes": 25,
+      "session": "2026-07-20",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 2,
+        "Lagging": 19,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 299,
+      "researchable_themes": 25,
+      "session": "2026-07-21",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 19,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 363,
+      "researchable_themes": 26,
+      "session": "2026-07-22",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 4,
+        "Lagging": 18,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 370,
+      "researchable_themes": 27,
+      "session": "2026-07-23",
+      "side": "short",
+      "states": {
+        "Fading": 6,
+        "Improving": 4,
+        "Lagging": 17,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 325,
+      "researchable_themes": 24,
+      "session": "2026-07-24",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 3,
+        "Lagging": 20,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 334,
+      "researchable_themes": 26,
+      "session": "2026-07-27",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 5,
+        "Lagging": 18,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 335,
+      "researchable_themes": 26,
+      "session": "2026-07-28",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 6,
+        "Lagging": 18,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 383,
+      "researchable_themes": 29,
+      "session": "2026-07-29",
+      "side": "short",
+      "states": {
+        "Fading": 5,
+        "Improving": 8,
+        "Lagging": 15,
+        "Leading": 16
+      }
+    },
+    {
+      "research_stocks": 341,
+      "researchable_themes": 28,
+      "session": "2026-07-30",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 5,
+        "Lagging": 16,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 358,
+      "researchable_themes": 25,
+      "session": "2026-07-31",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 6,
+        "Lagging": 19,
+        "Leading": 16
+      }
+    },
+    {
+      "research_stocks": 380,
+      "researchable_themes": 25,
+      "session": "2026-08-03",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 6,
+        "Lagging": 19,
+        "Leading": 15
+      }
+    },
+    {
+      "research_stocks": 383,
+      "researchable_themes": 26,
+      "session": "2026-08-04",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 5,
+        "Lagging": 18,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 422,
+      "researchable_themes": 27,
+      "session": "2026-08-05",
+      "side": "short",
+      "states": {
+        "Fading": 1,
+        "Improving": 6,
+        "Lagging": 17,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 370,
+      "researchable_themes": 23,
+      "session": "2026-08-06",
+      "side": "short",
+      "states": {
+        "Fading": 1,
+        "Improving": 4,
+        "Lagging": 21,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 405,
+      "researchable_themes": 25,
+      "session": "2026-08-07",
+      "side": "short",
+      "states": {
+        "Fading": 1,
+        "Improving": 4,
+        "Lagging": 19,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 297,
+      "researchable_themes": 22,
+      "session": "2026-08-10",
+      "side": "short",
+      "states": {
+        "Fading": 1,
+        "Improving": 3,
+        "Lagging": 22,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 404,
+      "researchable_themes": 28,
+      "session": "2026-08-11",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 4,
+        "Lagging": 16,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 320,
+      "researchable_themes": 25,
+      "session": "2026-08-12",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 6,
+        "Lagging": 19,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 333,
+      "researchable_themes": 25,
+      "session": "2026-08-13",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 4,
+        "Lagging": 19,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 308,
+      "researchable_themes": 23,
+      "session": "2026-08-14",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 21,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 338,
+      "researchable_themes": 25,
+      "session": "2026-08-17",
+      "side": "short",
+      "states": {
+        "Fading": 6,
+        "Improving": 2,
+        "Lagging": 19,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 287,
+      "researchable_themes": 23,
+      "session": "2026-08-18",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 3,
+        "Lagging": 21,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 330,
+      "researchable_themes": 24,
+      "session": "2026-08-19",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 2,
+        "Lagging": 20,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 349,
+      "researchable_themes": 26,
+      "session": "2026-08-20",
+      "side": "short",
+      "states": {
+        "Fading": 1,
+        "Improving": 3,
+        "Lagging": 18,
+        "Leading": 22
+      }
+    },
+    {
+      "research_stocks": 315,
+      "researchable_themes": 24,
+      "session": "2026-08-21",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 1,
+        "Lagging": 20,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 309,
+      "researchable_themes": 23,
+      "session": "2026-08-24",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 1,
+        "Lagging": 21,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 338,
+      "researchable_themes": 26,
+      "session": "2026-08-25",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 2,
+        "Lagging": 18,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 324,
+      "researchable_themes": 24,
+      "session": "2026-08-26",
+      "side": "short",
+      "states": {
+        "Fading": 5,
+        "Lagging": 20,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 386,
+      "researchable_themes": 27,
+      "session": "2026-08-27",
+      "side": "short",
+      "states": {
+        "Fading": 6,
+        "Improving": 2,
+        "Lagging": 17,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 342,
+      "researchable_themes": 22,
+      "session": "2026-08-28",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 4,
+        "Lagging": 22,
+        "Leading": 15
+      }
+    },
+    {
+      "research_stocks": 307,
+      "researchable_themes": 23,
+      "session": "2026-08-31",
+      "side": "short",
+      "states": {
+        "Fading": 1,
+        "Improving": 4,
+        "Lagging": 21,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 347,
+      "researchable_themes": 26,
+      "session": "2026-09-01",
+      "side": "short",
+      "states": {
+        "Fading": 1,
+        "Improving": 5,
+        "Lagging": 18,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 311,
+      "researchable_themes": 24,
+      "session": "2026-09-02",
+      "side": "short",
+      "states": {
+        "Fading": 5,
+        "Improving": 2,
+        "Lagging": 20,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 304,
+      "researchable_themes": 24,
+      "session": "2026-09-03",
+      "side": "short",
+      "states": {
+        "Fading": 6,
+        "Improving": 2,
+        "Lagging": 20,
+        "Leading": 16
+      }
+    },
+    {
+      "research_stocks": 344,
+      "researchable_themes": 25,
+      "session": "2026-09-04",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 344,
+      "researchable_themes": 24,
+      "session": "2026-09-08",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 4,
+        "Lagging": 20,
+        "Leading": 16
+      }
+    },
+    {
+      "research_stocks": 397,
+      "researchable_themes": 25,
+      "session": "2026-09-09",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 5,
+        "Lagging": 19,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 388,
+      "researchable_themes": 26,
+      "session": "2026-09-10",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 3,
+        "Lagging": 18,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 350,
+      "researchable_themes": 25,
+      "session": "2026-09-11",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 4,
+        "Lagging": 19,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 326,
+      "researchable_themes": 24,
+      "session": "2026-09-14",
+      "side": "short",
+      "states": {
+        "Fading": 1,
+        "Improving": 2,
+        "Lagging": 20,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 334,
+      "researchable_themes": 24,
+      "session": "2026-09-15",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 4,
+        "Lagging": 20,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 342,
+      "researchable_themes": 26,
+      "session": "2026-09-16",
+      "side": "short",
+      "states": {
+        "Fading": 1,
+        "Improving": 5,
+        "Lagging": 18,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 398,
+      "researchable_themes": 25,
+      "session": "2026-09-17",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 364,
+      "researchable_themes": 25,
+      "session": "2026-09-18",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 19,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 312,
+      "researchable_themes": 23,
+      "session": "2026-09-21",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 21,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 474,
+      "researchable_themes": 29,
+      "session": "2026-09-22",
+      "side": "short",
+      "states": {
+        "Fading": 6,
+        "Improving": 6,
+        "Lagging": 15,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 459,
+      "researchable_themes": 28,
+      "session": "2026-09-23",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 7,
+        "Lagging": 16,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 410,
+      "researchable_themes": 26,
+      "session": "2026-09-24",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 5,
+        "Lagging": 18,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 407,
+      "researchable_themes": 27,
+      "session": "2026-09-25",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 5,
+        "Lagging": 17,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 352,
+      "researchable_themes": 24,
+      "session": "2026-09-28",
+      "side": "short",
+      "states": {
+        "Fading": 5,
+        "Improving": 2,
+        "Lagging": 20,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 388,
+      "researchable_themes": 26,
+      "session": "2026-09-29",
+      "side": "short",
+      "states": {
+        "Fading": 5,
+        "Improving": 2,
+        "Lagging": 18,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 355,
+      "researchable_themes": 26,
+      "session": "2026-09-30",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 2,
+        "Lagging": 18,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 389,
+      "researchable_themes": 26,
+      "session": "2026-10-01",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 4,
+        "Lagging": 18,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 365,
+      "researchable_themes": 24,
+      "session": "2026-10-02",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 20,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 359,
+      "researchable_themes": 24,
+      "session": "2026-10-05",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 1,
+        "Lagging": 20,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 351,
+      "researchable_themes": 23,
+      "session": "2026-10-06",
+      "side": "short",
+      "states": {
+        "Fading": 5,
+        "Improving": 1,
+        "Lagging": 21,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 336,
+      "researchable_themes": 24,
+      "session": "2026-10-07",
+      "side": "short",
+      "states": {
+        "Fading": 1,
+        "Improving": 2,
+        "Lagging": 20,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 357,
+      "researchable_themes": 25,
+      "session": "2026-10-08",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 391,
+      "researchable_themes": 26,
+      "session": "2026-10-09",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 1,
+        "Lagging": 18,
+        "Leading": 22
+      }
+    },
+    {
+      "research_stocks": 378,
+      "researchable_themes": 25,
+      "session": "2026-10-12",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 2,
+        "Lagging": 19,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 344,
+      "researchable_themes": 23,
+      "session": "2026-10-13",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Lagging": 21,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 332,
+      "researchable_themes": 24,
+      "session": "2026-10-14",
+      "side": "short",
+      "states": {
+        "Improving": 3,
+        "Lagging": 20,
+        "Leading": 21
+      }
+    },
+    {
+      "research_stocks": 364,
+      "researchable_themes": 27,
+      "session": "2026-10-15",
+      "side": "short",
+      "states": {
+        "Fading": 1,
+        "Improving": 4,
+        "Lagging": 17,
+        "Leading": 22
+      }
+    },
+    {
+      "research_stocks": 379,
+      "researchable_themes": 28,
+      "session": "2026-10-16",
+      "side": "short",
+      "states": {
+        "Fading": 6,
+        "Improving": 6,
+        "Lagging": 16,
+        "Leading": 16
+      }
+    },
+    {
+      "research_stocks": 389,
+      "researchable_themes": 28,
+      "session": "2026-10-19",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 6,
+        "Lagging": 16,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 362,
+      "researchable_themes": 26,
+      "session": "2026-10-20",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 5,
+        "Lagging": 18,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 325,
+      "researchable_themes": 25,
+      "session": "2026-10-21",
+      "side": "short",
+      "states": {
+        "Fading": 5,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 277,
+      "researchable_themes": 23,
+      "session": "2026-10-22",
+      "side": "short",
+      "states": {
+        "Fading": 2,
+        "Improving": 3,
+        "Lagging": 21,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 311,
+      "researchable_themes": 22,
+      "session": "2026-10-23",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 2,
+        "Lagging": 22,
+        "Leading": 17
+      }
+    },
+    {
+      "research_stocks": 364,
+      "researchable_themes": 25,
+      "session": "2026-10-26",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 426,
+      "researchable_themes": 28,
+      "session": "2026-10-27",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 5,
+        "Lagging": 16,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 400,
+      "researchable_themes": 27,
+      "session": "2026-10-28",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 4,
+        "Lagging": 17,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 382,
+      "researchable_themes": 26,
+      "session": "2026-10-29",
+      "side": "short",
+      "states": {
+        "Fading": 4,
+        "Improving": 3,
+        "Lagging": 18,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 386,
+      "researchable_themes": 26,
+      "session": "2026-10-30",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 4,
+        "Lagging": 18,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 369,
+      "researchable_themes": 26,
+      "session": "2026-11-02",
+      "side": "short",
+      "states": {
+        "Fading": 5,
+        "Improving": 5,
+        "Lagging": 18,
+        "Leading": 16
+      }
+    },
+    {
+      "research_stocks": 420,
+      "researchable_themes": 28,
+      "session": "2026-11-03",
+      "side": "short",
+      "states": {
+        "Fading": 6,
+        "Improving": 4,
+        "Lagging": 16,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 336,
+      "researchable_themes": 25,
+      "session": "2026-11-04",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 4,
+        "Lagging": 19,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 332,
+      "researchable_themes": 25,
+      "session": "2026-11-05",
+      "side": "short",
+      "states": {
+        "Fading": 3,
+        "Improving": 4,
+        "Lagging": 19,
+        "Leading": 18
+      }
+    },
+    {
+      "research_stocks": 320,
+      "researchable_themes": 22,
+      "session": "2026-11-06",
+      "side": "short",
+      "states": {
+        "Fading": 1,
+        "Improving": 1,
+        "Lagging": 22,
+        "Leading": 20
+      }
+    },
+    {
+      "research_stocks": 305,
+      "researchable_themes": 21,
+      "session": "2026-11-09",
+      "side": "short",
+      "states": {
+        "Fading": 1,
+        "Improving": 1,
+        "Lagging": 23,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 326,
+      "researchable_themes": 23,
+      "session": "2026-11-10",
+      "side": "short",
+      "states": {
+        "Fading": 1,
+        "Improving": 3,
+        "Lagging": 21,
+        "Leading": 19
+      }
+    },
+    {
+      "research_stocks": 375,
+      "researchable_themes": 25,
+      "session": "2026-11-11",
+      "side": "short",
+      "states": {
+        "Improving": 3,
+        "Lagging": 19,
+        "Leading": 22
+      }
+    },
+    {
+      "research_stocks": 388,
+      "researchable_themes": 25,
+      "session": "2026-11-12",
+      "side": "short",
+      "states": {
+        "Fading": 1,
+        "Improving": 6,
+        "Lagging": 19,
+        "Leading": 18
+      }
+    }
+  ],
+  "small_themes": {
+    "ai-applications": 6,
+    "airlines": 5,
+    "copper-miners": 5,
+    "data-centers": 6,
+    "homebuilders": 7,
+    "mortgage-reits": 5,
+    "natural-gas-producers": 8,
+    "residential-reits": 9,
+    "robotics-automation": 9,
+    "silver-miners": 7,
+    "solar": 5,
+    "timber-forestry": 5,
+    "water": 8
+  },
+  "state_candidates": [
+    {
+      "breadth_gate": false,
+      "delta_threshold": 5,
+      "improving_themes": {
+        "maximum": 11,
+        "mean": 5.5,
+        "minimum": 0
+      },
+      "latest_states": {
+        "Fading": 9,
+        "Improving": 5,
+        "Lagging": 14,
+        "Leading": 16
+      },
+      "research_stocks": {
+        "maximum": 532,
+        "mean": 431.304,
+        "minimum": 312
+      },
+      "researchable_themes": {
+        "maximum": 31,
+        "mean": 27.015,
+        "minimum": 21
+      },
+      "side": "long",
+      "state_changes_per_session": {
+        "maximum": 20,
+        "mean": 11.358,
+        "minimum": 3
+      },
+      "state_observations": {
+        "Fading": 942,
+        "Improving": 1067,
+        "Lagging": 3229,
+        "Leading": 3232,
+        "Unavailable": 66
+      },
+      "structural_leader_retention": {
+        "maximum": 1.0,
+        "mean": 1.0,
+        "minimum": 1.0
+      }
+    },
+    {
+      "breadth_gate": false,
+      "delta_threshold": 5,
+      "improving_themes": {
+        "maximum": 11,
+        "mean": 4.851,
+        "minimum": 0
+      },
+      "latest_states": {
+        "Fading": 5,
+        "Improving": 9,
+        "Lagging": 16,
+        "Leading": 14
+      },
+      "research_stocks": {
+        "maximum": 497,
+        "mean": 395.722,
+        "minimum": 277
+      },
+      "researchable_themes": {
+        "maximum": 32,
+        "mean": 27.015,
+        "minimum": 20
+      },
+      "side": "short",
+      "state_changes_per_session": {
+        "maximum": 20,
+        "mean": 11.352,
+        "minimum": 3
+      },
+      "state_observations": {
+        "Fading": 1068,
+        "Improving": 941,
+        "Lagging": 3229,
+        "Leading": 3232,
+        "Unavailable": 66
+      },
+      "structural_leader_retention": {
+        "maximum": 1.0,
+        "mean": 1.0,
+        "minimum": 1.0
+      }
+    },
+    {
+      "breadth_gate": true,
+      "delta_threshold": 5,
+      "improving_themes": {
+        "maximum": 11,
+        "mean": 5.5,
+        "minimum": 0
+      },
+      "latest_states": {
+        "Fading": 9,
+        "Improving": 5,
+        "Lagging": 14,
+        "Leading": 16
+      },
+      "research_stocks": {
+        "maximum": 510,
+        "mean": 313.99,
+        "minimum": 59
+      },
+      "researchable_themes": {
+        "maximum": 29,
+        "mean": 19.289,
+        "minimum": 4
+      },
+      "side": "long",
+      "state_changes_per_session": {
+        "maximum": 20,
+        "mean": 11.358,
+        "minimum": 3
+      },
+      "state_observations": {
+        "Fading": 942,
+        "Improving": 1067,
+        "Lagging": 3229,
+        "Leading": 3232,
+        "Unavailable": 66
+      },
+      "structural_leader_retention": {
+        "maximum": 1.0,
+        "mean": 0.784,
+        "minimum": 0.18181818181818182
+      }
+    },
+    {
+      "breadth_gate": true,
+      "delta_threshold": 5,
+      "improving_themes": {
+        "maximum": 11,
+        "mean": 4.851,
+        "minimum": 0
+      },
+      "latest_states": {
+        "Fading": 5,
+        "Improving": 9,
+        "Lagging": 16,
+        "Leading": 14
+      },
+      "research_stocks": {
+        "maximum": 474,
+        "mean": 283.979,
+        "minimum": 58
+      },
+      "researchable_themes": {
+        "maximum": 29,
+        "mean": 19.861,
+        "minimum": 7
+      },
+      "side": "short",
+      "state_changes_per_session": {
+        "maximum": 20,
+        "mean": 11.352,
+        "minimum": 3
+      },
+      "state_observations": {
+        "Fading": 1068,
+        "Improving": 941,
+        "Lagging": 3229,
+        "Leading": 3232,
+        "Unavailable": 66
+      },
+      "structural_leader_retention": {
+        "maximum": 1.0,
+        "mean": 0.789,
+        "minimum": 0.22727272727272727
+      }
+    },
+    {
+      "breadth_gate": false,
+      "delta_threshold": 10,
+      "improving_themes": {
+        "maximum": 9,
+        "mean": 3.325,
+        "minimum": 0
+      },
+      "latest_states": {
+        "Fading": 6,
+        "Improving": 1,
+        "Lagging": 18,
+        "Leading": 19
+      },
+      "research_stocks": {
+        "maximum": 505,
+        "mean": 401.763,
+        "minimum": 297
+      },
+      "researchable_themes": {
+        "maximum": 29,
+        "mean": 24.84,
+        "minimum": 19
+      },
+      "side": "long",
+      "state_changes_per_session": {
+        "maximum": 16,
+        "mean": 9.187,
+        "minimum": 3
+      },
+      "state_observations": {
+        "Fading": 573,
+        "Improving": 645,
+        "Lagging": 3651,
+        "Leading": 3601,
+        "Unavailable": 66
+      },
+      "structural_leader_retention": {
+        "maximum": 1.0,
+        "mean": 1.0,
+        "minimum": 1.0
+      }
+    },
+    {
+      "breadth_gate": false,
+      "delta_threshold": 10,
+      "improving_themes": {
+        "maximum": 8,
+        "mean": 2.948,
+        "minimum": 0
+      },
+      "latest_states": {
+        "Fading": 1,
+        "Improving": 6,
+        "Lagging": 19,
+        "Leading": 18
+      },
+      "research_stocks": {
+        "maximum": 474,
+        "mean": 364.928,
+        "minimum": 255
+      },
+      "researchable_themes": {
+        "maximum": 30,
+        "mean": 25.113,
+        "minimum": 20
+      },
+      "side": "short",
+      "state_changes_per_session": {
+        "maximum": 16,
+        "mean": 9.181,
+        "minimum": 3
+      },
+      "state_observations": {
+        "Fading": 646,
+        "Improving": 572,
+        "Lagging": 3598,
+        "Leading": 3654,
+        "Unavailable": 66
+      },
+      "structural_leader_retention": {
+        "maximum": 1.0,
+        "mean": 1.0,
+        "minimum": 1.0
+      }
+    },
+    {
+      "breadth_gate": true,
+      "delta_threshold": 10,
+      "improving_themes": {
+        "maximum": 9,
+        "mean": 3.325,
+        "minimum": 0
+      },
+      "latest_states": {
+        "Fading": 6,
+        "Improving": 1,
+        "Lagging": 18,
+        "Leading": 19
+      },
+      "research_stocks": {
+        "maximum": 458,
+        "mean": 304.082,
+        "minimum": 59
+      },
+      "researchable_themes": {
+        "maximum": 29,
+        "mean": 18.582,
+        "minimum": 4
+      },
+      "side": "long",
+      "state_changes_per_session": {
+        "maximum": 16,
+        "mean": 9.187,
+        "minimum": 3
+      },
+      "state_observations": {
+        "Fading": 573,
+        "Improving": 645,
+        "Lagging": 3651,
+        "Leading": 3601,
+        "Unavailable": 66
+      },
+      "structural_leader_retention": {
+        "maximum": 1.0,
+        "mean": 0.784,
+        "minimum": 0.18181818181818182
+      }
+    },
+    {
+      "breadth_gate": true,
+      "delta_threshold": 10,
+      "improving_themes": {
+        "maximum": 8,
+        "mean": 2.948,
+        "minimum": 0
+      },
+      "latest_states": {
+        "Fading": 1,
+        "Improving": 6,
+        "Lagging": 19,
+        "Leading": 18
+      },
+      "research_stocks": {
+        "maximum": 459,
+        "mean": 273.402,
+        "minimum": 58
+      },
+      "researchable_themes": {
+        "maximum": 29,
+        "mean": 19.129,
+        "minimum": 7
+      },
+      "side": "short",
+      "state_changes_per_session": {
+        "maximum": 16,
+        "mean": 9.181,
+        "minimum": 3
+      },
+      "state_observations": {
+        "Fading": 646,
+        "Improving": 572,
+        "Lagging": 3598,
+        "Leading": 3654,
+        "Unavailable": 66
+      },
+      "structural_leader_retention": {
+        "maximum": 1.0,
+        "mean": 0.789,
+        "minimum": 0.22727272727272727
+      }
+    },
+    {
+      "breadth_gate": false,
+      "delta_threshold": 15,
+      "improving_themes": {
+        "maximum": 6,
+        "mean": 1.964,
+        "minimum": 0
+      },
+      "latest_states": {
+        "Fading": 4,
+        "Lagging": 19,
+        "Leading": 21
+      },
+      "research_stocks": {
+        "maximum": 477,
+        "mean": 382.278,
+        "minimum": 279
+      },
+      "researchable_themes": {
+        "maximum": 28,
+        "mean": 23.479,
+        "minimum": 18
+      },
+      "side": "long",
+      "state_changes_per_session": {
+        "maximum": 17,
+        "mean": 7.689,
+        "minimum": 2
+      },
+      "state_observations": {
+        "Fading": 341,
+        "Improving": 381,
+        "Lagging": 3915,
+        "Leading": 3833,
+        "Unavailable": 66
+      },
+      "structural_leader_retention": {
+        "maximum": 1.0,
+        "mean": 1.0,
+        "minimum": 1.0
+      }
+    },
+    {
+      "breadth_gate": false,
+      "delta_threshold": 15,
+      "improving_themes": {
+        "maximum": 6,
+        "mean": 1.753,
+        "minimum": 0
+      },
+      "latest_states": {
+        "Improving": 4,
+        "Lagging": 21,
+        "Leading": 19
+      },
+      "research_stocks": {
+        "maximum": 444,
+        "mean": 344.83,
+        "minimum": 232
+      },
+      "researchable_themes": {
+        "maximum": 28,
+        "mean": 23.918,
+        "minimum": 19
+      },
+      "side": "short",
+      "state_changes_per_session": {
+        "maximum": 17,
+        "mean": 7.684,
+        "minimum": 2
+      },
+      "state_observations": {
+        "Fading": 382,
+        "Improving": 340,
+        "Lagging": 3830,
+        "Leading": 3918,
+        "Unavailable": 66
+      },
+      "structural_leader_retention": {
+        "maximum": 1.0,
+        "mean": 1.0,
+        "minimum": 1.0
+      }
+    },
+    {
+      "breadth_gate": true,
+      "delta_threshold": 15,
+      "improving_themes": {
+        "maximum": 6,
+        "mean": 1.964,
+        "minimum": 0
+      },
+      "latest_states": {
+        "Fading": 4,
+        "Lagging": 19,
+        "Leading": 21
+      },
+      "research_stocks": {
+        "maximum": 458,
+        "mean": 294.985,
+        "minimum": 59
+      },
+      "researchable_themes": {
+        "maximum": 26,
+        "mean": 17.99,
+        "minimum": 4
+      },
+      "side": "long",
+      "state_changes_per_session": {
+        "maximum": 17,
+        "mean": 7.689,
+        "minimum": 2
+      },
+      "state_observations": {
+        "Fading": 341,
+        "Improving": 381,
+        "Lagging": 3915,
+        "Leading": 3833,
+        "Unavailable": 66
+      },
+      "structural_leader_retention": {
+        "maximum": 1.0,
+        "mean": 0.784,
+        "minimum": 0.18181818181818182
+      }
+    },
+    {
+      "breadth_gate": true,
+      "delta_threshold": 15,
+      "improving_themes": {
+        "maximum": 6,
+        "mean": 1.753,
+        "minimum": 0
+      },
+      "latest_states": {
+        "Improving": 4,
+        "Lagging": 21,
+        "Leading": 19
+      },
+      "research_stocks": {
+        "maximum": 431,
+        "mean": 264.072,
+        "minimum": 58
+      },
+      "researchable_themes": {
+        "maximum": 27,
+        "mean": 18.572,
+        "minimum": 7
+      },
+      "side": "short",
+      "state_changes_per_session": {
+        "maximum": 17,
+        "mean": 7.684,
+        "minimum": 2
+      },
+      "state_observations": {
+        "Fading": 382,
+        "Improving": 340,
+        "Lagging": 3830,
+        "Leading": 3918,
+        "Unavailable": 66
+      },
+      "structural_leader_retention": {
+        "maximum": 1.0,
+        "mean": 0.789,
+        "minimum": 0.22727272727272727
+      }
+    }
+  ]
+}

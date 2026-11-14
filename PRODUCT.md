@@ -1,23 +1,29 @@
 # ThemeScope product boundary
 
-ThemeScope is a local, end-of-day US equity research workspace: **Market → Themes
-→ Stocks**. SPY/QQQ determine Market Bias; IWM is context only. Custom themes drive
-Strength and synthetic Trend; stocks are researched against actual theme peers.
-Directional and Countertrend are research lenses, not technical entries or orders.
+ThemeScope is a local, private, completed-session equity research application.
+Its workflow is Market → Themes → Daily Research List → chart review. The user
+judges actual chart setups; ThemeScope never selects entries, stops, positions,
+reversal trades or executions.
 
-Daily operation uses Alpaca historical SIP and a transactional SQLite snapshot,
-without daily CSV uploads. Memberships and manual SPY/QQQ rosters are reviewed,
-effective-dated configuration. Core/Enabler enter calculations; Related does not.
-Multi-theme qualification is independent and combined exports deduplicate by the
-approved deterministic rules. Thematic ETFs have no runtime calculation role.
+SPY/QQQ determine market direction; IWM is context only. Reviewed effective-dated
+Core/Enabler memberships drive theme calculations; Related is context. Thematic
+ETFs have no calculation role. Research v2 separates structural theme strength
+from five-session change. Leading, Improving and Fading themes retain all
+daily-eligible members. Peer strength orders stocks; its sign never hides them.
+The Countertrend lens is removed.
 
-The UI presents supplied results, contextual research inspectors, browser-local
-Saved and TradingView TXT exports. Optional public snapshots are frozen/read-only;
-the live backend remains local. No trade execution, stops, position sizing, intraday
-feed, automatic constituent scraping or silent data-source substitution.
+The manually supplied TradingView Base Market Universe is a maintenance input,
+not a daily dependency. Daily operation uses swappable market-data providers,
+Alpaca historical SIP and transactional SQLite publication. Failed refresh keeps
+the prior successful snapshot. No silent SIP/IEX substitution, scanner scraping
+or trading endpoints are permitted.
 
-Launch rebalance remains Nov 6, 2026 close; first earned session is Nov 9.
-Legacy series are retained separately, never spliced into current history.
-[Gate E is CLOSED](docs/operations/gate-e-closure.md) after user-confirmed Nov 6,
-Nov 9 and Nov 10 real validation. See the [README](README.md) for setup and
-[current methodology](docs/methodology/README.md) for exact rules.
+The UI presents deterministic results, contextual inspectors, compatible
+browser-local Saved research and TradingView watchlists. Optional public snapshots
+are frozen/read-only and require explicit publication authorization. Provider
+credentials, runtime databases and raw private market data never enter output.
+
+Launch rebalance remains November 6, 2026 close; first earned session November 9.
+Legacy and vNext history remain separate. Gate E is CLOSED, as recorded in
+[the closure record](docs/operations/gate-e-closure.md). Current selection rules
+are defined in [Research Logic v2](docs/methodology/research-v2.md).

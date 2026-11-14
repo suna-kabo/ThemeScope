@@ -19,7 +19,7 @@ from ..themes.index import build_index,IndexUnavailable
 from ..themes.history import ThemeHistory
 from ..research.engine import calculate_session
 from ..research.context import enrich
-from ..research.countertrend_exports import attach as attach_countertrend_exports
+from ..research.v2 import attach as attach_research_v2, policy as research_policy
 from ..research.exports import reviewed_mapping
 from ..research.universe import approved_launch_universe,approved_launch_close_membership,contiguous_suffix
 from ..research_policy import ACTION_SENTENCES
@@ -267,7 +267,10 @@ class RefreshService:
             previous_context=store.research_at(sessions[-2],config.methodology['version']) if len(sessions)>1 else None
             snapshot=enrich(snapshot,bars,sessions,previous_context,
                 {m.ticker:m.company for m in config.memberships if m.company})
-            snapshot=attach_countertrend_exports(snapshot,mapping)
+            horizon=research_policy()['change_sessions']
+            comparison=store.research_at(sessions[-horizon-1],config.methodology['version']) if len(sessions)>horizon else None
+            snapshot=attach_research_v2(snapshot,bars,sessions,mapping,previous=comparison,
+                                       previous_day=previous_context,related=working.memberships)
             snapshot['refreshed_at']=datetime.now(timezone.utc).isoformat()
             snapshot['completeness']={'required':len(target_names),'valid_target':len(target_names),'complete':True}
             if prepared.terminal_values:

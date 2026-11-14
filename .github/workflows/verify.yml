@@ -23,6 +23,8 @@ jobs:
       - run: python3 -m compileall -q src scripts tests
       - run: node --check static/dashboard.js
       - run: node tests/test_dashboard.js
+      - run: node --check static/vnext/app.js
+      - run: node tests/test_workspace.js
       - name: Clean manual-CSV install, preservation, history and HTTP site checks
         run: python tests/smoke_local_install.py --browser
 
@@ -31,3 +33,8 @@ jobs:
 
       - name: Pre-launch research and official-launch boundary browser smoke
         run: python tests/smoke_prelaunch_ui.py
+
+      - name: Install local accessibility audit tool
+        run: npm install --prefix runtime/ui-v3-tools --no-save --package-lock=false axe-core@4.14.0
+      - name: Research v2 desktop, mobile, keyboard and accessibility gate
+        run: python tests/smoke_research_v2_ui.py

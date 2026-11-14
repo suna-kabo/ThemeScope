@@ -109,13 +109,14 @@ class Store:
     def research_at(self, session, methodology):
         """One successful run's entire theme universe and market context, read only."""
         row=self.connection.execute(
-            "SELECT r.id,m.payload FROM refresh_run r JOIN market_snapshot m ON m.run_id=r.id "
+            "SELECT r.id,r.config_hash,m.payload FROM refresh_run r JOIN market_snapshot m ON m.run_id=r.id "
             "WHERE r.session=? AND r.methodology=? AND r.status='success' ORDER BY r.id DESC LIMIT 1",
             (session,methodology)).fetchone()
         if row is None:return None
         themes=[json.loads(t[0]) for t in self.connection.execute(
             'SELECT payload FROM theme_snapshot WHERE run_id=? ORDER BY theme_id',(row['id'],))]
-        return {'session':session,'methodology':methodology,'market':json.loads(row['payload']),'themes':themes}
+        return {'session':session,'methodology':methodology,'configuration_hash':row['config_hash'],
+                'market':json.loads(row['payload']),'themes':themes}
 
     def active_publication(self):
         """Version and payload from ONE committed publication-pointer read."""

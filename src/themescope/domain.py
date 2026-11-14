@@ -205,4 +205,10 @@ def load_configuration(root):
     if actions:
         sessions=json.loads((Path(root)/'config/calendars/xnys_2020_2035_v1.json').read_text())['sessions']
         configuration=apply_membership_ends(configuration,actions,[r['session'] for r in sessions])
+    review=folder/'research_v2_membership_review.json'
+    if review.exists():
+        from .research.membership_review import apply_review
+        sessions=json.loads((Path(root)/'config/calendars/xnys_2020_2035_v1.json').read_text())['sessions']
+        configuration=apply_review(configuration,json.loads(review.read_text(encoding='utf-8')),
+                                   [r['session'] for r in sessions])
     return configuration

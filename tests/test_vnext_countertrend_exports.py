@@ -105,8 +105,8 @@ class CountertrendExportsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder,patch('src.themescope.local.service.optional_earnings',return_value={}):
             f=PrelaunchFixture(folder);first=f.service.refresh();self.assertIsNotNone(first,f.service.status())
             before=f.service.snapshot()
-            exported=before['research']['countertrend']['exports']['symbols']
-            ticker=next(s for s in exported if s not in before['exports']['assignments'])
+            self.assertNotIn('countertrend',before['research'])
+            ticker=next(iter(before['exports']['assignments']))
             def missing(config,source):
                 value=reviewed_mapping(config,source);value.pop(ticker,None);return value
             with patch('src.themescope.local.service.reviewed_mapping',side_effect=missing):

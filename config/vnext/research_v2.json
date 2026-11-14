@@ -1,0 +1,11 @@
+{
+  "version": "themescope-research-v2-1",
+  "change_sessions": 5,
+  "structural_boundary": 50,
+  "material_score_change": 10,
+  "liquidity_sessions": 20,
+  "price_floor_exclusive": 5,
+  "average_dollar_volume_floor": 10000000,
+  "breadth_small_sample": 10,
+  "state_order": ["Leading", "Improving", "Fading", "Lagging", "Unavailable"]
+}

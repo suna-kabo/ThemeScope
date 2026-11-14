@@ -13,7 +13,9 @@ It is not a trade-execution or signal-execution system.
 - Theme Score = 60% 1M cross-theme percentile + 40% 3M percentile.
 - Stock relative performance uses Leave-One-Out peer medians.
 - W = 60% ER1M + 40% ER3M.
-- Long Primary requires W > 0; Short Primary requires W < 0.
+- Research v2 includes every daily-eligible Core/Enabler member of researchable
+  themes; W orders peers (descending Long, ascending Short), never filters by sign.
+- Historical Primary sign-gate helpers remain provenance, not current selection.
 - Theme breadth is context only.
 - Synthetic theme trend uses a chain-linked index and EMA21/EMA50.
 - Do not invent or change formulas without explicit user approval.
@@ -60,6 +62,11 @@ New inspection bundles must be allowlisted and explicitly requested; never inclu
 secrets, runtime DB, raw market data or absolute personal paths.
 
 ## Current milestone and documentation
+Research Logic v2 and UI v3 follow the authorized master contract. Current research
+rules are in [the v2 specification](docs/methodology/research-v2.md); return formulas,
+Market Matrix and launch accounting remain unchanged. Reviewed membership additions
+are forward-dated overlays; the original launch review package stays immutable.
+
 Gate E is CLOSED after user-confirmed real Nov 6, Nov 9 and Nov 10 validation.
 See [the closure record](docs/operations/gate-e-closure.md) and
 [current docs](docs/README.md). Original gate/phase reports are historical and do

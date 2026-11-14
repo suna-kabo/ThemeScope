@@ -9,12 +9,12 @@ against their actual theme peers. It does not place trades or generate entry sig
 
 1. **Market:** SPY and QQQ determine Market Bias; breadth and price/EMA evidence
    explain the result. IWM supplies small-cap context only.
-2. **Themes:** compare Theme Strength, synthetic-index Trend, Research Priority,
-   returns and breadth. The Theme Returns Map adds a compact cross-theme view.
-3. **Stocks:** switch between Directional and Countertrend research, inspect a
+2. **Themes:** compare structural strength, five-session change, participation and
+   Leading/Improving/Fading/Lagging states. Synthetic-index Trend remains context.
+3. **Research list:** inspect every daily-eligible member of researchable themes, open a
    ticker's theme relationships, save research locally, and export TradingView TXT lists.
 
-The midnight/cyan **Tidal Vector** interface includes contextual inspectors,
+The charcoal/cream **After Close** interface includes contextual inspectors,
 search and filters, grouped research tables, keyboard navigation, compact/comfortable
 layouts, enlarged text, high contrast and reduced motion. See the
 [UI and workflow guide](docs/getting-started/research-workflow.md) and
@@ -68,18 +68,18 @@ columns are never runtime prices. See [operations](docs/operations/refresh-and-m
   the 63-session percentile, using median Core/Enabler stock price returns.
 - **Theme Trend:** a chain-linked synthetic theme index versus EMA21/EMA50;
   holdings drift between approved rebalances.
-- **Peer delta (W):** a 60%/40% blend of 1M/3M stock-minus-peer returns, using
+- **Peer strength (W):** a 60%/40% blend of 1M/3M stock-minus-peer returns, using
   leave-one-out theme-peer medians.
   It measures relative performance, not an expected return or entry signal.
-- **Daily eligibility:** close ≥ $5, 10-session average volume > 500,000 shares,
-  and target-session turnover ≥ $10 million. Eligibility does not change membership.
-- **Directional / Countertrend:** separate research lenses using the approved
-  market, theme and peer-relative rules. One stock can qualify in multiple themes;
+- **Daily eligibility:** close > $5 and at least $10 million average daily dollar
+  volume over 20 completed sessions. Eligibility does not change membership.
+- **Research priority:** five-session score changes distinguish improving/fading
+  themes. W orders stocks without sign exclusion. One stock can qualify in multiple themes;
   combined TXT output uses deterministic deduplicated placement.
 
 Thematic ETFs have no calculation role. Breadth does not enter Theme Strength.
 Prices are split/spin-off adjusted, not dividend adjusted. Read the
-[current methodology](docs/methodology/README.md) for validity, lifecycle and exact rules.
+[Research Logic v2](docs/methodology/research-v2.md) for exact rules and simulation evidence.
 
 ## Optional frozen public snapshots
 

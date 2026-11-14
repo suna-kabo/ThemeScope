@@ -18,7 +18,7 @@ from src.themescope.domain import MarketRoster, ThemeStatus
 from src.themescope.market.layer import market_layer
 from src.themescope.research.engine import calculate_session
 from src.themescope.research.context import enrich
-from src.themescope.research.countertrend_exports import attach as attach_countertrend_exports
+from src.themescope.research.v2 import attach as attach_research_v2
 from src.themescope.storage import canonical
 from src.themescope.themes.calculations import Bar, deterministic
 from src.themescope.themes.index import build_index
@@ -72,7 +72,7 @@ def demo_snapshot():
                     earnings={s:{'status':'Unavailable','dates':[]} for s in sorted(names)})
     snapshot['earnings'][sorted(names)[0]]={'status':'Available','dates':['2024-04-15']}
     snapshot=enrich(snapshot,bars,sessions[:sessions.index(target)+1],companies={m.ticker:m.company for m in memberships})
-    snapshot=attach_countertrend_exports(snapshot,mapping)
+    snapshot=attach_research_v2(snapshot,bars,sessions,mapping)
     return json.loads(canonical(snapshot))
 
 

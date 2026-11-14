@@ -40,7 +40,7 @@ class PrelaunchResearchTests(unittest.TestCase):
         self.assertFalse(snapshot['synthetic_fixture'])
         self.assertEqual(snapshot['production_blockers'],[])
         self.assertEqual(config.memberships,before)
-        self.assertTrue(all(m.effective_from==E and not m.active_on(T) for m in before))
+        self.assertTrue(all(m.effective_from>=E and not m.active_on(T) for m in before))
         self.assertTrue(all(not config.members_on(t.theme_id,T) for t in config.themes))
         active=[t for t in snapshot['themes'] if t['status']=='active']
         self.assertEqual(len(active),44)
@@ -54,7 +54,7 @@ class PrelaunchResearchTests(unittest.TestCase):
             self.assertIn(':pre-launch-research:',theme['history']['series_id'])
             self.assertTrue(all(v is None for v in theme['transition'].values()))
             self.assertEqual(theme['priority'],priority(snapshot['market_direction'],theme['score'],theme['index']['trend'],theme['transition']))
-        expected={(m.ticker,m.theme_id) for m in before if m.calculation_eligible}
+        expected={(m.ticker,m.theme_id) for m in before if m.calculation_eligible and m.active_on(E)}
         self.assertEqual({(r['ticker'],r['theme_id']) for r in snapshot['relationships']},expected)
         self.assertEqual(len(snapshot['relationships']),721)
         self.assertTrue(all(r['relative'].w is not None for r in snapshot['relationships']))
@@ -78,8 +78,8 @@ class PrelaunchResearchTests(unittest.TestCase):
         bars=bar_map(fixture.bars);end=DAYS.index(T);returns=[]
         for horizon in (21,63):
             returns.append({s:F(bars[s,T].adjusted_close)/F(bars[s,DAYS[end-horizon]].adjusted_close)-1
-                            for s in {m.ticker for m in before if m.calculation_eligible}})
-        medians=[{t['theme_id']:median(values[m.ticker] for m in before if m.theme_id==t['theme_id'] and m.calculation_eligible)
+                            for s in {m.ticker for m in before if m.calculation_eligible and m.active_on(E)}})
+        medians=[{t['theme_id']:median(values[m.ticker] for m in before if m.theme_id==t['theme_id'] and m.calculation_eligible and m.active_on(E))
                   for t in active} for values in returns]
         def percentile(values,key):
             value=values[key];less=sum(v<value for v in values.values());ties=sum(v==value for v in values.values())
@@ -135,7 +135,7 @@ class PrelaunchResearchTests(unittest.TestCase):
         for current in (before,launch,first,second):
             self.assertEqual({(r['ticker'],r['theme_id']) for r in current['relationships']},expected)
             self.assertTrue(all(t['score'] is not None for t in current['themes']))
-            self.assertTrue(all(r['relative'].w is not None and r['eligibility'].available for r in current['relationships']))
+            self.assertTrue(all(r['relative'].w is not None and r['eligibility']['available'] for r in current['relationships']))
         self.assertEqual(launch['theme_layer']['state'],'initialized')
         self.assertTrue(launch['theme_layer']['official_live_history'])
         self.assertTrue(any(r['qualifies'] for r in launch['relationships']))
@@ -206,7 +206,7 @@ class PrelaunchResearchTests(unittest.TestCase):
         fixture=PrelaunchFixture(self.root)
         first=self.refresh(fixture)
         selected=next(r for r in first['relationships'] if r['qualifies'])
-        fixture.bars=tuple(replace(b,volume=D(1)) if b.ticker==selected['ticker'] and b.session==T else b for b in fixture.bars)
+        fixture.bars=tuple(replace(b,volume=D(1)) if b.ticker==selected['ticker'] else b for b in fixture.bars)
         after=self.refresh(fixture)
         self.assertEqual([t['score'] for t in first['themes']],[t['score'] for t in after['themes']])
         self.assertEqual(len(first['relationships']),len(after['relationships']))

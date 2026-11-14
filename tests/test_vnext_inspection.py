@@ -38,7 +38,8 @@ class InspectionTests(unittest.TestCase):
         report_path.write_text('Synthetic inspection test; not a certification of a real gate.\n')
         report = build(self.root, test_report=report_path)
         self.assertEqual(report['active_themes'], 44)
-        self.assertEqual(report['unique_tickers'], 668)
+        from src.themescope.domain import load_configuration
+        self.assertEqual(report['unique_tickers'],len({m.ticker for m in load_configuration(self.root).memberships}))
         self.assertEqual(report['production_blockers'],[])
         paths = list((self.root / 'inspection').iterdir())
         self.assertEqual(len(paths), 5)

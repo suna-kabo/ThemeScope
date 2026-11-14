@@ -29,7 +29,7 @@ def reviewed_mapping(configuration, mapping):
         if venue in ('NYSE','NASDAQ') and result.get(ticker,{}).get('status')!='verified':
             result[ticker]={'status':'verified','symbol':venue+':'+ticker,
                             'evidence_kind':'User-supplied TradingView review Symbol/Exchange',
-                            'source_sha256':configuration.universe['source_sha256']}
+                            'source_sha256':row.get('source_sha256',configuration.universe['source_sha256'])}
     return result
 
 

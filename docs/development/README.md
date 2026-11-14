@@ -35,18 +35,17 @@ available, otherwise the installed Playwright browser. Run each program with the
 ```sh
 python tests/smoke_vnext_ui.py
 python tests/smoke_prelaunch_ui.py
-python tests/smoke_lunar_ui.py
-python tests/smoke_research_context_ui.py
-python tests/smoke_professional_ui.py
-python tests/smoke_identity_ui.py
-python tests/smoke_cloudflare_demo.py
-python tests/smoke_public_snapshot.py
+python tests/smoke_research_v2_ui.py
 ```
 
-The historical Lunar test name remains compatible; it now verifies the current UI.
-Tests cover refresh/preservation, launch boundaries, selected-theme context, both
-lenses and exports, Saved, nested Back/focus/scroll, map, motion, static isolation,
-responsive text/density and accessibility. Fixture dates are not live chronology.
+Install the local audit script with `npm install --prefix runtime/ui-v3-tools
+--no-save --package-lock=false axe-core@4.14.0`; the release gate finds it there
+or uses `THEMESCOPE_AXE_SCRIPT`. Historical Lunar, identity and research-context
+smoke programs preserve previous UI checkpoints; current UI coverage is consolidated
+in the v2 release gate. It checks refresh preservation, both research sides,
+exports, Saved, nested Back/focus/scroll, motion, static isolation, eight device
+widths, 200% text/reflow and accessibility. Pre-launch accounting keeps a separate
+browser regression. Fixture dates are not live chronology.
 Record actual results when running; old checkpoint counts remain archived.
 
 Cross-platform asset checks simulate fresh Git checkouts with Unix and Windows EOL
