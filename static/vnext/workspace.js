@@ -83,6 +83,7 @@ window.ThemeScopeUI = (() => {
     selections.set(group,{selected,x,y,width:r.width,height:r.height});
   }
   function indicators() {
+    document.querySelectorAll('.table-wrap').forEach(e=>{e.dataset.scroll=String(e.scrollWidth>e.clientWidth+1);});
     document.querySelectorAll('.segmented,.research-tabs,.main-nav').forEach(g=>indicator(g,g.querySelector('[aria-pressed="true"],[aria-selected="true"],[aria-current="page"]')));
   }
   function install() {
@@ -125,7 +126,10 @@ window.ThemeScopeUI = (() => {
         e.preventDefault();tabs[next].click();tabs[next].focus();
       }
     },true);
-    new ResizeObserver(()=>{indicators();document.querySelectorAll('.table-wrap').forEach(e=>{e.dataset.scroll=String(e.scrollWidth>e.clientWidth+1);});}).observe(document.querySelector('.app-shell'));
+    new ResizeObserver(indicators).observe(document.querySelector('.app-shell'));
+    // Replaced tables need fresh overflow measurements even when workspace size is unchanged.
+    let layoutFrame;
+    new MutationObserver(()=>{cancelAnimationFrame(layoutFrame);layoutFrame=requestAnimationFrame(indicators);}).observe(document.querySelector('.app-shell'),{childList:true,subtree:true});
     document.addEventListener('toggle',e=>{if(e.target instanceof HTMLDetailsElement&&e.target.open){const panel=e.target.querySelector(':scope > div');if(panel&&!e.target.classList.contains('method-item'))move(panel,'reveal');}},true);
     window.addEventListener('resize',()=>close());
     matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',e=>{if(e.matches)document.getAnimations().forEach(a=>a.cancel());});

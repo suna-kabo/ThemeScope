@@ -155,7 +155,7 @@
   const recentValue = id => { const recent=themeResearch(id).recent; return currentSide()?recent?.directional_score_change:recent?.raw_score_change; };
   function recentChange(id) {
     const recent=themeResearch(id).recent,value=recentValue(id);
-    if(!recent?.available)return `<span class="unavailable">${esc(UX.comparisonMessage(recent?.reason))}</span>`;
+    if(!recent?.available)return `<span class="unavailable" title="${esc(UX.comparisonMessage(recent?.reason))}"><span class="comparison-short" aria-hidden="true">Unavailable</span><span class="comparison-reason">${esc(UX.comparisonMessage(recent?.reason))}</span></span>`;
     return `<span class="${signTone(value)}">${Number(value)>0?'+':''}${number(value,1)} pts</span>`;
   }
   function primaryThemes() {
@@ -299,7 +299,7 @@
     const filterCount=['theme-family','theme-priority','theme-trend'].filter(id=>$(id).value).length;
     document.querySelector('.theme-filter-menu>summary').textContent='Filters'+(filterCount?' ('+filterCount+')':'');
     const rows=themeRows();
-    $('theme-results').textContent=`${rows.length} ${tracked?'themes':'concepts'} · ${sideLabel()} · ${primaryThemes().length} researchable`;
+    $('theme-results').textContent=tracked?`${rows.length} themes · ${sideLabel()} · ${primaryThemes().length} researchable`:`${rows.length} untracked concepts`;
     if(!rows.length){$('theme-table').innerHTML=empty(snapshot?'No themes match':'Themes are waiting',snapshot?'Try another search or reset the filters.':'Refresh Data to load completed-session research.','<button class="button secondary" data-reset="themes">Reset filters</button>');return;}
     if(!tracked){$('theme-table').innerHTML=table(['Concept','Family','Coverage'],rows.map(t=>`<tr><td data-label="Concept">${themeLink(t.theme_id)}</td><td data-label="Family">${esc(t.family)}</td><td data-label="Coverage">Not currently tracked</td></tr>`),'Untracked concepts','concept-table');return;}
     const heading=`<thead><tr><th scope="col" class="col-rank numeric">Rank ${helpButton('rank')}</th>${sortHeading('Theme','name')}${sortHeading('State','priority',false,'priority')}${sortHeading('Strength','score',true,'strength')}${sortHeading(currentSide()?'5-session research Δ':'5-session strength Δ','recent',true)}${sortHeading('Trend','trend')}${sortHeading('Participation','breadth',true,'breadth')}</tr></thead>`;
@@ -311,7 +311,7 @@
   function participation(id) {
     const breadth=themeResearch(id).breadth||{};
     const text=valid(breadth.percent)&&valid(breadth.above)?`${number(breadth.above,0)} / ${number(breadth.total,0)} · ${number(breadth.percent,0)}%`:'Unavailable';
-    return `<span>${text}</span>${breadth.small_sample?'<small class="small-sample">Small sample · context only</small>':''}`;
+    return `<span>${text}</span>${breadth.small_sample?'<small class="small-sample" title="Participation is context only">Small sample<span class="sr-only">; context only</span></small>':''}`;
   }
 
   function researchStatus(row,included='Included in research list',excluded='Outside research list') { return !currentResearch()?'Previous rules snapshot':row.role==='Related'?'Context only':!currentSide()?'No directional research list':row.qualifies?included:excluded; }
@@ -385,7 +385,7 @@
   }
   function renderSaved() {
     $('saved-count').textContent=watched.length;
-    if(!watched.length){$('saved').innerHTML=empty('No Saved tickers','Saved in this browser only');return;}
+    if(!watched.length){$('saved').innerHTML=empty('No saved stocks','Use the star beside a stock to save it here. Saved stays in this browser.');return;}
     $('saved').innerHTML='<p class="saved-scope">Saved in this browser only</p><div class="saved-list">'+watched.map(ticker=>{
       const rows=(snapshot?.relationships||[]).filter(r=>r.ticker===ticker),context=savedContext(ticker,rows),lead=rows.find(r=>r.theme_id===context.theme);
       const status=!snapshot?'Snapshot loading':!lead?'Relationship unavailable':researchStatus(lead,'On today’s research list','Outside today’s research list');
@@ -487,7 +487,7 @@
     if(!t){$('inspector-content').innerHTML=empty('Theme unavailable','This theme is not in the current snapshot.');return;}
     if(t.status!=='active'){$('inspector-content').innerHTML=`<p class="detail-family">${esc(t.family)} · Untracked Concept</p>${empty('No active calculation basket','This concept does not enter Strength, returns or candidate calculations.')}`;return;}
     const v=inspectorView();
-    $('inspector-content').innerHTML=`<div class="inspector-subhead"><span>${esc(t.family)}</span>${themeState(t.theme_id)}</div><div class="inspector-metrics">${metric('Strength '+helpButton('strength'),number(t.score,1))}${metric('Strength Rank '+helpButton('rank'),rankLabel(t.theme_id))}${metric('Trend',state(t.index?.trend))}${metric('1M Return',percent(t.returns?.[0]?.value,100,true))}${metric('3M Return',percent(t.returns?.[1]?.value,100,true))}${metric(recentLabel(),recentChange(t.theme_id))}</div><div class="inspector-breadth">${participation(t.theme_id)}</div><details class="inspector-reason"><summary>State rationale</summary><p>${esc(themeResearch(t.theme_id).reason||'Research state unavailable')}.</p></details><div class="section-heading"><h3>Member preview</h3><span class="table-meta">Peer strength (pp) ${helpButton('w')}</span></div><form class="inspector-member-tools" aria-label="Filter member preview"><label>Search<input id="inspector-search" type="search" placeholder="Ticker" value="${esc(v.search)}" data-focus-key="inspector-search"></label><label>View<select id="inspector-view" data-focus-key="inspector-view"><option value="All">All members</option><option value="Primary">On research list</option><option value="Eligible">Liquidity eligible</option><option value="Core">Core business</option><option value="Enabler">Supporting business</option><option value="Related">Related context</option></select></label></form><p id="inspector-member-count" class="table-meta" role="status"></p><div id="inspector-members"></div><div class="inspector-footer"><a class="button secondary" href="${themeHref(t.theme_id)}">Open full theme</a><a class="text-link" href="#methodology?metric=strength">Metric definitions</a></div>`;
+    $('inspector-content').innerHTML=`<div class="inspector-subhead"><span>${esc(t.family)}</span>${themeState(t.theme_id)}</div><div class="inspector-metrics">${metric('Strength '+helpButton('strength'),number(t.score,1))}${metric('Strength Rank '+helpButton('rank'),rankLabel(t.theme_id))}${metric('Trend',state(t.index?.trend))}${metric('1M Return',percent(t.returns?.[0]?.value,100,true))}${metric('3M Return',percent(t.returns?.[1]?.value,100,true))}${metric(recentLabel(),recentChange(t.theme_id))}</div><div class="inspector-breadth"><span class="metric-label">Participation ${helpButton('breadth')}</span>${participation(t.theme_id)}</div><details class="inspector-reason"><summary>State rationale</summary><p>${esc(themeResearch(t.theme_id).reason||'Research state unavailable')}.</p></details><div class="section-heading"><h3>Member preview</h3><span class="table-meta">Peer strength (pp) ${helpButton('w')}</span></div><form class="inspector-member-tools" aria-label="Filter member preview"><label>Search<input id="inspector-search" type="search" placeholder="Ticker" value="${esc(v.search)}" data-focus-key="inspector-search"></label><label>View<select id="inspector-view" data-focus-key="inspector-view"><option value="All">All members</option><option value="Primary">On research list</option><option value="Eligible">Liquidity eligible</option><option value="Core">Core business</option><option value="Enabler">Supporting business</option><option value="Related">Related context</option></select></label></form><p id="inspector-member-count" class="table-meta" role="status"></p><div id="inspector-members"></div><div class="inspector-footer"><a class="button secondary" href="${themeHref(t.theme_id)}">Open full theme</a><a class="text-link" href="#methodology?metric=strength">Metric definitions</a></div>`;
     $('inspector-view').value=v.filter;renderInspectorMembers();
   }
   function renderInspectorMembers() {
@@ -508,7 +508,7 @@
     const assigned=snapshot?.exports?.assignments?.[ticker]?.assigned_section;
     const lead=inspector.context?rows.find(r=>r.theme_id===inspector.context):rows.find(r=>r.theme_id===assigned)||rows[0];
     const others=rows.filter(r=>r!==lead),lens=inspector.lens||'directional',company=research().companies?.[ticker];
-    $('inspector-content').innerHTML=`${company?`<p class="ticker-company">${esc(company)}</p>`:''}<div class="inspector-subhead"><span>Stock research</span>${saveButton(ticker,'inspector-ticker',lead?.theme_id||inspector.context,lens)}</div>${lead?tickerRelationship(lead,true):empty('Relationship unavailable',inspector.context?name(inspector.context)+' is not a current relationship.':'No current theme relationships. Your bookmark is retained.')}<details class="other-relationships"><summary>Other relationships · ${others.length}</summary>${others.map(r=>tickerRelationship(r)).join('')||'<p class="table-note">No other current relationships.</p>'}</details>`;
+    $('inspector-content').innerHTML=`<div class="inspector-subhead"><span class="ticker-company">${esc(company||ticker)}</span>${saveButton(ticker,'inspector-ticker',lead?.theme_id||inspector.context,lens)}</div>${lead?tickerRelationship(lead,true):empty('Relationship unavailable',inspector.context?name(inspector.context)+' is not a current relationship.':'No current theme relationships. Your bookmark is retained.')}<details class="other-relationships"${others.length?'':' hidden'}><summary>Other relationships · ${others.length}</summary>${others.map(r=>tickerRelationship(r)).join('')||'<p class="table-note">No other current relationships.</p>'}</details>`;
   }
 
   function parseRoute() {
@@ -720,6 +720,7 @@
   const narrowMarket=matchMedia('(max-width:600px)');
   const adaptBenchmarks=()=>{document.querySelector('.benchmark-details').open=!narrowMarket.matches;document.querySelector('.theme-filter-menu').open=!narrowMarket.matches;};
   adaptBenchmarks();narrowMarket.addEventListener('change',adaptBenchmarks);
+  new ResizeObserver(([entry]) => document.documentElement.style.setProperty('--masthead-height',entry.borderBoxSize[0].blockSize+'px')).observe(document.querySelector('.masthead'));
   applyDisplay();
   history.scrollRestoration = 'manual';
   document.querySelectorAll('[data-nav]').forEach(link => { link.querySelector('.nav-icon').innerHTML = icon(link.dataset.nav); });

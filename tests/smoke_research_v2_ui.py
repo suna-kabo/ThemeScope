@@ -105,6 +105,28 @@ def main():
                         if name=='overview' and width<=430:
                             expect(page.locator('#market-brief')).to_be_visible()
                             assert not page.locator('.benchmark-details').evaluate('e=>e.open')
+                        if name=='primary':
+                            for selector in ('.secondary-filters>summary','#export-menu>summary'):
+                                page.locator(selector).click()
+                                panel=page.locator('.secondary-filter-body' if selector.startswith('.secondary') else '#export-options')
+                                bounds=panel.bounding_box()
+                                assert bounds and bounds['x']>=0 and bounds['x']+bounds['width']<=width, (width,selector,bounds)
+                                if selector.startswith('.secondary'):
+                                    page.locator('#candidate-role').select_option('Enabler')
+                                    roles=page.locator('#candidates tbody .col-role').all_text_contents()
+                                    assert roles and all('Supporting business' in text for text in roles)
+                                    page.locator('#candidate-role').select_option('')
+                                capture(('filters' if selector.startswith('.secondary') else 'exports')+'-'+str(width))
+                                page.locator(selector).click()
+                            if width>=1280:
+                                page.evaluate('window.scrollTo(0,900)')
+                                masthead=page.locator('.masthead').bounding_box()
+                                head=page.locator('#candidates thead th').first.bounding_box()
+                                assert masthead and abs(masthead['y'])<1, masthead
+                                assert head and abs(head['y']-masthead['height'])<1, (masthead,head)
+                                page.evaluate('window.scrollTo(0,0)')
+                            selected=page.locator('[data-candidate-mode="unique"]')
+                            assert selected.evaluate('e=>getComputedStyle(e).boxShadow')!='none'
                         if name=='themes' and width<=430:
                             page.locator('.theme-filter-menu>summary').click()
                             page.locator('#theme-family').select_option(index=1)
