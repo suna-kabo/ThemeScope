@@ -3,6 +3,7 @@ from copy import deepcopy
 from dataclasses import replace
 from decimal import Decimal as D
 from pathlib import Path
+import json
 import tempfile
 import unittest
 
@@ -121,6 +122,24 @@ class DirectionTests(unittest.TestCase):
 
 
 class ProjectionTests(unittest.TestCase):
+    def test_short_decimal_validation_uses_calculation_precision_and_stays_strict(self):
+        from decimal import localcontext
+        from scripts.research_v2_projection import validate_v2
+        data=fixture('Short Bias')
+        data['market']={'decision':{'direction':data['market_direction']}}
+        recent=data['research_v2']['themes']['e']['recent']
+        recent['raw_score_change']=D('-0.1234567890123456789012345678901234')
+        recent['directional_score_change']=recent['raw_score_change'].copy_negate()
+        data=json.loads(canonical(data))
+        for precision in (6,28,50):
+            with self.subTest(precision=precision),localcontext() as context:
+                context.prec=precision
+                validate_v2(data)
+                self.assertEqual(context.prec,precision)
+                changed=deepcopy(data)
+                changed['research_v2']['themes']['e']['recent']['directional_score_change']='0.1234567890123456789012345678901235'
+                with self.assertRaisesRegex(ValueError,'Directional change mismatch'):validate_v2(changed)
+
     def test_normalized_public_contract_rejects_semantic_and_export_tampering(self):
         from scripts.build_cloudflare_demo import demo_snapshot
         from scripts.build_public_snapshot import project_snapshot,SnapshotError
