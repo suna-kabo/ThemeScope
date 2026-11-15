@@ -25,6 +25,7 @@ def main():
     from playwright.sync_api import sync_playwright, expect
     from src.themescope.local.app import create_app
     from scripts.build_cloudflare_demo import build
+    from scripts.static_pages import HEADERS
     import uvicorn
 
     output = Path(os.environ.get('THEMESCOPE_UI_ARTIFACTS', ROOT/'runtime/final-rebuild-qa'))
@@ -290,7 +291,8 @@ def main():
                 page.evaluate("document.documentElement.style.fontSize=''")
                 # A 1440px browser at 200% has a 720 CSS-pixel layout viewport.
                 page.set_viewport_size(dict(width=720,height=500));nav('primary');width_ok('zoom200-layout')
-                page.evaluate("document.documentElement.style.zoom='2'");width_ok('css-zoom200');capture('zoom200-720')
+                page.evaluate("async()=>{document.documentElement.style.zoom='2';await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));}")
+                width_ok('css-zoom200');capture('zoom200-720')
                 page.evaluate("document.documentElement.style.zoom=''")
                 result['workflows'].append('All device widths; touch targets;200% text;200% browser-layout/reflow and CSS zoom')
 
@@ -355,6 +357,11 @@ def main():
                 build(ROOT)
                 class QuietHandler(SimpleHTTPRequestHandler):
                     def log_message(self,*args):pass
+                    def end_headers(self):
+                        for line in HEADERS.splitlines():
+                            if line.startswith('  '):
+                                key,value=line.strip().split(': ',1);self.send_header(key,value)
+                        super().end_headers()
                 static=ThreadingHTTPServer(('127.0.0.1',0),partial(QuietHandler,directory=str(ROOT/'dist/cloudflare-pages')))
                 static_worker=threading.Thread(target=static.serve_forever,daemon=True);static_worker.start()
                 try:
@@ -371,12 +378,23 @@ def main():
                     result['workflows'].append('Synthetic static build uses identical UI without API requests or refresh')
                     frozen.close()
                     public=browser.new_page(viewport=dict(width=390,height=844));calls=[]
+                    public_errors=[]
+                    public.on('pageerror',lambda error:public_errors.append(str(error)))
+                    public.on('console',lambda message:public_errors.append(message.text) if message.type=='error' else None)
                     public.add_init_script('window.THEMESCOPE_STATIC_SOURCE='+json.dumps(dict(mode='public_snapshot',snapshot=base)))
                     public.on('request',lambda r:calls.append(r.url) if '/api/' in r.url else None)
                     public.goto('http://127.0.0.1:'+str(static.server_port))
                     expect(public.locator('#workspace')).to_have_attribute('aria-busy','false')
                     expect(public.locator('#refresh')).to_be_hidden()
+                    expect(public.locator('#progress')).to_have_text('Market data fixed')
+                    public.get_by_label('Snapshot details',exact=True).click()
+                    expect(public.locator('#completeness')).to_contain_text('Data complete')
+                    public.locator('#refresh').evaluate('button=>button.click()')
+                    public.locator('[data-nav="themes"]').click()
+                    assert public.locator('.score-rule i').evaluate_all("es=>es.length>0&&es.every(e=>Math.abs(parseFloat(e.style.width)-Number(e.dataset.width))<.001)")
+                    public.wait_for_timeout(1800)
                     assert not calls,calls
+                    assert not public_errors,public_errors
                     public.close()
                     result['workflows'].append('Frozen public mode hides refresh and makes no API request; fabricated fixture data only')
                 finally:static.shutdown();static.server_close();static_worker.join(timeout=5)
