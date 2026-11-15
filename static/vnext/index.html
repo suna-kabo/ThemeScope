@@ -1,17 +1,16 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>Overview · ThemeScope</title><link rel="stylesheet" href="app.css"></head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>Market · ThemeScope</title><link rel="stylesheet" href="app.css"></head>
 <body>
 <a class="skip-link" href="#workspace">Skip to research</a>
-<aside class="rail">
+<header class="masthead">
   <a class="brand" href="#overview" aria-label="ThemeScope home"><span class="brand-mark" aria-hidden="true">◔</span><span>ThemeScope</span></a>
   <nav aria-label="Research" class="main-nav">
-    <a href="#overview" data-nav="overview"><span aria-hidden="true" class="nav-icon">◫</span>Overview</a>
+    <a href="#overview" data-nav="overview"><span aria-hidden="true" class="nav-icon">◫</span>Market</a>
     <a href="#themes" data-nav="themes"><span aria-hidden="true" class="nav-icon">◈</span>Themes</a>
-    <a href="#primary" data-nav="primary"><span aria-hidden="true" class="nav-icon">⌕</span>Research</a>
+    <a href="#primary" data-nav="primary"><span aria-hidden="true" class="nav-icon">⌕</span>Primary</a>
     <a href="#saved" data-nav="saved"><span aria-hidden="true" class="nav-icon">☆</span>Saved<span id="saved-count" class="nav-count">0</span></a>
-    <a href="#methodology" data-nav="methodology" class="secondary-nav"><span aria-hidden="true" class="nav-icon">≡</span>Rules</a>
   </nav>
-  <div class="rail-footer"><button id="display-toggle" class="button quiet" aria-expanded="false" aria-controls="display-panel"><span aria-hidden="true">Aa</span> Display</button></div>
+  <div class="rail-footer"><a href="#methodology" data-nav="methodology" class="utility-nav"><span aria-hidden="true" class="nav-icon">≡</span>Methodology</a><button id="display-toggle" class="button quiet" aria-expanded="false" aria-controls="display-panel"><span aria-hidden="true">Aa</span> Display</button></div>
   <section id="display-panel" class="display-panel" aria-labelledby="display-title" hidden>
     <div class="section-heading"><h2 id="display-title">Display</h2><button id="display-close" class="button quiet small" aria-label="Close Display">×</button></div>
     <fieldset><legend>Density</legend><div class="segmented"><button data-density="compact" aria-pressed="true">Compact</button><button data-density="comfortable" aria-pressed="false">Comfortable</button></div></fieldset>
@@ -19,16 +18,16 @@
     <label class="display-check"><input id="display-motion" type="checkbox">Reduce motion</label>
     <label class="display-check"><input id="display-contrast" type="checkbox">High contrast</label>
   </section>
-</aside>
+</header>
 <div class="app-shell">
   <header class="app-header">
     <div class="session-label"><span class="status-dot" aria-hidden="true"></span><span id="target">Completed US session —</span></div>
     <div class="header-actions"><span id="progress" role="status" aria-live="polite">Connecting…</span><button id="refresh" class="button primary"><span aria-hidden="true">↻</span><span id="refresh-label">Refresh Data</span></button></div>
-  </header>
   <div class="operational-strip">
 
     <details class="diagnostics"><summary>Snapshot details</summary><div class="diagnostics-body"><p id="completeness">Completeness —</p><p id="provider">Provider —</p><p id="last-success">Last successful refresh —</p><p id="target-detail">Target session —</p><p id="read-status"></p><p id="lifecycle-detail" hidden></p><div id="market-data-details"></div><ul id="blockers"></ul><p>Refresh publishes one complete snapshot. Failed refreshes preserve the previous results and exports.</p></div></details>
   </div>
+  </header>
   <main id="workspace" tabindex="-1" aria-busy="true">
     <div id="public-banner" class="notice info" hidden></div>
     <div id="fixture-banner" class="notice warning" hidden>Synthetic inspection fixture · fictional symbols and results · no live signals.</div>
@@ -36,13 +35,18 @@
     <div id="error" class="notice negative" role="alert" hidden></div>
     <p id="research-version-notice" class="notice warning" hidden></p>
     <section id="overview-page" class="view" aria-labelledby="overview-title">
-      <div class="page-heading"><div><h1 id="overview-title" tabindex="-1">Market &amp; leadership</h1></div><a href="#primary" class="button secondary">Review stocks <span aria-hidden="true">↗</span></a></div>
-      <div id="market-direction" class="direction-panel"><div class="loading-state skeleton skeleton-market" role="status"><span>Loading completed-session research…</span><i></i><i></i><i></i></div></div>
-      <details class="benchmark-details"><summary>SPY / QQQ · market evidence <span>IWM context</span></summary><div id="market-cards" class="market-grid"></div></details>
-      <section id="leadership-changes" class="leadership-changes" aria-labelledby="changes-title"><div class="section-heading"><h2 id="changes-title">What changed</h2><span class="table-meta" title="Both dates use today's reviewed theme members. This read-only comparison does not create official historical snapshots.">Current basket · five sessions</span></div><div id="change-board" class="change-board"></div></section>
-      <div class="overview-research">
-        <section class="research-panel" aria-labelledby="top-themes-title"><div class="section-heading"><div><h2 id="top-themes-title">Themes to research</h2><span id="theme-preview-order" class="table-meta"></span></div><a href="#themes" class="text-link">All themes <span aria-hidden="true">↗</span></a></div><div id="primary-themes"></div></section>
-        <section class="research-panel" aria-labelledby="preview-candidates-title"><div class="section-heading"><div><h2 id="preview-candidates-title">Stocks to review</h2><span id="research-preview-count" class="table-meta"></span></div><a href="#primary" class="text-link">Full research list <span aria-hidden="true">↗</span></a></div><div id="candidate-preview"></div></section>
+      <div class="page-heading"><div><h1 id="overview-title" tabindex="-1">Market</h1></div><a href="#primary" class="button secondary">Primary research <span aria-hidden="true">↗</span></a></div>
+      <div class="research-desk">
+        <section class="market-evidence" aria-label="Market direction and benchmarks">
+          <div id="market-direction" class="direction-panel"><div class="loading-state skeleton skeleton-market" role="status"><span>Loading market…</span><i></i><i></i></div></div>
+          <div id="market-brief" class="market-brief"></div>
+          <details class="benchmark-details" open><summary>Benchmarks <span>SPY / QQQ / IWM</span></summary><div id="market-cards" class="market-grid"></div></details>
+        </section>
+        <div class="overview-research">
+          <section class="research-panel" aria-labelledby="top-themes-title"><div class="section-heading"><div><h2 id="top-themes-title">Theme leadership</h2><span id="theme-preview-order" class="table-meta"></span></div><a href="#themes" class="text-link">All themes</a></div><div id="primary-themes"></div></section>
+          <section class="research-panel" aria-labelledby="preview-candidates-title"><div class="section-heading"><div><h2 id="preview-candidates-title">Primary research</h2><span id="research-preview-count" class="table-meta"></span></div><a href="#primary" class="text-link">Full list</a></div><div id="candidate-preview"></div></section>
+        </div>
+      <section id="leadership-changes" class="leadership-changes" aria-labelledby="changes-title"><div class="section-heading"><h2 id="changes-title">Leadership changes</h2><span class="table-meta" title="Both dates use today's reviewed theme members. This read-only comparison does not create official historical snapshots.">Five sessions</span></div><div id="change-board" class="change-board"></div></section>
       </div>
       <details id="theme-map-panel" class="theme-map-panel"><summary>Theme Returns Map <span>1M × 3M median member returns</span></summary><div id="theme-map"></div></details>
     </section>
@@ -50,9 +54,11 @@
       <div class="page-heading"><div><h1 id="themes-title" tabindex="-1">Themes</h1></div><div class="segmented" role="group" aria-label="Theme universe"><button data-universe="active" aria-pressed="true">Active Themes <span id="active-count">—</span></button><button data-universe="watch_only" aria-pressed="false">Untracked Concepts <span id="watch-count">—</span></button></div></div>
       <form id="theme-filters" class="filter-bar" role="search" aria-label="Filter themes">
         <label class="search-field">Search themes<input id="theme-search" type="search" placeholder="Theme or family…" autocomplete="off"></label>
+        <details class="theme-filter-menu" open><summary class="button secondary">Filters</summary><div class="theme-filter-body">
         <label>Family<select id="theme-family"><option value="">All families</option></select></label>
         <label>State<select id="theme-priority"><option value="">All states</option><option>Leading</option><option>Improving</option><option>Fading</option><option>Lagging</option><option>Unavailable</option></select></label>
         <label>Trend<select id="theme-trend"><option value="">All trends</option><option>Bullish</option><option>Bearish</option><option>Mixed</option><option>Unavailable</option></select></label>
+        </div></details>
         <button type="button" data-reset="themes" class="button quiet">Reset</button>
       </form>
       <div class="candidate-tools"><p class="table-meta" id="theme-results" role="status" aria-live="polite">Loading themes…</p></div>
@@ -60,7 +66,7 @@
     </section>
     <section id="theme-detail" class="view" aria-labelledby="detail-title" hidden><div id="detail-content"></div></section>
     <section id="candidate-page" class="view" aria-labelledby="candidates-title" hidden>
-      <div class="page-heading research-heading"><div><h1 id="candidates-title" tabindex="-1">Daily Research List</h1><p id="primary-context" class="compact-context"></p></div>
+      <div class="page-heading research-heading"><div><h1 id="candidates-title" tabindex="-1">Primary research</h1><p id="primary-context" class="compact-context"></p></div>
         <details id="export-menu" class="export-menu"><summary class="button secondary">Export <span aria-hidden="true">⌄</span></summary><div id="export-options" class="export-options"><p class="menu-title">Waiting for a completed snapshot</p></div></details>
       </div>
       <div id="candidate-panel" role="region" aria-labelledby="candidates-title">

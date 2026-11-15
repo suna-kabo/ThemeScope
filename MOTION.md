@@ -6,9 +6,9 @@ dependency or decorative looping effects are used.
 
 | Interaction | Treatment |
 | --- | --- |
-| Top-level navigation | 180ms, 5px content resolve after route state changes |
-| Selected destination/view | One travelling amber selection marker, 200ms |
-| Deeper/back research | 240ms ±14px inner content; right inspector 24px, 180ms exit |
+| Top-level navigation | Immediate route and focus; brief 5px content resolve |
+| Selected destination/view | Stable blue destination underline; quiet view-selection marker |
+| Deeper/back research | 240ms ±14px inner content; opaque research sheet, brief exit |
 | Disclosure, filtering and sorting | Short 160–200ms content replacement, no row stagger |
 | Save, export and refresh completion | 140ms nonblocking confirmation |
 | Buttons and links | 120ms color response and short press feedback |

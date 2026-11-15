@@ -102,6 +102,15 @@ def main():
                     for name in ('overview','themes','primary','saved','methodology'):
                         nav(name); width_ok(f'{name}-{width}'); capture(f'{name}-{width}')
                         if width in (1440,390):audit(f'{name}-{width}')
+                        if name=='overview' and width<=430:
+                            expect(page.locator('#market-brief')).to_be_visible()
+                            assert not page.locator('.benchmark-details').evaluate('e=>e.open')
+                        if name=='themes' and width<=430:
+                            page.locator('.theme-filter-menu>summary').click()
+                            page.locator('#theme-family').select_option(index=1)
+                            expect(page.locator('.theme-filter-menu>summary')).to_have_text('Filters (1)')
+                            page.locator('.theme-filter-menu>summary').click()
+                            page.locator('#theme-filters [data-reset]').click()
                     page.goto(origin+'/#themes/semiconductors')
                     expect(page.locator('#detail-title')).to_contain_text('Semiconductors')
                     width_ok(f'detail-{width}');capture(f'detail-{width}')
@@ -255,10 +264,19 @@ def main():
                 result['touch_targets_below40']=small
                 assert not small,small
                 page.locator('#display-toggle').click()
+                audit('display-390')
+                page.locator('#display-contrast').check()
+                audit('display-high-contrast-390')
+                page.locator('#display-contrast').uncheck()
                 for _ in range(4):page.locator('[data-text-step="25"]').click()
                 expect(page.locator('#text-size')).to_have_text('200%');page.keyboard.press('Escape')
                 for name in ('overview','themes','primary','saved','methodology'):
                     nav(name);width_ok('text200-'+name)
+                # Enlarged text must keep every destination separate and actionable.
+                assert page.locator('.main-nav a').evaluate_all("""es=>es.every((a,i)=>es.slice(i+1).every(b=>{
+                    const x=a.getBoundingClientRect(),y=b.getBoundingClientRect();
+                    return x.right<=y.left+1||y.right<=x.left+1||x.bottom<=y.top+1||y.bottom<=x.top+1;
+                }))""")
                 capture('text200-390');audit('text200-390')
                 page.locator('#display-toggle').click()
                 for _ in range(4):page.locator('[data-text-step="-25"]').click()
