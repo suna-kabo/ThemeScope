@@ -5,12 +5,14 @@ from datetime import date
 from hashlib import sha256
 import json
 from src.themescope.research.state_rules import state
+from src.themescope.themes.calculations import deterministic
 
 
 def metric(value):
     return None if value is None else Decimal(str(value))
 
 
+@deterministic
 def validate_v2(snapshot):
     research=snapshot['research_v2'];themes=research['themes'];order=research['theme_order']
     direction=snapshot['market_direction'].lower()
