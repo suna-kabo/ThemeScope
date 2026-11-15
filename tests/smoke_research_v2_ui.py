@@ -15,6 +15,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT), str(ROOT/'tests')]
+from ui_smoke_helpers import open_refresh
 from professional_ui_fixture import make,research_states
 from test_research_v2_adversarial import fixture as contract_fixture
 from src.themescope.storage import canonical
@@ -308,7 +309,7 @@ def main():
                 page.emulate_media(reduced_motion='reduce')
                 nav('themes');assert page.evaluate("document.getAnimations().every(a=>a.playState!=='running')")
                 result['workflows'].append('Normal and reduced motion keep navigation usable')
-                nav('overview');page.locator('.diagnostics>summary').click();page.locator('#refresh').click()
+                nav('overview');open_refresh(page).click()
                 expect(page.locator('#progress')).to_contain_text('Fetching missing sessions',timeout=6000)
                 expect(page.locator('#refresh')).to_be_disabled()
                 state['status'].update(state='success',progress='Refresh complete')
@@ -362,7 +363,7 @@ def main():
                     frozen.goto('http://127.0.0.1:'+str(static.server_port))
                     expect(frozen.locator('#workspace')).to_have_attribute('aria-busy','false')
                     expect(frozen.locator('#refresh')).to_contain_text('Replay fixture')
-                    frozen.locator('.diagnostics>summary').click();frozen.locator('#refresh').click()
+                    frozen.get_by_label('Snapshot and refresh',exact=True).click();frozen.locator('#refresh').click()
                     frozen.locator('[data-nav="primary"]').click()
                     assert frozen.locator('#candidates [data-ticker-row]').count()>0
                     assert not calls,calls

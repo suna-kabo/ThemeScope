@@ -2,9 +2,9 @@
 
 ## Daily refresh
 
-Run the private loopback application and select **Refresh Data**. It chooses the
-latest US session closed at least 20 minutes ago using the versioned calendar;
-there is no intraday mode or daily CSV upload. First refresh seeds the required
+Run the private loopback application, open **Snapshot and refresh** and select
+**Refresh Data**. It chooses the latest US session closed at least 20 minutes ago
+using the versioned calendar; there is no intraday mode or daily CSV upload. First refresh seeds the required
 history. Warm refresh retrieves missing/new completed sessions, a bounded repair
 window and adjustment anchors. See [provider/cache design](../architecture/provider-and-storage.md).
 

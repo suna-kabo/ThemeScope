@@ -84,7 +84,7 @@
     body+=link(download(),current?'Full research list':'Previous rules list',current?'Research.txt':'PreviousResearch.txt','combined');
     const themes=Object.keys(snapshot?.exports?.individual||{});
     if(themes.length)body+=`<details class="theme-files"><summary class="button quiet">Theme files</summary>${themes.map(id=>link(download(id),name(id),'Theme.txt')).join('')}</details>`;
-    body+=`<p class="menu-scope">${current?'Full session list in research order. Filters affect this view only.':'Stored under previous research rules. Refresh Data to build the current list.'}</p>`;
+    body+=`<p class="menu-scope">${current?'Full session list in research order. Filters affect this view only.':'Stored under previous research rules. Open Snapshot and refresh and select Refresh Data to build the current list.'}</p>`;
     if($('export-options').innerHTML!==body)$('export-options').innerHTML=body;
   }
   function renderLayer() {
@@ -200,7 +200,7 @@
   function renderOverview() {
     if(initialLoading)return;
     $('theme-map-panel').hidden=!snapshot;renderChanges();
-    if(!snapshot){$('market-direction').innerHTML=empty('No completed snapshot','Open Snapshot to refresh completed-session data.');$('market-cards').innerHTML='';$('market-continuation').innerHTML='';return;}
+    if(!snapshot){$('market-direction').innerHTML=empty('No completed snapshot','Open Snapshot and refresh and select Refresh Data.');$('market-cards').innerHTML='';$('market-continuation').innerHTML='';return;}
     const direction=marketName(snapshot.market_direction),changes=v2().changes||{},decision=snapshot.market?.decision||{};
     const changed=changes.changed?`From ${marketName(changes.previous_market_direction)}`:changes.previous_market_direction?'Unchanged since previous session':'No previous comparison';
     $('market-direction').innerHTML=`<div class="bias-line"><div class="bias-title"><span class="eyebrow">Market Bias</span><h2 class="direction-name ${tone(direction)}" aria-label="Market Bias: ${esc(direction)}">${esc(direction)}</h2><span class="market-change"><span class="${changes.previous_market_direction?'':'comparison-unavailable'}">${esc(changed)}</span>${v2().conviction==='selective'?' \u00b7 Reduced conviction':''}</span></div><div class="bias-action">${!currentResearch()?'<p>Current research list unavailable \u00b7 previous rules snapshot</p>':currentSide()?`<span>${sideLabel()}</span><a href="#themes">${primaryThemes().length} researchable themes <span aria-hidden="true">\u2192</span></a>`:'<p>No directional research list</p><a href="#themes">Explore theme context \u2192</a>'}</div></div><details class="decision-details"><summary>Decision evidence</summary><p id="decision-path">${esc(decision.reason||'Market context unavailable.')}</p><p id="today-plan">${esc(snapshot.today_plan||'')}</p><p>Breadth: ${esc(snapshot.market?.breadth_consensus||'Unavailable')}</p></details>`;
@@ -247,7 +247,7 @@
     const rows=themeRows();
     $('theme-results').textContent=tracked?`${rows.length} themes \u00b7 ${sideLabel()} \u00b7 ${primaryThemes().length} researchable`:`${rows.length} untracked concepts`;
     $('theme-sort').value=`${ui.themeSort}:${ui.themeDescending?'desc':'asc'}`;
-    if(!rows.length){$('theme-table').innerHTML=empty(snapshot?'No themes match':'Themes are waiting',snapshot?'Try another search or reset the filters.':'Open Snapshot to refresh completed-session data.','<button class="button secondary" data-reset="themes">Reset filters</button>');return;}
+    if(!rows.length){$('theme-table').innerHTML=empty(snapshot?'No themes match':'Themes are waiting',snapshot?'Try another search or reset the filters.':'Open Snapshot and refresh and select Refresh Data.','<button class="button secondary" data-reset="themes">Reset filters</button>');return;}
     if(!tracked){$('theme-table').innerHTML='<ul class="concept-list">'+rows.map(t=>`<li>${themeLink(t.theme_id)}<span>${esc(t.family)}</span></li>`).join('')+'</ul>';return;}
     const side=currentSide()?currentSide()==='short'?'Short':'Long':'Current';
     $('theme-table').innerHTML=`<div class="theme-ledger-head" aria-hidden="true"><span>Rank / Theme</span><span>Relative state \u00b7 ${side}</span><span>Theme Score</span><span>5-session \u0394</span><span>Price direction</span><span>1M / 3M return</span></div><ol class="theme-ledger">${rows.map(t=>`<li data-theme-row="${esc(t.theme_id)}" class="theme-line ${ui.selectedTheme===t.theme_id?'selected-row':''}"><div class="theme-identity"><span class="canonical-rank">${rankLabel(t.theme_id)}</span><div>${themeLink(t.theme_id)}<small>${esc(t.family)}</small></div></div><div class="relative-cell"><span class="mobile-label">Relative state \u00b7 ${side}</span>${themeState(t.theme_id)}<small>${themeResearch(t.theme_id).researchable?'Researchable':'Context'}</small></div><div class="score-cell"><span class="mobile-label">Theme Score</span><span class="score-value">${number(t.score,1)}</span><span class="score-rule" aria-hidden="true"><i style="width:${valid(t.score)?Math.max(0,Math.min(100,Number(t.score))):0}%"></i></span></div><div class="change-cell"><span class="mobile-label">5-session \u0394</span>${recentChange(t.theme_id)}<small>${currentSide()?'Side rank':'Rank'} ${rankChange(t.theme_id)}</small></div><div class="price-cell"><span class="mobile-label">Price direction</span>${state(t.index?.trend)}</div><div class="return-cell"><span class="mobile-label">1M / 3M return</span><span class="${signTone(t.returns?.[0]?.value)}">${percent(t.returns?.[0]?.value,100,true)}</span><span class="${signTone(t.returns?.[1]?.value)}">${percent(t.returns?.[1]?.value,100,true)}</span></div></li>`).join('')}</ol>`;
@@ -281,7 +281,7 @@
     if(initialLoading)return;
     if(snapshot&&!currentResearch()){
       renderCandidateContext();$('candidate-results').textContent='Current research list unavailable';
-      $('candidates').innerHTML=empty('Research update required','This stored snapshot uses previous rules. Refresh Data to calculate the current list. Themes and Saved remain available.');return;
+      $('candidates').innerHTML=empty('Research update required','This stored snapshot uses previous rules. Open Snapshot and refresh and select Refresh Data to calculate the current list. Themes and Saved remain available.');return;
     }
     const enabled=earningsEnabled(),earningsFilter=$('candidate-earnings');
     if(!enabled)earningsFilter.value='';earningsFilter.closest('label').hidden=!enabled;
@@ -518,7 +518,7 @@
     interactions.closeHelp();snapshot=data;snapshotSignature=signature;
     if(!previousMarket||previousSide!==currentSide()){ui.themeSort='priority';ui.themeDescending=false;$('theme-priority').value='';}
     $('research-version-notice').hidden=currentResearch();
-    $('research-version-notice').textContent=publicSnapshot?'This frozen snapshot uses previous research rules. Open a current snapshot for the new research list.':'This stored snapshot uses previous research rules. Refresh Data to calculate the current research list.';
+    $('research-version-notice').textContent=publicSnapshot?'This frozen snapshot uses previous research rules. Open a current snapshot for the new research list.':'This stored snapshot uses previous research rules. Open Snapshot and refresh and select Refresh Data to calculate the current research list.';
     ui.candidateLens='directional';
     for (const url of blobUrls.values()) URL.revokeObjectURL(url); blobUrls.clear();
     renderLayer(); renderOverview();
@@ -551,7 +551,7 @@
     const failed = ['failed','interrupted'].includes(status.state);
     if (inspector) $('inspector-status').textContent = failed ? 'Refresh failed · previous successful snapshot retained' : status.state === 'running' ? progress : 'Completed session ' + (snapshot?.session || '—');
     $('error').hidden = !failed && !requestError;
-    $('error').textContent = failed ? `${status.state === 'interrupted' ? 'Refresh interrupted' : 'Refresh failed'}${status.error ? ' (' + status.error + ')' : ''}. Previous successful results and exports remain available. Refresh Data to retry.` : requestError;
+    $('error').textContent = failed ? `${status.state === 'interrupted' ? 'Refresh interrupted' : 'Refresh failed'}${status.error ? ' (' + status.error + ')' : ''}. Previous successful results and exports remain available. Open Snapshot and refresh and select Refresh Data to retry.` : requestError;
     if (previous.state === 'running' && status.state === 'success') {
       announce('Refresh complete.');
       $('refresh').classList.remove('refresh-complete');
@@ -648,8 +648,8 @@
     $('refresh').disabled = true;
     try {
       const response = await fetch('/api/refresh',{method:'POST'});
-      if (!response.ok && response.status !== 409) requestError = 'Unable to start refresh. Previous results remain available. Refresh Data to retry.';
-    } catch { requestError = 'Unable to reach the local server. Previous results remain available. Refresh Data to retry.'; }
+      if (!response.ok && response.status !== 409) requestError = 'Unable to start refresh. Previous results remain available. Open Snapshot and refresh and select Refresh Data to retry.';
+    } catch { requestError = 'Unable to reach the local server. Previous results remain available. Open Snapshot and refresh and select Refresh Data to retry.'; }
     await poll();
   });
   $('theme-map-panel').addEventListener('toggle',()=>{ if ($('theme-map-panel').open) renderThemeMap(); });

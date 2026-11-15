@@ -2,7 +2,7 @@
 from pathlib import Path
 import json,shutil,socket,sys,tempfile,threading,time
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
-from ui_smoke_helpers import open_exports,open_filters
+from ui_smoke_helpers import open_exports,open_filters,open_refresh
 
 
 def main():
@@ -27,12 +27,13 @@ def main():
                 page.on('pageerror',lambda e:errors.append(str(e)))
                 page.on('request',lambda r:outside.append(r.url) if not r.url.startswith(f'http://127.0.0.1:{port}') and not r.url.startswith('blob:') else None)
                 page.goto(f'http://127.0.0.1:{port}')
-                page.get_by_role('button',name='Refresh Data',exact=True).click()
+                open_refresh(page).click()
                 expect(page.locator('#progress')).to_have_text('Refresh complete')
                 page.locator('[data-nav="primary"]').click()
                 expect(page.locator('#candidates')).to_contain_text('AAA')
+                open_filters(page)
                 page.get_by_role('button',name='By theme',exact=True).click()
-                assert page.locator('#candidates tbody tr').count()>=4
+                assert page.locator('#candidates [data-ticker-row]').count()>=4
                 page.locator('#candidates [data-save]').first.click()
                 page.locator('[data-nav="saved"]').click()
                 expect(page.locator('#saved')).to_contain_text('AAA')

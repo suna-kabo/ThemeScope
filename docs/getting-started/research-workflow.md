@@ -29,6 +29,6 @@ theme files retain their own eligible members. These are watchlists, not orders.
 survive the redesign. Display controls offer density, text size, contrast and
 reduced motion.
 
-Local Refresh retrieves data. Fixture/demo data are synthetic; public snapshots
-are frozen and read-only. Exact rules and diagnostic evidence are in
-[Research Logic v2](../methodology/research-v2.md).
+**Refresh Data** under **Snapshot and refresh** retrieves local data. Fixture/demo
+data are synthetic; public snapshots are frozen and read-only. Exact rules and
+diagnostic evidence are in [Research Logic v2](../methodology/research-v2.md).

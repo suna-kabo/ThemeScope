@@ -5,7 +5,7 @@ from unittest.mock import patch
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
 from vnext_prelaunch_fixture import PrelaunchFixture
 
-from ui_smoke_helpers import open_exports,open_filters
+from ui_smoke_helpers import open_exports,open_filters,open_refresh
 
 
 def main():
@@ -29,17 +29,17 @@ def main():
                 page.on('pageerror',lambda e:errors.append(str(e)))
                 page.on('request',lambda r:outside.append(r.url) if not r.url.startswith((f'http://127.0.0.1:{port}','blob:')) else None)
                 page.goto(f'http://127.0.0.1:{port}')
-                page.get_by_role('button',name='Refresh Data',exact=True).click()
+                open_refresh(page).click()
                 expect(page.locator('#progress')).to_have_text('Refresh complete',timeout=30000)
                 expect(page.locator('#theme-layer')).to_contain_text('Pre-launch research')
                 expect(page.locator('#theme-layer')).to_contain_text('2026-11-05')
                 expect(page.locator('#theme-layer')).to_contain_text('2026-11-06 close')
                 expect(page.locator('#fixture-banner')).to_be_hidden()
                 page.locator('[data-nav="themes"]').click()
-                expect(page.locator('#theme-table')).to_contain_text('Trend')
+                expect(page.locator('#theme-table')).to_contain_text('Price direction')
                 expect(page.locator('#theme-table')).to_contain_text('Bullish')
                 page.locator('[data-nav="primary"]').click()
-                assert page.locator('#candidates tbody tr').count()>0
+                assert page.locator('#candidates [data-ticker-row]').count()>0
                 save=page.locator('#candidates [data-save]').first;ticker=save.get_attribute('data-save');save.click()
                 page.locator('[data-nav="saved"]').click()
                 expect(page.locator('#saved')).to_contain_text(ticker)
@@ -51,12 +51,11 @@ def main():
                 identifiers=[line for line in text.splitlines() if not line.startswith('###')]
                 assert len(identifiers)==len(set(identifiers))
                 # Auto cutover uses the same server and never calls research history live.
-                fixture.target='2026-11-06';page.get_by_role('button',name='Refresh Data',exact=True).click()
-                page.locator('.diagnostics summary').click()
+                fixture.target='2026-11-06';open_refresh(page).click()
                 expect(page.locator('#lifecycle-detail')).to_contain_text('Launch close: index initialized at 100',timeout=30000)
                 expect(page.locator('#theme-layer')).to_be_hidden()
                 page.locator('[data-nav="themes"]').click()
-                expect(page.locator('#theme-table')).to_contain_text('Trend')
+                expect(page.locator('#theme-table')).to_contain_text('Price direction')
                 assert service.snapshot()['theme_layer']['official_live_history']
                 page.set_viewport_size({'width':390,'height':844})
                 assert page.locator('body').bounding_box()['width']<=390
