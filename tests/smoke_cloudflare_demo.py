@@ -73,6 +73,7 @@ def main(public=False):
                     page.locator('#refresh').evaluate('(button)=>button.click()')
                     expect(page.locator('#progress')).to_have_text('Market data fixed')
                 else:
+                    page.get_by_label('Snapshot and refresh',exact=True).click()
                     page.get_by_role('button',name='Replay fixture',exact=True).click()
                     expect(page.locator('#progress')).to_have_text('Synthetic fixture replayed')
                 assert page.locator('#market-cards').inner_text()==before

@@ -1,77 +1,68 @@
-# ThemeScope UI v3 — After Close
+# ThemeScope — Research desk
 
-ThemeScope is an Operate surface for focused chart research after the US close.
-The visual direction is a charcoal research ledger: warm paper text, quiet green
-surfaces and a restrained amber selection accent. It replaces Tidal Vector's
-electric selection planes and cut geometry. Color carries state or focus, never
-decoration. Positive/negative values also retain words or signs.
+ThemeScope is a dense completed-session equity research workspace. Its light
+working canvas and dark horizontal masthead replace After Close's permanent
+sidebar and vertically stacked overview. Market → Themes → Primary is the main
+task path. Saved is a personal shelf; Methodology and Display are quiet utilities.
+Stable hash routes and browser storage keys remain compatible.
 
-## Information hierarchy
+## Composition
 
-Overview starts with market direction and its change, then themes gaining or
-losing strength, researchable themes and stocks worth reviewing. It does not
-start with a grid of interchangeable KPI cards. Themes compares structural
-strength with recent change. The Daily Research List is the chart queue.
-Theme and stock inspectors preserve the underlying list; full Theme expands
-context. Saved and Methodology remain secondary destinations.
+Desktop Market compares three areas simultaneously: market direction and
+benchmark evidence at the left; theme leadership and the Primary preview at the
+right. Leadership changes occupy the space below the previews. The returns map
+remains an optional analytical surface. The eight-row previews retain backend
+research priority and offer direct routes to the complete lists.
 
-The local/static application keeps modular vanilla JavaScript. `workspace.js`
-owns presentation primitives and interruptible motion; `app.js` composes
-committed snapshot fields and browser state. Native links, tables, details and
-dialog retain platform behavior. A framework migration would add a build and
-state migration without improving these existing boundaries. Financial rules
-are supplied by the backend, never reconstructed in the browser.
+Themes places state beside theme identity, followed by structural strength,
+five-session change, trend and participation. Blue strength bars encode the
+supplied 0–100 score, without implying Long selection. Canonical ranks survive
+view sorting and filtering. Family is secondary metadata.
 
-## Tokens and components
+Primary offers unique stocks and grouped theme relationships, explicit view
+sorting, contextual inspection and full-session exports. Desktop company names
+help identify tickers. Filters never alter eligibility, export order or the
+research side. Related relationships remain contextual and do not calculate.
 
-- Page #131615, rail #191d1b, surface #1c211e, raised surface #242b26.
-- Text #f4f2e9, secondary #c8cec5, muted #a7b1a5; amber #e1c78b for focus/selection.
-- Positive #9bcca9, negative #f2a6a0; warning shares amber with explicit wording.
-- Existing self-hosted Inter remains the deliberate dense Operate face. It is
-  pinned in static publication, requires no network and has tabular numerals.
-- Body 14px, secondary 13px, captions 12px at default scale; page title 30px.
-  Display text controls support 100–200% without hiding actions.
-- Spacing follows 4/8/12/16/24/32/48px. Related rows are tight; headings separate
-  work areas. Straight section rules replace nested panels.
-- Controls use 4px corners; floating utilities and inspector use 8px. Rows and
-  ordinary data do not acquire pill backgrounds or decorative shadows.
+The opaque inspector preserves the underlying selection. Its dark title bar
+separates the current research object from the originating list. Theme rationale
+is disclosed on demand; members and peer comparisons remain immediately useful.
+Full Theme retains all member relationships, eligibility and provenance evidence.
 
-Tables retain real headers and numeric alignment on desktop. Theme state,
-strength, five-session change, participation and researchability have distinct
-roles. Research rows default to server priority; view sorting never changes
-export priority. Related relationships are visible context, excluded from
-calculations and the Daily Research List.
+## System
+
+- Canvas #edf1f5; white work surfaces; masthead #17283f.
+- Text #203047, secondary #35465d, metadata #526176.
+- Selection/action #174ac7; positive #167052, negative #b32d49, warning #815b12.
+- Pinned, self-hosted Inter for readable offline data; Segoe UI brand treatment.
+  Tabular figures, 14px body, 13px controls, 12px metadata, 24px page title.
+- 4/8/12/16/24/32px spacing. Compact table cells use 5px vertical padding;
+  Comfortable uses 12px. Ordinary data uses aligned rows rather than metric cards.
+- Five-pixel control corners; ten-pixel floating sheets. No decorative gradients,
+  glass, glows, arbitrary charts, marketing headings or ornamental icon grids.
 
 ## Responsive behavior
 
-Large desktop uses the persistent left navigation and dense aligned tables.
-Tablet removes the rail in favor of a wrapping navigation row. At mobile widths
-the five destinations become a reachable bottom bar, with safe-area padding.
-The main content reserves space for that bar.
+At 1920/1440/1280, width serves simultaneous research and comparison. At tablet,
+market evidence spans the canvas and table column budgets preserve readable
+names and reachable Save controls. Phone themes and research use compact labeled
+rows. Mobile filters expand deliberately instead of consuming the first screen.
 
-Research rows become a compact ticker/peer-strength line plus theme context,
-with a separate Save action. Role and earnings move to inspection. Themes use
-a deliberate compact state/strength/change hierarchy, rather than a miniature
-desktop table. Full Theme member rows reflow independently. Filters wrap with
-full-width search; inspectors fill the viewport with visible close actions.
-320/360/390/430px, tablet, normal and large desktop are release checks.
+Mobile Market keeps three compact benchmark observations visible and puts full
+EMA/breadth evidence behind one disclosure. Four research destinations live in
+bottom navigation; Methodology and Display remain in the masthead. At enlarged
+text sizes utilities wrap and bottom navigation reflows to two rows. Safe-area
+spacing and scalable content padding prevent the navigation obscuring final rows.
 
-## Language and accessibility
+## Access and continuity
 
-Use Market direction, Structural strength, Last five sessions, Participation,
-Peer strength, Research list and Saved. W appears only in the exact methodology.
-Internal lifecycle and provider details belong in Diagnostics. Countertrend,
-snapback and setup predictions do not appear in the working experience.
+Native links, forms, tables, details and dialog retain keyboard semantics.
+Focus remains visible; inspectors restore their trigger; nested Back/Forward
+preserve research context. Named states and signs accompany financial color.
+High contrast, 100–200% text, density and reduced motion are browser preferences.
+The application renders backend research decisions and never rebuilds formulas.
 
-All actions have accessible names, visible focus and native semantics. Inspectors
-restore trigger focus; Back/Forward retain context. Reduced motion cancels
-visual travel while preserving state. Readability, sample counts and non-color
-state labels are release requirements. Mobile primary controls target 44px.
-
-No gradients, blobs, glass, all-caps eyebrows, decorative charts, nested cards,
-glows, repeated badges, technical-costume typography or marketing spacing.
-The return map is retained because it compares actual supplied returns.
-
-Impeccable is used in Operate mode. Its generic Inter saturation warning is a
-contextual exception: the existing pinned offline face serves scanability and
-publication integrity. Rendered QA and axe establish actual usability.
+Acceptance evidence and the independent visual critique are recorded in
+[the ground-up validation](reports/ground-up-ui-validation.md). No backend,
+calculation, provider, membership, persistence or export contract changes belong
+to this redesign.

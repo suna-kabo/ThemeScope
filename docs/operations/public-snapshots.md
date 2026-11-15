@@ -100,8 +100,8 @@ Keep the app running in normal live mode with keys in its launching environment:
 .\ThemeScope.cmd
 ```
 
-Select **Refresh Data**, verify success/completeness and its exact completed session,
-then in another terminal at the same clean main checkout:
+Open **Snapshot and refresh**, select **Refresh Data**, and verify success/completeness
+and its exact completed session, then in another terminal at the same clean main checkout:
 
 ```powershell
 .\publish-public-snapshot.cmd SESSION themescope

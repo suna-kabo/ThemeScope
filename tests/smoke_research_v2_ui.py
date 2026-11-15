@@ -15,6 +15,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT), str(ROOT/'tests')]
+from ui_smoke_helpers import open_refresh
 from professional_ui_fixture import make,research_states
 from test_research_v2_adversarial import fixture as contract_fixture
 from src.themescope.storage import canonical
@@ -26,7 +27,7 @@ def main():
     from scripts.build_cloudflare_demo import build
     import uvicorn
 
-    output = Path(os.environ.get('THEMESCOPE_UI_ARTIFACTS', ROOT/'runtime/ui-v3-qa'))
+    output = Path(os.environ.get('THEMESCOPE_UI_ARTIFACTS', ROOT/'runtime/final-rebuild-qa'))
     output.mkdir(parents=True, exist_ok=True)
     axe = Path(os.environ.get('THEMESCOPE_AXE_SCRIPT', ROOT/'runtime/ui-v3-tools/node_modules/axe-core/axe.min.js'))
     if not axe.is_file():
@@ -102,6 +103,25 @@ def main():
                     for name in ('overview','themes','primary','saved','methodology'):
                         nav(name); width_ok(f'{name}-{width}'); capture(f'{name}-{width}')
                         if width in (1440,390):audit(f'{name}-{width}')
+                        if name=='primary':
+                            for selector in ('.secondary-filters>summary','#export-menu>summary'):
+                                page.locator(selector).click()
+                                panel=page.locator('.secondary-filter-body' if selector.startswith('.secondary') else '#export-options')
+                                bounds=panel.bounding_box()
+                                assert bounds and bounds['x']>=0 and bounds['x']+bounds['width']<=width, (width,selector,bounds)
+                                if selector.startswith('.secondary'):
+                                    page.locator('#candidate-role').select_option('Enabler')
+                                    roles=page.locator('#candidates [data-ticker-row] .col-role').all_text_contents()
+                                    assert roles and all('Supporting business' in text for text in roles)
+                                    page.locator('#candidate-role').select_option('')
+                                capture(('filters' if selector.startswith('.secondary') else 'exports')+'-'+str(width))
+                                page.locator(selector).click()
+                        if name=='themes' and width<=430:
+                            page.locator('.theme-filter-menu>summary').click()
+                            page.locator('#theme-family').select_option(index=1)
+                            expect(page.locator('.theme-filter-menu>summary')).to_have_text('Filters (1)')
+                            page.locator('.theme-filter-menu>summary').click()
+                            page.locator('#theme-filters [data-reset]').click()
                     page.goto(origin+'/#themes/semiconductors')
                     expect(page.locator('#detail-title')).to_contain_text('Semiconductors')
                     width_ok(f'detail-{width}');capture(f'detail-{width}')
@@ -123,13 +143,13 @@ def main():
                 state['hold']=False
                 for pending in state['pending']:pending.fulfill(json=state['snapshot'])
                 expect(page.locator('#workspace')).to_have_attribute('aria-busy','false')
-                expect(page.locator('#theme-table tbody tr')).to_have_count(44)
+                expect(page.locator('#theme-table [data-theme-row]')).to_have_count(44)
                 assert 'Countertrend' not in page.locator('body').inner_text()
-                result['workflows'].append('Layout-preserving initial loading, no removed lens')
+                result['workflows'].append('Loading and committed snapshot delivery')
 
                 nav('themes')
                 ranks=page.locator('[data-theme-row]').evaluate_all("els=>Object.fromEntries(els.map(e=>[e.dataset.themeRow,e.querySelector('.canonical-rank').textContent]))")
-                page.locator('[data-theme-sort="name"]').click()
+                page.locator('#theme-sort').select_option('name:asc')
                 assert page.locator('[data-theme-row]').evaluate_all("els=>Object.fromEntries(els.map(e=>[e.dataset.themeRow,e.querySelector('.canonical-rank').textContent]))")==ranks
                 page.locator('#theme-search').fill('semiconductors')
                 opener=page.locator('#theme-table [data-inspect-theme]').first
@@ -158,9 +178,9 @@ def main():
                 rendered=page.locator('#candidates [data-ticker-row]').evaluate_all('els=>els.map(e=>e.dataset.tickerRow)')
                 expected=list(dict.fromkeys(r['ticker'] for r in base['research_v2']['list']['rows']))
                 assert rendered==expected
-                page.locator('[data-candidate-mode="relationships"]').click()
+                page.locator('.secondary-filters>summary').click();page.locator('[data-candidate-mode="relationships"]').click()
                 assert page.locator('#candidates [data-ticker-row]').count()==base['research_v2']['list']['relationship_count']
-                page.locator('[data-candidate-mode="unique"]').click()
+                page.locator('[data-candidate-mode="unique"]').click();page.locator('.secondary-filters>summary').click()
                 selection=base['research_v2']['list']['rows'][0]
                 page.locator('#candidate-theme').select_option(selection['theme_id'])
                 page.locator('#candidate-search').fill(selection['ticker'])
@@ -181,6 +201,10 @@ def main():
                 tickers=page.locator('#candidates [data-ticker-row]').evaluate_all('els=>els.map(e=>e.dataset.tickerRow)')
                 assert tickers==sorted(tickers)
                 page.locator('#candidate-sort').select_option('priority')
+                company=base['research']['companies'][selection['ticker']]
+                page.locator('#candidate-search').fill(company)
+                assert selection['ticker'] in page.locator('#candidates [data-ticker-row]').evaluate_all('es=>es.map(e=>e.dataset.tickerRow)')
+                reset()
                 start_time=time.perf_counter();page.locator('#candidate-search').fill('NVDA')
                 expect(page.locator('#candidates [data-ticker-row]')).to_have_count(1)
                 result['performance']['hundreds_row_filter_ms']=round((time.perf_counter()-start_time)*1000)
@@ -224,7 +248,7 @@ def main():
                         if improving:
                             recent=data['research_v2']['themes'][improving]['recent']
                             assert float(recent['raw_score_change'])<0<float(recent['directional_score_change'])
-                            nav('overview');expect(page.locator('#change-board')).to_contain_text('Improving for Short research')
+                            nav('overview');expect(page.locator('#movement-side')).to_have_text('Short-side research');expect(page.locator('#change-board')).to_contain_text('Gaining strength')
                     if direction in ('Short bias','Neutral','Selective long'):
                         for width in (1440,390):
                             page.set_viewport_size(dict(width=width,height=900 if width==1440 else 844))
@@ -254,15 +278,16 @@ def main():
                 small=page.locator('button:visible,select:visible,input:visible,a.button:visible').evaluate_all("els=>els.map(e=>({name:e.textContent||e.getAttribute('aria-label'),w:e.getBoundingClientRect().width,h:e.getBoundingClientRect().height})).filter(r=>r.w<40||r.h<40)")
                 result['touch_targets_below40']=small
                 assert not small,small
-                page.locator('#display-toggle').click()
-                for _ in range(4):page.locator('[data-text-step="25"]').click()
-                expect(page.locator('#text-size')).to_have_text('200%');page.keyboard.press('Escape')
+                # Browser text enlargement replaces the removed Display surface.
+                page.evaluate("document.documentElement.style.fontSize='200%'")
                 for name in ('overview','themes','primary','saved','methodology'):
                     nav(name);width_ok('text200-'+name)
+                assert page.locator('.main-nav a').evaluate_all("""es=>es.every((a,i)=>es.slice(i+1).every(b=>{
+                    const x=a.getBoundingClientRect(),y=b.getBoundingClientRect();
+                    return x.right<=y.left+1||y.right<=x.left+1||x.bottom<=y.top+1||y.bottom<=x.top+1;
+                }))""")
                 capture('text200-390');audit('text200-390')
-                page.locator('#display-toggle').click()
-                for _ in range(4):page.locator('[data-text-step="-25"]').click()
-                page.keyboard.press('Escape')
+                page.evaluate("document.documentElement.style.fontSize=''")
                 # A 1440px browser at 200% has a 720 CSS-pixel layout viewport.
                 page.set_viewport_size(dict(width=720,height=500));nav('primary');width_ok('zoom200-layout')
                 page.evaluate("document.documentElement.style.zoom='2'");width_ok('css-zoom200');capture('zoom200-720')
@@ -271,18 +296,31 @@ def main():
 
                 page.set_viewport_size(dict(width=1440,height=1000));page.emulate_media(reduced_motion='no-preference')
                 nav('overview');nav('primary')
+                opener=page.locator('#candidates [data-inspect-ticker]').first
+                opener.click()
+                expect(page.locator('#research-inspector')).to_be_visible()
+                page.locator('#inspector-close').click()
+                expect(page.locator('#research-inspector')).not_to_be_visible()
+                expect(opener).to_be_focused()
+                opener.click()
+                expect(page.locator('#research-inspector')).to_be_visible()
+                close_inspector()
                 result['motion']=page.evaluate("({reduced:matchMedia('(prefers-reduced-motion: reduce)').matches,animationCount:document.getAnimations().length})")
                 page.emulate_media(reduced_motion='reduce')
                 nav('themes');assert page.evaluate("document.getAnimations().every(a=>a.playState!=='running')")
                 result['workflows'].append('Normal and reduced motion keep navigation usable')
-                nav('overview');page.locator('#refresh').click()
+                nav('overview');open_refresh(page).click()
                 expect(page.locator('#progress')).to_contain_text('Fetching missing sessions',timeout=6000)
                 expect(page.locator('#refresh')).to_be_disabled()
                 state['status'].update(state='success',progress='Refresh complete')
                 expect(page.locator('#refresh')).to_be_enabled(timeout=6000)
+                state['status'].update(state='failed',progress='Refresh failed',error='Synthetic failure')
+                expect(page.locator('#error')).to_contain_text('Previous successful results',timeout=6000)
+                assert page.locator('#candidates [data-ticker-row]').count()==base['research_v2']['list']['stock_count']
+                state['status'].update(state='success',progress='Refresh complete',error=None)
                 state['connected']=False
                 expect(page.locator('#progress')).to_contain_text('Connection lost',timeout=6000)
-                nav('themes');expect(page.locator('#theme-table tbody tr')).to_have_count(44)
+                nav('themes');expect(page.locator('#theme-table [data-theme-row]')).to_have_count(44)
                 capture('connection-error-1440');state['connected']=True
                 expect(page.locator('#progress')).not_to_contain_text('Connection lost',timeout=6000)
                 neutral=cases['Neutral']
@@ -299,9 +337,20 @@ def main():
                 expect(page.locator('#candidates')).to_contain_text('Research update required')
                 expect(page.locator('#candidate-results')).to_have_text('Current research list unavailable')
                 nav('saved');expect(page.locator('#saved')).to_contain_text(selection['ticker'])
-                nav('themes');expect(page.locator('#theme-table tbody tr')).to_have_count(44)
+                nav('themes');expect(page.locator('#theme-table [data-theme-row]')).to_have_count(44)
                 update(base)
                 result['workflows'].append('Previous-rules snapshot is explicitly unavailable for current selection; context and Saved retained')
+
+                cold=browser.new_page(viewport=dict(width=390,height=844))
+                cold.route('**/api/status',lambda r:r.abort('failed'))
+                cold.goto(origin)
+                expect(cold.locator('#error')).to_contain_text('Unable to load research')
+                expect(cold.locator('#workspace')).to_have_attribute('aria-busy','false')
+                cold.unroute('**/api/status')
+                expect(cold.locator('#theme-table [data-theme-row]')).to_have_count(44,timeout=6000)
+                expect(cold.locator('#error')).to_be_hidden()
+                cold.close()
+                result['workflows'].append('Company search; failed refresh retains authoritative queue; cold connection error and automatic recovery')
 
                 build(ROOT)
                 class QuietHandler(SimpleHTTPRequestHandler):
@@ -314,7 +363,7 @@ def main():
                     frozen.goto('http://127.0.0.1:'+str(static.server_port))
                     expect(frozen.locator('#workspace')).to_have_attribute('aria-busy','false')
                     expect(frozen.locator('#refresh')).to_contain_text('Replay fixture')
-                    frozen.locator('#refresh').click()
+                    frozen.get_by_label('Snapshot and refresh',exact=True).click();frozen.locator('#refresh').click()
                     frozen.locator('[data-nav="primary"]').click()
                     assert frozen.locator('#candidates [data-ticker-row]').count()>0
                     assert not calls,calls

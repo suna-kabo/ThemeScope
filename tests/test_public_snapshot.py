@@ -18,7 +18,7 @@ from scripts import build_public_snapshot as builder
 from scripts import publish_public_snapshot as publisher
 from public_snapshot_support import public_contract_fixture
 
-from scripts.static_pages import copy_fonts
+from scripts.static_pages import copy_fonts, FONT_HASHES
 ROOT=Path(__file__).resolve().parents[1]
 
 
@@ -74,12 +74,12 @@ class PublicSnapshotTests(unittest.TestCase):
             with self.assertRaisesRegex(builder.SnapshotError,'published lens'):builder.project_snapshot(source,'2026-11-06')
 
     def test_bundled_font_and_license_are_pinned(self):
-        for name in ('InterVariable.woff2','Inter-LICENSE.txt'):
+        for name in FONT_HASHES:
             with self.subTest(asset=name):
                 path=self.root/'static'/name;original=path.read_bytes();path.write_bytes(original+b'unapproved')
                 with self.assertRaises(ValueError):self.build()
                 path.write_bytes(original)
-        output=self.build();(output/'InterVariable.woff2').write_bytes(b'unknown binary')
+        output=self.build();(output/'Research.woff2').write_bytes(b'unknown binary')
         with self.assertRaisesRegex(builder.SnapshotError,'font/license'):builder.validate_output(output)
 
     def test_current_assets_determinism_safety_no_network_database_or_calculation(self):

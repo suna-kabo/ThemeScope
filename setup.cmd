@@ -7,6 +7,6 @@ if errorlevel 1 (
   pause
   exit /b 1
 )
-echo Run ThemeScope.cmd and select Refresh Data in the application.
+echo Run ThemeScope.cmd and open Snapshot and refresh, then select Refresh Data.
 pause
 exit /b 0

@@ -101,6 +101,8 @@ class LocalTests(unittest.TestCase):
         self.assertIn('no-store',client.get('/api/status').headers['cache-control'])
         self.assertEqual(client.get('/app.js').status_code,200)
         self.assertEqual(client.get('/app.css').status_code,200)
+        self.assertEqual(client.get('/Research.woff2').content,(ROOT/'static/Research.woff2').read_bytes())
+        self.assertIn('SIL OPEN FONT LICENSE',client.get('/Research-LICENSE.txt').text)
         self.assertEqual(client.get('/preview.js').status_code,200)
         self.assertEqual(client.get('/api/refresh/status').status_code,200)
         self.assertEqual(client.get('/api/status').json()['completeness']['complete'],True)

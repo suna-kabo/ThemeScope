@@ -33,10 +33,10 @@ $env:APCA_API_SECRET_KEY = '<your local Alpaca secret>'
 .\ThemeScope.cmd
 ```
 
-The app opens at **http://127.0.0.1:8766**. Select **Refresh Data** after a US
-session has completed. Alpaca historical **SIP access is required**; ThemeScope
-never falls back to IEX. Keep keys in your local process environment, never in
-Git, chat, screenshots or published output. Optional `ALPHAVANTAGE_API_KEY`
+The app opens at **http://127.0.0.1:8766**. After a US session has completed, open
+**Snapshot and refresh** and select **Refresh Data**. Alpaca historical
+**SIP access is required**; ThemeScope never falls back to IEX. Keep keys in your
+local process environment, never in Git, chat, screenshots or published output. Optional `ALPHAVANTAGE_API_KEY`
 enables earnings dates; earnings are not required for refresh or qualification.
 
 To try deterministic fictional data without credentials:
