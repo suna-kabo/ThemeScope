@@ -1,96 +1,73 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>Market · ThemeScope</title><link rel="stylesheet" href="app.css"></head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>Market &middot; ThemeScope</title><link rel="stylesheet" href="app.css"></head>
 <body>
 <a class="skip-link" href="#workspace">Skip to research</a>
-<header class="masthead">
-  <a class="brand" href="#overview" aria-label="ThemeScope home"><span class="brand-mark" aria-hidden="true">◔</span><span>ThemeScope</span></a>
-  <nav aria-label="Research" class="main-nav">
-    <a href="#overview" data-nav="overview"><span aria-hidden="true" class="nav-icon">◫</span>Market</a>
-    <a href="#themes" data-nav="themes"><span aria-hidden="true" class="nav-icon">◈</span>Themes</a>
-    <a href="#primary" data-nav="primary"><span aria-hidden="true" class="nav-icon">⌕</span>Primary</a>
-    <a href="#saved" data-nav="saved"><span aria-hidden="true" class="nav-icon">☆</span>Saved<span id="saved-count" class="nav-count">0</span></a>
-  </nav>
-  <div class="rail-footer"><a href="#methodology" data-nav="methodology" class="utility-nav"><span aria-hidden="true" class="nav-icon">≡</span>Methodology</a><button id="display-toggle" class="button quiet" aria-expanded="false" aria-controls="display-panel"><span aria-hidden="true">Aa</span> Display</button></div>
-  <section id="display-panel" class="display-panel" aria-labelledby="display-title" hidden>
-    <div class="section-heading"><h2 id="display-title">Display</h2><button id="display-close" class="button quiet small" aria-label="Close Display">×</button></div>
-    <fieldset><legend>Density</legend><div class="segmented"><button data-density="compact" aria-pressed="true">Compact</button><button data-density="comfortable" aria-pressed="false">Comfortable</button></div></fieldset>
-    <div class="display-text"><span>Text size</span><button class="button quiet small" data-text-step="-25" aria-label="Decrease text size">−</button><output id="text-size">100%</output><button class="button quiet small" data-text-step="25" aria-label="Increase text size">+</button></div>
-    <label class="display-check"><input id="display-motion" type="checkbox">Reduce motion</label>
-    <label class="display-check"><input id="display-contrast" type="checkbox">High contrast</label>
-  </section>
-</header>
 <div class="app-shell">
-  <header class="app-header">
-    <div class="session-label"><span class="status-dot" aria-hidden="true"></span><span id="target">Completed US session —</span></div>
-    <div class="header-actions"><span id="progress" role="status" aria-live="polite">Connecting…</span><button id="refresh" class="button primary"><span aria-hidden="true">↻</span><span id="refresh-label">Refresh Data</span></button></div>
-  <div class="operational-strip">
-
-    <details class="diagnostics"><summary>Snapshot details</summary><div class="diagnostics-body"><p id="completeness">Completeness —</p><p id="provider">Provider —</p><p id="last-success">Last successful refresh —</p><p id="target-detail">Target session —</p><p id="read-status"></p><p id="lifecycle-detail" hidden></p><div id="market-data-details"></div><ul id="blockers"></ul><p>Refresh publishes one complete snapshot. Failed refreshes preserve the previous results and exports.</p></div></details>
-  </div>
-  </header>
-  <main id="workspace" tabindex="-1" aria-busy="true">
-    <div id="public-banner" class="notice info" hidden></div>
-    <div id="fixture-banner" class="notice warning" hidden>Synthetic inspection fixture · fictional symbols and results · no live signals.</div>
-    <p id="theme-layer" class="notice info" hidden></p>
-    <div id="error" class="notice negative" role="alert" hidden></div>
-    <p id="research-version-notice" class="notice warning" hidden></p>
-    <section id="overview-page" class="view" aria-labelledby="overview-title">
-      <div class="page-heading"><div><h1 id="overview-title" tabindex="-1">Market</h1></div><a href="#primary" class="button secondary">Primary research <span aria-hidden="true">↗</span></a></div>
-      <div class="research-desk">
-        <section class="market-evidence" aria-label="Market direction and benchmarks">
-          <div id="market-direction" class="direction-panel"><div class="loading-state skeleton skeleton-market" role="status"><span>Loading market…</span><i></i><i></i></div></div>
-          <div id="market-brief" class="market-brief"></div>
-          <details class="benchmark-details" open><summary>Benchmarks <span>SPY / QQQ / IWM</span></summary><div id="market-cards" class="market-grid"></div></details>
-        </section>
-        <div class="overview-research">
-          <section class="research-panel" aria-labelledby="top-themes-title"><div class="section-heading"><div><h2 id="top-themes-title">Theme leadership</h2><span id="theme-preview-order" class="table-meta"></span></div><a href="#themes" class="text-link">All themes</a></div><div id="primary-themes"></div></section>
-          <section class="research-panel" aria-labelledby="preview-candidates-title"><div class="section-heading"><div><h2 id="preview-candidates-title">Primary research</h2><span id="research-preview-count" class="table-meta"></span></div><a href="#primary" class="text-link">Full list</a></div><div id="candidate-preview"></div></section>
-        </div>
-      <section id="leadership-changes" class="leadership-changes" aria-labelledby="changes-title"><div class="section-heading"><h2 id="changes-title">Leadership changes</h2><span class="table-meta" title="Both dates use today's reviewed theme members. This read-only comparison does not create official historical snapshots.">Five sessions</span></div><div id="change-board" class="change-board"></div></section>
-      </div>
-      <details id="theme-map-panel" class="theme-map-panel"><summary>Theme Returns Map <span>1M × 3M median member returns</span></summary><div id="theme-map"></div></details>
-    </section>
-    <section id="themes-page" class="view" aria-labelledby="themes-title" hidden>
-      <div class="page-heading"><div><h1 id="themes-title" tabindex="-1">Themes</h1></div><div class="segmented" role="group" aria-label="Theme universe"><button data-universe="active" aria-pressed="true">Active Themes <span id="active-count">—</span></button><button data-universe="watch_only" aria-pressed="false">Untracked Concepts <span id="watch-count">—</span></button></div></div>
-      <form id="theme-filters" class="filter-bar" role="search" aria-label="Filter themes">
-        <label class="search-field">Search themes<input id="theme-search" type="search" placeholder="Theme or family…" autocomplete="off"></label>
-        <details class="theme-filter-menu" open><summary class="button secondary">Filters</summary><div class="theme-filter-body">
+<header class="masthead">
+  <a class="brand" href="#overview" aria-label="ThemeScope home"><span class="brand-mark" aria-hidden="true"></span>ThemeScope</a>
+  <nav aria-label="Research" class="main-nav">
+    <a href="#overview" data-nav="overview"><span class="step-number" aria-hidden="true">01</span>Market</a>
+    <a href="#themes" data-nav="themes"><span class="step-number" aria-hidden="true">02</span>Themes</a>
+    <a href="#primary" data-nav="primary"><span class="step-number" aria-hidden="true">03</span>Primary</a>
+  </nav>
+  <div class="utilities"><a href="#saved" data-nav="saved">Saved <span id="saved-count">0</span></a><a href="#methodology" data-nav="methodology" aria-label="Methodology">Methodology</a></div>
+</header>
+<div class="session-bar">
+  <span id="target">Completed US session &mdash;</span>
+  <details class="diagnostics"><summary aria-label="Snapshot and refresh"><span id="progress" role="status" aria-live="polite">Connecting&hellip;</span><span aria-hidden="true">&#8964;</span></summary><div class="diagnostics-body">
+    <div class="section-heading"><h2>Snapshot</h2><button id="refresh" class="button secondary"><span id="refresh-label">Refresh Data</span></button></div>
+    <p id="completeness"></p><p id="provider"></p><p id="last-success"></p><p id="target-detail"></p><p id="read-status"></p><p id="lifecycle-detail" hidden></p><div id="market-data-details"></div><details><summary>Configuration</summary><ul id="blockers"></ul></details>
+  </div></details>
+</div>
+<main id="workspace" tabindex="-1" aria-busy="true">
+  <div id="public-banner" class="notice info" hidden></div>
+  <div id="fixture-banner" class="notice warning" hidden>Synthetic data &middot; inspection only</div>
+  <p id="theme-layer" class="notice info" hidden></p>
+  <div id="error" class="notice negative" role="alert" hidden></div>
+  <p id="research-version-notice" class="notice warning" hidden></p>
+  <section id="overview-page" class="view" aria-labelledby="overview-title">
+    <div class="page-heading"><h1 id="overview-title" tabindex="-1">Market</h1><span class="eyebrow">Research posture</span></div>
+    <div id="market-direction" aria-live="polite"><div class="loading-state skeleton skeleton-market" role="status">Loading market&hellip;</div></div>
+    <section class="benchmark-evidence" aria-labelledby="evidence-title"><div class="section-heading"><h2 id="evidence-title">The evidence</h2><a class="text-link" href="#methodology?metric=market">Market Matrix &#8599;</a></div><div id="market-cards"></div></section>
+    <div id="market-continuation"></div>
+    <details id="theme-map-panel" class="theme-map-panel"><summary>Return landscape <span>1M &times; 3M</span></summary><div id="theme-map"></div></details>
+  </section>
+  <section id="themes-page" class="view" aria-labelledby="themes-title" hidden>
+    <div class="page-heading"><h1 id="themes-title" tabindex="-1">Themes</h1><a href="#primary" class="text-link">Continue to Primary &#8594;</a></div>
+    <section id="leadership-changes" class="movement-section" aria-labelledby="changes-title"><div class="section-heading"><h2 id="changes-title">Five-session movement</h2><span id="movement-side" class="table-meta"></span></div><div id="change-board"></div></section>
+    <div class="ledger-toolbar"><div class="segmented" role="group" aria-label="Theme universe"><button data-universe="active" aria-pressed="true">Themes <span id="active-count"></span></button><button data-universe="watch_only" aria-pressed="false">Untracked <span id="watch-count"></span></button></div></div>
+    <form id="theme-filters" class="filter-bar" role="search" aria-label="Filter themes">
+      <label class="search-field"><span class="sr-only">Search themes</span><input id="theme-search" type="search" placeholder="Find a theme" autocomplete="off"></label>
+      <details class="theme-filter-menu"><summary class="button quiet">Filters</summary><div class="theme-filter-body">
         <label>Family<select id="theme-family"><option value="">All families</option></select></label>
-        <label>State<select id="theme-priority"><option value="">All states</option><option>Leading</option><option>Improving</option><option>Fading</option><option>Lagging</option><option>Unavailable</option></select></label>
-        <label>Trend<select id="theme-trend"><option value="">All trends</option><option>Bullish</option><option>Bearish</option><option>Mixed</option><option>Unavailable</option></select></label>
-        </div></details>
-        <button type="button" data-reset="themes" class="button quiet">Reset</button>
+        <label>Relative state<select id="theme-priority"><option value="">All states</option><option>Leading</option><option>Improving</option><option>Fading</option><option>Lagging</option><option>Unavailable</option></select></label>
+        <label>Price direction<select id="theme-trend"><option value="">All directions</option><option>Bullish</option><option>Bearish</option><option>Mixed</option><option>Unavailable</option></select></label>
+      </div></details><button type="button" data-reset="themes" class="button quiet">Reset</button>
+      <label class="theme-sort"><span class="sr-only">Sort themes</span><select id="theme-sort"><option value="priority:asc">Research priority</option><option value="recent:desc">Gaining strength first</option><option value="recent:asc">Losing strength first</option><option value="score:desc">Highest Theme Score</option><option value="score:asc">Lowest Theme Score</option><option value="name:asc">Theme A&ndash;Z</option></select></label>
+    </form>
+    <p class="table-meta result-count" id="theme-results" role="status" aria-live="polite">Loading themes&hellip;</p>
+    <div id="theme-table"><div class="loading-state skeleton skeleton-rows" role="status">Loading themes&hellip;</div></div>
+  </section>
+  <section id="theme-detail" class="view" aria-labelledby="detail-title" hidden><div id="detail-content"></div></section>
+  <section id="candidate-page" class="view" aria-labelledby="candidates-title" hidden>
+    <div class="page-heading"><div><h1 id="candidates-title" tabindex="-1">Primary</h1><p id="primary-context" class="compact-context"></p></div><details id="export-menu" class="export-menu"><summary class="button secondary">Export &#8595;</summary><div id="export-options" class="export-options"></div></details></div>
+    <div id="candidate-panel" role="region" aria-labelledby="candidates-title">
+      <form id="candidate-filters" class="filter-bar" role="search" aria-label="Filter research list">
+        <label class="search-field"><span class="sr-only">Search research</span><input id="candidate-search" type="search" placeholder="Find a stock or theme" autocomplete="off"></label>
+        <label class="theme-filter"><span class="sr-only">Theme</span><select id="candidate-theme"><option value="">All themes</option></select></label>
+        <details class="secondary-filters"><summary class="button quiet">Refine</summary><div class="secondary-filter-body">
+          <label>Role<select id="candidate-role"><option value="">All roles</option><option value="Core">Core business</option><option value="Enabler">Supporting business</option></select></label>
+          <label>Earnings<select id="candidate-earnings"><option value="">Any earnings state</option><option value="available">Date available</option><option value="unavailable">No date</option></select></label>
+          <div class="segmented" role="group" aria-label="Research list view"><button type="button" data-candidate-mode="unique" aria-pressed="true">Stocks</button><button type="button" data-candidate-mode="relationships" aria-pressed="false">By theme</button></div>
+        </div></details><button type="button" data-reset="candidates" class="button quiet">Reset</button>
+        <label class="queue-sort"><span class="sr-only">Sort research</span><select id="candidate-sort"><option value="priority">Research priority</option><option value="ticker">Ticker A&ndash;Z</option><option value="w-desc">Peer strength high to low</option><option value="w-asc">Peer strength low to high</option><option value="theme">Theme A&ndash;Z</option></select></label>
       </form>
-      <div class="candidate-tools"><p class="table-meta" id="theme-results" role="status" aria-live="polite">Loading themes…</p></div>
-      <div id="theme-table" class="table-wrap theme-wrap" role="region" aria-label="Theme research results" tabindex="0"><div class="loading-state skeleton skeleton-rows" role="status"><span>Loading themes…</span><i></i><i></i><i></i><i></i></div></div>
-    </section>
-    <section id="theme-detail" class="view" aria-labelledby="detail-title" hidden><div id="detail-content"></div></section>
-    <section id="candidate-page" class="view" aria-labelledby="candidates-title" hidden>
-      <div class="page-heading research-heading"><div><h1 id="candidates-title" tabindex="-1">Primary research</h1><p id="primary-context" class="compact-context"></p></div>
-        <details id="export-menu" class="export-menu"><summary class="button secondary">Export <span aria-hidden="true">⌄</span></summary><div id="export-options" class="export-options"><p class="menu-title">Waiting for a completed snapshot</p></div></details>
-      </div>
-      <div id="candidate-panel" role="region" aria-labelledby="candidates-title">
-        <form id="candidate-filters" class="filter-bar candidate-filter-bar" role="search" aria-label="Filter research list">
-          <label class="search-field">Search<input id="candidate-search" type="search" placeholder="Ticker or theme" autocomplete="off"></label>
-          <label class="theme-filter">Theme<select id="candidate-theme"><option value="">All themes</option></select></label>
-          <details class="secondary-filters"><summary class="button quiet">Filters <span aria-hidden="true">⌄</span></summary><div class="secondary-filter-body">
-            <label>Role<select id="candidate-role"><option value="">All roles</option><option value="Core">Core business</option><option value="Enabler">Supporting business</option></select></label>
-            <label>Earnings<select id="candidate-earnings"><option value="">Any earnings state</option><option value="available">Date available</option><option value="unavailable">No date</option></select></label>
-          </div></details>
-          <button type="button" data-reset="candidates" class="button quiet">Reset</button>
-        </form>
-        <div class="candidate-tools"><p id="candidate-results" class="table-meta" role="status" aria-live="polite">Loading stocks…</p><div class="candidate-view-tools"><div class="segmented" role="group" aria-label="Research list view"><button data-candidate-mode="unique" aria-pressed="true">Stocks</button><button data-candidate-mode="relationships" aria-pressed="false">By theme</button></div><label class="inline-label">Sort<select id="candidate-sort"><option value="priority">Research priority</option><option value="ticker">Ticker A–Z</option><option value="w-desc">Peer strength high to low</option><option value="w-asc">Peer strength low to high</option><option value="theme">Theme A–Z</option></select></label></div></div>
-        <div id="candidates"><div class="loading-state skeleton skeleton-rows" role="status"><span>Loading stocks…</span><i></i><i></i><i></i><i></i></div></div>
-      </div>
-    </section>
-    <section id="saved-page" class="view" aria-labelledby="saved-title" hidden>
-      <div class="page-heading"><div><h1 id="saved-title" tabindex="-1">Saved</h1></div><a href="#primary" class="button secondary">Browse research list <span aria-hidden="true">↗</span></a></div>
-      <div id="saved"></div>
-    </section>
-    <section id="methodology-page" class="view" aria-labelledby="methodology-title" hidden>
-      <div class="page-heading"><div><h1 id="methodology-title" tabindex="-1">Methodology</h1></div></div>
-
-<nav class="method-toc" aria-label="Methodology sections"><a href="#methodology?metric=market">Market</a><a href="#methodology?metric=strength">Themes</a><a href="#methodology?metric=w">Stocks</a><a href="#methodology?metric=sessions">Data</a></nav>
+      <p id="candidate-results" class="table-meta result-count" role="status" aria-live="polite">Loading stocks&hellip;</p>
+      <div id="candidates"><div class="loading-state skeleton skeleton-rows" role="status">Loading stocks&hellip;</div></div>
+    </div>
+  </section>
+  <section id="saved-page" class="view" aria-labelledby="saved-title" hidden><div class="page-heading"><h1 id="saved-title" tabindex="-1">Saved</h1><a href="#primary" class="text-link">Back to Primary &#8594;</a></div><div id="saved"></div></section>
+  <section id="methodology-page" class="view" aria-labelledby="methodology-title" hidden><div class="page-heading"><h1 id="methodology-title" tabindex="-1">Methodology</h1></div><nav class="method-toc" aria-label="Methodology sections"><a href="#methodology?metric=market">Market</a><a href="#methodology?metric=strength">Themes</a><a href="#methodology?metric=w">Stocks</a><a href="#methodology?metric=sessions">Data</a></nav>
 <div class="method-grid">
 <section class="method-group" aria-labelledby="method-group-market"><h2 id="method-group-market">Market</h2>
 <details class="method-item" id="method-market"><summary>Market direction</summary><div><p>SPY and QQQ determine Long Bias, Selective Long, Neutral, Selective Short, Short Bias or Unclassified using price trends and constituent breadth in the Market Matrix. IWM supplies small-cap context only.</p><p>Selective states retain the same research side with lower conviction. Neither market direction nor this list evaluates chart setups.</p></div></details>
@@ -110,10 +87,9 @@
 <section class="method-group" aria-labelledby="method-group-system"><h2 id="method-group-system">Data</h2>
 <details class="method-item" id="method-sessions"><summary>Completed-session data</summary><div><p>The whole workspace uses a completed US market session. A failed refresh preserves the prior successful snapshot. Live data remains local; an explicitly prepared public snapshot is static and read-only. Provider credentials never enter the browser.</p></div></details>
 <details class="method-item" id="method-lifecycle"><summary>History and provenance</summary><div><p>Official theme indices began at the November 6, 2026 close. Return history starts on November 9. Recent-change comparisons require compatible completed sessions; earlier ETF history remains separate.</p></div></details></section>
-</div>
-    </section>
-
-  </main>
+</div></section>
+</main>
+<footer class="desk-footer"><span>ThemeScope</span><span>End-of-day research</span></footer>
 </div>
 <dialog id="research-inspector" aria-labelledby="inspector-title">
   <header class="inspector-header"><div><h2 id="inspector-title" tabindex="-1"></h2><span id="inspector-kind" class="metric-label">Research</span></div><button id="inspector-back" class="button quiet" aria-label="Return to previous research object" hidden data-focus-key="inspector-back">←</button><button id="inspector-close" class="button quiet" aria-label="Close Research Inspector" data-focus-key="inspector-close">×</button></header>

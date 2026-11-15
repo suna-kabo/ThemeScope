@@ -41,27 +41,6 @@
   const themeLink = (id,lens='directional') => `<a class="theme-link" href="${themeHref(id)}" data-inspect-theme="${esc(id)}" data-context-lens="${esc(lens)}" data-focus-key="theme:${esc(id)}">${esc(name(id))}</a>`;
   const saveButton = (ticker,location,themeId='',lens='') => `<button class="save-button" data-save="${esc(ticker)}" data-save-theme="${esc(themeId)}" data-save-lens="${esc(lens)}" data-focus-key="${esc(location+':'+ticker)}" aria-pressed="${watched.includes(ticker)}" aria-label="${watched.includes(ticker)?'Saved '+esc(ticker)+'; remove from Saved':'Save '+esc(ticker)}">${icon('saved')}<span class="sr-only">${watched.includes(ticker)?'Saved':'Save'}</span></button>`;
   const empty = (title, message, action = '') => `<div class="empty-state"><h3>${esc(title)}</h3><p>${esc(message)}</p>${action}</div>`;
-  const displayKey = 'themescope-vnext-display';
-  let display = {density:'compact', text:100, motion:false, contrast:false};
-  try {
-    const stored = JSON.parse(localStorage.getItem(displayKey) || '{}');
-    display = {density:stored.density === 'comfortable' ? 'comfortable' : 'compact', text:[100,125,150,175,200].includes(stored.text) ? stored.text : 100, motion:stored.motion === true, contrast:stored.contrast === true};
-  } catch { /* Independent, optional browser preference. */ }
-  function applyDisplay(persist = false) {
-    const root = document.documentElement;
-    root.dataset.density = display.density; root.dataset.motion = display.motion ? 'reduce' : 'system'; root.dataset.contrast = display.contrast ? 'high' : 'standard';
-    root.style.fontSize = display.text + '%';
-    $('text-size').textContent = display.text + '%';
-    $('display-motion').checked = display.motion; $('display-contrast').checked = display.contrast;
-    document.querySelectorAll('button[data-density]').forEach(b => b.setAttribute('aria-pressed',String(b.dataset.density === display.density)));
-    document.querySelector('[data-text-step="-25"]').disabled = display.text === 100;
-    document.querySelector('[data-text-step="25"]').disabled = display.text === 200;
-    if ($('theme-map-panel').open) renderThemeMap();
-    if(UX.reduced())document.getAnimations().forEach(a=>a.cancel());
-    requestAnimationFrame(UX.indicators);
-    if (persist) try { localStorage.setItem(displayKey,JSON.stringify(display)); } catch { announce('Display settings apply for this visit; browser storage is unavailable.'); }
-  }
-  function closeDisplay() { $('display-panel').hidden = true; $('display-toggle').setAttribute('aria-expanded','false'); }
   function focusKey() { return document.activeElement?.dataset?.focusKey; }
   function restoreFocus(key) { if (key) [...(inspector ? $('research-inspector') : document).querySelectorAll(`[data-focus-key="${CSS.escape(key)}"]`)].find(node => !node.closest('[hidden]'))?.focus({preventScroll:true}); }
   function announce(text) {
@@ -72,17 +51,9 @@
   // All-unavailable cannot distinguish disabled, failed, or an empty calendar in this contract.
   function earningsEnabled() { return Object.values(snapshot?.earnings || {}).some(e=>(e?.dates?.length || 0)>0 || e?.status === 'Available'); }
   function earnings(ticker) { const dates = earningsDates(ticker); return dates.length ? dates.map(esc).join('<br>') : `<span class="muted">${snapshot?.earnings?.[ticker]?.status === 'Available' ? 'No reported date' : 'Unavailable'}</span>`; }
-  function themeBreadth(metric) {
-    if(valid(metric?.value))return number(metric.value,0)+'%';
-    if (!valid(metric?.valid) || !valid(metric?.configured)) return '—';
-    const reason = Number(metric.configured) === 0 ? 'No active calculation basket' : Number(metric.valid) < 5 ? 'Insufficient members' : valid(metric.coverage) && Number(metric.coverage) < .8 ? 'Insufficient coverage' : 'Current close or EMA unavailable';
-    const detail = `${reason} · ${metric.valid}/${metric.configured} valid${valid(metric.coverage) ? ' · ' + percent(metric.coverage,100) + ' coverage' : ''}`;
-    return `<span title="${esc(detail)}">—<span class="sr-only"> breadth unavailable; ${esc(detail)}</span></span>`;
-  }
   const research = () => snapshot?.research || {};
   const roleName = value => value === 'Core' ? 'Core business' : value === 'Enabler' ? 'Supporting business' : value;
   const roleLabel = value => `<span title="${value === 'Core' ? 'Business directly participates in this theme.' : value === 'Enabler' ? 'Provides products or services that enable this theme.' : ''}">${esc(roleName(value))}</span>`;
-  const wHeading='Peer strength (pp) '+helpButton('w');
   function rankInfo(id) { return themeResearch(id); }
   function rankLabel(id) { const r=rankInfo(id); return valid(r.strength_rank) ? '#' + r.strength_rank : '—'; }
   function rankChange(id) {
@@ -116,11 +87,6 @@
     body+=`<p class="menu-scope">${current?'Full session list in research order. Filters affect this view only.':'Stored under previous research rules. Refresh Data to build the current list.'}</p>`;
     if($('export-options').innerHTML!==body)$('export-options').innerHTML=body;
   }
-  const columns = keys => `<colgroup>${keys.map(key=>`<col class="col-${key}">`).join('')}</colgroup>`;
-  function table(headers, rows, caption, className = '') {
-    const keys=headers.map(h=>h.column||'');
-    return `<table class="${className}"><caption class="sr-only">${esc(caption)}</caption>${keys.every(Boolean)?columns(keys):''}<thead><tr>${headers.map(h=>`<th scope="col" class="${h.column?'col-'+h.column:''}${h.numeric?' numeric':''}">${h.label||h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>`;
-  }
   function renderLayer() {
     $('fixture-banner').hidden = publicSnapshot || !snapshot?.synthetic_fixture;
     $('public-banner').hidden = !publicSnapshot;
@@ -145,7 +111,7 @@
   const v2 = () => snapshot?.research_v2 || {};
   const themeResearch = id => v2().themes?.[id] || {};
   const researchState = id => UX.themeState(snapshot,id);
-  const stateTone = value => ({Leading:'positive',Improving:'positive',Fading:'mixed',Lagging:'negative'})[value] || 'neutral';
+  const stateTone = value => ({Leading:'leader',Improving:'improving',Fading:'fading',Lagging:'lagging'})[value] || 'neutral';
   const themeState = id => `<span class="theme-state ${stateTone(researchState(id))}">${esc(researchState(id))}</span>`;
   const researchOrder = id => currentResearch()?(themeResearch(id).research_order_index ?? (v2().theme_order||[]).indexOf(id)):(snapshot?.themes||[]).map(t=>t.theme_id).sort().indexOf(id);
   const currentSide = () => UX.currentSide(snapshot);
@@ -168,20 +134,20 @@
   }
   function renderChanges() {
     $('leadership-changes').hidden=!snapshot;
+    $('movement-side').textContent=sideLabel();
     if(!currentSide()){
-      $('change-board').innerHTML=`<p class="table-note">${esc(marketName(snapshot?.market_direction))} · No directional theme states. Raw strength changes remain available in Themes.</p>`;
-      return;
+      $('change-board').innerHTML='<p class="table-note">No directional theme states \u00b7 Raw score changes remain in the theme ledger.</p>';return;
     }
     const active=(snapshot?.themes||[]).filter(t=>t.status==='active');
     const comparable=active.filter(t=>themeResearch(t.theme_id).recent?.available);
-    const unavailable=active.length-comparable.length;
-    const availability=unavailable?`<p class="table-note comparison-availability">Five-session comparison unavailable for ${unavailable} themes. ${[...new Set(active.filter(t=>!themeResearch(t.theme_id).recent?.available).map(t=>UX.comparisonMessage(themeResearch(t.theme_id).recent?.reason)))].map(esc).join(' · ')}.</p>`:'';
-    $('change-board').innerHTML=availability+['Improving','Fading'].map(label=>{
-      const rows=comparable.filter(t=>researchState(t.theme_id)===label).sort((a,b)=>researchOrder(a.theme_id)-researchOrder(b.theme_id));
-      const missing=comparable.length?'No '+label.toLowerCase()+' themes among '+comparable.length+' comparable themes.':'Five-session comparison unavailable.';
-      return `<section class="change-column"><div class="section-heading"><h3 class="${stateTone(label)}">${label} for ${currentSide()==='short'?'Short':'Long'} research</h3><span class="table-meta">${comparable.length?rows.length+' themes':'Unavailable'}</span></div>${rows.length?rows.slice(0,3).map(t=>`<div class="change-row">${themeLink(t.theme_id)}<span>${recentChange(t.theme_id)}</span></div>`).join(''):`<p class="table-note">${esc(missing)}</p>`}</section>`;
-    }).join('');
+    const missing=active.filter(t=>!themeResearch(t.theme_id).recent?.available);
+    const unavailable=missing.length?`<p class="comparison-availability table-note">Five-session comparison unavailable \u00b7 ${[...new Set(missing.map(t=>UX.comparisonMessage(themeResearch(t.theme_id).recent?.reason)))].map(esc).join(' \u00b7 ')}</p>`:'';
+    $('change-board').innerHTML=unavailable+'<div class="movement-columns">'+[1,-1].map(direction=>{
+      const rows=comparable.filter(t=>Number(recentValue(t.theme_id))*direction>0).sort((a,b)=>direction*(Number(recentValue(b.theme_id))-Number(recentValue(a.theme_id)))||researchOrder(a.theme_id)-researchOrder(b.theme_id));
+      return `<section class="movement-column"><h3>${direction===1?'Gaining strength':'Losing strength'}<span>${rows.length}</span></h3>${rows.length?'<ol>'+rows.slice(0,3).map(t=>`<li><div>${themeLink(t.theme_id)}<small>${themeState(t.theme_id)} \u00b7 ${esc(t.index?.trend||'Unavailable')} price</small></div><span class="movement-value">${recentChange(t.theme_id)}</span></li>`).join('')+'</ol>':`<p class="table-note">${comparable.length?'No themes '+(direction===1?'gaining':'losing')+' strength':'Comparison unavailable'}</p>`}</section>`;
+    }).join('')+'</div>';
   }
+
   // Display transforms only: all breadth, returns, scores and trend come from the snapshot.
   function breadthBar(label,value,coverage = '') {
     const available = valid(value), bounded = available ? Math.max(0,Math.min(100,Number(value))) : 0;
@@ -223,40 +189,24 @@
   }
   function renderBenchmarks() {
     const market=snapshot?.market||{};
-    const rows=['SPY','QQQ','IWM'].map(ticker=>{
+    $('market-cards').innerHTML='<div class="benchmark-pair">'+['SPY','QQQ'].map(ticker=>{
       const row=market.context?.[ticker]||{},breadth=row.breadth||{},extension=research().extension?.indices?.[ticker];
-      return `<tr class="market-card ${ticker==='IWM'?'context':''}" aria-label="${ticker} market context"><td data-label="Index"><span class="market-ticker">${ticker}</span>${ticker==='IWM'?`<small>Small-cap context ${helpButton('iwm')}</small>`:''}</td><td data-label="State">${state(row.price_state)}</td><td class="numeric" data-label="Close"><span class="market-price">${money(row.close)}</span></td><td class="market-emas" data-label="EMA21">${marketEMA('EMA21',row.close,row.ema21,ticker)}</td><td class="market-emas" data-label="EMA50">${marketEMA('EMA50',row.close,row.ema50,ticker)}</td><td data-label="Breadth">${ticker==='IWM'?'<span aria-label="Breadth not applicable">—</span>':`<div class="market-breadth">${breadthBar('EMA21',breadth.above_ema21)}${breadthBar('EMA50',breadth.above_ema50)}</div><small class="breadth-state ${tone(breadth.state)}">${esc(breadth.state||'Unavailable')}</small>`}</td><td data-label="Extension">${ticker==='IWM'?'<span aria-label="Extension not applicable">—</span>':`${valid(extension?.distance)?number(extension.distance)+' ATR':'—'}<span class="index-extension">${esc(extension?.state||'Unavailable')}</span>`}</td></tr>`;
-    });
-    $('market-brief').innerHTML=['SPY','QQQ','IWM'].map(ticker=>{const row=market.context?.[ticker]||{};return `<div><strong>${ticker}</strong><span>${money(row.close)}</span>${state(row.price_state)}</div>`;}).join('');
-    $('market-cards').innerHTML=table(['Index','State',{label:'Close',numeric:true},'EMA21','EMA50','Breadth '+helpButton('market-breadth'),'Extension '+helpButton('extension')],rows,'Benchmark evidence. Breadth shows members above EMA21 and EMA50. IWM is context only.','benchmark-table');
-    $('market-data-details').innerHTML=['SPY','QQQ'].map(ticker=>{const row=market.context?.[ticker]||{},b=row.breadth||{};return `<p>${ticker} breadth · ${esc(b.valid??0)}/${esc(b.configured??0)} valid<br>${esc(row.roster_source||'Roster unavailable')}<br>${esc((row.roster_warnings||[]).join(' ')||'No roster advisories.')}</p>`;}).join('');
+      return `<article class="benchmark" aria-label="${ticker} market evidence"><div class="benchmark-heading"><h3>${ticker}</h3><span class="market-price">${money(row.close)}</span>${state(row.price_state)}</div><div class="benchmark-observations"><div><span class="metric-label">EMA21</span>${marketEMA('EMA21',row.close,row.ema21,ticker)}</div><div><span class="metric-label">EMA50</span>${marketEMA('EMA50',row.close,row.ema50,ticker)}</div><div class="benchmark-breadth"><span class="metric-label">Breadth ${helpButton('market-breadth')}</span>${breadthBar('21',breadth.above_ema21)}${breadthBar('50',breadth.above_ema50)}<small>${esc(breadth.state||'Unavailable')}</small></div></div><details class="benchmark-extra"><summary>Extension <span>${esc(extension?.state||'Unavailable')}</span></summary><p>${valid(extension?.distance)?number(extension.distance)+' ATR':'Unavailable'} ${helpButton('extension')}</p></details></article>`;
+    }).join('')+'</div>';
+    const iwm=market.context?.IWM||{};
+    $('market-cards').innerHTML+=`<div class="iwm-context"><strong>IWM</strong><span>${money(iwm.close)}</span>${state(iwm.price_state)}<span class="context-label">Small-cap context ${helpButton('iwm')}</span><details><summary>EMA evidence</summary><div>${marketEMA('EMA21',iwm.close,iwm.ema21,'IWM')}${marketEMA('EMA50',iwm.close,iwm.ema50,'IWM')}</div></details></div>`;
+    $('market-data-details').innerHTML=['SPY','QQQ'].map(ticker=>{const row=market.context?.[ticker]||{},b=row.breadth||{};return `<p>${ticker} breadth \u00b7 ${esc(b.valid??0)}/${esc(b.configured??0)} valid<br>${esc(row.roster_source||'Roster unavailable')}<br>${esc((row.roster_warnings||[]).join(' ')||'No roster advisories.')}</p>`;}).join('');
   }
   function renderOverview() {
     if(initialLoading)return;
-    document.querySelector('.overview-research').hidden=!snapshot;$('theme-map-panel').hidden=!snapshot;
-    renderChanges();
-    if(!snapshot){$('market-direction').innerHTML=empty('No completed snapshot','Refresh Data to load completed-session research.');$('market-cards').innerHTML='';return;}
-    if(!currentResearch()){
-      document.querySelector('.overview-research').hidden=true;$('leadership-changes').hidden=true;
-      $('market-direction').innerHTML=`<h2 class="direction-name">${esc(marketName(snapshot.market_direction))}</h2><p>Current research list unavailable · previous rules snapshot</p>`;
-      renderBenchmarks();renderThemeMap();return;
-    }
-    const decision=snapshot?.market?.decision||{},direction=marketName(snapshot?.market_direction),changes=v2().changes||{};
-    const changed=changes.changed?`Changed from ${marketName(changes.previous_market_direction)}`:changes.previous_market_direction?'Unchanged since previous session':'No previous comparison';
-    if(!currentSide()){
-      document.querySelector('.overview-research').hidden=true;
-      $('market-direction').innerHTML=`<div class="market-conclusion direction-plane"><div class="bias-identity"><h2 class="direction-name">${esc(direction)}</h2><span class="market-change">${esc(changed)}</span></div><p>No directional research list · Themes and stock context remain available.</p><details class="decision-details"><summary>Decision details</summary><p id="decision-path">${esc(decision.reason||'Market context unavailable.')}</p><p id="today-plan">${esc(snapshot.today_plan||'')}</p></details></div>`;
-      renderBenchmarks();renderThemeMap();return;
-    }
-    const total=v2().list?.stock_count??uniqueRows(qualifiedRows()).length;
-    $('market-direction').innerHTML=`<div class="market-conclusion direction-plane"><div class="bias-identity"><h2 class="direction-name ${tone(direction)}" aria-label="Market direction: ${esc(direction)}">${esc(direction)}</h2><span class="market-change">${esc(changed)}${v2().conviction==='selective'?' · Reduced conviction':''}</span></div><div class="direction-step"><strong>${primaryThemes().length} themes</strong><span class="plane-label">Researchable</span></div><div class="direction-step"><a href="#primary" class="research-total">${total} stocks</a><span class="plane-label">Primary research</span></div><details class="decision-details"><summary>Decision details</summary><p id="decision-path">${esc(decision.reason||'Market context unavailable.')}</p><p id="today-plan">${esc(snapshot?.today_plan||'')}</p><p>Breadth: ${esc(snapshot?.market?.breadth_consensus||'Unavailable')}</p><p>Benchmark extension: ${esc(research().extension?.state||'Unavailable')}</p></details></div>`;
+    $('theme-map-panel').hidden=!snapshot;renderChanges();
+    if(!snapshot){$('market-direction').innerHTML=empty('No completed snapshot','Open Snapshot to refresh completed-session data.');$('market-cards').innerHTML='';$('market-continuation').innerHTML='';return;}
+    const direction=marketName(snapshot.market_direction),changes=v2().changes||{},decision=snapshot.market?.decision||{};
+    const changed=changes.changed?`From ${marketName(changes.previous_market_direction)}`:changes.previous_market_direction?'Unchanged since previous session':'No previous comparison';
+    $('market-direction').innerHTML=`<div class="bias-line"><div class="bias-title"><span class="eyebrow">Market Bias</span><h2 class="direction-name ${tone(direction)}" aria-label="Market Bias: ${esc(direction)}">${esc(direction)}</h2><span class="market-change">${esc(changed)}${v2().conviction==='selective'?' \u00b7 Reduced conviction':''}</span></div><div class="bias-action">${!currentResearch()?'<p>Current research list unavailable \u00b7 previous rules snapshot</p>':currentSide()?`<span>${sideLabel()}</span><a href="#themes">${primaryThemes().length} researchable themes <span aria-hidden="true">\u2192</span></a>`:'<p>No directional research list</p><a href="#themes">Explore theme context \u2192</a>'}</div></div><details class="decision-details"><summary>Decision evidence</summary><p id="decision-path">${esc(decision.reason||'Market context unavailable.')}</p><p id="today-plan">${esc(snapshot.today_plan||'')}</p><p>Breadth: ${esc(snapshot.market?.breadth_consensus||'Unavailable')}</p></details>`;
     renderBenchmarks();renderThemeMap();
-    $('theme-preview-order').textContent='Research priority';
-    const themes=primaryThemes().slice(0,8);
-    $('primary-themes').innerHTML=themes.length?themes.map(t=>`<div class="preview-row"><span class="position">${rankLabel(t.theme_id)}</span><div>${themeLink(t.theme_id)}<small>${themeState(t.theme_id)}</small></div><div class="preview-value">${number(t.score,1)}</div></div>`).join(''):empty('No researchable themes','All themes remain available for review.','<a href="#themes" class="text-link">Browse themes</a>');
-    const stocks=uniqueRows(qualifiedRows()).slice(0,8);
-    $('research-preview-count').textContent=total+' stocks';
-    $('candidate-preview').innerHTML=stocks.length?stocks.map(r=>`<div class="preview-row stock-row"><div>${tickerLink(r.ticker,r.theme_id,'directional')}<small>${esc(name(r.theme_id))}</small></div><div class="preview-value ${signTone(r.relative?.w)}">${points(r.relative?.w)}</div>${saveButton(r.ticker,'overview',r.theme_id,'directional')}</div>`).join(''):empty('No stocks to review','Daily eligibility and theme relevance determine the list.','<a href="#themes" class="text-link">Browse themes</a>');
+    const leaders=primaryThemes().slice(0,3);
+    $('market-continuation').innerHTML=`<section class="research-next"><div class="section-heading"><h2>Next in research</h2><a href="#themes" class="text-link">Theme changes \u2192</a></div>${leaders.length?`<ol class="next-themes">${leaders.map(t=>`<li><div>${themeLink(t.theme_id)}<small>${themeState(t.theme_id)}</small></div><span>${recentChange(t.theme_id)}</span></li>`).join('')}</ol><a href="#primary" class="queue-entry"><span>Primary research</span><strong>${v2().list?.stock_count??uniqueRows(qualifiedRows()).length} stocks <span aria-hidden="true">\u2192</span></strong></a>`:'<a href="#themes" class="queue-entry">All themes <span aria-hidden="true">\u2192</span></a>'}</section>`;
   }
 
   function setOptions(id, options) {
@@ -285,29 +235,24 @@
     const query = $('theme-search').value.trim().toLowerCase();
     return (snapshot?.themes || []).filter(t => (ui.universe === 'active' ? t.status === 'active' : t.status !== 'active') && (!query || `${t.name} ${t.theme_id} ${t.family}`.toLowerCase().includes(query)) && (!$('theme-family').value || t.family === $('theme-family').value) && (!$('theme-priority').value || researchState(t.theme_id) === $('theme-priority').value) && (!$('theme-trend').value || (t.index?.trend || 'Unavailable') === $('theme-trend').value)).sort((a, b) => compareValues(themeValue(a, ui.themeSort), themeValue(b, ui.themeSort), ui.themeDescending) || a.theme_id.localeCompare(b.theme_id));
   }
-  function sortHeading(label, key, numeric = false, help = '') {
-    const selected = ui.themeSort === key;
-    const column=({name:'theme',score:'strength',rankchange:'rank-change'})[key]||key;
-    return `<th scope="col" class="col-${column}${numeric?' numeric':''}"${selected ? ` aria-sort="${ui.themeDescending ? 'descending' : 'ascending'}"` : ''}><div class="th-content"><button class="sort-button" data-theme-sort="${key}" data-focus-key="sort:${key}">${label}<span aria-hidden="true">${selected ? ui.themeDescending ? '↓' : '↑' : '↕'}</span><span class="sr-only">, sort ${selected && !ui.themeDescending ? 'descending' : 'ascending'}</span></button>${help?helpButton(help):''}</div></th>`;
-  }
   function renderThemes() {
     if(initialLoading)return;
-    const active=(snapshot?.themes||[]).filter(t=>t.status==='active').length,tracked=ui.universe==='active';
-    $('active-count').textContent=active;$('watch-count').textContent=(snapshot?.themes?.length||0)-active;
+    const tracked=ui.universe==='active';
+    $('active-count').textContent=(snapshot?.themes||[]).filter(t=>t.status==='active').length;
+    $('watch-count').textContent=(snapshot?.themes||[]).filter(t=>t.status!=='active').length;
     document.querySelectorAll('[data-universe]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.universe===ui.universe)));
     $('theme-priority').closest('label').hidden=!tracked||!currentSide();$('theme-trend').closest('label').hidden=!tracked;
-    const filterCount=['theme-family','theme-priority','theme-trend'].filter(id=>$(id).value).length;
-    document.querySelector('.theme-filter-menu>summary').textContent='Filters'+(filterCount?' ('+filterCount+')':'');
+    const count=['theme-family','theme-priority','theme-trend'].filter(id=>$(id).value).length;
+    document.querySelector('.theme-filter-menu>summary').textContent='Filters'+(count?' ('+count+')':'');
     const rows=themeRows();
-    $('theme-results').textContent=tracked?`${rows.length} themes · ${sideLabel()} · ${primaryThemes().length} researchable`:`${rows.length} untracked concepts`;
-    if(!rows.length){$('theme-table').innerHTML=empty(snapshot?'No themes match':'Themes are waiting',snapshot?'Try another search or reset the filters.':'Refresh Data to load completed-session research.','<button class="button secondary" data-reset="themes">Reset filters</button>');return;}
-    if(!tracked){$('theme-table').innerHTML=table(['Concept','Family','Coverage'],rows.map(t=>`<tr><td data-label="Concept">${themeLink(t.theme_id)}</td><td data-label="Family">${esc(t.family)}</td><td data-label="Coverage">Not currently tracked</td></tr>`),'Untracked concepts','concept-table');return;}
-    const heading=`<thead><tr><th scope="col" class="col-rank numeric">Rank ${helpButton('rank')}</th>${sortHeading('Theme','name')}${sortHeading('State','priority',false,'priority')}${sortHeading('Strength','score',true,'strength')}${sortHeading(currentSide()?'5-session research Δ':'5-session strength Δ','recent',true)}${sortHeading('Trend','trend')}${sortHeading('Participation','breadth',true,'breadth')}</tr></thead>`;
-    const body=rows.map(t=>`<tr data-theme-row="${esc(t.theme_id)}" class="${ui.selectedTheme===t.theme_id?'selected-row':''}"><td class="numeric col-rank canonical-rank" data-label="Rank">${rankLabel(t.theme_id)}</td><td class="col-theme theme-name" data-label="Theme">${themeLink(t.theme_id)}<small class="theme-family">${esc(t.family)}</small></td><td class="col-priority" data-label="State">${themeState(t.theme_id)}<small class="researchability">${themeResearch(t.theme_id).researchable?'Researchable':'Context only'}</small></td><td class="col-strength numeric" data-label="Strength"><span class="strength-track" aria-hidden="true"><i style="width:${valid(t.score)?Math.max(0,Math.min(100,Number(t.score))):0}%"></i></span><span>${number(t.score,1)}</span></td><td class="col-recent numeric" data-label="5-session change">${recentChange(t.theme_id)}<small class="rank-change">${currentSide()?'Side rank':'Strength rank'} ${rankChange(t.theme_id)}</small></td><td class="col-trend" data-label="Trend">${state(t.index?.trend)}</td><td class="col-breadth numeric" data-label="Participation">${participation(t.theme_id)}</td></tr>`).join('');
-    const sortControl=`<label class="theme-mobile-sort inline-label">Sort themes<select id="theme-mobile-sort"><option value="score:desc">Strength strongest first</option><option value="score:asc">Strength weakest first</option><option value="name:asc">Theme A–Z</option><option value="recent:desc">${currentSide()?'Research improvement first':'Raw strength gains first'}</option><option value="recent:asc">${currentSide()?'Research deterioration first':'Raw strength losses first'}</option><option value="priority:asc">${currentSide()?'Research priority':'Context order (A–Z)'}</option></select></label>`;
-    $('theme-table').innerHTML=sortControl+`<table role="table" class="theme-research-table"><caption class="sr-only">Theme states reflect the current research side. Strength ranks compare all scored active themes. Five-session change uses compatible history.</caption>${columns(['rank','theme','priority','strength','recent','trend','breadth'])}${heading}<tbody role="rowgroup">${body}</tbody></table>`;
-    const mobile=$('theme-mobile-sort');if([...mobile.options].some(o=>o.value===`${ui.themeSort}:${ui.themeDescending?'desc':'asc'}`))mobile.value=`${ui.themeSort}:${ui.themeDescending?'desc':'asc'}`;
+    $('theme-results').textContent=tracked?`${rows.length} themes \u00b7 ${sideLabel()} \u00b7 ${primaryThemes().length} researchable`:`${rows.length} untracked concepts`;
+    $('theme-sort').value=`${ui.themeSort}:${ui.themeDescending?'desc':'asc'}`;
+    if(!rows.length){$('theme-table').innerHTML=empty(snapshot?'No themes match':'Themes are waiting',snapshot?'Try another search or reset the filters.':'Open Snapshot to refresh completed-session data.','<button class="button secondary" data-reset="themes">Reset filters</button>');return;}
+    if(!tracked){$('theme-table').innerHTML='<ul class="concept-list">'+rows.map(t=>`<li>${themeLink(t.theme_id)}<span>${esc(t.family)}</span></li>`).join('')+'</ul>';return;}
+    const side=currentSide()?currentSide()==='short'?'Short':'Long':'Current';
+    $('theme-table').innerHTML=`<div class="theme-ledger-head" aria-hidden="true"><span>Rank / Theme</span><span>Relative state \u00b7 ${side}</span><span>Theme Score</span><span>5-session \u0394</span><span>Price direction</span><span>1M / 3M return</span></div><ol class="theme-ledger">${rows.map(t=>`<li data-theme-row="${esc(t.theme_id)}" class="theme-line ${ui.selectedTheme===t.theme_id?'selected-row':''}"><div class="theme-identity"><span class="canonical-rank">${rankLabel(t.theme_id)}</span><div>${themeLink(t.theme_id)}<small>${esc(t.family)}</small></div></div><div class="relative-cell"><span class="mobile-label">Relative state \u00b7 ${side}</span>${themeState(t.theme_id)}<small>${themeResearch(t.theme_id).researchable?'Researchable':'Context'}</small></div><div class="score-cell"><span class="mobile-label">Theme Score</span><span class="score-value">${number(t.score,1)}</span><span class="score-rule" aria-hidden="true"><i style="width:${valid(t.score)?Math.max(0,Math.min(100,Number(t.score))):0}%"></i></span></div><div class="change-cell"><span class="mobile-label">5-session \u0394</span>${recentChange(t.theme_id)}<small>${currentSide()?'Side rank':'Rank'} ${rankChange(t.theme_id)}</small></div><div class="price-cell"><span class="mobile-label">Price direction</span>${state(t.index?.trend)}</div><div class="return-cell"><span class="mobile-label">1M / 3M return</span><span class="${signTone(t.returns?.[0]?.value)}">${percent(t.returns?.[0]?.value,100,true)}</span><span class="${signTone(t.returns?.[1]?.value)}">${percent(t.returns?.[1]?.value,100,true)}</span></div></li>`).join('')}</ol>`;
   }
+
   function participation(id) {
     const breadth=themeResearch(id).breadth||{};
     const text=valid(breadth.percent)&&valid(breadth.above)?`${number(breadth.above,0)} / ${number(breadth.total,0)} · ${number(breadth.percent,0)}%`:'Unavailable';
@@ -316,14 +261,14 @@
 
   function researchStatus(row,included='Included in research list',excluded='Outside research list') { return !currentResearch()?'Previous rules snapshot':row.role==='Related'?'Context only':!currentSide()?'No directional research list':row.qualifies?included:excluded; }
   function eligibility(row) { return !currentResearch()?'Previous rules':!row.eligibility?.available ? 'Unavailable' : row.eligibility.eligible ? 'Liquidity eligible' : 'Liquidity ineligible'; }
-  function candidateRow(row,location,withTheme=true) {
+  function candidateRow(row,location,withTheme=true,index=0) {
     const selected=ui.selectedTicker===row.ticker&&ui.selectedTickerTheme===row.theme_id;
-    return `<tr data-ticker-row="${esc(row.ticker)}" data-relationship-theme="${esc(row.theme_id)}" class="${selected?'selected-row':''}"><td class="col-ticker" data-label="Ticker">${tickerLink(row.ticker,row.theme_id,ui.candidateLens)}<small class="row-company">${esc(research().companies?.[row.ticker]||'')}</small></td>${withTheme?`<td class="col-theme" data-label="Theme">${themeLink(row.theme_id,ui.candidateLens)}</td>`:''}<td class="col-role" data-label="Role">${roleLabel(row.role)}</td><td data-label="Peer strength" class="col-w numeric ${signTone(row.relative?.w)}">${points(row.relative?.w)}</td>${earningsEnabled()?`<td data-label="Earnings" class="col-earnings table-note">${earnings(row.ticker)}</td>`:''}<td class="col-save" data-label="Save">${saveButton(row.ticker,location+':'+row.theme_id,row.theme_id,ui.candidateLens)}</td></tr>`;
+    return `<li data-ticker-row="${esc(row.ticker)}" data-relationship-theme="${esc(row.theme_id)}" class="queue-row ${selected?'selected-row':''}"><span class="queue-position" aria-hidden="true">${String(index+1).padStart(2,'0')}</span><div class="queue-stock">${tickerLink(row.ticker,row.theme_id,ui.candidateLens)}<small class="row-company">${esc(research().companies?.[row.ticker]||'')}</small></div>${withTheme?`<div class="queue-theme">${themeLink(row.theme_id,ui.candidateLens)}<small class="col-role">${roleLabel(row.role)}</small></div>`:`<span class="col-role sr-only">${roleLabel(row.role)}</span>`}<div class="queue-peer"><span class="mobile-label">Peer strength</span><span class="numeric ${signTone(row.relative?.w)}">${points(row.relative?.w)}</span></div>${earningsEnabled()?`<div class="queue-earnings table-note"><span class="mobile-label">Earnings</span>${earnings(row.ticker)}</div>`:''}${saveButton(row.ticker,location+':'+row.theme_id,row.theme_id,ui.candidateLens)}</li>`;
   }
-  const candidateHeaders=(withTheme=true)=>[{label:'Ticker',column:'ticker'},...(withTheme?[{label:'Theme',column:'theme'}]:[]),{label:'Role',column:'role'},{label:wHeading,column:'w',numeric:true},...(earningsEnabled()?[{label:'Earnings',column:'earnings'}]:[]),{label:'Save',column:'save'}];
+
   function matchesCandidate(row) {
     const query=$('candidate-search').value.trim().toLowerCase(),filter=$('candidate-theme').value;
-    return (!query||`${row.ticker} ${name(row.theme_id)}`.toLowerCase().includes(query))&&(!filter||row.theme_id===filter)&&(!$('candidate-role').value||row.role===$('candidate-role').value)&&(!$('candidate-earnings').value||(earningsDates(row.ticker).length>0)===($('candidate-earnings').value==='available'));
+    return (!query||`${row.ticker} ${research().companies?.[row.ticker]||''} ${name(row.theme_id)}`.toLowerCase().includes(query))&&(!filter||row.theme_id===filter)&&(!$('candidate-role').value||row.role===$('candidate-role').value)&&(!$('candidate-earnings').value||(earningsDates(row.ticker).length>0)===($('candidate-earnings').value==='available'));
   }
   function lensRows() { return qualifiedRows(); }
   function renderCandidateContext() {
@@ -346,16 +291,16 @@
     const rows=(ui.candidateMode==='unique'?UX.displayRows(all,representatives,$('candidate-theme').value):all).filter(matchesCandidate);
     const sort=$('candidate-sort').value;
     rows.sort((a,b)=>(sort==='w-desc'||sort==='w-asc'?compareValues(valid(a.relative?.w)?Number(a.relative.w):null,valid(b.relative?.w)?Number(b.relative.w):null,sort==='w-desc'):sort==='theme'?name(a.theme_id).localeCompare(name(b.theme_id)):sort==='priority'?a.list_order-b.list_order:a.ticker.localeCompare(b.ticker))||a.ticker.localeCompare(b.ticker)||a.theme_id.localeCompare(b.theme_id));
-    $('candidate-results').textContent=`${new Set(rows.map(r=>r.ticker)).size} stocks${ui.candidateMode==='relationships'?' · '+rows.length+' relationships':''}`;
+    $('candidate-results').textContent=`${new Set(rows.map(r=>r.ticker)).size} ${new Set(rows.map(r=>r.ticker)).size===1?'stock':'stocks'}${ui.candidateMode==='relationships'?' · '+rows.length+' relationships':''}`;
     if(!rows.length){$('candidates').innerHTML=currentSide()?empty(all.length?'No stocks match':'No stocks to review this session',all.length?'Try another filter.':'No daily-eligible members belong to researchable themes.'):empty('No directional research list',marketName(snapshot?.market_direction)+' has no Long or Short research side. Themes, stock context and Saved remain available.');return;}
     $('candidates').innerHTML=candidateTables(rows,'Daily Research List');
   }
   function candidateTables(rows,label) {
-    const withTheme=ui.candidateMode==='unique';
-    const render=(members,title)=>`<div class="table-wrap" role="region" tabindex="0" aria-label="${esc(title)}">${table(candidateHeaders(withTheme),members.map(r=>candidateRow(r,ui.candidateLens,withTheme)),title+'; peer-relative performance is relative to '+(withTheme?'the displayed theme.':name(members[0].theme_id)+'.'),withTheme?'candidate-table':'candidate-table grouped-table')}</div>`;
-    if(ui.candidateMode==='unique')return render(rows,label);
+    const grouped=ui.candidateMode==='relationships'||$('candidate-sort').value==='priority';
+    if(!grouped)return `<div class="research-queue ${earningsEnabled()?'has-earnings':''}"><div class="queue-head" aria-hidden="true"><span>#</span><span>Stock</span><span>Theme</span><span>Peer strength (pp)</span>${earningsEnabled()?'<span>Earnings</span>':''}<span>Save</span></div><ol aria-label="${esc(label)}">${rows.map((r,i)=>candidateRow(r,ui.candidateLens,true,i)).join('')}</ol></div>`;
     const groups=new Map();for(const row of rows){if(!groups.has(row.theme_id))groups.set(row.theme_id,[]);groups.get(row.theme_id).push(row);}
-    return [...groups].map(([id,members])=>`<section class="qualification-group"><div class="group-heading"><h3>${themeLink(id,ui.candidateLens)}</h3><span class="table-meta">${members.length} relationships</span></div>${render(members,name(id))}</section>`).join('');
+    let position=0;
+    return [...groups].map(([id,members])=>`<section class="queue-chapter" aria-label="${esc(name(id))}"><header class="chapter-heading"><span class="eyebrow">${String([...groups.keys()].indexOf(id)+1).padStart(2,'0')}</span><h2>${themeLink(id,ui.candidateLens)}</h2><div>${themeState(id)}</div><a class="text-link" href="${themeHref(id)}">${members.length} stocks <span aria-hidden="true">&#8599;</span></a></header><div class="chapter-stocks"><span class="chapter-peer-label">Peer strength (pp) ${helpButton('w')}</span><ol class="chapter-queue" aria-label="${esc(name(id))} stocks">${members.map(r=>candidateRow(r,ui.candidateLens,false,position++)).join('')}</ol></div></section>`).join('');
   }
 
   function memberRows(themeId) {
@@ -364,17 +309,17 @@
     return rows;
   }
   function renderMembers(themeId) {
-    const rows = memberRows(themeId), total = (snapshot?.relationships || []).filter(r => r.theme_id === themeId).length;
-    $('member-count').textContent = `${rows.length} of ${total} reviewed relationships`;
-    $('member-table').innerHTML = rows.length ? table(['Ticker','Role',{label:'Peer strength (pp)',numeric:true},'Daily eligibility','Research list',...(earningsEnabled() ? ['Earnings'] : []),'Saved'], rows.map(r => `<tr><td>${tickerLink(r.ticker,r.theme_id,'directional')}</td><td>${roleLabel(r.role)}</td><td class="numeric ${signTone(r.relative?.w)}">${points(r.relative?.w)}</td><td class="table-note">${esc(eligibility(r))}</td><td><span class="table-note">${researchStatus(r)}</span></td>${earningsEnabled() ? `<td class="table-note">${earnings(r.ticker)}</td>` : ''}<td>${saveButton(r.ticker,'member:'+themeId,r.theme_id,'directional')}</td></tr>`), name(themeId) + ' members. Peer-relative performance is an ordering signal.') : empty(total ? 'No members match this view' : 'No reviewed members available', total ? 'Try another ticker, role or eligibility filter.' : 'No reviewed members are available.');
+    const rows=memberRows(themeId),total=(snapshot?.relationships||[]).filter(r=>r.theme_id===themeId).length;
+    $('member-count').textContent=`${rows.length} of ${total} reviewed relationships`;
+    $('member-table').innerHTML=rows.length?`<ol class="member-ledger" aria-label="${esc(name(themeId))} members">${rows.map(r=>`<li><div class="member-identity">${tickerLink(r.ticker,r.theme_id,'directional')}<small>${roleLabel(r.role)}</small></div><div class="member-comparison"><span class="metric-label">Peer strength</span><span class="numeric ${signTone(r.relative?.w)}">${points(r.relative?.w)}</span></div><div class="member-status"><span>${esc(eligibility(r))}</span><small>${researchStatus(r)}</small>${earningsEnabled()?`<small>Earnings ${earnings(r.ticker)}</small>`:''}</div>${saveButton(r.ticker,'member:'+themeId,r.theme_id,'directional')}</li>`).join('')}</ol>`:empty(total?'No members match':'No reviewed members',total?'Try another filter.':'No reviewed members are available.');
   }
   function renderDetail(themeId) {
     if(initialLoading){$('detail-content').innerHTML='<p class="loading-state">Loading theme research…</p>';return;}
     const theme=snapshot?.themes?.find(t=>t.theme_id===themeId);
     if(!theme){$('detail-content').innerHTML='<a href="#themes" class="back-link">← Back to Themes</a>'+empty('Theme unavailable','This theme is not in the current snapshot.');return;}
     if(theme.status!=='active'){$('detail-content').innerHTML=`<a href="#themes" class="back-link">← Back to Themes</a><h1 id="detail-title" tabindex="-1">${esc(theme.name||themeId)}</h1>${empty('Not currently tracked','This concept has no reviewed calculation basket.') }`;return;}
-    const originName=origin.startsWith('#primary')?'research list':origin.startsWith('#saved')?'Saved':origin.startsWith('#overview')?'Market':'Themes',context=themeResearch(themeId);
-    $('detail-content').innerHTML=`<div class="crumbs"><a href="${esc(origin)}" class="back-link" data-return-theme="${esc(themeId)}">← Back to ${originName}</a>${themeDownload(themeId)}</div><div class="detail-heading"><h1 id="detail-title" tabindex="-1">${esc(theme.name||themeId)}</h1><p class="detail-family">${esc(theme.family)} · ${themeState(themeId)} · ${sideLabel()}</p></div><div class="detail-primary">${metric('Structural strength '+helpButton('strength'),number(theme.score,1))}${metric('Strength rank '+helpButton('rank'),rankLabel(themeId))}${metric(recentLabel(),recentChange(themeId))}${metric('Theme trend',state(theme.index?.trend))}</div><div class="detail-summary">${metric('Median 1M return',percent(theme.returns?.[0]?.value,100,true))}${metric('Median 3M return',percent(theme.returns?.[1]?.value,100,true))}${metric('Theme participation '+helpButton('breadth'),participation(themeId))}</div><details class="theme-evidence"><summary>State &amp; trend evidence</summary><p class="theme-reason">${esc(context.reason||'Comparison unavailable')} · ${context.researchable?'Daily-eligible members enter today’s research list.':'Members remain available for context.'}</p><dl class="relationship-metrics"><div><dt>Current-basket comparison session</dt><dd>${esc(context.recent?.comparison_session||UX.comparisonMessage(context.recent?.reason))}</dd></div><div><dt>Five-session ${currentSide()?'side':'Strength'} rank change</dt><dd>${valid(currentSide()?context.recent?.directional_rank_change:context.recent?.raw_rank_change)?number(currentSide()?context.recent.directional_rank_change:context.recent.raw_rank_change,0):'Unavailable'}</dd></div><div><dt>Raw structural strength change</dt><dd>${valid(context.recent?.raw_score_change)?number(context.recent.raw_score_change,1)+' pts':UX.comparisonMessage(context.recent?.reason)}</dd></div><div><dt>Participation change</dt><dd>${valid(context.recent?.breadth_change)?number(context.recent.breadth_change,1)+' pp':'Unavailable'}</dd></div><div><dt>Index / EMA21 / EMA50</dt><dd>${number(theme.index?.level)} / ${number(theme.index?.ema21)} / ${number(theme.index?.ema50)}</dd></div></dl></details><div class="section-heading"><h2>Member stocks</h2><span id="member-count" class="table-meta"></span></div><form id="member-filters" class="filter-bar" role="search" aria-label="Filter theme members"><label class="search-field">Search members<input id="member-search" type="search" placeholder="Ticker…" value="${esc(ui.memberSearch)}"></label><label>Role<select id="member-role"><option value="">All roles</option><option value="Core">Core business</option><option value="Enabler">Supporting business</option><option value="Related">Related context</option></select></label><label>Eligibility<select id="member-eligibility"><option value="">All states</option><option>Liquidity eligible</option><option>Liquidity ineligible</option><option>Unavailable</option></select></label><label>Sort<select id="member-sort"><option value="priority">${currentSide()?'Peer priority':'Context order (A–Z)'}</option><option value="ticker">Ticker A–Z</option><option value="w-desc">Peer strength high to low</option><option value="w-asc">Peer strength low to high</option></select></label></form><div id="member-table" class="table-wrap member-table" role="region" tabindex="0" aria-label="Theme member research"></div>`;
+    const originName=origin.startsWith('#primary')?'Primary':origin.startsWith('#saved')?'Saved':origin.startsWith('#overview')?'Market':'Themes';
+    $('detail-content').innerHTML=`<div class="crumbs"><a href="${esc(origin)}" class="back-link" data-return-theme="${esc(themeId)}">&#8592; ${originName}</a>${themeDownload(themeId)}</div><header class="full-theme-heading"><h1 id="detail-title" tabindex="-1">${esc(theme.name||themeId)}</h1><span>${esc(theme.family)}</span></header><div class="full-theme-evidence">${themeEvidence(theme)}</div><div class="section-heading"><h2>Member stocks</h2><span id="member-count" class="table-meta"></span></div><form id="member-filters" class="filter-bar" role="search" aria-label="Filter theme members"><label class="search-field">Search members<input id="member-search" type="search" placeholder="Ticker…" value="${esc(ui.memberSearch)}"></label><label>Role<select id="member-role"><option value="">All roles</option><option value="Core">Core business</option><option value="Enabler">Supporting business</option><option value="Related">Related context</option></select></label><label>Eligibility<select id="member-eligibility"><option value="">All states</option><option>Liquidity eligible</option><option>Liquidity ineligible</option><option>Unavailable</option></select></label><label>Sort<select id="member-sort"><option value="priority">${currentSide()?'Peer priority':'Context order (A–Z)'}</option><option value="ticker">Ticker A–Z</option><option value="w-desc">Peer strength high to low</option><option value="w-asc">Peer strength low to high</option></select></label></form><div id="member-table" class="table-wrap member-table" role="region" tabindex="0" aria-label="Theme member research"></div>`;
     $('member-role').value=ui.memberRole;$('member-eligibility').value=ui.memberEligibility;$('member-sort').value=ui.memberSort;renderMembers(themeId);
   }
 
@@ -464,10 +409,9 @@
     if(inspector.kind==='ticker'){ui.selectedTicker=inspector.id;ui.selectedTickerTheme=inspector.context;document.querySelectorAll('[data-ticker-row]').forEach(row=>row.classList.toggle('selected-row',row.dataset.tickerRow===inspector.id&&row.dataset.relationshipTheme===inspector.context));}
     if (inspector.kind === 'theme') { ui.selectedTheme = inspector.id; document.querySelectorAll('[data-theme-row]').forEach(row=>row.classList.toggle('selected-row',row.dataset.themeRow === inspector.id)); }
     renderInspector(unchanged);
-    if (!$('research-inspector').open) { closeDisplay(); $('research-inspector').showModal(); document.documentElement.classList.add('inspecting'); }
+    if (!$('research-inspector').open) { $('research-inspector').showModal(); document.documentElement.classList.add('inspecting'); }
     if(!unchanged){if(wasOpen){UX.move($('inspector-content'),'slide',inspector.depth<previousDepth?-1:1);UX.move($('inspector-title'),'slide',inspector.depth<previousDepth?-1:1);}const view=inspectorView();$('research-inspector').scrollTop=view.scroll||0;if(view.focus)restoreFocus(view.focus);else $('inspector-title').focus({preventScroll:true});}
   }
-  function metric(label,value) { return `<div class="metric-block"><span class="metric-label">${label}</span><div class="metric-value">${value}</div></div>`; }
   function renderInspector(preserve = false) {
     if(!inspector)return;
     const dialog = $('research-inspector'), focused = dialog.contains(document.activeElement) ? focusKey() : null;
@@ -482,12 +426,16 @@
     if (inspector.kind === 'theme') renderThemeInspector(); else renderTickerInspector();
     if (preserve) { dialog.scrollTop = scroll; restoreFocus(focused); if (textSelection != null) $('inspector-search')?.setSelectionRange(textSelection,textSelection); }
   }
+  function themeEvidence(t) {
+    const id=t.theme_id,r=themeResearch(id);
+    return `<section class="relative-evidence" aria-label="Relative state"><div class="evidence-label">Relative state <span>${sideLabel()}</span></div><div class="relative-summary"><div>${themeState(id)}<small>${r.researchable?'Researchable':'Context only'}</small></div><div><span class="metric-label">Theme Score ${helpButton('strength')}</span><strong>${number(t.score,1)}</strong><small>Rank ${rankLabel(id)}</small></div><div><span class="metric-label">Five-session change</span><strong>${recentChange(id)}</strong><small>${rankChange(id)}</small></div></div></section><section class="price-evidence" aria-label="Price direction"><div class="evidence-label">Price direction ${state(t.index?.trend)}</div><div class="price-returns"><div><span class="metric-label">Median 1M return</span><strong class="${signTone(t.returns?.[0]?.value)}">${percent(t.returns?.[0]?.value,100,true)}</strong></div><div><span class="metric-label">Median 3M return</span><strong class="${signTone(t.returns?.[1]?.value)}">${percent(t.returns?.[1]?.value,100,true)}</strong></div></div></section><details class="theme-provenance"><summary>Evidence &amp; provenance</summary><p>${esc(r.reason||'Comparison unavailable')}</p><dl class="evidence-list"><div><dt>Participation ${helpButton('breadth')}</dt><dd>${participation(id)}</dd></div><div><dt>Current-basket comparison</dt><dd>${esc(r.recent?.comparison_session||UX.comparisonMessage(r.recent?.reason))}</dd></div><div><dt>Basket session</dt><dd>${esc(v2().comparison?.basis_session||snapshot?.session||'Unavailable')}</dd></div><div><dt>Participation change</dt><dd>${valid(r.recent?.breadth_change)?number(r.recent.breadth_change,1)+' pp':'Unavailable'}</dd></div><div><dt>Raw score change</dt><dd>${valid(r.recent?.raw_score_change)?number(r.recent.raw_score_change,1)+' pts':UX.comparisonMessage(r.recent?.reason)}</dd></div><div><dt>Index / EMA21 / EMA50</dt><dd>${number(t.index?.level)} / ${number(t.index?.ema21)} / ${number(t.index?.ema50)}</dd></div></dl></details>`;
+  }
   function renderThemeInspector() {
     const t=snapshot?.themes?.find(row=>row.theme_id===inspector.id);
     if(!t){$('inspector-content').innerHTML=empty('Theme unavailable','This theme is not in the current snapshot.');return;}
-    if(t.status!=='active'){$('inspector-content').innerHTML=`<p class="detail-family">${esc(t.family)} · Untracked Concept</p>${empty('No active calculation basket','This concept does not enter Strength, returns or candidate calculations.')}`;return;}
+    if(t.status!=='active'){$('inspector-content').innerHTML=`<p class="detail-family">${esc(t.family)}</p>${empty('Not currently tracked','No reviewed calculation basket.')}`;return;}
     const v=inspectorView();
-    $('inspector-content').innerHTML=`<div class="inspector-subhead"><span>${esc(t.family)}</span>${themeState(t.theme_id)}</div><div class="inspector-metrics">${metric('Strength '+helpButton('strength'),number(t.score,1))}${metric('Strength Rank '+helpButton('rank'),rankLabel(t.theme_id))}${metric('Trend',state(t.index?.trend))}${metric('1M Return',percent(t.returns?.[0]?.value,100,true))}${metric('3M Return',percent(t.returns?.[1]?.value,100,true))}${metric(recentLabel(),recentChange(t.theme_id))}</div><div class="inspector-breadth"><span class="metric-label">Participation ${helpButton('breadth')}</span>${participation(t.theme_id)}</div><details class="inspector-reason"><summary>State rationale</summary><p>${esc(themeResearch(t.theme_id).reason||'Research state unavailable')}.</p></details><div class="section-heading"><h3>Member preview</h3><span class="table-meta">Peer strength (pp) ${helpButton('w')}</span></div><form class="inspector-member-tools" aria-label="Filter member preview"><label>Search<input id="inspector-search" type="search" placeholder="Ticker" value="${esc(v.search)}" data-focus-key="inspector-search"></label><label>View<select id="inspector-view" data-focus-key="inspector-view"><option value="All">All members</option><option value="Primary">On research list</option><option value="Eligible">Liquidity eligible</option><option value="Core">Core business</option><option value="Enabler">Supporting business</option><option value="Related">Related context</option></select></label></form><p id="inspector-member-count" class="table-meta" role="status"></p><div id="inspector-members"></div><div class="inspector-footer"><a class="button secondary" href="${themeHref(t.theme_id)}">Open full theme</a><a class="text-link" href="#methodology?metric=strength">Metric definitions</a></div>`;
+    $('inspector-content').innerHTML=`<p class="inspector-family">${esc(t.family)}</p>${themeEvidence(t)}<div class="section-heading"><h3>Members</h3><span class="table-meta">Peer strength (pp) ${helpButton('w')}</span></div><form class="inspector-member-tools" aria-label="Filter member preview"><label>Search<input id="inspector-search" type="search" placeholder="Ticker" value="${esc(v.search)}" data-focus-key="inspector-search"></label><label>View<select id="inspector-view" data-focus-key="inspector-view"><option value="All">All members</option><option value="Primary">On research list</option><option value="Eligible">Liquidity eligible</option><option value="Core">Core business</option><option value="Enabler">Supporting business</option><option value="Related">Related context</option></select></label></form><p id="inspector-member-count" class="table-meta" role="status"></p><div id="inspector-members"></div><div class="inspector-footer"><a class="button secondary" href="${themeHref(t.theme_id)}">Open full theme</a>${themeDownload(t.theme_id)}</div>`;
     $('inspector-view').value=v.filter;renderInspectorMembers();
   }
   function renderInspectorMembers() {
@@ -499,9 +447,7 @@
     $('inspector-members').innerHTML=preview.length?`<ul class="inspector-member-list">${preview.map(r=>`<li class="preview-row inspector-member-row" data-member-preview="${esc(r.ticker)}"><div>${tickerLink(r.ticker,r.theme_id,inspector.lens||'directional')}<small>${roleLabel(r.role)}</small></div><span class="numeric ${signTone(r.relative?.w)}">${points(r.relative?.w)}</span>${saveButton(r.ticker,'inspector-member',r.theme_id,inspector.lens||'directional')}</li>`).join('')}</ul>`:empty('No members match','Try another search or view.');
   }
   function tickerRelationship(row,primary=false) {
-    const cell=(label,value)=>`<div><dt>${label}</dt><dd>${value}</dd></div>`;
-    const lens='directional';
-    return `<section class="${primary?'relationship-context':'ticker-relationship'}" ${primary?`data-current-theme="${esc(row.theme_id)}" data-current-w="${esc(row.relative?.w)}" data-current-role="${esc(row.role)}"`:''}><div class="relationship-heading"><h3>${themeLink(row.theme_id,lens)}</h3>${!primary?tickerLink(row.ticker,row.theme_id,lens):''}</div><dl class="relationship-metrics">${cell('Role',roleLabel(row.role))}${cell('Peer-relative strength '+helpButton('w'),`<span class="${primary?'w-value ':''}${signTone(row.relative?.w)}">${points(row.relative?.w)}</span>`)}${cell('Research list',researchStatus(row,'Included today','Not included today'))}${cell('Liquidity',esc(eligibility(row)))}</dl>${primary&&earningsEnabled()?`<p class="table-note">Earnings · ${earnings(row.ticker)}</p>`:''}<details class="liquidity-details"><summary>Peer returns and liquidity</summary><dl class="relationship-metrics">${cell('1M return vs peers',points(row.relative?.er1))}${cell('3M return vs peers',points(row.relative?.er3))}${cell('Close',money(row.eligibility?.close))}${cell('Average volume · '+(currentResearch()?v2().policy.liquidity_sessions+' sessions':'previous rules'),number(row.eligibility?.average_volume,0))}${cell('Average dollar volume · '+(currentResearch()?v2().policy.liquidity_sessions+' sessions':'previous rules'),money(row.eligibility?.average_dollar_volume))}</dl></details></section>`;
+    return `<section class="stock-relationship ${primary?'relationship-context':'ticker-relationship'}" ${primary?`data-current-theme="${esc(row.theme_id)}" data-current-w="${esc(row.relative?.w)}" data-current-role="${esc(row.role)}"`:''}><div class="relationship-heading"><h3>${themeLink(row.theme_id,'directional')}</h3>${!primary?tickerLink(row.ticker,row.theme_id,'directional'):''}</div><div class="stock-comparison"><div><span class="metric-label">Peer strength ${helpButton('w')}</span><strong class="${primary?'w-value ':''}${signTone(row.relative?.w)}">${points(row.relative?.w)}</strong></div><div class="stock-membership"><span>${roleLabel(row.role)}</span><small>${researchStatus(row,'Included today','Not included today')}</small></div></div><dl class="evidence-list"><div><dt>1M excess return</dt><dd class="${signTone(row.relative?.er1)}">${points(row.relative?.er1)}</dd></div><div><dt>3M excess return</dt><dd class="${signTone(row.relative?.er3)}">${points(row.relative?.er3)}</dd></div><div><dt>Daily eligibility</dt><dd>${esc(eligibility(row))}</dd></div>${earningsEnabled()?`<div><dt>Earnings</dt><dd>${earnings(row.ticker)}</dd></div>`:''}</dl><details class="liquidity-details"><summary>Liquidity evidence</summary><dl class="evidence-list"><div><dt>Close</dt><dd>${money(row.eligibility?.close)}</dd></div><div><dt>${currentResearch()?v2().policy.liquidity_sessions+'-session average volume':'Average volume'}</dt><dd>${number(row.eligibility?.average_volume,0)}</dd></div><div><dt>${currentResearch()?v2().policy.liquidity_sessions+'-session average dollar volume':'Average dollar volume'}</dt><dd>${money(row.eligibility?.average_dollar_volume)}</dd></div></dl></details></section>`;
   }
   function renderTickerInspector() {
     const ticker=inspector.id,rows=(snapshot?.relationships||[]).filter(r=>r.ticker===ticker).sort((a,b)=>name(a.theme_id).localeCompare(name(b.theme_id)));
@@ -529,6 +475,7 @@
   }
   function showRoute(initial = false) {
     interactions.closeHelp();
+    document.querySelectorAll('.diagnostics[open],.theme-filter-menu[open],.secondary-filters[open],.export-menu[open]').forEach(e=>e.open=false);
     const next = parseRoute();
     const previousRoute = route;
     if(next===route){syncInspector();methodologyAnchor();return;}
@@ -624,6 +571,7 @@
     } catch {
       const message=snapshot?`Connection lost · showing completed session ${snapshot.session}`:'Connection lost · no snapshot loaded';
       if ($('progress').textContent !== message) $('progress').textContent = message;
+      if(!snapshot){render(null);$('error').hidden=false;$('error').textContent='Unable to load research. Open Snapshot to retry.';}
     } finally { polling = false; }
   }
   document.addEventListener('submit',event => { if (event.target.matches('form')) event.preventDefault(); });
@@ -649,17 +597,9 @@
     if (button.id === 'inspector-back') { history.back();return; }
     if (button.id === 'inspector-close') { closeInspector(); return; }
     if (button.dataset.inspectorFilter) { inspectorView().filter = button.dataset.inspectorFilter; renderInspector(true); restoreFocus('inspect-filter:' + button.dataset.inspectorFilter); return; }
-    if (button.id === 'display-toggle') { const open = $('display-panel').hidden; $('display-panel').hidden = !open; button.setAttribute('aria-expanded',String(open)); if (open) $('display-close').focus(); return; }
-    if (button.id === 'display-close') { closeDisplay(); $('display-toggle').focus(); return; }
-    if (button.dataset.density) { display.density = button.dataset.density; applyDisplay(true); return; }
-    if (button.dataset.textStep) { display.text = Math.max(100,Math.min(200,display.text + Number(button.dataset.textStep))); applyDisplay(true); return; }
     if (button.dataset.save) { changeSaved(button.dataset.save,false,button.dataset.saveTheme||'',button.dataset.saveLens||''); return; }
     if (button.dataset.remove) { changeSaved(button.dataset.remove,true); return; }
     if (button.dataset.universe) { ui.universe=button.dataset.universe; if(ui.universe!=='active'){$('theme-priority').value='';$('theme-trend').value='';ui.themeSort='name';ui.themeDescending=false;} renderThemes();requestAnimationFrame(UX.indicators);return;}
-    if (button.dataset.themeSort) {
-      const key = button.dataset.themeSort, focused = focusKey();
-      ui.themeDescending = ui.themeSort === key ? !ui.themeDescending : ['score','return1','return3','breadth'].includes(key); ui.themeSort = key; renderThemes(); restoreFocus(focused); return;
-    }
     if (button.dataset.candidateMode) { const changed=ui.candidateMode!==button.dataset.candidateMode;ui.candidateMode=button.dataset.candidateMode;renderCandidates();UX.indicators();if(changed)UX.move($('candidates'),'sweep');return; }
     if (button.dataset.reset === 'themes') { $('theme-filters').reset(); renderThemes(); }
     if (button.dataset.reset === 'candidates') { $('candidate-filters').reset(); renderCandidates(); }
@@ -671,7 +611,7 @@
     if(id==='inspector-view'){inspectorView().filter=event.target.value;renderInspectorMembers();return;}
     if (id === 'inspector-sort') { inspectorView().sort = event.target.value; renderInspectorMembers(); return; }
     if (['theme-search','theme-family','theme-priority','theme-trend'].includes(id)) renderThemes();
-    if (id === 'theme-mobile-sort') { const [key,direction] = event.target.value.split(':'); ui.themeSort = key; ui.themeDescending = direction === 'desc'; renderThemes(); $('theme-mobile-sort')?.focus(); }
+    if (id === 'theme-sort') { const [key,direction] = event.target.value.split(':'); ui.themeSort = key; ui.themeDescending = direction === 'desc'; renderThemes(); $('theme-sort')?.focus(); }
     if (id.startsWith('candidate-') && id !== 'candidate-filters') renderCandidates();
     if (id.startsWith('member-') && ['member-search','member-role','member-eligibility','member-sort'].includes(id)) {
       ui.memberSearch = $('member-search').value; ui.memberRole = $('member-role').value; ui.memberEligibility = $('member-eligibility').value; ui.memberSort = $('member-sort').value; renderMembers(detailId());
@@ -695,9 +635,6 @@
     const next=event.key === 'Home' ? 0 : event.key === 'End' ? points.length-1 : (index+(['ArrowRight','ArrowDown'].includes(event.key) ? 1 : -1)+points.length)%points.length;
     event.preventDefault();points.forEach((n,i)=>n.tabIndex=i===next?0:-1);mapFocusId=points[next].dataset.mapTheme;points[next]?.focus({preventScroll:true});
   });
-  document.addEventListener('keydown',event => { if (event.key === 'Escape' && !$('display-panel').hidden) { closeDisplay(); $('display-toggle').focus(); } });
-  document.addEventListener('click',event => { if (!$('display-panel').hidden && !event.target.closest('#display-panel, #display-toggle')) closeDisplay(); });
-  document.addEventListener('change',event => { if (event.target.id === 'display-motion' || event.target.id === 'display-contrast') { display.motion = $('display-motion').checked; display.contrast = $('display-contrast').checked; applyDisplay(true); } });
   document.addEventListener('input',event => { if (event.target.matches('input')) filterChange(event); });
   document.addEventListener('change',event => { if (event.target.matches('select')) filterChange(event); });
   window.addEventListener('hashchange',() => showRoute());
@@ -717,14 +654,8 @@
   window.addEventListener('resize',()=>{ clearTimeout(mapResizeTimer); mapResizeTimer=setTimeout(()=>{ if ($('theme-map-panel').open) { const key=focusKey(); renderThemeMap(); restoreFocus(key); } },100); });
   $('research-inspector').addEventListener('cancel',event=>{ event.preventDefault(); closeInspector(); });
   const interactions=UX.install();
-  const narrowMarket=matchMedia('(max-width:600px)');
-  const adaptBenchmarks=()=>{document.querySelector('.benchmark-details').open=!narrowMarket.matches;document.querySelector('.theme-filter-menu').open=!narrowMarket.matches;};
-  adaptBenchmarks();narrowMarket.addEventListener('change',adaptBenchmarks);
   new ResizeObserver(([entry]) => document.documentElement.style.setProperty('--masthead-height',entry.borderBoxSize[0].blockSize+'px')).observe(document.querySelector('.masthead'));
-  applyDisplay();
   history.scrollRestoration = 'manual';
-  document.querySelectorAll('[data-nav]').forEach(link => { link.querySelector('.nav-icon').innerHTML = icon(link.dataset.nav); });
-  document.querySelector('.brand-mark').innerHTML = icon('orbit');
   $('inspector-back').innerHTML=icon('back');
   document.querySelectorAll('a span[aria-hidden="true"]').forEach(span => { if (span.textContent === '↗') span.innerHTML = icon('up'); });
   renderSaved();showRoute(true);

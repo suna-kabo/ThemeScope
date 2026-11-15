@@ -15,11 +15,11 @@ class StaticAssetCheckoutTests(unittest.TestCase):
         return subprocess.check_output(['git',*args],cwd=cwd,stderr=subprocess.PIPE).decode().strip()
 
     def test_pinned_bytes_and_explicit_checkout_attributes(self):
-        self.assertNotIn(b'\r',(ROOT/'static/Inter-LICENSE.txt').read_bytes())
+        self.assertNotIn(b'\r',(ROOT/'static/Research-LICENSE.txt').read_bytes())
         self.assertEqual({name:sha256(value).hexdigest() for name,value in font_assets(ROOT).items()},FONT_HASHES)
-        attrs=self.git('check-attr','text','eol','--','static/Inter-LICENSE.txt','static/InterVariable.woff2',cwd=ROOT)
-        self.assertIn('static/Inter-LICENSE.txt: eol: lf',attrs)
-        self.assertIn('static/InterVariable.woff2: text: unset',attrs)
+        attrs=self.git('check-attr','text','eol','--','static/Research-LICENSE.txt','static/Research.woff2',cwd=ROOT)
+        self.assertIn('static/Research-LICENSE.txt: eol: lf',attrs)
+        self.assertIn('static/Research.woff2: text: unset',attrs)
 
     def test_fresh_autocrlf_checkouts_build_without_bypassing_integrity(self):
         with tempfile.TemporaryDirectory() as folder:

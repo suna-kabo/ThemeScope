@@ -50,7 +50,7 @@ window.ThemeScopeUI = (() => {
     return {low:start*step/100,high:end*step/100,ticks:Array.from({length:end-start+1},(_,i)=>Number(((start+i)*step/100).toPrecision(12)))};
   }
   const reduced = () => document.documentElement.dataset.motion==='reduce'||matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const motion=Object.freeze({shift:180,slide:240,sweep:200,reveal:160,confirm:140,lock:180});
+  const motion=Object.freeze({shift:180,slide:180,sweep:200,reveal:160,confirm:140,lock:180});
   const ease={enter:'cubic-bezier(.22,1,.36,1)',exit:'cubic-bezier(.4,0,1,1)',travel:'cubic-bezier(.2,.8,.2,1)'};
   const running=new WeakMap(),selections=new WeakMap();
   function move(element,kind='shift',direction=1) {
@@ -68,19 +68,22 @@ window.ThemeScopeUI = (() => {
     ring.animate([{opacity:1,transform:'scale(.8)'},{opacity:0,transform:'scale(1.8)'}],{duration:motion.lock,easing:ease.enter});
   }
   function indicator(group,selected) {
-    if(!group||!selected)return;
+    if(!group)return;
+    if(!selected){const mark=group.querySelector(':scope > .selection-indicator');if(mark)mark.hidden=true;return;}
     let mark=group.querySelector(':scope > .selection-indicator');
     if(!mark){mark=document.createElement('span');mark.className='selection-indicator';mark.setAttribute('aria-hidden','true');group.prepend(mark);}
+    mark.hidden=false;
     const g=group.getBoundingClientRect(),r=selected.getBoundingClientRect(),old=mark.getBoundingClientRect(),previous=selections.get(group);
-    const x=r.left-g.left,y=r.top-g.top;
-    if(previous?.selected===selected&&Math.abs(previous.x-x)<.5&&Math.abs(previous.y-y)<.5&&Math.abs(previous.width-r.width)<.5&&Math.abs(previous.height-r.height)<.5)return;
+    const zoom=parseFloat(getComputedStyle(document.documentElement).zoom)||1;
+    const x=(r.left-g.left)/zoom,y=(r.top-g.top)/zoom,width=r.width/zoom,height=r.height/zoom;
+    if(previous?.selected===selected&&Math.abs(previous.x-x)<.5&&Math.abs(previous.y-y)<.5&&Math.abs(previous.width-width)<.5&&Math.abs(previous.height-height)<.5)return;
     mark.getAnimations().forEach(a=>a.cancel());
     group.style.setProperty('--selected-x',x+'px');group.style.setProperty('--selected-y',y+'px');
-    group.style.setProperty('--selected-width',r.width+'px');group.style.setProperty('--selected-height',r.height+'px');
+    group.style.setProperty('--selected-width',width+'px');group.style.setProperty('--selected-height',height+'px');
     if(previous&&previous.selected!==selected&&!reduced()&&old.width&&r.width){
-      mark.animate([{transform:`translate(${old.left-g.left}px,${old.top-g.top}px) scale(${old.width/r.width},${old.height/r.height})`},{transform:`translate(${x}px,${y}px) scale(1)`}],{duration:motion.sweep,easing:ease.travel});
+      mark.animate([{transform:`translate(${(old.left-g.left)/zoom}px,${(old.top-g.top)/zoom}px) scale(${old.width/r.width},${old.height/r.height})`},{transform:`translate(${x}px,${y}px) scale(1)`}],{duration:motion.sweep,easing:ease.travel});
     }
-    selections.set(group,{selected,x,y,width:r.width,height:r.height});
+    selections.set(group,{selected,x,y,width,height});
   }
   function indicators() {
     document.querySelectorAll('.table-wrap').forEach(e=>{e.dataset.scroll=String(e.scrollWidth>e.clientWidth+1);});

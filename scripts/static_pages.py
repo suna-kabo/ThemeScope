@@ -5,11 +5,10 @@ import struct
 import zlib
 
 ASSETS = ('index.html', 'app.css', 'workspace.js', 'app.js')
-# Existing bundled Inter (SIL OFL 1.1), pinned so public builds cannot ship
-# arbitrary binary payloads. No remote font fetch or new repository binary.
+# SIL OFL 1.1 assets, pinned so static builds cannot ship arbitrary payloads.
 FONT_HASHES = {
-    'InterVariable.woff2':'693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3',
-    'Inter-LICENSE.txt':'262481e844521b326f5ecd053e59b98c8b2da78c8ee1bdbb6e8174305e54935a',
+    'Research.woff2':'4ba7d3d096695818fe0686be4f1e82c6b05134e18a22260336130335027462dd',
+    'Research-LICENSE.txt':'bb272dfcd8801eb31fb98fe51828f76f0e41ac82f89256101df8021aa3d30ce2',
 }
 
 
