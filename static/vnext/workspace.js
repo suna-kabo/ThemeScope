@@ -13,15 +13,34 @@ window.ThemeScopeUI = (() => {
   };
   const displayRows = (all,representatives,theme) => theme ? [...new Map(all.filter(r=>r.theme_id===theme).map(r=>[r.ticker,r])).values()] : representatives;
   function researchRows(snapshot) {
+    if(!currentContract(snapshot))return [];
     const supplied=new Map((snapshot?.relationships||[]).map(row=>[row.ticker+':'+row.theme_id,row]));
     return (snapshot?.research_v2?.list?.rows||[]).map((row,index)=>({
       ...supplied.get(row.ticker+':'+row.theme_id),...row,
-      relative:supplied.get(row.ticker+':'+row.theme_id)?.relative||{w:row.w},research_order:index
+      relative:supplied.get(row.ticker+':'+row.theme_id)?.relative||{w:row.w},list_order:index
     }));
   }
   function themeState(snapshot,id) {
+    if(!currentContract(snapshot))return 'Unavailable';
     const row=snapshot?.research_v2?.themes?.[id];
-    return (snapshot?.research_v2?.list?.side==='short'?row?.short_state:row?.state)||'Unavailable';
+    if(!row)return 'Unavailable';
+    return currentSide(snapshot)?row.current_state||'Unavailable':'Non-directional';
+  }
+  function currentSide(snapshot) {
+    if(!currentContract(snapshot))return null;
+    const side=snapshot?.research_v2?.current_side;
+    return side==='long'||side==='short'?side:null;
+  }
+  const currentContract = snapshot => snapshot?.research_v2?.schema==='themescope-research-v2'&&snapshot?.research_v2?.contract_revision===2;
+  function comparisonMessage(reason) {
+    return ({insufficient_completed_history:'Not enough completed history',current_basis_mismatch:'Current comparison basis unavailable',
+      methodology_or_membership_changed:'Methodology or reviewed membership changed',
+      insufficient_history:'Not enough completed history',insufficient_return_history:'Not enough completed return history',
+      insufficient_comparable_history:'No comparable five-session basis',no_compatible_prior_basis:'No comparable five-session basis',
+      methodology_or_universe_changed:'Methodology or theme universe changed',membership_basis_changed:'Reviewed membership changed',
+      membership_comparison_unavailable:'Reviewed membership changed',ranked_universe_changed:'Scored theme universe changed',
+      score_population_changed:'Scored theme universe changed',unavailable_score:'Structural strength unavailable',
+      score_unavailable:'Structural strength unavailable',untracked_concept:'Theme is not tracked'})[reason]||'Five-session comparison unavailable';
   }
   function axis(low,high,count=5) {
     if(!Number.isFinite(low)||!Number.isFinite(high)||high<=low)return {low:-.01,high:.01,ticks:[-.01,0,.01]};
@@ -112,5 +131,5 @@ window.ThemeScopeUI = (() => {
     matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',e=>{if(e.matches)document.getAnimations().forEach(a=>a.cancel());});
     return {closeHelp:close};
   }
-  return Object.freeze({help,displayRows,researchRows,themeState,axis,reduced,motion,move,pulse,indicators,install});
+  return Object.freeze({help,displayRows,researchRows,themeState,currentSide,currentContract,comparisonMessage,axis,reduced,motion,move,pulse,indicators,install});
 })();

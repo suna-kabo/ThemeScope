@@ -370,3 +370,5 @@ html.inspecting { overflow:hidden; }
   .candidate-view-tools .inline-label { flex-basis:100%; font-size:var(--type-body); }
 }
 @media(forced-colors:active) { :root,:root[data-contrast="high"] { --page:Canvas; --rail:Canvas; --surface:Canvas; --surface-raised:Canvas; --surface-hover:Canvas; --text:CanvasText; --secondary:CanvasText; --muted:CanvasText; --accent:LinkText; --accent-hover:LinkText; --accent-ink:Canvas; --accent-subtle:Canvas; --border:CanvasText; --rule:CanvasText; --input-border:CanvasText; --info:LinkText; --selected:Canvas; --unavailable:CanvasText; --positive:CanvasText; --negative:CanvasText; --warning:CanvasText; }.button.primary { background:ButtonFace; color:ButtonText; }.main-nav a[aria-current="page"],.research-tabs [aria-selected="true"],.segmented [aria-pressed="true"] { outline:1px solid Highlight; }.selection-indicator { outline:1px solid Highlight; }.point-ring,.breadth-fill { stroke:CanvasText; }.metric-tooltip,#research-inspector { border:1px solid CanvasText; } }
+
+#change-board > .comparison-availability { grid-column:1 / -1; }

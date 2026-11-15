@@ -4,7 +4,7 @@
   "status": "reviewed",
   "reviewed_on": "2026-11-14",
   "effective_from": "2026-11-16",
-  "authorization_reference": "THEMESCOPE_CODEX_MASTER.md sections 1, 5 and 6 authorize evidence-reviewed membership expansion in this redevelopment; immutable forward additions only.",
+  "authorization_reference": "docs/operations/research-v2-membership-authorization.md#authorized-scope records the project owner's authorization for evidence-reviewed, immutable forward additions.",
   "base_universe_source": {
     "sha256": "49e72888c4a029075fc01e2b9f9a28bfcaeddf7e5df960bca52adfff5c9de25f",
     "security_type_basis": "user_scanner_attestation",

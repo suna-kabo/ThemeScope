@@ -13,6 +13,7 @@ is authoritative for that milestone; old phase reports are historical.
 | Build a read-only public site | [Daily update, frozen snapshots and synthetic demo](operations/public-snapshots.md) |
 | Understand implementation | [Architecture](architecture/README.md), [provider/cache](architecture/provider-and-storage.md), [terminal events](architecture/terminal-actions.md) |
 | Develop and test | [Development](development/README.md), [project map](development/project-structure.md), [stable main / UI work](development/production-and-ui.md) |
+| Review current correction evidence | [Adversarial validation](../reports/research-v2-adversarial-validation.md), [findings](../reports/research-v2-adversarial-review.md) |
 | Trace earlier decisions | [Historical archive](archive/README.md), [relocation map](archive/relocations.md) |
 
 The [design system](../DESIGN.md), [motion grammar](../MOTION.md),

@@ -87,34 +87,11 @@ class SelectionTests(unittest.TestCase):
         self.assertNotIn('research_v2',before)
         self.assertEqual(result['research_v2']['themes']['alpha']['breadth']['above'],5)
         self.assertTrue(result['research_v2']['themes']['alpha']['breadth']['small_sample'])
-        for direction in ('Selective long','Long bias'):
-            other=attach(dict(before,market_direction=direction),self.bars,self.days,self.mapping)
-            self.assertEqual(other['research_v2']['list']['rows'],result['research_v2']['list']['rows'])
-
-    def test_exact_five_session_comparison_rejects_changed_membership_and_bootstrap(self):
-        current=attach(self.snapshot(),self.bars,self.days,self.mapping)
-        old=deepcopy(current);old['session']=self.days[self.days.index(self.target)-5]
-        for theme in old['themes']:
-            if theme['theme_id']=='alpha':theme['score']=D(100)
-        for theme in current['themes']:
-            if theme['theme_id']=='alpha':theme['score']=D(85)
+    def test_saved_snapshot_alone_is_not_five_session_comparison_provenance(self):
+        current=self.snapshot();old=deepcopy(current);old['session']=self.days[58]
         result=attach(current,self.bars,self.days,self.mapping,previous=old)
-        self.assertEqual(result['research_v2']['themes']['alpha']['state'],'Fading')
-        self.assertTrue(result['research_v2']['themes']['alpha']['researchable'])
-        for mutation in ('date','members','bootstrap','methodology','score_population','horizon_population'):
-            changed=deepcopy(old)
-            if mutation=='date':changed['session']=self.days[-1]
-            elif mutation=='members':changed['themes'][1]['research_member_signature']='changed'
-            elif mutation=='bootstrap':changed['themes'][0]['history']['bootstrap']=True
-            elif mutation=='score_population':changed['themes'][1]['score']=None
-            elif mutation=='horizon_population':
-                changed['themes'][1]['score']=None
-                current['themes'][1]['score']=None
-                changed['themes'][1]['returns']=(replace(changed['themes'][1]['returns'][0],value=None),
-                                                 changed['themes'][1]['returns'][1])
-            else:changed['methodology']='legacy'
-            tested=attach(current,self.bars,self.days,self.mapping,previous=changed)
-            self.assertFalse(tested['research_v2']['themes']['alpha']['recent']['available'])
+        self.assertFalse(result['research_v2']['themes']['alpha']['recent']['available'])
+        self.assertEqual(result['research_v2']['themes']['alpha']['recent']['reason'],'no_compatible_prior_basis')
 
     def test_queries_are_independent_copies(self):
         result=attach(self.snapshot(),self.bars,self.days,self.mapping)

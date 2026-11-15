@@ -61,6 +61,11 @@ def create_app(root,service=None):
     def theme(theme_id:str):return query('get_theme',theme_id)
     @app.get('/api/themes/{theme_id}/members')
     def members(theme_id:str):return query('get_theme_members',theme_id)
+    @app.get('/api/themes/{theme_id}/history')
+    def theme_history(theme_id:str):
+        result=service.theme_history(theme_id)
+        if result is None:raise HTTPException(404,'Theme history unavailable')
+        return Response(canonical(result),media_type='application/json')
     @app.get('/api/stocks/{ticker}')
     def stock(ticker:str):return query('get_stock',ticker)
     @app.get('/api/exports/combined.txt')

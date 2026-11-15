@@ -118,6 +118,16 @@ class Store:
         return {'session':session,'methodology':methodology,'configuration_hash':row['config_hash'],
                 'market':json.loads(row['payload']),'themes':themes}
 
+    def theme_history(self,theme_id,methodology):
+        """Latest successful observation per session; never reconstructed research."""
+        rows=self.connection.execute(
+            "SELECT r.session,t.payload FROM theme_snapshot t JOIN refresh_run r ON r.id=t.run_id "
+            "WHERE t.theme_id=? AND r.methodology=? AND r.status='success' AND r.id=("
+            "SELECT MAX(newer.id) FROM refresh_run newer WHERE newer.session=r.session "
+            "AND newer.methodology=r.methodology AND newer.status='success') ORDER BY r.session",
+            (theme_id,methodology))
+        return [{'session':row['session'],'methodology':methodology,'themes':[json.loads(row['payload'])]} for row in rows]
+
     def active_publication(self):
         """Version and payload from ONE committed publication-pointer read."""
         row = self.connection.execute('SELECT run_id,payload FROM publication WHERE id=1').fetchone()

@@ -20,6 +20,7 @@ from ..themes.history import ThemeHistory
 from ..research.engine import calculate_session
 from ..research.context import enrich
 from ..research.v2 import attach as attach_research_v2, policy as research_policy
+from ..research.comparison import reconstruct
 from ..research.exports import reviewed_mapping
 from ..research.universe import approved_launch_universe,approved_launch_close_membership,contiguous_suffix
 from ..research_policy import ACTION_SENTENCES
@@ -70,6 +71,16 @@ class RefreshService:
                 self._publication_version=version
                 self._committed_snapshot=snapshot
             return deepcopy(self._committed_snapshot)
+
+    def theme_history(self,theme_id):
+        from ..research.queries import get_theme_history
+        snapshot=self.snapshot()
+        if not snapshot or not any(t['theme_id']==theme_id for t in snapshot['themes']):return None
+        store=Store(self.db,read_only=True)
+        try:rows=store.theme_history(theme_id,snapshot['methodology'])
+        finally:store.close()
+        return dict(basis='official_session_observations',reconstructed=False,theme_id=theme_id,
+                    observations=get_theme_history(rows,theme_id))
 
     def status(self):
         # A DB wait may span refresh completion: sample operational state afterward.
@@ -268,9 +279,11 @@ class RefreshService:
             snapshot=enrich(snapshot,bars,sessions,previous_context,
                 {m.ticker:m.company for m in config.memberships if m.company})
             horizon=research_policy()['change_sessions']
-            comparison=store.research_at(sessions[-horizon-1],config.methodology['version']) if len(sessions)>horizon else None
+            comparison,comparison_provenance=reconstruct(working,bars,sessions,target,
+                members_for=research.members_for if research else launch_research.members_for if launch_research else None,
+                current=snapshot,change_sessions=horizon)
             snapshot=attach_research_v2(snapshot,bars,sessions,mapping,previous=comparison,
-                                       previous_day=previous_context,related=working.memberships)
+                comparison_provenance=comparison_provenance,previous_day=previous_context,related=working.memberships)
             snapshot['refreshed_at']=datetime.now(timezone.utc).isoformat()
             snapshot['completeness']={'required':len(target_names),'valid_target':len(target_names),'complete':True}
             if prepared.terminal_values:

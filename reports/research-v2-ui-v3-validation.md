@@ -1,5 +1,14 @@
 # Research Logic v2 / UI v3 release validation
 
+This is the **initial `cfc1099` checkpoint record**, retained as historical
+evidence. Its passing tests did not establish all product semantics: a subsequent
+adversarial pass confirmed directional/default, Selective-ordering, comparison
+cadence and evidence-scope defects. The current result is the
+[adversarial correction validation](research-v2-adversarial-validation.md).
+In particular, the membership audit did not individually review all 560 machine
+proposals; the updated audit distinguishes cohort triage, company decisions and
+explicit deferrals. Do not use the initial completion table as current proof.
+
 Completed 2026-11-15 on `feature/research-v2-ui-v3`. This record evaluates the
 Definition of Done in the supplied master contract. All market observations used
 for browser testing were synthetic; this is not a new live-provider validation.

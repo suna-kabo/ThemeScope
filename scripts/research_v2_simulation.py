@@ -75,11 +75,57 @@ def summarize(values):
     return {'minimum': min(values), 'mean': round(mean(values), 3), 'maximum': max(values)} if values else None
 
 
+def transition_diagnostics(histories, changes, strengths, threshold):
+    """Observed state episodes, with incomplete edge episodes explicitly censored."""
+    output = {}
+    for label in ('Improving', 'Fading'):
+        durations = []; leading_times = []; exits = Counter(); left = right = 0; pairs = persistent = 0
+        for theme, states in histories.items():
+            for current, following in zip(states, states[1:]):
+                if current == label and following != 'Unavailable':
+                    pairs += 1; persistent += following == label
+            index = 0
+            while index < len(states):
+                if states[index] != label:
+                    index += 1; continue
+                end = index + 1
+                while end < len(states) and states[end] == label:
+                    end += 1
+                left_edge = index == 0 or states[index-1] == 'Unavailable'
+                right_edge = end == len(states) or states[end] == 'Unavailable'
+                left += left_edge; right += right_edge
+                if not (left_edge or right_edge):
+                    durations.append(end-index); exits[states[end]] += 1
+                    if states[end] == 'Leading':leading_times.append(end-index)
+                index = end
+        completed = len(durations)
+        output[label.lower()] = dict(completed_episodes=completed, left_censored=left,
+            right_censored=right, completed_duration_sessions=summarize(durations),
+            next_session_pairs=pairs, next_session_persistence=round(persistent/pairs, 6) if pairs else None,
+            direct_exit_counts=dict(sorted(exits.items())),
+            direct_to_leading_rate=round(exits['Leading']/completed, 6) if completed else None,
+            direct_to_lagging_rate=round(exits['Lagging']/completed, 6) if completed else None)
+        output[label.lower()]['sessions_to_direct_leading'] = summarize(leading_times)
+    near = changed = 0
+    for theme, states in histories.items():
+        for index in range(1, len(states)):
+            a, b = changes[theme][index-1:index+1]
+            s, t = strengths[theme][index-1:index+1]
+            if (None in (a,b,s,t) or 'Unavailable' in (states[index-1],states[index])
+                    or (s >= 50) != (t >= 50)):
+                continue
+            if min(abs(abs(a)-threshold),abs(abs(b)-threshold)) <= 2:
+                near += 1; changed += states[index-1] != states[index]
+    output['threshold_neighborhood'] = dict(width_points=2, same_structural_zone_pairs=near,
+        state_changes=changed, change_rate=round(changed/near, 6) if near else None)
+    return output
+
+
 @deterministic
 def diagnose(config, bars, sessions, members, metadata):
     symbols = sorted({m.ticker for rows in members.values() for m in rows})
     start = max(config.methodology['return_sessions'])
-    scores = []; participations = []; dollar = {}; ranks = []
+    scores = []; populations = []; participations = []; dollar = {}; ranks = []
     stock_emas = {ticker: [] for ticker in symbols}
     # Seed once, then update only across contiguous valid sessions.
     ema_values = {}; streaks = {ticker: [] for ticker in symbols}
@@ -97,8 +143,11 @@ def diagnose(config, bars, sessions, members, metadata):
             stock_emas[ticker].append(ema_values.get(ticker))
         if index < start:
             continue
-        _, score, _ = benchmarks(config, bars, sessions, day, members_for=lambda theme: members.get(theme, ()))
+        metrics, score, _ = benchmarks(config, bars, sessions, day, members_for=lambda theme: members.get(theme, ()))
         scores.append(score)
+        populations.append(tuple(frozenset(theme for theme, pair in metrics.items() if pair[horizon].value is not None)
+                                 for horizon in (0, 1)) +
+                           (frozenset(theme for theme, value in score.items() if value is not None),))
         ranks.append({theme: 1+sum(other > value for other in score.values() if other is not None)
                       for theme, value in score.items() if value is not None})
         closes = {ticker: bars[ticker, day].adjusted_close for ticker in symbols if usable(bars.get((ticker, day)))}
@@ -110,6 +159,11 @@ def diagnose(config, bars, sessions, members, metadata):
     diagnostic_days = sessions[start:]
     if len(diagnostic_days) < 6:
         raise ValueError('At least six scored diagnostic sessions required')
+    reasons = ['insufficient_completed_history' if index < 5 else
+               'ranked_universe_changed' if populations[index] != populations[index-5] else
+               'unavailable_score' if not populations[index][2] else 'comparable'
+               for index in range(len(scores))]
+    comparable = [reason == 'comparable' for reason in reasons]
     eligible = {}; liquidity = []
     for window in (10, 20):
         for millions in (5, 10, 20, 30):
@@ -124,15 +178,22 @@ def diagnose(config, bars, sessions, members, metadata):
                               'daily_membership_changes': summarize([len(a ^ b) for a, b in zip(sets, sets[1:])]),
                               'latest_eligible': len(sets[-1]),
                               'latest_missing_history': sum(value is None for value in dollar[len(sessions)-1, window].values())})
-    models = []; per_session = []
+    models = []; per_session = []; recent_models = []
     for threshold in (D(5), D(10), D(15)):
         for breadth_gate in (False, True):
             for direction in ('long', 'short'):
                 prior_states = {}; churn = []; counts = []; stocks = []; leader_retained = []; emerging = []
+                histories = {theme: [] for theme in members}
+                changes = {theme: [] for theme in members}; strengths = {theme: [] for theme in members}
                 state_totals = Counter(); latest_states = Counter()
                 for offset, day in enumerate(diagnostic_days):
-                    previous = scores[offset-5] if offset >= 5 else {}
+                    previous = scores[offset-5] if comparable[offset] else {}
                     states = {theme: classify(score, previous.get(theme), direction, threshold) for theme, score in scores[offset].items()}
+                    for theme, label in states.items():
+                        score, before = scores[offset][theme], previous.get(theme)
+                        histories[theme].append(label if comparable[offset] else 'Unavailable')
+                        changes[theme].append(None if score is None or before is None else (score-before)*(1 if direction=='long' else -1))
+                        strengths[theme].append(None if score is None else score if direction=='long' else 100-score)
                     chosen = {theme for theme, state in states.items() if state in ('Leading', 'Improving', 'Fading')}
                     if breadth_gate:
                         chosen = {theme for theme in chosen if participations[offset][theme].value is not None
@@ -140,8 +201,9 @@ def diagnose(config, bars, sessions, members, metadata):
                                        else participations[offset][theme].value <= 50)}
                     stock_set = {m.ticker for theme in chosen for m in members[theme]} & eligible[20, 10, offset]
                     counts.append(len(chosen)); stocks.append(len(stock_set)); state_totals.update(states.values())
-                    if prior_states:
-                        churn.append(sum(states[theme] != prior_states[theme] for theme in states))
+                    if prior_states and comparable[offset] and comparable[offset-1]:
+                        churn.append(sum(states[theme] != prior_states[theme] for theme in states
+                                         if 'Unavailable' not in (states[theme], prior_states[theme])))
                     structural = {theme for theme, score in scores[offset].items() if score is not None and
                                   (score >= 50 if direction == 'long' else score <= 50)}
                     if structural:
@@ -150,12 +212,17 @@ def diagnose(config, bars, sessions, members, metadata):
                     prior_states = states; latest_states = Counter(states.values())
                     if threshold == 10 and not breadth_gate:
                         per_session.append({'session': day, 'side': direction, 'researchable_themes': len(chosen),
-                                            'research_stocks': len(stock_set), 'states': dict(latest_states)})
+                                            'research_stocks': len(stock_set), 'states': dict(latest_states),
+                                            'comparison_available': comparable[offset], 'comparison_reason': reasons[offset]})
                 models.append({'delta_threshold': int(threshold), 'breadth_gate': breadth_gate, 'side': direction,
                                'researchable_themes': summarize(counts), 'research_stocks': summarize(stocks),
                                'state_changes_per_session': summarize(churn), 'improving_themes': summarize(emerging),
+                               'state_churn_comparable_session_pairs': len(churn),
                                'structural_leader_retention': summarize(leader_retained),
                                'state_observations': dict(state_totals), 'latest_states': dict(latest_states)})
+                if not breadth_gate:
+                    recent_models.append(dict(delta_threshold=int(threshold), side=direction,
+                        **transition_diagnostics(histories, changes, strengths, threshold)))
     rank_moves = [abs(now[theme]-old[theme]) for old, now in zip(ranks, ranks[1:]) for theme in old.keys() & now.keys()]
     pullbacks = []
     for offset, day in enumerate(diagnostic_days):
@@ -180,6 +247,11 @@ def diagnose(config, bars, sessions, members, metadata):
                       'sessions': len(diagnostic_days), 'themes': len(members), 'unique_members': len(symbols),
                       'no_accounting_writes': True, 'no_profit_optimization': True},
             'liquidity_candidates': liquidity, 'state_candidates': models,
+            'comparison_availability': dict(reason_counts=dict(sorted(Counter(reasons).items())),
+                eligible_five_session_pairs=max(0, len(scores)-5), available_session_comparisons=sum(comparable),
+                unavailable_session_comparisons=len(scores)-sum(comparable)),
+            'recent_change_diagnostics': recent_models,
+            'retention_interpretation': 'No-veto retention of structural leaders is a definition invariant, not independent validation of recent-change thresholds',
             'rank_absolute_daily_change': summarize(rank_moves),
             'selected_session_counts': per_session, 'broad_pullbacks': pullbacks,
             'small_themes': {theme: len(rows) for theme, rows in members.items() if len(rows) < 10},
@@ -192,7 +264,7 @@ def diagnose(config, bars, sessions, members, metadata):
 
 def write_report(result, folder):
     folder.mkdir(parents=True, exist_ok=True)
-    (folder/'research-v2-rule-simulation.json').write_text(json.dumps(result, indent=2, sort_keys=True)+'\n', encoding='utf-8')
+    (folder/'research-v2-rule-simulation.json').write_text(json.dumps(result, indent=2, sort_keys=True)+'\n', encoding='utf-8', newline='\n')
     scope = result['scope']; inputs = result['inputs']
     lines = ['# Research Logic v2 rule simulation', '',
         f"Read-only pinned successful snapshot: {inputs['snapshot_session']}; {scope['sessions']} offline sessions "
@@ -210,15 +282,49 @@ def write_report(result, folder):
         'Below 50: Improving when change ≥threshold; otherwise Lagging. '
         'Leading, Improving and Fading are researchable. Missing score is Unavailable; '
         'missing prior score does not invent a change. Breadth-veto alternatives require directional participation ≥50%.', '',
-        '| Δ threshold | Breadth veto | Side | Themes min/mean/max | Stocks min/mean/max | Mean state changes/day | Mean improving | Mean leader retention |',
+        '| Δ threshold | Breadth veto | Side | Themes min/mean/max | Stocks min/mean/max | Mean state changes/day | Mean improving | Structural retention |',
         '| --- | --- | --- | --- | --- | --- | --- | --- |']
     def span(value):
         return f"{value['minimum']}/{value['mean']}/{value['maximum']}" if value else 'Unavailable'
     for row in result['state_candidates']:
         lines.append(f"| {row['delta_threshold']} | {row['breadth_gate']} | {row['side']} | {span(row['researchable_themes'])} | "
-                     f"{span(row['research_stocks'])} | {row['state_changes_per_session']['mean']} | "
+                     f"{span(row['research_stocks'])} | {row['state_changes_per_session']['mean'] if row['state_changes_per_session'] else 'Unavailable'} | "
                      f"{row['improving_themes']['mean']} | {row['structural_leader_retention']['mean']} |")
-    lines += ['', 'Rank instability is measured independently: absolute daily competition-rank movement '
+    availability = result['comparison_availability']
+    lines += ['', f"Five-session comparisons: {availability['available_session_comparisons']} available of "
+              f"{availability['eligible_five_session_pairs']} eligible session pairs. "
+              'Unavailable diagnostic dates: ' + ', '.join(f'{key}={value}' for key, value in availability['reason_counts'].items() if key != 'comparable') + '.',
+              'The 1M, 3M and combined scored-theme populations must each match globally across t and t-5. '
+              'Unavailable comparisons use structural Leading/Lagging fallback for product/list counts. '
+              'They censor temporal episodes and are excluded from recent-state churn; availability changes '
+              'are not counted as market-state changes. State churn uses adjacent dates with valid comparisons '
+              'on both dates, and excludes missing-score theme pairs. JSON records the included session-pair count.', '',
+              '**Retention is a definition check, not independent evidence for the recent-change threshold.** '
+              'Every structurally strong theme is Leading or Fading and both are researchable, so the '
+              'no-veto model necessarily reports 1.0. The breadth-veto comparison measures how many '
+              'of those deliberately retained themes that extra gate would remove; it does not validate ±10.', '',
+              '## Recent-state persistence and transitions', '',
+              'Rates below are observed fractions (0–1), not profit metrics. Persistence is the fraction '
+              'of valid next-session pairs that remain Improving. Transition rates use completed '
+              'episodes only; left-edge and right-edge/missing-data episodes are censored and reported '
+              'separately in JSON (one episode may touch both edges). Time to Leading counts sessions to a direct Improving → Leading '
+              'exit, rather than counting later recoveries after a different state. Fading exits '
+              'separate loss of directional structure (Lagging) from recovery (Leading).', '',
+              '| Δ threshold | Side | Improving next-session persistence | Completed Improving episodes | Direct to Leading | Mean sessions to Leading | Fading to Lagging | Fading recovery to Leading | Near-threshold change rate |',
+              '| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |']
+    for row in result['recent_change_diagnostics']:
+        improving, fading = row['improving'], row['fading']
+        duration = improving['sessions_to_direct_leading']
+        lines.append(f"| {row['delta_threshold']} | {row['side']} | {improving['next_session_persistence']} | "
+                     f"{improving['completed_episodes']} | {improving['direct_to_leading_rate']} | "
+                     f"{duration['mean'] if duration else 'Unavailable'} | {fading['direct_to_lagging_rate']} | "
+                     f"{fading['direct_to_leading_rate']} | {row['threshold_neighborhood']['change_rate']} |")
+    lines += ['', 'Near-threshold change rate counts state changes among pairs within two score-change '
+              'points of either material-change boundary, while both dates stay in the same directional '
+              'structural zone. It isolates material-change sensitivity from crossing structural score 50. '
+              'These diagnostics distinguish temporal behavior without optimizing P&L or list size. '
+              'The established ±10 rule is retained; the diagnostics do not establish predictive superiority.', '',
+              'Rank instability is measured independently: absolute daily competition-rank movement '
               f"min/mean/max = {span(result['rank_absolute_daily_change'])}. State changes above count changed theme labels, "
               'not stock churn or profitable trades.', '', '## Daily liquidity candidates', '',
               'Price must be **above $5**. Liquidity is the arithmetic mean of each completed session’s '
@@ -250,7 +356,7 @@ def write_report(result, folder):
               'than $20M at the latest snapshot. This supports a moderate floor without claiming an optimal liquidity rule.', '',
               '## Pullbacks, retention and symmetry', '',
               f"Both SPY and QQQ declined across five sessions on {len(result['broad_pullbacks'])} diagnostic sessions. "
-              'Per-session researchable and state counts are in the JSON. Structural leaders are retained '
+              'Per-session researchable and state counts are in the JSON. By the explicit retention policy, structural leaders are retained '
               f"at mean ratios Long={selected[0]['structural_leader_retention']['mean']} and "
               f"Short={selected[1]['structural_leader_retention']['mean']} without the breadth veto. "
               'Fading is a label change, not deletion. Exact mirrored inputs are unit-tested for Long/Short symmetry; '
@@ -265,9 +371,10 @@ def write_report(result, folder):
               '.venv-vnext/Scripts/python.exe -m unittest discover -s tests -p test_research_v2_simulation.py -v', '```', '',
               'This workflow never calls a provider, changes membership, writes the runtime DB, or emits raw market data. '
               'New observations or memberships change results; the JSON pins the inspected inputs. Threshold selection '
-              'is a transparent research policy choice, not predictive evidence. Official v2 recent-change fields must '
-              'wait for compatible five-session history rather than representing retrospective diagnostics as earned history.', '']
-    (folder/'research-v2-rule-simulation.md').write_text('\n'.join(lines), encoding='utf-8')
+              'is a transparent research policy choice, not predictive evidence. Production may calculate an '
+              'explicitly labelled same-basis five-session research comparison from sufficient completed bars; '
+              'that comparison never becomes or rewrites official accounting history.', '']
+    (folder/'research-v2-rule-simulation.md').write_text('\n'.join(lines), encoding='utf-8', newline='\n')
 
 
 def main():

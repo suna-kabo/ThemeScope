@@ -2,19 +2,29 @@
 from copy import deepcopy
 
 
+def _current(snapshot):
+    research=(snapshot or {}).get('research_v2',{})
+    return research if research.get('schema')=='themescope-research-v2' and research.get('contract_revision')==2 else {}
+
+
 def get_market_state(snapshot):
     return deepcopy((snapshot or {}).get('market'))
 
 
 def get_market_changes(snapshot):
-    return deepcopy((snapshot or {}).get('research_v2', {}).get('changes'))
+    return deepcopy(_current(snapshot).get('changes'))
 
 
 def get_theme(snapshot, theme_id):
     row = next((t for t in (snapshot or {}).get('themes', ()) if t['theme_id'] == theme_id), None)
     if row is None:
         return None
-    return dict(deepcopy(row), research=deepcopy(snapshot.get('research_v2', {}).get('themes', {}).get(theme_id)))
+    # Historical v1 priority/transition fields are not current research decisions.
+    result={key:deepcopy(value) for key,value in row.items()
+            if key not in ('priority','transition','history','research_member_signature','breadth_above')}
+    result['research']=deepcopy(_current(snapshot).get('themes',{}).get(theme_id))
+    result['selection_available']=bool(_current(snapshot))
+    return result
 
 
 def get_theme_history(snapshots, theme_id):
@@ -22,8 +32,17 @@ def get_theme_history(snapshots, theme_id):
             if (row := get_theme(s, theme_id)) is not None]
 
 
+def _relationships(snapshot, rows):
+    result=deepcopy(rows)
+    if not _current(snapshot):
+        for row in result:
+            for key in ('qualifies','eligibility','assigned_section','also_qualifies_in'):row[key]=None
+    return result
+
+
 def get_theme_members(snapshot, theme_id):
-    return deepcopy([r for r in (snapshot or {}).get('relationships', ()) if r['theme_id'] == theme_id])
+    if not any(t['theme_id']==theme_id for t in (snapshot or {}).get('themes',())):return None
+    return _relationships(snapshot,sorted((r for r in (snapshot or {}).get('relationships', ()) if r['theme_id'] == theme_id),key=lambda r:r['ticker']))
 
 
 def get_stock(snapshot, ticker):
@@ -31,8 +50,8 @@ def get_stock(snapshot, ticker):
     if not rows:
         return None
     return dict(ticker=ticker, company=snapshot.get('research', {}).get('companies', {}).get(ticker),
-                relationships=deepcopy(rows))
+                relationships=_relationships(snapshot,rows),selection_available=bool(_current(snapshot)))
 
 
 def get_research_list(snapshot):
-    return deepcopy((snapshot or {}).get('research_v2', {}).get('list'))
+    return deepcopy(_current(snapshot).get('list'))

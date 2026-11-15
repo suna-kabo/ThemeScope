@@ -26,7 +26,7 @@
   try{const data=JSON.parse(localStorage.getItem(savedContextKey)||'{}');if(data&&typeof data==='object'&&!Array.isArray(data))savedContexts=data;}catch{}
   let watched = [];
   try { const values = JSON.parse(localStorage.getItem(savedKey) || '[]'); if (Array.isArray(values)) watched = [...new Set(values.filter(s => typeof s === 'string' && s.trim()))]; } catch { /* A blocked or malformed browser store must not stop research. */ }
-  const ui = {universe:'active', themeSort:'score', themeDescending:true, selectedTheme:'', selectedTicker:'', selectedTickerTheme:'', candidateMode:'unique', candidateLens:'directional', memberSearch:'', memberRole:'', memberEligibility:'', memberSort:'priority'};
+  const ui = {universe:'active', themeSort:'priority', themeDescending:false, selectedTheme:'', selectedTicker:'', selectedTickerTheme:'', candidateMode:'unique', candidateLens:'directional', memberSearch:'', memberRole:'', memberEligibility:'', memberSort:'priority'};
   const positions = new Map(), blobUrls = new Map();
   let inspector = null, inspectorTrigger = '', inspectorOrigin = '', inspectorScroll = 0;
   const inspectorViews = new Map();
@@ -83,16 +83,16 @@
   const roleName = value => value === 'Core' ? 'Core business' : value === 'Enabler' ? 'Supporting business' : value;
   const roleLabel = value => `<span title="${value === 'Core' ? 'Business directly participates in this theme.' : value === 'Enabler' ? 'Provides products or services that enable this theme.' : ''}">${esc(roleName(value))}</span>`;
   const wHeading='Peer strength (pp) '+helpButton('w');
-  function rankInfo(id) { return research().ranks?.themes?.[id] || {}; }
-  function rankLabel(id) { const r=rankInfo(id); return valid(r.rank) ? '#' + r.rank : '—'; }
+  function rankInfo(id) { return themeResearch(id); }
+  function rankLabel(id) { const r=rankInfo(id); return valid(r.strength_rank) ? '#' + r.strength_rank : '—'; }
   function rankChange(id) {
-    const r=rankInfo(id), reasons={no_compatible_previous_session:'Previous session unavailable',untracked_concept:'No active calculation basket',unavailable_score:'Strength unavailable',newly_active_theme:'Newly active theme',newly_available_score:'Newly available score',active_universe_changed:'Active theme universe changed',ranked_universe_changed:'Scored theme universe changed'};
-    const text=valid(r.change) ? Number(r.change)>0 ? 'Up '+r.change : Number(r.change)<0 ? 'Down '+Math.abs(r.change) : 'Unchanged' : '—';
-    const help=valid(r.change) ? `Compared with ${r.previous_session}; previous rank #${r.previous_rank}` : reasons[r.reason] || 'Previous session unavailable';
-    return `<span title="${esc(help)}">${text}<span class="sr-only"> · ${esc(help)}</span></span>`;
+    const recent=themeResearch(id).recent,change=recent?.directional_rank_change;
+    const value=currentSide()?change:recent?.raw_rank_change;
+    const text=valid(value)?Number(value)>0?'Up '+value:Number(value)<0?'Down '+Math.abs(value):'Unchanged':'—';
+    const description=recent?.available?`Compared with ${recent.comparison_session}`:UX.comparisonMessage(recent?.reason);
+    return `<span title="${esc(description)}">${text}<span class="sr-only"> · ${esc(description)}</span></span>`;
   }
 
-  function comparison(theme) { const value = theme.transition?.priority_change; return value == null ? 'Change unavailable' : value === '—' ? 'Continuing' : value; }
   function prelaunch() { return snapshot?.theme_layer?.state === 'pre_launch_research'; }
   function download(themeId) {
     const text = themeId ? snapshot?.exports?.individual?.[themeId] : snapshot?.exports?.combined;
@@ -107,7 +107,7 @@
     return url ? `<a class="button secondary small" href="${esc(url)}" download="Theme.txt">Theme TXT <span aria-hidden="true">↓</span></a>` : '<span class="muted table-note">No research list export for this theme</span>';
   }
   function renderExportMenu() {
-    const current=Boolean(v2().schema);
+    const current=currentResearch();
     const link=(url,label,file,id='')=>url?`<a ${id?`id="${id}"`:''} href="${esc(url)}" download="${esc(file)}" data-export="${esc(label)}">${esc(label)}<span aria-hidden="true">↓</span></a>`:`<span class="export-unavailable">${esc(label)} unavailable</span>`;
     let body=`<p class="menu-title">${current?'TradingView':'Previous research rules'} · ${esc(snapshot?.session||'No snapshot')}</p>`;
     body+=link(download(),current?'Full research list':'Previous rules list',current?'Research.txt':'PreviousResearch.txt','combined');
@@ -131,7 +131,7 @@
     const messages = {
       pre_launch_research:`Pre-launch research · Completed session ${session} · Approved launch membership universe. Official index history begins at the ${layer.launch_rebalance_session} close; first earned session ${layer.first_earned_session}.`,
       pre_launch:'Pre-launch · Official theme indices have not yet initialized.',
-      initialized:`Launch close: index initialized at 100 · First earned session ${layer.first_earned_session}. Historical comparisons are not yet available.`,
+      initialized:`Launch close: index initialized at 100 · First earned session ${layer.first_earned_session}. Official index history has just begun.`,
       live:'Official theme history · Completed-session research',
       activation_blocked:'Theme activation blocked · Market context remains available. See Configuration & activation status in Methodology.'
     };
@@ -147,11 +147,16 @@
   const researchState = id => UX.themeState(snapshot,id);
   const stateTone = value => ({Leading:'positive',Improving:'positive',Fading:'mixed',Lagging:'negative'})[value] || 'neutral';
   const themeState = id => `<span class="theme-state ${stateTone(researchState(id))}">${esc(researchState(id))}</span>`;
-  const researchOrder = id => themeResearch(id).priority_rank ?? (v2().theme_order||[]).indexOf(id);
+  const researchOrder = id => currentResearch()?(themeResearch(id).research_order_index ?? (v2().theme_order||[]).indexOf(id)):(snapshot?.themes||[]).map(t=>t.theme_id).sort().indexOf(id);
+  const currentSide = () => UX.currentSide(snapshot);
+  const currentResearch = () => UX.currentContract(snapshot);
+  const sideLabel = () => currentSide()==='long'?'Long-side research':currentSide()==='short'?'Short-side research':'Non-directional context';
+  const recentLabel = () => currentSide()?'Five-session research change':'Five-session raw strength change';
+  const recentValue = id => { const recent=themeResearch(id).recent; return currentSide()?recent?.directional_score_change:recent?.raw_score_change; };
   function recentChange(id) {
-    const recent=themeResearch(id).recent;
-    if(!recent?.available)return '<span class="unavailable">History building</span>';
-    return `<span class="${signTone(recent.score_change)}">${Number(recent.score_change)>0?'+':''}${number(recent.score_change,1)} pts</span>`;
+    const recent=themeResearch(id).recent,value=recentValue(id);
+    if(!recent?.available)return `<span class="unavailable">${esc(UX.comparisonMessage(recent?.reason))}</span>`;
+    return `<span class="${signTone(value)}">${Number(value)>0?'+':''}${number(value,1)} pts</span>`;
   }
   function primaryThemes() {
     return (snapshot?.themes || []).filter(t => themeResearch(t.theme_id).researchable).sort((a,b)=>researchOrder(a.theme_id)-researchOrder(b.theme_id)||a.theme_id.localeCompare(b.theme_id));
@@ -162,14 +167,21 @@
     return [...tickers.values()];
   }
   function renderChanges() {
-    const states=['Improving','Fading'];
     $('leadership-changes').hidden=!snapshot;
-    $('change-board').innerHTML=states.map(label=>{
-      const rows=(snapshot?.themes||[]).filter(t=>researchState(t.theme_id)===label).sort((a,b)=>researchOrder(a.theme_id)-researchOrder(b.theme_id));
-      return `<section class="change-column"><div class="section-heading"><h3 class="${stateTone(label)}">${label==='Improving'?'Gaining strength':'Losing strength'}</h3><span class="table-meta">${rows.length} themes</span></div>${rows.length?rows.slice(0,3).map(t=>`<div class="change-row">${themeLink(t.theme_id)}<span>${recentChange(t.theme_id)}</span></div>`).join(''):'<p class="table-note">'+(v2().schema?'No themes in this state.':'Five-session comparisons are not available in this snapshot.')+'</p>'}</section>`;
+    if(!currentSide()){
+      $('change-board').innerHTML=`<p class="table-note">${esc(marketName(snapshot?.market_direction))} · No directional theme states. Raw strength changes remain available in Themes.</p>`;
+      return;
+    }
+    const active=(snapshot?.themes||[]).filter(t=>t.status==='active');
+    const comparable=active.filter(t=>themeResearch(t.theme_id).recent?.available);
+    const unavailable=active.length-comparable.length;
+    const availability=unavailable?`<p class="table-note comparison-availability">Five-session comparison unavailable for ${unavailable} themes. ${[...new Set(active.filter(t=>!themeResearch(t.theme_id).recent?.available).map(t=>UX.comparisonMessage(themeResearch(t.theme_id).recent?.reason)))].map(esc).join(' · ')}.</p>`:'';
+    $('change-board').innerHTML=availability+['Improving','Fading'].map(label=>{
+      const rows=comparable.filter(t=>researchState(t.theme_id)===label).sort((a,b)=>researchOrder(a.theme_id)-researchOrder(b.theme_id));
+      const missing=comparable.length?'No '+label.toLowerCase()+' themes among '+comparable.length+' comparable themes.':'Five-session comparison unavailable.';
+      return `<section class="change-column"><div class="section-heading"><h3 class="${stateTone(label)}">${label} for ${currentSide()==='short'?'Short':'Long'} research</h3><span class="table-meta">${comparable.length?rows.length+' themes':'Unavailable'}</span></div>${rows.length?rows.slice(0,3).map(t=>`<div class="change-row">${themeLink(t.theme_id)}<span>${recentChange(t.theme_id)}</span></div>`).join(''):`<p class="table-note">${esc(missing)}</p>`}</section>`;
     }).join('');
   }
-
   // Display transforms only: all breadth, returns, scores and trend come from the snapshot.
   function breadthBar(label,value,coverage = '') {
     const available = valid(value), bounded = available ? Math.max(0,Math.min(100,Number(value))) : 0;
@@ -213,7 +225,7 @@
     const market=snapshot?.market||{};
     const rows=['SPY','QQQ','IWM'].map(ticker=>{
       const row=market.context?.[ticker]||{},breadth=row.breadth||{},extension=research().extension?.indices?.[ticker];
-      return `<tr class="market-card ${ticker==='IWM'?'context':''}" aria-label="${ticker} market context"><td data-label="Index"><span class="market-ticker">${ticker}</span>${ticker==='IWM'?`<small>Small-cap context ${helpButton('iwm')}</small>`:''}</td><td data-label="State">${state(row.price_state)}</td><td class="numeric" data-label="Close"><span class="market-price">${money(row.close)}</span></td><td class="market-emas" data-label="EMA21">${marketEMA('EMA21',row.close,row.ema21,ticker)}</td><td class="market-emas" data-label="EMA50">${marketEMA('EMA50',row.close,row.ema50,ticker)}</td><td data-label="Breadth">${ticker==='IWM'?'<span aria-label="Breadth not applicable">—</span>':`<div class="market-breadth">${breadthBar('EMA21',breadth.above_ema21)}${breadthBar('EMA50',breadth.above_ema50)}</div><small class="breadth-state ${tone(breadth.state)}">${esc(breadth.state||'Unavailable')}</small>`}</td><td data-label="Extension">${ticker==='IWM'?'<span aria-label="Extension not applicable">—</span>':`${valid(extension?.distance)?number(extension.distance)+' ATR':'—'}<span class="index-extension">${esc(extension?.state||'History building')}</span>`}</td></tr>`;
+      return `<tr class="market-card ${ticker==='IWM'?'context':''}" aria-label="${ticker} market context"><td data-label="Index"><span class="market-ticker">${ticker}</span>${ticker==='IWM'?`<small>Small-cap context ${helpButton('iwm')}</small>`:''}</td><td data-label="State">${state(row.price_state)}</td><td class="numeric" data-label="Close"><span class="market-price">${money(row.close)}</span></td><td class="market-emas" data-label="EMA21">${marketEMA('EMA21',row.close,row.ema21,ticker)}</td><td class="market-emas" data-label="EMA50">${marketEMA('EMA50',row.close,row.ema50,ticker)}</td><td data-label="Breadth">${ticker==='IWM'?'<span aria-label="Breadth not applicable">—</span>':`<div class="market-breadth">${breadthBar('EMA21',breadth.above_ema21)}${breadthBar('EMA50',breadth.above_ema50)}</div><small class="breadth-state ${tone(breadth.state)}">${esc(breadth.state||'Unavailable')}</small>`}</td><td data-label="Extension">${ticker==='IWM'?'<span aria-label="Extension not applicable">—</span>':`${valid(extension?.distance)?number(extension.distance)+' ATR':'—'}<span class="index-extension">${esc(extension?.state||'Unavailable')}</span>`}</td></tr>`;
     });
     $('market-cards').innerHTML=table(['Index','State',{label:'Close',numeric:true},'EMA21','EMA50','Breadth '+helpButton('market-breadth'),'Extension '+helpButton('extension')],rows,'Benchmark evidence. Breadth shows members above EMA21 and EMA50. IWM is context only.','benchmark-table');
     $('market-data-details').innerHTML=['SPY','QQQ'].map(ticker=>{const row=market.context?.[ticker]||{},b=row.breadth||{};return `<p>${ticker} breadth · ${esc(b.valid??0)}/${esc(b.configured??0)} valid<br>${esc(row.roster_source||'Roster unavailable')}<br>${esc((row.roster_warnings||[]).join(' ')||'No roster advisories.')}</p>`;}).join('');
@@ -223,15 +235,20 @@
     document.querySelector('.overview-research').hidden=!snapshot;$('theme-map-panel').hidden=!snapshot;
     renderChanges();
     if(!snapshot){$('market-direction').innerHTML=empty('No completed snapshot','Refresh Data to load completed-session research.');$('market-cards').innerHTML='';return;}
-    if(!v2().schema){
+    if(!currentResearch()){
       document.querySelector('.overview-research').hidden=true;$('leadership-changes').hidden=true;
       $('market-direction').innerHTML=`<h2 class="direction-name">${esc(marketName(snapshot.market_direction))}</h2><p>Current research list unavailable · previous rules snapshot</p>`;
       renderBenchmarks();renderThemeMap();return;
     }
     const decision=snapshot?.market?.decision||{},direction=marketName(snapshot?.market_direction),changes=v2().changes||{};
     const changed=changes.changed?`Changed from ${marketName(changes.previous_market_direction)}`:changes.previous_market_direction?'Unchanged since previous session':'Previous market direction unavailable';
+    if(!currentSide()){
+      document.querySelector('.overview-research').hidden=true;
+      $('market-direction').innerHTML=`<div class="market-conclusion direction-plane"><div class="bias-identity"><h2 class="direction-name">${esc(direction)}</h2><span class="market-change">${esc(changed)}</span></div><p>No directional research list · Themes and stock context remain available.</p><details class="decision-details"><summary>Market evidence</summary><p id="decision-path">${esc(decision.reason||'Market context unavailable.')}</p><p id="today-plan">${esc(snapshot.today_plan||'')}</p></details></div>`;
+      renderBenchmarks();renderThemeMap();return;
+    }
     const total=v2().list?.stock_count??uniqueRows(qualifiedRows()).length;
-    $('market-direction').innerHTML=`<div class="market-conclusion direction-plane"><div class="bias-identity"><h2 class="direction-name ${tone(direction)}" aria-label="Market direction: ${esc(direction)}">${esc(direction)}</h2><span class="market-change">${esc(changed)}</span></div><div class="direction-step"><strong>${primaryThemes().length} themes</strong><span class="plane-label">Worth researching</span></div><div class="direction-step"><a href="#primary" class="research-total">${total} stocks</a><span class="plane-label">In today's research list</span></div><details class="decision-details"><summary>Market evidence</summary><p id="decision-path">${esc(decision.reason||'Market context unavailable.')}</p><p id="today-plan">${esc(snapshot?.today_plan||'')}</p><p>Breadth: ${esc(snapshot?.market?.breadth_consensus||'Unavailable')}</p><p>Benchmark extension: ${esc(research().extension?.state||'Unavailable')}</p></details></div>`;
+    $('market-direction').innerHTML=`<div class="market-conclusion direction-plane"><div class="bias-identity"><h2 class="direction-name ${tone(direction)}" aria-label="Market direction: ${esc(direction)}">${esc(direction)}</h2><span class="market-change">${esc(changed)}${v2().conviction==='selective'?' · Reduced conviction':''}</span></div><div class="direction-step"><strong>${primaryThemes().length} themes</strong><span class="plane-label">Worth researching</span></div><div class="direction-step"><a href="#primary" class="research-total">${total} stocks</a><span class="plane-label">In today's research list</span></div><details class="decision-details"><summary>Market evidence</summary><p id="decision-path">${esc(decision.reason||'Market context unavailable.')}</p><p id="today-plan">${esc(snapshot?.today_plan||'')}</p><p>Breadth: ${esc(snapshot?.market?.breadth_consensus||'Unavailable')}</p><p>Benchmark extension: ${esc(research().extension?.state||'Unavailable')}</p></details></div>`;
     renderBenchmarks();renderThemeMap();
     $('theme-preview-order').textContent='Research priority';
     const themes=primaryThemes().slice(0,5);
@@ -253,9 +270,8 @@
     if (key === 'breadth') { const v = theme.breadth?.[0]?.value; return valid(v) ? Number(v) : null; }
     if (key === 'trend') return ({Bullish:0,Mixed:1,Bearish:2,Unavailable:3})[theme.index?.trend || 'Unavailable'];
     if (key === 'priority') return researchOrder(theme.theme_id);
-    if (key === 'recent') return valid(themeResearch(theme.theme_id).recent?.score_change)?Number(themeResearch(theme.theme_id).recent.score_change):null;
-    if (key === 'rankchange') return valid(rankInfo(theme.theme_id).change) ? Number(rankInfo(theme.theme_id).change) : null;
-    if (key === 'change') return comparison(theme);
+    if (key === 'recent') return valid(recentValue(theme.theme_id))?Number(recentValue(theme.theme_id)):null;
+    if (key === 'rankchange') { const change=currentSide()?themeResearch(theme.theme_id).recent?.directional_rank_change:themeResearch(theme.theme_id).recent?.raw_rank_change; return valid(change)?Number(change):null; }
     return theme[key] || '';
   }
   function compareValues(a, b, descending = false) {
@@ -278,14 +294,14 @@
     const active=(snapshot?.themes||[]).filter(t=>t.status==='active').length,tracked=ui.universe==='active';
     $('active-count').textContent=active;$('watch-count').textContent=(snapshot?.themes?.length||0)-active;
     document.querySelectorAll('[data-universe]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.universe===ui.universe)));
-    for(const id of ['theme-priority','theme-trend'])$(id).closest('label').hidden=!tracked;
+    $('theme-priority').closest('label').hidden=!tracked||!currentSide();$('theme-trend').closest('label').hidden=!tracked;
     const rows=themeRows();
-    $('theme-results').textContent=`${rows.length} ${tracked?'themes':'concepts'} · ${v2().list?.side==='short'?'Short-side states':'Long-side states'} · ${primaryThemes().length} researchable`;
+    $('theme-results').textContent=`${rows.length} ${tracked?'themes':'concepts'} · ${sideLabel()} · ${primaryThemes().length} researchable`;
     if(!rows.length){$('theme-table').innerHTML=empty(snapshot?'No themes match':'Themes are waiting',snapshot?'Try another search or reset the filters.':'Refresh Data to load completed-session research.','<button class="button secondary" data-reset="themes">Reset filters</button>');return;}
     if(!tracked){$('theme-table').innerHTML=table(['Concept','Family','Coverage'],rows.map(t=>`<tr><td data-label="Concept">${themeLink(t.theme_id)}</td><td data-label="Family">${esc(t.family)}</td><td data-label="Coverage">Not currently tracked</td></tr>`),'Untracked concepts','concept-table');return;}
-    const heading=`<thead><tr><th scope="col" class="col-rank numeric">Rank ${helpButton('rank')}</th>${sortHeading('Theme','name')}${sortHeading('Strength','score',true,'strength')}${sortHeading('5-session Δ','recent',true)}${sortHeading('Trend','trend')}${sortHeading('Participation','breadth',true,'breadth')}${sortHeading('State','priority',false,'priority')}</tr></thead>`;
-    const body=rows.map(t=>`<tr data-theme-row="${esc(t.theme_id)}" class="${ui.selectedTheme===t.theme_id?'selected-row':''}"><td class="numeric col-rank canonical-rank" data-label="Rank">${rankLabel(t.theme_id)}</td><td class="col-theme theme-name" data-label="Theme">${themeLink(t.theme_id)}<small class="theme-family">${esc(t.family)}</small></td><td class="col-strength numeric" data-label="Strength">${number(t.score,1)}</td><td class="col-recent numeric" data-label="5-session change">${recentChange(t.theme_id)}<small class="rank-change">Rank ${rankChange(t.theme_id)}</small></td><td class="col-trend" data-label="Trend">${state(t.index?.trend)}</td><td class="col-breadth numeric" data-label="Participation">${participation(t.theme_id)}</td><td class="col-priority" data-label="State">${themeState(t.theme_id)}<small class="researchability">${themeResearch(t.theme_id).researchable?'Researchable':'Context only'}</small></td></tr>`).join('');
-    const sortControl=`<label class="theme-mobile-sort inline-label">Sort themes<select id="theme-mobile-sort"><option value="score:desc">Strength strongest first</option><option value="score:asc">Strength weakest first</option><option value="name:asc">Theme A–Z</option><option value="recent:desc">Recent improvement first</option><option value="recent:asc">Recent deterioration first</option><option value="priority:asc">Research priority</option></select></label>`;
+    const heading=`<thead><tr><th scope="col" class="col-rank numeric">Rank ${helpButton('rank')}</th>${sortHeading('Theme','name')}${sortHeading('Strength','score',true,'strength')}${sortHeading(currentSide()?'5-session research Δ':'5-session strength Δ','recent',true)}${sortHeading('Trend','trend')}${sortHeading('Participation','breadth',true,'breadth')}${sortHeading('State','priority',false,'priority')}</tr></thead>`;
+    const body=rows.map(t=>`<tr data-theme-row="${esc(t.theme_id)}" class="${ui.selectedTheme===t.theme_id?'selected-row':''}"><td class="numeric col-rank canonical-rank" data-label="Rank">${rankLabel(t.theme_id)}</td><td class="col-theme theme-name" data-label="Theme">${themeLink(t.theme_id)}<small class="theme-family">${esc(t.family)}</small></td><td class="col-strength numeric" data-label="Strength">${number(t.score,1)}</td><td class="col-recent numeric" data-label="5-session change">${recentChange(t.theme_id)}<small class="rank-change">${currentSide()?'Side rank':'Strength rank'} ${rankChange(t.theme_id)}</small></td><td class="col-trend" data-label="Trend">${state(t.index?.trend)}</td><td class="col-breadth numeric" data-label="Participation">${participation(t.theme_id)}</td><td class="col-priority" data-label="State">${themeState(t.theme_id)}<small class="researchability">${themeResearch(t.theme_id).researchable?'Researchable':'Context only'}</small></td></tr>`).join('');
+    const sortControl=`<label class="theme-mobile-sort inline-label">Sort themes<select id="theme-mobile-sort"><option value="score:desc">Strength strongest first</option><option value="score:asc">Strength weakest first</option><option value="name:asc">Theme A–Z</option><option value="recent:desc">${currentSide()?'Research improvement first':'Raw strength gains first'}</option><option value="recent:asc">${currentSide()?'Research deterioration first':'Raw strength losses first'}</option><option value="priority:asc">${currentSide()?'Research priority':'Context order (A–Z)'}</option></select></label>`;
     $('theme-table').innerHTML=sortControl+`<table role="table" class="theme-research-table"><caption class="sr-only">Theme states reflect the current research side. Strength ranks compare all scored active themes. Five-session change uses compatible history.</caption>${columns(['rank','theme','strength','recent','trend','breadth','priority'])}${heading}<tbody role="rowgroup">${body}</tbody></table>`;
     const mobile=$('theme-mobile-sort');if([...mobile.options].some(o=>o.value===`${ui.themeSort}:${ui.themeDescending?'desc':'asc'}`))mobile.value=`${ui.themeSort}:${ui.themeDescending?'desc':'asc'}`;
   }
@@ -295,7 +311,8 @@
     return `<span>${text}</span>${breadth.small_sample?'<small class="small-sample">Small sample · context only</small>':''}`;
   }
 
-  function eligibility(row) { return !row.eligibility?.available ? 'Unavailable' : row.eligibility.eligible ? 'Liquidity eligible' : 'Liquidity ineligible'; }
+  function researchStatus(row,included='Included in research list',excluded='Outside research list') { return !currentResearch()?'Previous rules snapshot':row.role==='Related'?'Context only':!currentSide()?'No directional research list':row.qualifies?included:excluded; }
+  function eligibility(row) { return !currentResearch()?'Previous rules':!row.eligibility?.available ? 'Unavailable' : row.eligibility.eligible ? 'Liquidity eligible' : 'Liquidity ineligible'; }
   function candidateRow(row,location,withTheme=true) {
     const selected=ui.selectedTicker===row.ticker&&ui.selectedTickerTheme===row.theme_id;
     return `<tr data-ticker-row="${esc(row.ticker)}" data-relationship-theme="${esc(row.theme_id)}" class="${selected?'selected-row':''}"><td class="col-ticker" data-label="Ticker">${tickerLink(row.ticker,row.theme_id,ui.candidateLens)}</td>${withTheme?`<td class="col-theme" data-label="Theme">${themeLink(row.theme_id,ui.candidateLens)}</td>`:''}<td class="col-role" data-label="Role">${roleLabel(row.role)}</td><td data-label="Peer strength" class="col-w numeric ${signTone(row.relative?.w)}">${points(row.relative?.w)}</td>${earningsEnabled()?`<td data-label="Earnings" class="col-earnings table-note">${earnings(row.ticker)}</td>`:''}<td class="col-save" data-label="Save">${saveButton(row.ticker,location+':'+row.theme_id,row.theme_id,ui.candidateLens)}</td></tr>`;
@@ -307,13 +324,14 @@
   }
   function lensRows() { return qualifiedRows(); }
   function renderCandidateContext() {
-    const side=v2().list?.side;
-    $('primary-context').textContent=`${marketName(snapshot?.market_direction)} · ${side?side.charAt(0).toUpperCase()+side.slice(1)+'-side chart review':'No directional list'} · ${snapshot?.session||'No completed session'}`;
+    const side=currentSide();
+    const context=!currentResearch()?'Research update required':side?side.charAt(0).toUpperCase()+side.slice(1)+'-side chart review':'No directional list';
+    $('primary-context').textContent=`${marketName(snapshot?.market_direction)} · ${v2().conviction==='selective'?'Reduced conviction · ':''}${context} · ${snapshot?.session||'No completed session'}`;
     renderExportMenu();requestAnimationFrame(UX.indicators);
   }
   function renderCandidates() {
     if(initialLoading)return;
-    if(snapshot&&!v2().schema){
+    if(snapshot&&!currentResearch()){
       renderCandidateContext();$('candidate-results').textContent='Current research list unavailable';
       $('candidates').innerHTML=empty('Research update required','This stored snapshot uses previous rules. Refresh Data to calculate the current list. Themes and Saved remain available.');return;
     }
@@ -324,9 +342,9 @@
         const all=qualifiedRows(),representatives=uniqueRows(all);
     const rows=(ui.candidateMode==='unique'?UX.displayRows(all,representatives,$('candidate-theme').value):all).filter(matchesCandidate);
     const sort=$('candidate-sort').value;
-    rows.sort((a,b)=>(sort==='w-desc'||sort==='w-asc'?compareValues(valid(a.relative?.w)?Number(a.relative.w):null,valid(b.relative?.w)?Number(b.relative.w):null,sort==='w-desc'):sort==='theme'?name(a.theme_id).localeCompare(name(b.theme_id)):sort==='priority'?a.research_order-b.research_order:a.ticker.localeCompare(b.ticker))||a.ticker.localeCompare(b.ticker)||a.theme_id.localeCompare(b.theme_id));
+    rows.sort((a,b)=>(sort==='w-desc'||sort==='w-asc'?compareValues(valid(a.relative?.w)?Number(a.relative.w):null,valid(b.relative?.w)?Number(b.relative.w):null,sort==='w-desc'):sort==='theme'?name(a.theme_id).localeCompare(name(b.theme_id)):sort==='priority'?a.list_order-b.list_order:a.ticker.localeCompare(b.ticker))||a.ticker.localeCompare(b.ticker)||a.theme_id.localeCompare(b.theme_id));
     $('candidate-results').textContent=`${new Set(rows.map(r=>r.ticker)).size} stocks${ui.candidateMode==='relationships'?' · '+rows.length+' relationships':''}`;
-    if(!rows.length){$('candidates').innerHTML=empty(all.length?'No stocks match':'No stocks to review this session',all.length?'Try another filter.':'No daily-eligible members belong to researchable themes.');return;}
+    if(!rows.length){$('candidates').innerHTML=currentSide()?empty(all.length?'No stocks match':'No stocks to review this session',all.length?'Try another filter.':'No daily-eligible members belong to researchable themes.'):empty('No directional research list',marketName(snapshot?.market_direction)+' has no Long or Short research side. Themes, stock context and Saved remain available.');return;}
     $('candidates').innerHTML=candidateTables(rows,'Daily Research List');
   }
   function candidateTables(rows,label) {
@@ -339,13 +357,13 @@
 
   function memberRows(themeId) {
     let rows = (snapshot?.relationships || []).filter(r => r.theme_id === themeId && (!ui.memberSearch || r.ticker.toLowerCase().includes(ui.memberSearch.toLowerCase())) && (!ui.memberRole || r.role === ui.memberRole) && (!ui.memberEligibility || eligibility(r) === ui.memberEligibility));
-    rows.sort((a,b) => ui.memberSort === 'ticker' ? a.ticker.localeCompare(b.ticker) : compareValues(valid(a.relative?.w) ? Number(a.relative.w) : null,valid(b.relative?.w) ? Number(b.relative.w) : null, ui.memberSort === 'w-desc'||ui.memberSort==='priority'&&v2().list?.side!=='short') || a.ticker.localeCompare(b.ticker));
+    rows.sort((a,b) => ui.memberSort === 'ticker'||ui.memberSort==='priority'&&!currentSide() ? a.ticker.localeCompare(b.ticker) : compareValues(valid(a.relative?.w) ? Number(a.relative.w) : null,valid(b.relative?.w) ? Number(b.relative.w) : null, ui.memberSort === 'w-desc'||ui.memberSort==='priority'&&currentSide()==='long') || a.ticker.localeCompare(b.ticker));
     return rows;
   }
   function renderMembers(themeId) {
     const rows = memberRows(themeId), total = (snapshot?.relationships || []).filter(r => r.theme_id === themeId).length;
     $('member-count').textContent = `${rows.length} of ${total} reviewed relationships`;
-    $('member-table').innerHTML = rows.length ? table(['Ticker','Role',{label:'Peer strength (pp)',numeric:true},'Daily eligibility','Research list',...(earningsEnabled() ? ['Earnings'] : []),'Saved'], rows.map(r => `<tr><td>${tickerLink(r.ticker,r.theme_id,'directional')}</td><td>${roleLabel(r.role)}</td><td class="numeric ${signTone(r.relative?.w)}">${points(r.relative?.w)}</td><td class="table-note">${esc(eligibility(r))}</td><td><span class="table-note">${r.role==='Related'?'Context only':r.qualifies ? 'Included in research list' : 'Outside research list'}</span></td>${earningsEnabled() ? `<td class="table-note">${earnings(r.ticker)}</td>` : ''}<td>${saveButton(r.ticker,'member:'+themeId,r.theme_id,'directional')}</td></tr>`), name(themeId) + ' members. Peer-relative performance is an ordering signal.') : empty(total ? 'No members match this view' : 'No reviewed members available', total ? 'Try another ticker, role or eligibility filter.' : 'No reviewed members are available.');
+    $('member-table').innerHTML = rows.length ? table(['Ticker','Role',{label:'Peer strength (pp)',numeric:true},'Daily eligibility','Research list',...(earningsEnabled() ? ['Earnings'] : []),'Saved'], rows.map(r => `<tr><td>${tickerLink(r.ticker,r.theme_id,'directional')}</td><td>${roleLabel(r.role)}</td><td class="numeric ${signTone(r.relative?.w)}">${points(r.relative?.w)}</td><td class="table-note">${esc(eligibility(r))}</td><td><span class="table-note">${researchStatus(r)}</span></td>${earningsEnabled() ? `<td class="table-note">${earnings(r.ticker)}</td>` : ''}<td>${saveButton(r.ticker,'member:'+themeId,r.theme_id,'directional')}</td></tr>`), name(themeId) + ' members. Peer-relative performance is an ordering signal.') : empty(total ? 'No members match this view' : 'No reviewed members available', total ? 'Try another ticker, role or eligibility filter.' : 'No reviewed members are available.');
   }
   function renderDetail(themeId) {
     if(initialLoading){$('detail-content').innerHTML='<p class="loading-state">Loading theme research…</p>';return;}
@@ -353,7 +371,7 @@
     if(!theme){$('detail-content').innerHTML='<a href="#themes" class="back-link">← Back to Themes</a>'+empty('Theme unavailable','This theme is not in the current snapshot.');return;}
     if(theme.status!=='active'){$('detail-content').innerHTML=`<a href="#themes" class="back-link">← Back to Themes</a><h1 id="detail-title" tabindex="-1">${esc(theme.name||themeId)}</h1>${empty('Not currently tracked','This concept has no reviewed calculation basket.') }`;return;}
     const originName=origin.startsWith('#primary')?'research list':origin.startsWith('#saved')?'Saved':origin.startsWith('#overview')?'Overview':'Themes',context=themeResearch(themeId);
-    $('detail-content').innerHTML=`<div class="crumbs"><a href="${esc(origin)}" class="back-link" data-return-theme="${esc(themeId)}">← Back to ${originName}</a>${themeDownload(themeId)}</div><div class="detail-heading"><h1 id="detail-title" tabindex="-1">${esc(theme.name||themeId)}</h1><p class="detail-family">${esc(theme.family)} · ${themeState(themeId)} · ${v2().list?.side==='short'?'Short-side':'Long-side'} context</p></div><div class="detail-primary">${metric('Structural strength '+helpButton('strength'),number(theme.score,1))}${metric('Strength rank '+helpButton('rank'),rankLabel(themeId))}${metric('Last five sessions',recentChange(themeId))}${metric('Theme trend',state(theme.index?.trend))}</div><p class="theme-reason">${esc(context.reason||'Comparison unavailable')} · ${context.researchable?'Daily-eligible members enter today’s research list.':'Members remain available for context.'}</p><div class="detail-summary">${metric('Median 1M return',percent(theme.returns?.[0]?.value,100,true))}${metric('Median 3M return',percent(theme.returns?.[1]?.value,100,true))}${metric('Theme participation '+helpButton('breadth'),participation(themeId))}</div><details class="theme-evidence"><summary>Recent change &amp; trend evidence</summary><dl class="relationship-metrics"><div><dt>Compared with</dt><dd>${esc(context.recent?.session||'History building')}</dd></div><div><dt>Five-session rank change</dt><dd>${valid(context.recent?.rank_change)?number(context.recent.rank_change,0):'Unavailable'}</dd></div><div><dt>Participation change</dt><dd>${valid(context.recent?.breadth_change)?number(context.recent.breadth_change,1)+' pp':'Unavailable'}</dd></div><div><dt>Index / EMA21 / EMA50</dt><dd>${number(theme.index?.level)} / ${number(theme.index?.ema21)} / ${number(theme.index?.ema50)}</dd></div></dl></details><div class="section-heading"><h2>Member stocks</h2><span id="member-count" class="table-meta"></span></div><form id="member-filters" class="filter-bar" role="search" aria-label="Filter theme members"><label class="search-field">Search members<input id="member-search" type="search" placeholder="Ticker…" value="${esc(ui.memberSearch)}"></label><label>Role<select id="member-role"><option value="">All roles</option><option value="Core">Core business</option><option value="Enabler">Supporting business</option><option value="Related">Related context</option></select></label><label>Eligibility<select id="member-eligibility"><option value="">All states</option><option>Liquidity eligible</option><option>Liquidity ineligible</option><option>Unavailable</option></select></label><label>Sort<select id="member-sort"><option value="priority">Peer priority</option><option value="ticker">Ticker A–Z</option><option value="w-desc">Peer strength high to low</option><option value="w-asc">Peer strength low to high</option></select></label></form><div id="member-table" class="table-wrap member-table" role="region" tabindex="0" aria-label="Theme member research"></div>`;
+    $('detail-content').innerHTML=`<div class="crumbs"><a href="${esc(origin)}" class="back-link" data-return-theme="${esc(themeId)}">← Back to ${originName}</a>${themeDownload(themeId)}</div><div class="detail-heading"><h1 id="detail-title" tabindex="-1">${esc(theme.name||themeId)}</h1><p class="detail-family">${esc(theme.family)} · ${themeState(themeId)} · ${sideLabel()}</p></div><div class="detail-primary">${metric('Structural strength '+helpButton('strength'),number(theme.score,1))}${metric('Strength rank '+helpButton('rank'),rankLabel(themeId))}${metric(recentLabel(),recentChange(themeId))}${metric('Theme trend',state(theme.index?.trend))}</div><p class="theme-reason">${esc(context.reason||'Comparison unavailable')} · ${context.researchable?'Daily-eligible members enter today’s research list.':'Members remain available for context.'}</p><div class="detail-summary">${metric('Median 1M return',percent(theme.returns?.[0]?.value,100,true))}${metric('Median 3M return',percent(theme.returns?.[1]?.value,100,true))}${metric('Theme participation '+helpButton('breadth'),participation(themeId))}</div><details class="theme-evidence"><summary>Recent change &amp; trend evidence</summary><dl class="relationship-metrics"><div><dt>Current-basket comparison session</dt><dd>${esc(context.recent?.comparison_session||UX.comparisonMessage(context.recent?.reason))}</dd></div><div><dt>Five-session ${currentSide()?'side':'Strength'} rank change</dt><dd>${valid(currentSide()?context.recent?.directional_rank_change:context.recent?.raw_rank_change)?number(currentSide()?context.recent.directional_rank_change:context.recent.raw_rank_change,0):'Unavailable'}</dd></div><div><dt>Raw structural strength change</dt><dd>${valid(context.recent?.raw_score_change)?number(context.recent.raw_score_change,1)+' pts':UX.comparisonMessage(context.recent?.reason)}</dd></div><div><dt>Participation change</dt><dd>${valid(context.recent?.breadth_change)?number(context.recent.breadth_change,1)+' pp':'Unavailable'}</dd></div><div><dt>Index / EMA21 / EMA50</dt><dd>${number(theme.index?.level)} / ${number(theme.index?.ema21)} / ${number(theme.index?.ema50)}</dd></div></dl></details><div class="section-heading"><h2>Member stocks</h2><span id="member-count" class="table-meta"></span></div><form id="member-filters" class="filter-bar" role="search" aria-label="Filter theme members"><label class="search-field">Search members<input id="member-search" type="search" placeholder="Ticker…" value="${esc(ui.memberSearch)}"></label><label>Role<select id="member-role"><option value="">All roles</option><option value="Core">Core business</option><option value="Enabler">Supporting business</option><option value="Related">Related context</option></select></label><label>Eligibility<select id="member-eligibility"><option value="">All states</option><option>Liquidity eligible</option><option>Liquidity ineligible</option><option>Unavailable</option></select></label><label>Sort<select id="member-sort"><option value="priority">${currentSide()?'Peer priority':'Context order (A–Z)'}</option><option value="ticker">Ticker A–Z</option><option value="w-desc">Peer strength high to low</option><option value="w-asc">Peer strength low to high</option></select></label></form><div id="member-table" class="table-wrap member-table" role="region" tabindex="0" aria-label="Theme member research"></div>`;
     $('member-role').value=ui.memberRole;$('member-eligibility').value=ui.memberEligibility;$('member-sort').value=ui.memberSort;renderMembers(themeId);
   }
 
@@ -367,7 +385,7 @@
     if(!watched.length){$('saved').innerHTML=empty('No Saved tickers','Saved in this browser only');return;}
     $('saved').innerHTML='<p class="saved-scope">Saved in this browser only</p><div class="saved-list">'+watched.map(ticker=>{
       const rows=(snapshot?.relationships||[]).filter(r=>r.ticker===ticker),context=savedContext(ticker,rows),lead=rows.find(r=>r.theme_id===context.theme);
-      const status=!snapshot?'Snapshot loading':!lead?'Relationship unavailable':lead.qualifies?'On today’s research list':'Outside today’s research list';
+      const status=!snapshot?'Snapshot loading':!lead?'Relationship unavailable':researchStatus(lead,'On today’s research list','Outside today’s research list');
       return `<article class="saved-row ${earningsEnabled()?'has-earnings':''}">${tickerLink(ticker,context.theme,context.lens)}<div class="saved-context">${context.theme?themeLink(context.theme,context.lens):'No theme selected'}<small>${status}</small></div><span class="numeric ${signTone(lead?.relative?.w)}">Peer strength ${points(lead?.relative?.w)}${lead?`<small class="saved-w-theme">vs ${esc(name(lead.theme_id))} peers</small>`:''}</span>${earningsEnabled()?`<span class="table-note">${earnings(ticker)}</span>`:''}<button class="button quiet small" data-remove="${esc(ticker)}" data-focus-key="saved-remove:${esc(ticker)}" aria-label="Remove ${esc(ticker)} from Saved">Remove</button></article>`;
     }).join('')+'</div>';
   }
@@ -466,21 +484,21 @@
     if(!t){$('inspector-content').innerHTML=empty('Theme unavailable','This theme is not in the current snapshot.');return;}
     if(t.status!=='active'){$('inspector-content').innerHTML=`<p class="detail-family">${esc(t.family)} · Untracked Concept</p>${empty('No active calculation basket','This concept does not enter Strength, returns or candidate calculations.')}`;return;}
     const v=inspectorView();
-    $('inspector-content').innerHTML=`<div class="inspector-subhead"><span>${esc(t.family)}</span>${themeState(t.theme_id)}</div><div class="inspector-metrics">${metric('Strength '+helpButton('strength'),number(t.score,1))}${metric('Strength Rank '+helpButton('rank'),rankLabel(t.theme_id))}${metric('Trend',state(t.index?.trend))}${metric('1M Return',percent(t.returns?.[0]?.value,100,true))}${metric('3M Return',percent(t.returns?.[1]?.value,100,true))}${metric('Last five sessions',recentChange(t.theme_id))}</div><div class="inspector-breadth">${participation(t.theme_id)}</div><p class="inspector-reason">${esc(themeResearch(t.theme_id).reason||'History building')}. ${helpButton('priority')}</p><div class="section-heading"><h3>Member preview</h3><span class="table-meta">Peer strength (pp) ${helpButton('w')}</span></div><form class="inspector-member-tools" aria-label="Filter member preview"><label>Search<input id="inspector-search" type="search" placeholder="Ticker" value="${esc(v.search)}" data-focus-key="inspector-search"></label><label>View<select id="inspector-view" data-focus-key="inspector-view"><option value="All">All members</option><option value="Primary">On research list</option><option value="Eligible">Liquidity eligible</option><option value="Core">Core business</option><option value="Enabler">Supporting business</option><option value="Related">Related context</option></select></label></form><p id="inspector-member-count" class="table-meta" role="status"></p><div id="inspector-members"></div><div class="inspector-footer"><a class="button secondary" href="${themeHref(t.theme_id)}">Open full theme</a><a class="text-link" href="#methodology?metric=strength">Metric definitions</a></div>`;
+    $('inspector-content').innerHTML=`<div class="inspector-subhead"><span>${esc(t.family)}</span>${themeState(t.theme_id)}</div><div class="inspector-metrics">${metric('Strength '+helpButton('strength'),number(t.score,1))}${metric('Strength Rank '+helpButton('rank'),rankLabel(t.theme_id))}${metric('Trend',state(t.index?.trend))}${metric('1M Return',percent(t.returns?.[0]?.value,100,true))}${metric('3M Return',percent(t.returns?.[1]?.value,100,true))}${metric(recentLabel(),recentChange(t.theme_id))}</div><div class="inspector-breadth">${participation(t.theme_id)}</div><p class="inspector-reason">${esc(themeResearch(t.theme_id).reason||'Research state unavailable')}. ${helpButton('priority')}</p><div class="section-heading"><h3>Member preview</h3><span class="table-meta">Peer strength (pp) ${helpButton('w')}</span></div><form class="inspector-member-tools" aria-label="Filter member preview"><label>Search<input id="inspector-search" type="search" placeholder="Ticker" value="${esc(v.search)}" data-focus-key="inspector-search"></label><label>View<select id="inspector-view" data-focus-key="inspector-view"><option value="All">All members</option><option value="Primary">On research list</option><option value="Eligible">Liquidity eligible</option><option value="Core">Core business</option><option value="Enabler">Supporting business</option><option value="Related">Related context</option></select></label></form><p id="inspector-member-count" class="table-meta" role="status"></p><div id="inspector-members"></div><div class="inspector-footer"><a class="button secondary" href="${themeHref(t.theme_id)}">Open full theme</a><a class="text-link" href="#methodology?metric=strength">Metric definitions</a></div>`;
     $('inspector-view').value=v.filter;renderInspectorMembers();
   }
   function renderInspectorMembers() {
     if(inspector?.kind!=='theme'||!$('inspector-members'))return;
     const v=inspectorView(),all=(snapshot?.relationships||[]).filter(r=>r.theme_id===inspector.id);
     const rows=all.filter(r=>(!v.search||r.ticker.toLowerCase().includes(v.search.toLowerCase()))&&(v.filter==='All'||v.filter==='Primary'&&r.qualifies||v.filter==='Eligible'&&r.eligibility?.eligible||r.role===v.filter));
-    rows.sort((a,b)=>compareValues(valid(a.relative?.w)?Number(a.relative.w):null,valid(b.relative?.w)?Number(b.relative.w):null,v2().list?.side!=='short')||a.ticker.localeCompare(b.ticker));const preview=rows.slice(0,6);
+    rows.sort((a,b)=>currentSide()?compareValues(valid(a.relative?.w)?Number(a.relative.w):null,valid(b.relative?.w)?Number(b.relative.w):null,currentSide()==='long')||a.ticker.localeCompare(b.ticker):a.ticker.localeCompare(b.ticker));const preview=rows.slice(0,6);
     $('inspector-member-count').textContent=`${preview.length} of ${rows.length} members`;
     $('inspector-members').innerHTML=preview.length?`<ul class="inspector-member-list">${preview.map(r=>`<li class="preview-row inspector-member-row" data-member-preview="${esc(r.ticker)}"><div>${tickerLink(r.ticker,r.theme_id,inspector.lens||'directional')}<small>${roleLabel(r.role)}</small></div><span class="numeric ${signTone(r.relative?.w)}">${points(r.relative?.w)}</span>${saveButton(r.ticker,'inspector-member',r.theme_id,inspector.lens||'directional')}</li>`).join('')}</ul>`:empty('No members match','Try another search or view.');
   }
   function tickerRelationship(row,primary=false) {
     const cell=(label,value)=>`<div><dt>${label}</dt><dd>${value}</dd></div>`;
-    const lens='directional',meets=row.qualifies;
-    return `<section class="${primary?'relationship-context':'ticker-relationship'}" ${primary?`data-current-theme="${esc(row.theme_id)}" data-current-w="${esc(row.relative?.w)}" data-current-role="${esc(row.role)}"`:''}><div class="relationship-heading"><h3>${themeLink(row.theme_id,lens)}</h3>${!primary?tickerLink(row.ticker,row.theme_id,lens):''}</div><dl class="relationship-metrics">${cell('Role',roleLabel(row.role))}${cell('Peer-relative strength '+helpButton('w'),`<span class="${primary?'w-value ':''}${signTone(row.relative?.w)}">${points(row.relative?.w)}</span>`)}${cell('Research list',meets?'Included today':'Not included today')}${cell('Liquidity',esc(eligibility(row)))}</dl>${primary&&earningsEnabled()?`<p class="table-note">Earnings · ${earnings(row.ticker)}</p>`:''}<details class="liquidity-details"><summary>Peer returns and liquidity</summary><dl class="relationship-metrics">${cell('1M return vs peers',points(row.relative?.er1))}${cell('3M return vs peers',points(row.relative?.er3))}${cell('Close',money(row.eligibility?.close))}${cell('Average volume · '+(v2().liquidity?.liquidity_sessions||20)+' sessions',number(row.eligibility?.average_volume,0))}${cell('Average dollar volume · '+(v2().liquidity?.liquidity_sessions||20)+' sessions',money(row.eligibility?.average_dollar_volume))}</dl></details></section>`;
+    const lens='directional';
+    return `<section class="${primary?'relationship-context':'ticker-relationship'}" ${primary?`data-current-theme="${esc(row.theme_id)}" data-current-w="${esc(row.relative?.w)}" data-current-role="${esc(row.role)}"`:''}><div class="relationship-heading"><h3>${themeLink(row.theme_id,lens)}</h3>${!primary?tickerLink(row.ticker,row.theme_id,lens):''}</div><dl class="relationship-metrics">${cell('Role',roleLabel(row.role))}${cell('Peer-relative strength '+helpButton('w'),`<span class="${primary?'w-value ':''}${signTone(row.relative?.w)}">${points(row.relative?.w)}</span>`)}${cell('Research list',researchStatus(row,'Included today','Not included today'))}${cell('Liquidity',esc(eligibility(row)))}</dl>${primary&&earningsEnabled()?`<p class="table-note">Earnings · ${earnings(row.ticker)}</p>`:''}<details class="liquidity-details"><summary>Peer returns and liquidity</summary><dl class="relationship-metrics">${cell('1M return vs peers',points(row.relative?.er1))}${cell('3M return vs peers',points(row.relative?.er3))}${cell('Close',money(row.eligibility?.close))}${cell('Average volume · '+(currentResearch()?v2().policy.liquidity_sessions+' sessions':'previous rules'),number(row.eligibility?.average_volume,0))}${cell('Average dollar volume · '+(currentResearch()?v2().policy.liquidity_sessions+' sessions':'previous rules'),money(row.eligibility?.average_dollar_volume))}</dl></details></section>`;
   }
   function renderTickerInspector() {
     const ticker=inspector.id,rows=(snapshot?.relationships||[]).filter(r=>r.ticker===ticker).sort((a,b)=>name(a.theme_id).localeCompare(name(b.theme_id)));
@@ -546,16 +564,17 @@
     const signature=JSON.stringify(data);
     if (signature === snapshotSignature) return; // Polling must not replace a focused or expanded research control.
     const focused = focusKey(), memberFocused = document.activeElement?.id?.startsWith('member-') ? {id:document.activeElement.id,start:document.activeElement.selectionStart} : null;
-    const scroll = window.scrollY, themeScroll = $('theme-table').scrollTop,previousMarket=snapshot?.market_direction;
+    const scroll = window.scrollY, themeScroll = $('theme-table').scrollTop,previousMarket=snapshot?.market_direction,previousSide=currentSide();
     interactions.closeHelp();snapshot=data;snapshotSignature=signature;
-    $('research-version-notice').hidden=Boolean(v2().schema);
+    if(!previousMarket||previousSide!==currentSide()){ui.themeSort='priority';ui.themeDescending=false;$('theme-priority').value='';}
+    $('research-version-notice').hidden=currentResearch();
     $('research-version-notice').textContent=publicSnapshot?'This frozen snapshot uses previous research rules. Open a current snapshot for the new research list.':'This stored snapshot uses previous research rules. Refresh Data to calculate the current research list.';
     ui.candidateLens='directional';
     for (const url of blobUrls.values()) URL.revokeObjectURL(url); blobUrls.clear();
     renderLayer(); renderOverview();
-    const rules=v2().liquidity;
+    const rules=v2().policy;
     if(rules){
-      $('method-state-rule').textContent=`Structural boundary: ${rules.structural_boundary} points. A change of at least ${rules.material_score_change} points over ${rules.change_sessions} completed sessions is material. Short-side strength uses 100 minus structural strength, with the change direction reversed.`;
+      $('method-state-rule').textContent=`Structural boundary: ${rules.structural_boundary} points. A change of at least ${rules.material_score_change} points over ${rules.change_sessions} completed sessions is material. Short-side research favors raw structural weakness, with changes reversed. Exactly 50 is a directional tie for both sides. Selective states keep the same members but place structurally established Fading themes ahead of below-boundary Improving themes.`;
       $('method-liquidity-rule').textContent=`Require a completed-session close above $${number(rules.price_floor_exclusive,0)} and average dollar volume of at least ${money(rules.average_dollar_volume_floor)} over ${rules.liquidity_sessions} completed regular sessions.`;
     }
     if(previousMarket&&previousMarket!==snapshot.market_direction&&route==='#overview')UX.move($('market-direction'),'sweep');

@@ -15,7 +15,9 @@ import time
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT), str(ROOT/'tests')]
-from professional_ui_fixture import make
+from professional_ui_fixture import make,research_states
+from test_research_v2_adversarial import fixture as contract_fixture
+from src.themescope.storage import canonical
 
 
 def main():
@@ -33,6 +35,8 @@ def main():
                   passed=False, workflows=[], responsive=[], axe={}, screenshots=[], performance={})
     with tempfile.TemporaryDirectory() as folder, patch('src.themescope.local.service.optional_earnings', return_value={}):
         fixture, base, short = make(folder)
+        cases=research_states(fixture,base)
+        assert set(cases)=={'Long bias','Selective long','Neutral','Selective short','Short bias','Unclassified'}
         assert len([t for t in base['themes'] if t['status']=='active']) == 44
         assert base['research_v2']['list']['stock_count'] >= 100
         state = dict(snapshot=deepcopy(base), connected=True, hold=True, pending=[], status=fixture.service.status())
@@ -191,6 +195,57 @@ def main():
                 short_order=page.locator('#candidates [data-ticker-row]').evaluate_all('els=>els.map(e=>e.dataset.tickerRow)')
                 assert short_order==list(dict.fromkeys(r['ticker'] for r in short['research_v2']['list']['rows']))
                 result['workflows'].append('Short side uses authoritative symmetric selection and peer order')
+                for direction,data in cases.items():
+                    update(data);nav('overview')
+                    side=data['research_v2']['current_side']
+                    if 'Selective' in direction:expect(page.locator('#market-direction')).to_contain_text('Reduced conviction')
+                    if side is None:
+                        expect(page.locator('#market-direction')).to_contain_text('No directional research list')
+                        expect(page.locator('#change-board')).to_contain_text('No directional theme states')
+                    nav('primary')
+                    rendered=page.locator('#candidates [data-ticker-row]').evaluate_all('els=>els.map(e=>e.dataset.tickerRow)')
+                    assert rendered==list(dict.fromkeys(r['ticker'] for r in data['research_v2']['list']['rows']))
+                    nav('themes')
+                    expected=[key for key in data['research_v2']['theme_order'] if data['research_v2']['themes'][key]['structural_score'] is not None]
+                    actual=page.locator('[data-theme-row]').evaluate_all('els=>els.map(e=>e.dataset.themeRow)')
+                    assert actual==expected,(direction,actual,expected)
+                    if side is None:
+                        assert page.locator('#theme-table .theme-state').all_text_contents()==['Non-directional']*44
+                        page.locator('#theme-search').fill('semiconductors');page.locator('#theme-table [data-inspect-theme]').first.click()
+                        page.locator('#inspector-search').fill('');page.locator('#inspector-view').select_option('All')
+                        tickers=page.locator('#inspector-members [data-inspect-ticker]').evaluate_all('els=>els.map(e=>e.dataset.inspectTicker)')
+                        assert tickers==sorted(tickers)
+                        assert 'Long-side' not in page.locator('#inspector-content').inner_text()
+                        page.locator('#inspector-members [data-inspect-ticker]').first.click()
+                        expect(page.locator('#inspector-content')).to_contain_text('No directional research list')
+                        close_inspector();page.locator('#theme-search').fill('')
+                    if side=='short':
+                        improving=next((key for key,row in data['research_v2']['themes'].items() if row['current_state']=='Improving'),None)
+                        if improving:
+                            recent=data['research_v2']['themes'][improving]['recent']
+                            assert float(recent['raw_score_change'])<0<float(recent['directional_score_change'])
+                            nav('overview');expect(page.locator('#change-board')).to_contain_text('Improving for Short research')
+                    if direction in ('Short bias','Neutral','Selective long'):
+                        for width in (1440,390):
+                            page.set_viewport_size(dict(width=width,height=900 if width==1440 else 844))
+                            for surface in ('overview','themes'):
+                                nav(surface);width_ok(direction+'-'+surface);capture(direction.lower().replace(' ','-')+'-'+surface+'-'+str(width))
+                            page.locator('#theme-table [data-inspect-theme]').first.click()
+                            width_ok(direction+'-inspector');capture(direction.lower().replace(' ','-')+'-inspector-'+str(width))
+                            close_inspector()
+                        page.set_viewport_size(dict(width=1440,height=1000))
+                for options,label in ((dict(target_index=67),'Not enough completed history'),
+                                      (dict(missing='population'),'Scored theme universe changed'),
+                                      (dict(missing='scores'),'Structural strength unavailable')):
+                    data=json.loads(canonical(contract_fixture('Long Bias',**options)))
+                    data['market']=deepcopy(base['market']);data['market']['decision']['direction']='Long Bias'
+                    update(data);nav('overview');expect(page.locator('#change-board')).to_contain_text(label)
+                    expect(page.locator('#change-board')).to_contain_text('Five-session comparison unavailable')
+                    nav('themes');expect(page.locator('#theme-table')).to_contain_text(label)
+                    page.set_viewport_size(dict(width=390,height=844));width_ok(label)
+                    capture('unavailable-'+data['research_v2']['comparison']['reason']+'-390')
+                    page.set_viewport_size(dict(width=1440,height=1000))
+                result['workflows'].append('Six coherent backend states; Selective priority; non-directional alphabetical context and empty list; Short directional change; unavailable reasons')
                 update(base)
 
                 for width in (1920,1440,1280,768,430,390,360,320):
@@ -230,8 +285,7 @@ def main():
                 nav('themes');expect(page.locator('#theme-table tbody tr')).to_have_count(44)
                 capture('connection-error-1440');state['connected']=True
                 expect(page.locator('#progress')).not_to_contain_text('Connection lost',timeout=6000)
-                neutral=deepcopy(base);neutral['market_direction']='Neutral';neutral['research_v2']['list'].update(rows=[],stock_count=0,relationship_count=0,side=None)
-                neutral['exports']=dict(combined='',individual={},assignments={})
+                neutral=cases['Neutral']
                 update(neutral);nav('primary');expect(page.locator('#candidates [data-ticker-row]')).to_have_count(0)
                 capture('empty-neutral-1440');audit('empty-neutral')
                 update(base)

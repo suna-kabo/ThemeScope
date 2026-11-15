@@ -178,18 +178,26 @@ RESEARCH = object_rule(dict(schema=text, policy_version=text, policy_hash=text,
     **{'countertrend?':object_rule(dict(available=boolean, side=optional(text), buckets=object_rule(dict(resilient=BUCKET,snapback=BUCKET)), stock_count=numeric, relationship_count=numeric, ordering_note=text))},
     companies=keyed(text,SYMBOL)))
 
-RECENT = object_rule(dict(available=boolean, session=optional(text), score_change=numeric,
-    rank_change=numeric, breadth_change=numeric, reason=text))
-V2_THEME = object_rule(dict(state=text, short_state=text, structural_score=numeric, recent=RECENT,
-    rank=numeric, side=optional(text), researchable=boolean, reason=text,
+RECENT = object_rule(dict(available=boolean, comparison_session=optional(text), raw_score_change=numeric,
+    directional_score_change=numeric,raw_rank_change=numeric,directional_rank_change=numeric,
+    breadth_change=numeric, reason=text))
+POPULATION=object_rule(dict(current=sequence(text),previous=sequence(text)))
+COMPARISON=object_rule(dict(version=text,available=boolean,reason=text,basis=text,basis_session=text,
+    current_session=text,previous_session=optional(text),change_sessions=numeric,methodology=text,
+    membership_hash=text,official_history=boolean,
+    horizon_populations=object_rule({'21?':POPULATION,'63?':POPULATION}),ranked_population=sequence(text)))
+V2_THEME = object_rule(dict(long_state=text, short_state=text,current_state=optional(text),
+    structural_score=numeric, recent=RECENT,strength_rank=numeric,research_order_index=numeric,
+    current_side=optional(text), researchable=boolean, reason=text,
     breadth=object_rule(dict(above=numeric, total=numeric, percent=numeric, small_sample=boolean))))
 V2_ROW = object_rule(dict(ticker=text, theme_id=text, role=text, w=numeric, theme_state=text,
-    theme_rank=numeric, eligible=boolean, eligibility_reasons=sequence(text)))
+    research_order_index=numeric, eligible=boolean, eligibility_reasons=sequence(text)))
 V2_POLICY = object_rule(dict(version=text, change_sessions=numeric, structural_boundary=numeric,
     material_score_change=numeric, liquidity_sessions=numeric, price_floor_exclusive=numeric,
-    average_dollar_volume_floor=numeric, breadth_small_sample=numeric, state_order=sequence(text)))
-RESEARCH_V2 = object_rule(dict(schema=text, policy_version=text, themes=keyed(V2_THEME,SLUG),
-    theme_order=sequence(text), liquidity=V2_POLICY,
+    average_dollar_volume_floor=numeric, breadth_small_sample=numeric,state_order=sequence(text),selective_state_order=sequence(text)))
+RESEARCH_V2 = object_rule(dict(schema=text,contract_revision=numeric,policy_version=text,
+    current_side=optional(text),conviction=text,themes=keyed(V2_THEME,SLUG),comparison=COMPARISON,
+    theme_order=sequence(text), policy=V2_POLICY,
     list=object_rule(dict(side=optional(text), rows=sequence(V2_ROW), stock_count=numeric, relationship_count=numeric)),
     changes=object_rule(dict(market_direction=text, previous_market_direction=optional(text), changed=optional(boolean)))))
 
@@ -279,6 +287,11 @@ def project_snapshot(source, expected):
         assignments[symbol] = row
     result['exports'] = dict(combined=txt(exported.get('combined'), True),
         individual={t:txt(value) for t,value in exported['individual'].items()}, assignments=assignments)
+    if v2:
+        from scripts.research_v2_projection import validate_v2
+        try:validate_v2(result)
+        except (ValueError,TypeError,KeyError):
+            raise SnapshotError('Research v2 semantics or exports are inconsistent.') from None
     earnings = source.get('earnings', {})
     if not isinstance(earnings, dict):
         raise SnapshotError('Earnings presentation is malformed.')

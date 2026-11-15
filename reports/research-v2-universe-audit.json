@@ -19208,7 +19208,7 @@
     "status": "reviewed",
     "reviewed_on": "2026-11-14",
     "effective_from": "2026-11-16",
-    "authorization_reference": "THEMESCOPE_CODEX_MASTER.md sections 1, 5 and 6 authorize evidence-reviewed membership expansion in this redevelopment; immutable forward additions only.",
+    "authorization_reference": "docs/operations/research-v2-membership-authorization.md#authorized-scope records the project owner's authorization for evidence-reviewed, immutable forward additions.",
     "base_universe_source": {
       "sha256": "49e72888c4a029075fc01e2b9f9a28bfcaeddf7e5df960bca52adfff5c9de25f",
       "security_type_basis": "user_scanner_attestation",
@@ -19378,6 +19378,352 @@
       "multi_theme_stocks": 57
     }
   },
+  "review_completion": {
+    "machine_candidates": 560,
+    "cohort_triage": [
+      {
+        "theme_id": "aerospace-defense",
+        "candidate_relationships": 27,
+        "rule_ids": [
+          "IND-aerospace-defense-aerospace-defense-core"
+        ],
+        "charter": "Companies whose principal business supplies aircraft, aerospace systems, defense platforms, military electronics or defense services.",
+        "exclusions": "General industrial companies with incidental aerospace sales.",
+        "required_review": "Verify issuer aerospace/defense activity and segment materiality rather than inferring exposure from general component manufacturing",
+        "decision": "defer_unreviewed_companies_without_auto_apply"
+      },
+      {
+        "theme_id": "agribusiness",
+        "candidate_relationships": 17,
+        "rule_ids": [
+          "IND-agribusiness-agricultural-commodities-milling-core",
+          "IND-agribusiness-chemicals-agricultural-core",
+          "IND-agribusiness-trucks-construction-farm-machinery-core"
+        ],
+        "charter": "Companies whose principal business supports agricultural production, inputs, machinery, crop processing or animal/agricultural commodities.",
+        "exclusions": "General food brands and retailers.",
+        "required_review": "Verify principal agricultural/input operations and distinguish general food processing, retail and incidental commodity exposure",
+        "decision": "defer_unreviewed_companies_without_auto_apply"
+      },
+      {
+        "theme_id": "airlines",
+        "candidate_relationships": 5,
+        "rule_ids": [
+          "IND-airlines-airlines-core"
+        ],
+        "charter": "Passenger airlines whose principal business is scheduled air transportation.",
+        "exclusions": "Aircraft makers; airports; travel platforms; cargo-only logistics.",
+        "required_review": "Verify airline transport operations and distinguish lessors, travel intermediaries and other transport businesses",
+        "decision": "defer_unreviewed_companies_without_auto_apply"
+      },
+      {
+        "theme_id": "biotechnology",
+        "candidate_relationships": 47,
+        "rule_ids": [
+          "IND-biotechnology-biotechnology-core"
+        ],
+        "charter": "Companies primarily engaged in biotechnology-based therapeutics, biologics, cell/gene therapies or biotech drug discovery.",
+        "exclusions": "CROs, diagnostics-only firms, medical devices and diversified pharma where biotech is not the principal business.",
+        "required_review": "Inspect current pipeline and operating activities; resolve biotech/pharma/platform overlap rather than relying on the industry tag",
+        "decision": "defer_unreviewed_companies_without_auto_apply"
+      },
+      {
+        "theme_id": "capital-markets",
+        "candidate_relationships": 55,
+        "rule_ids": [
+          "IND-capital-markets-financial-publishing-services-core",
+          "IND-capital-markets-investment-banks-brokers-core",
+          "IND-capital-markets-investment-managers-core"
+        ],
+        "charter": "Companies whose principal business is brokerage, investment banking, exchanges, asset management, market infrastructure or financial-market data.",
+        "exclusions": "Commercial banks where capital markets is not principal.",
+        "required_review": "Establish the operating capital-markets business; distinguish managers/brokers/exchanges from investment vehicles and incidental holdings",
+        "decision": "defer_unreviewed_companies_without_auto_apply"
+      },
+      {
+        "theme_id": "construction-infrastructure",
+        "candidate_relationships": 35,
+        "rule_ids": [
+          "IND-construction-infrastructure-construction-materials-core",
+          "IND-construction-infrastructure-engineering-construction-core",
+          "IND-construction-infrastructure-trucks-construction-farm-machinery-core"
+        ],
+        "charter": "Companies whose principal business builds, supplies or equips large physical infrastructure and construction projects.",
+        "exclusions": "Pure homebuilders; generic industrial conglomerates.",
+        "required_review": "Verify physical infrastructure exposure and charter exclusions, particularly pure homebuilding and generic industrial activity",
+        "decision": "defer_unreviewed_companies_without_auto_apply"
+      },
+      {
+        "theme_id": "healthcare-providers",
+        "candidate_relationships": 21,
+        "rule_ids": [
+          "IND-healthcare-providers-hospital-nursing-management-core",
+          "IND-healthcare-providers-managed-health-care-core",
+          "IND-healthcare-providers-medical-nursing-services-core",
+          "IND-healthcare-providers-services-to-the-health-industry-core"
+        ],
+        "charter": "Companies whose principal business is delivering, financing, administering or supporting healthcare services.",
+        "exclusions": "Drug/device manufacturers; healthcare REITs.",
+        "required_review": "Establish care delivery or healthcare-service operations; distinguish drug/device businesses and incidental health exposure",
+        "decision": "defer_unreviewed_companies_without_auto_apply"
+      },
+      {
+        "theme_id": "homebuilders",
+        "candidate_relationships": 7,
+        "rule_ids": [
+          "IND-homebuilders-homebuilding-core"
+        ],
+        "charter": "Companies whose principal business is residential home construction.",
+        "exclusions": "Building-material suppliers and home-improvement retailers.",
+        "required_review": "Verify principal residential construction; FTDR fails that relationship, CVCO fits but awaits separate approval, LEN.B needs share-class review",
+        "decision": "defer_unreviewed_companies_without_auto_apply"
+      },
+      {
+        "theme_id": "insurance",
+        "candidate_relationships": 53,
+        "rule_ids": [
+          "IND-insurance-insurance-brokers-services-core",
+          "IND-insurance-life-health-insurance-core",
+          "IND-insurance-multi-line-insurance-core",
+          "IND-insurance-property-casualty-insurance-core"
+        ],
+        "charter": "Companies whose principal business is underwriting insurance, reinsurance or insurance brokerage/services.",
+        "exclusions": "Banks and asset managers.",
+        "required_review": "Establish insurance underwriting, reinsurance or brokerage operations and the proposed Core/Enabler relationship",
+        "decision": "defer_unreviewed_companies_without_auto_apply"
+      },
+      {
+        "theme_id": "leisure-entertainment",
+        "candidate_relationships": 23,
+        "rule_ids": [
+          "IND-leisure-entertainment-hotels-resorts-cruise-lines-core",
+          "IND-leisure-entertainment-movies-entertainment-core"
+        ],
+        "charter": "Companies whose principal business is live entertainment, theme/media entertainment, cruises, hotels/resorts or consumer leisure experiences.",
+        "exclusions": "Pure online platforms; gambling-only companies; video-game publishers.",
+        "required_review": "Verify the actual leisure/entertainment operator and resolve media, platform and untracked gaming overlap",
+        "decision": "defer_unreviewed_companies_without_auto_apply"
+      },
+      {
+        "theme_id": "marine-shipping",
+        "candidate_relationships": 17,
+        "rule_ids": [
+          "IND-marine-shipping-marine-shipping-core"
+        ],
+        "charter": "Companies whose principal business is marine freight shipping, tankers, bulk carriers or maritime transport services.",
+        "exclusions": "Cruise lines; offshore oil services unless shipping is principal.",
+        "required_review": "Verify the commercial shipping business and distinguish operator, leasing, port and shipbuilding relationships",
+        "decision": "defer_unreviewed_companies_without_auto_apply"
+      },
+      {
+        "theme_id": "midstream-lng",
+        "candidate_relationships": 4,
+        "rule_ids": [
+          "IND-midstream-lng-oil-gas-pipelines-core"
+        ],
+        "charter": "Companies whose principal business transports, stores, processes or liquefies natural gas and hydrocarbons.",
+        "exclusions": "Upstream producers; regulated gas utilities.",
+        "required_review": "Verify pipeline, storage, processing or LNG infrastructure operations and distinguish upstream producers and incidental suppliers",
+        "decision": "defer_unreviewed_companies_without_auto_apply"
+      },
+      {
+        "theme_id": "oil-gas-producers",
+        "candidate_relationships": 19,
+        "rule_ids": [
+          "IND-oil-gas-producers-integrated-oil-core",
+          "IND-oil-gas-producers-oil-gas-production-core"
+        ],
+        "charter": "Companies whose principal business is exploration, production or integrated production of crude oil and natural gas.",
+        "exclusions": "Midstream pipelines; oilfield services; refiners.",
+        "required_review": "Verify upstream production exposure and distinguish producing operations from royalty, midstream and refining businesses",
+        "decision": "defer_unreviewed_companies_without_auto_apply"
+      },
+      {
+        "theme_id": "oil-services",
+        "candidate_relationships": 7,
+        "rule_ids": [
+          "IND-oil-services-contract-drilling-core",
+          "IND-oil-services-oilfield-services-equipment-core"
+        ],
+        "charter": "Companies whose principal business supplies equipment, drilling or services to oil and gas producers.",
+        "exclusions": "Oil/gas producers; pipelines.",
+        "required_review": "Verify drilling/oilfield-service activity and distinguish producers and general industrial suppliers",
+        "decision": "defer_unreviewed_companies_without_auto_apply"
+      },
+      {
+        "theme_id": "pharmaceuticals",
+        "candidate_relationships": 69,
+        "rule_ids": [
+          "IND-pharmaceuticals-pharmaceuticals-major-core",
+          "IND-pharmaceuticals-pharmaceuticals-other-core"
+        ],
+        "charter": "Companies whose principal business is development and commercialization of prescription pharmaceuticals.",
+        "exclusions": "Medical devices, diagnostics, CROs, providers.",
+        "required_review": "Establish principal drug-development/manufacturing exposure and distinguish distributors, service providers and mixed businesses",
+        "decision": "defer_unreviewed_companies_without_auto_apply"
+      },
+      {
+        "theme_id": "regional-banks",
+        "candidate_relationships": 80,
+        "rule_ids": [
+          "IND-regional-banks-regional-banks-core",
+          "IND-regional-banks-savings-banks-core"
+        ],
+        "charter": "Commercial banks whose business is primarily regional/community banking rather than global money-center banking.",
+        "exclusions": "Fintech lenders; payment companies; money-center banks.",
+        "required_review": "Establish actual regional banking operations and geography; distinguish bank operators from other financial issuers",
+        "decision": "defer_unreviewed_companies_without_auto_apply"
+      },
+      {
+        "theme_id": "retail",
+        "candidate_relationships": 51,
+        "rule_ids": [
+          "IND-retail-apparel-footwear-retail-core",
+          "IND-retail-department-stores-core",
+          "IND-retail-electronics-appliance-stores-core",
+          "IND-retail-food-retail-core",
+          "IND-retail-home-improvement-chains-core",
+          "IND-retail-specialty-stores-core"
+        ],
+        "charter": "Companies whose principal business is physical or omnichannel retailing of consumer goods.",
+        "exclusions": "Online-only marketplaces assigned to Internet Platforms; restaurants.",
+        "required_review": "Distinguish retail operators from brands, wholesalers and manufacturers; verify the principal customer-facing retail activity",
+        "decision": "defer_unreviewed_companies_without_auto_apply"
+      },
+      {
+        "theme_id": "semiconductors",
+        "candidate_relationships": 16,
+        "rule_ids": [
+          "IND-semiconductors-semiconductors-core"
+        ],
+        "charter": "Companies whose principal business is semiconductor design, manufacturing, memory, analog/power ICs, foundry services, or semiconductor production/test equipment.",
+        "exclusions": "Solar manufacturers; optical-networking vendors without a semiconductor principal business; lidar-only businesses; generic electronics manufacturing.",
+        "required_review": "Verify chip design/fabrication/equipment activity; FSLR demonstrates that an industry label can otherwise admit solar manufacturing",
+        "decision": "defer_unreviewed_companies_without_auto_apply"
+      },
+      {
+        "theme_id": "timber-forestry",
+        "candidate_relationships": 4,
+        "rule_ids": [
+          "IND-timber-forestry-forest-products-core",
+          "IND-timber-forestry-pulp-paper-core"
+        ],
+        "charter": "Companies whose principal business is timberland ownership, forestry, lumber, wood products or pulp/paper tied to forest resources.",
+        "exclusions": "Packaging-only companies with little forest-resource exposure.",
+        "required_review": "Verify principal forestry/timber activity and resolve packaging, pulp, general real-estate and mixed-business exposure",
+        "decision": "defer_unreviewed_companies_without_auto_apply"
+      },
+      {
+        "theme_id": "water",
+        "candidate_relationships": 3,
+        "rule_ids": [
+          "IND-water-water-utilities-core"
+        ],
+        "charter": "Companies whose principal or material business supplies, treats, measures or distributes water and wastewater.",
+        "exclusions": "General industrials with immaterial water exposure.",
+        "required_review": "Verify principal/material water or wastewater operations; original three screened omissions have issuer-backed approvals in the amendment",
+        "decision": "defer_unreviewed_companies_without_auto_apply"
+      }
+    ],
+    "company_decisions": [
+      {
+        "ticker": "CCS",
+        "theme_id": "homebuilders",
+        "decision": "approved_forward_amendment",
+        "reviewed_on": "2026-11-14",
+        "effective_from": "2026-11-16",
+        "source_url": "https://www.centurycommunities.com/about-us/",
+        "rationale": "Century Communities and Century Complete build single-family homes, townhomes, paired homes and condos. Principal homebuilding matches the existing residential construction charter."
+      },
+      {
+        "ticker": "GRBK",
+        "theme_id": "homebuilders",
+        "decision": "approved_forward_amendment",
+        "reviewed_on": "2026-11-14",
+        "effective_from": "2026-11-16",
+        "source_url": "https://greenbrickpartners.com/",
+        "rationale": "The issuer describes a residential land-development and homebuilding company operating consolidated homebuilder brands. Principal residential construction supports Core membership."
+      },
+      {
+        "ticker": "NVR",
+        "theme_id": "homebuilders",
+        "decision": "approved_forward_amendment",
+        "reviewed_on": "2026-11-14",
+        "effective_from": "2026-11-16",
+        "source_url": "https://www.nvrinc.com/",
+        "rationale": "NVR constructs and sells residential homes; its mortgage operations support those homebuyers. Homebuilding is a principal operating business, matching the existing Core charter."
+      },
+      {
+        "ticker": "MHO",
+        "theme_id": "homebuilders",
+        "decision": "approved_forward_amendment",
+        "reviewed_on": "2026-11-14",
+        "effective_from": "2026-11-16",
+        "source_url": "https://investors.mihomes.com/investor-relations/corporate-profile/",
+        "rationale": "The issuer identifies its principal business as single-family homebuilding, serving multiple residential buyer segments. This directly matches the existing Homebuilders Core definition."
+      },
+      {
+        "ticker": "AWR",
+        "theme_id": "water",
+        "decision": "approved_forward_amendment",
+        "reviewed_on": "2026-11-14",
+        "effective_from": "2026-11-16",
+        "source_url": "https://www.aswater.com/",
+        "rationale": "Golden State Water supplies regulated water service; American States Utility Services operates military-base water and wastewater systems. Water is a material operating business, supporting Core rather than incidental exposure."
+      },
+      {
+        "ticker": "CWT",
+        "theme_id": "water",
+        "decision": "approved_forward_amendment",
+        "reviewed_on": "2026-11-14",
+        "effective_from": "2026-11-16",
+        "source_url": "https://www.calwatergroup.com/investors/company-information",
+        "rationale": "The group operates regulated water utilities and related water/wastewater services. Principal water distribution and treatment meet the existing Water Core charter."
+      },
+      {
+        "ticker": "MSEX",
+        "theme_id": "water",
+        "decision": "approved_forward_amendment",
+        "reviewed_on": "2026-11-14",
+        "effective_from": "2026-11-16",
+        "source_url": "https://www.middlesexwater.com/about-us/",
+        "rationale": "Middlesex owns and operates regulated water and wastewater systems and provides contract operations. Principal water utility activities directly support Core membership."
+      },
+      {
+        "ticker": "FTDR",
+        "theme_id": "homebuilders",
+        "decision": "rejected_company_review",
+        "source_url": "https://www.frontdoorhome.com/about/",
+        "rationale": "Home-maintenance service plans do not establish principal residential construction"
+      },
+      {
+        "ticker": "FSLR",
+        "theme_id": "semiconductors",
+        "decision": "rejected_company_review",
+        "source_url": "https://www.firstsolar.com/en/About-Us/Overview",
+        "rationale": "Solar manufacturing belongs to its supported Solar charter; a broad industry label does not establish this semiconductor relationship"
+      },
+      {
+        "ticker": "CVCO",
+        "theme_id": "homebuilders",
+        "decision": "suitable_proposal_pending_separate_approval",
+        "reviewed_on": "2026-11-15",
+        "source_url": "https://investor.cavco.com/",
+        "rationale": "Issuer describes principal manufactured/modular housing; a suitable charter fit, kept unapplied pending its own dated approval rather than backdating the existing amendment"
+      },
+      {
+        "ticker": "LEN.B",
+        "theme_id": "homebuilders",
+        "decision": "deferred_share_class_policy",
+        "reviewed_on": "2026-11-15",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/920760/000162828026003870/len-20251130.htm",
+        "rationale": "Issuer confirms a second share class of already represented LEN; review duplicate-issuer treatment before adding another economically overlapping security"
+      }
+    ],
+    "not_company_evidence_reviewed": 549,
+    "exhaustive_company_review_complete": false,
+    "screening_never_applies_membership": true
+  },
   "sources": {
     "Daily_Stock_2026-11-14 (1).csv": "49e72888c4a029075fc01e2b9f9a28bfcaeddf7e5df960bca52adfff5c9de25f",
     "industry_rule_registry.json": "e3c436863a9e1452a0067d6987db1af3eaa833e389a7efe53706d69e6b0f7581",
@@ -19386,6 +19732,6 @@
     "corporate_actions.json": "1ed8294eddcc55cc0066e582139f7a9b6f506e8b3afe31f5a9dbb5f56b14e3e1",
     "membership_master_review.json": "6af2c7fe8d72bd28a6375fbe2c50912d44325f5d3b589723429178529012cc34",
     "primary_source_attachments.json": "5ec670492a43cb527c2276a5a25faf83d17c6a9175e43a6c74387d470d844159",
-    "research_v2_membership_review.json": "6ae5067bb39f1a489ea1fdc374a9a6efd19a3b98f582045a979a035aab5c284d"
+    "research_v2_membership_review.json": "0b298dcb419fd5d5ade852438192c08062440b549b3c5cb2020bb8bf7dc1de99"
   }
 }

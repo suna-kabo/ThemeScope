@@ -182,6 +182,71 @@ def audit(base, configuration, rules, as_of):
     }
 
 
+def review_completion(result, configuration, amendment):
+    """Separate screening/charter triage from actual company-evidence decisions."""
+    candidates = result['membership_review']
+    groups = defaultdict(list)
+    for row in candidates:
+        groups[row['theme_id']].append(row)
+    charters = {theme.theme_id: theme for theme in configuration.themes}
+    decisions = [{'ticker': row['ticker'], 'theme_id': row['theme_id'],
+                  'decision': 'approved_forward_amendment', 'reviewed_on': amendment['reviewed_on'],
+                  'effective_from': amendment['effective_from'],
+                  'source_url': row['evidence']['source_url'],
+                  'rationale': row['evidence']['support_summary']} for row in amendment['additions']]
+    decisions += [
+        dict(ticker='FTDR', theme_id='homebuilders', decision='rejected_company_review',
+             source_url='https://www.frontdoorhome.com/about/',
+             rationale='Home-maintenance service plans do not establish principal residential construction'),
+        dict(ticker='FSLR', theme_id='semiconductors', decision='rejected_company_review',
+             source_url='https://www.firstsolar.com/en/About-Us/Overview',
+             rationale='Solar manufacturing belongs to its supported Solar charter; a broad industry label does not establish this semiconductor relationship'),
+        dict(ticker='CVCO', theme_id='homebuilders', decision='suitable_proposal_pending_separate_approval',
+             reviewed_on='2026-11-15', source_url='https://investor.cavco.com/',
+             rationale='Issuer describes principal manufactured/modular housing; a suitable charter fit, kept unapplied pending its own dated approval rather than backdating the existing amendment'),
+        dict(ticker='LEN.B', theme_id='homebuilders', decision='deferred_share_class_policy',
+             reviewed_on='2026-11-15',
+             source_url='https://www.sec.gov/Archives/edgar/data/920760/000162828026003870/len-20251130.htm',
+             rationale='Issuer confirms a second share class of already represented LEN; review duplicate-issuer treatment before adding another economically overlapping security')]
+    candidate_pairs = {(row['ticker'], row['theme_id']) for row in candidates}
+    decisions = [row for row in decisions if (row['ticker'], row['theme_id']) in candidate_pairs]
+    cohorts = []
+    evidence_gaps = {
+        'regional-banks':'Establish actual regional banking operations and geography; distinguish bank operators from other financial issuers',
+        'pharmaceuticals':'Establish principal drug-development/manufacturing exposure and distinguish distributors, service providers and mixed businesses',
+        'capital-markets':'Establish the operating capital-markets business; distinguish managers/brokers/exchanges from investment vehicles and incidental holdings',
+        'insurance':'Establish insurance underwriting, reinsurance or brokerage operations and the proposed Core/Enabler relationship',
+        'retail':'Distinguish retail operators from brands, wholesalers and manufacturers; verify the principal customer-facing retail activity',
+        'biotechnology':'Inspect current pipeline and operating activities; resolve biotech/pharma/platform overlap rather than relying on the industry tag',
+        'construction-infrastructure':'Verify physical infrastructure exposure and charter exclusions, particularly pure homebuilding and generic industrial activity',
+        'aerospace-defense':'Verify issuer aerospace/defense activity and segment materiality rather than inferring exposure from general component manufacturing',
+        'leisure-entertainment':'Verify the actual leisure/entertainment operator and resolve media, platform and untracked gaming overlap',
+        'healthcare-providers':'Establish care delivery or healthcare-service operations; distinguish drug/device businesses and incidental health exposure',
+        'oil-gas-producers':'Verify upstream production exposure and distinguish producing operations from royalty, midstream and refining businesses',
+        'marine-shipping':'Verify the commercial shipping business and distinguish operator, leasing, port and shipbuilding relationships',
+        'agribusiness':'Verify principal agricultural/input operations and distinguish general food processing, retail and incidental commodity exposure',
+        'semiconductors':'Verify chip design/fabrication/equipment activity; FSLR demonstrates that an industry label can otherwise admit solar manufacturing',
+        'homebuilders':'Verify principal residential construction; FTDR fails that relationship, CVCO fits but awaits separate approval, LEN.B needs share-class review',
+        'oil-services':'Verify drilling/oilfield-service activity and distinguish producers and general industrial suppliers',
+        'airlines':'Verify airline transport operations and distinguish lessors, travel intermediaries and other transport businesses',
+        'midstream-lng':'Verify pipeline, storage, processing or LNG infrastructure operations and distinguish upstream producers and incidental suppliers',
+        'timber-forestry':'Verify principal forestry/timber activity and resolve packaging, pulp, general real-estate and mixed-business exposure',
+        'water':'Verify principal/material water or wastewater operations; original three screened omissions have issuer-backed approvals in the amendment',
+    }
+    for theme_id, rows in sorted(groups.items()):
+        charter = charters[theme_id]
+        cohorts.append(dict(theme_id=theme_id, candidate_relationships=len(rows),
+            rule_ids=sorted({row['rule_id'] for row in rows}),
+            charter=charter.definition, exclusions=charter.excluded_activities,
+            required_review=evidence_gaps.get(theme_id,'Verify issuer principal/material activities, charter exclusions, proposed role and current identity'),
+            decision='defer_unreviewed_companies_without_auto_apply'))
+    return dict(machine_candidates=len(candidates), cohort_triage=cohorts,
+                company_decisions=decisions,
+                not_company_evidence_reviewed=len(candidates)-len(decisions),
+                exhaustive_company_review_complete=False,
+                screening_never_applies_membership=True)
+
+
 def markdown(result):
     counts = result['counts']
     lines = ['# Research Logic v2: universe and membership audit', '',
@@ -260,6 +325,32 @@ def markdown(result):
                   'not an assertion that these companies lack thematic value. Banks, packaging, refining '
                   'and restaurants similarly remain explicit unsupported-area queues rather than forced '
                   'members of unrelated current charters.', '']
+    completion = result.get('review_completion')
+    if completion:
+        lines += ['', '## Review scope and deliberately deferred work', '',
+                  f"Machine screening identified {completion['machine_candidates']} proposed relationships. "
+                  f"All {len(completion['cohort_triage'])} theme cohorts received charter/evidence-gap triage; "
+                  'this is not issuer review of every candidate. '
+                  f"Company-evidence decisions cover {len(completion['company_decisions'])} candidate relationships: "
+                  'seven approved forward additions, two rejected proposals, one suitable proposed addition '
+                  'awaiting a separate approval artifact, and one share-class deferral. '
+                  f"The remaining {completion['not_company_evidence_reviewed']} proposals have not received "
+                  'company-level evidence review and remain explicitly deferred. No other approval is implied.', '',
+                  '| Theme cohort | Machine candidates | Further evidence required |', '| --- | ---: | --- |']
+        lines += [f"| {row['theme_id']} | {row['candidate_relationships']} | {row['required_review']} |"
+                  for row in completion['cohort_triage']]
+        lines += ['', 'The complete-coverage audit and cohort triage are finished; an exhaustive '
+                  'company-by-company review of all 560 proposals is **not** finished and is not claimed. '
+                  'The release checklist wording “Missing/misaligned memberships reviewed” refers only '
+                  'to the documented scope above, not blanket company approval.', '',
+                  'Additional issuer checks: [Cavco](https://investor.cavco.com/) describes a principal '
+                  'manufactured/modular housing business, making CVCO a suitable Homebuilders proposal. '
+                  'It remains unapplied until a separate dated approval artifact; it is not appended '
+                  'retroactively to the November 14 amendment. '
+                  '[Lennar’s issuer filing](https://www.sec.gov/Archives/edgar/data/920760/000162828026003870/len-20251130.htm) '
+                  'identifies LEN.B as another share class of the issuer already represented by LEN. '
+                  'Adding that security is deferred until an explicit duplicate-issuer/share-class '
+                  'policy is reviewed; no new weighting formula is invented here.', '']
     lines += ['', 'Full industry coverage, unmapped classifications, absent members, multi-theme '
               'relationships and proposed additions are in `research-v2-universe-audit.json`.', '',
               '## Reproduce and limits', '',
@@ -300,6 +391,7 @@ def main():
         # The loader may already have applied the validated overlay; do not apply twice.
         amended = configuration if configuration.universe.get('research_v2_review') else apply_review(configuration, review, days)
         result['reviewed_amendment'] = dict(review, effective_counts=audit(base, amended, rules, review['effective_from'])['counts'])
+        result['review_completion'] = review_completion(result, configuration, review)
     sources = [args.input, registry, ROOT / 'config/vnext/memberships.csv',
                ROOT / 'config/vnext/themes.csv', ROOT / 'config/vnext/corporate_actions.json',
                ROOT / 'config/vnext/membership_master_review.json',
@@ -308,8 +400,8 @@ def main():
         sources.append(review_path)
     result['sources'] = {path.name: sha256(path.read_bytes()).hexdigest() for path in sources}
     args.output.mkdir(parents=True, exist_ok=True)
-    (args.output / 'research-v2-universe-audit.json').write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8')
-    (args.output / 'research-v2-universe-audit.md').write_text(markdown(result), encoding='utf-8')
+    (args.output / 'research-v2-universe-audit.json').write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8', newline='\n')
+    (args.output / 'research-v2-universe-audit.md').write_text(markdown(result), encoding='utf-8', newline='\n')
     print(json.dumps(result['counts'], indent=2))
 
 

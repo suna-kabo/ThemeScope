@@ -27,12 +27,31 @@ the medians of valid Core/Enabler 21/63-session price returns; Theme Score is
 five valid members and 80% coverage remain required for these calculations.
 The chain-linked index and EMA21/50 trend remain context.
 
-Recent change compares Theme Score with exactly five completed sessions earlier.
-The theme universe, calculation membership, methodology and index series must
-be comparable. Missing history stays unavailable; diagnostic pre-launch
-reconstructions never become official change history. A changed score universe
-invalidates comparisons. Rank change is prior competition rank minus current
-rank; unavailable scores that change the ranked universe invalidate rank change.
+Recent change recalculates Theme Score at today and exactly five completed
+sessions earlier using **today's reviewed Core/Enabler basket at both dates**.
+This read-only current-basket research comparison does not depend on saved
+refreshes. It is not the historical official Theme Score and never writes or
+backdates accounting, index or membership records. Both dates use the same
+methodology and membership basis. The 1M percentile population, 3M percentile
+population and combined scored-theme population must each agree globally;
+otherwise every recent comparison is unavailable. A per-theme fallback would
+incorrectly ignore the effect of another theme on cross-theme percentiles.
+
+Provenance identifies the basis session, exact comparison session, methodology,
+reviewed-membership fingerprint and all score populations. The calculation also
+checks that today's snapshot metrics and relationships match that basis. It
+needs 63+5 elapsed sessions (69 endpoint observations), not five earlier app runs.
+Fresh installation, skipped refresh days and a v1 upgrade can therefore show
+Improving/Fading on the first refresh when sufficient valid bars exist. Index
+warm-up does not block a cross-sectional score comparison.
+
+On November 16 the seven approved additions enter today's basket. Their already
+available historical prices may enter the reconstructed November 9 comparison,
+explicitly labelled as the **November 16 basket**, without asserting November 9
+membership or modifying its official results. If data change a percentile
+population, the entire comparison remains unavailable; no one-week app warm-up
+is imposed. Insufficient completed history, unavailable score, incompatible basis
+and changed percentile population have distinct readable explanations.
 
 For Long, directional strength is Score and change is current minus prior Score.
 For Short, strength is 100−Score and change is the reverse. Both use:
@@ -45,6 +64,13 @@ For Short, strength is 100−Score and change is the reverse. Both use:
 | Strength <50, otherwise | Lagging | No |
 | Missing structural score | Unavailable | No |
 
+Exactly 50 is included at the structural boundary for either research side.
+This inclusive midpoint tie policy preserves mirrored Long/Short semantics; it
+does not imply either market bias. Only the actual market side selects a list.
+Reasons describe raw weakness as support for Short research, and raw strength
+as support for Long research. Short research improvement is a decline in raw
+Theme Score, not a gain in raw structural strength.
+
 Without a comparable five-session change, structural strength still distinguishes
 Leading and Lagging, with an explicit comparison-unavailable explanation.
 Fading leaders remain researchable during broad pullbacks. Synthetic Trend and
@@ -56,8 +82,15 @@ when the original breadth metric cannot meet its calculation coverage minimum.
 The SPY/QQQ Market Matrix remains unchanged, including Neutral and Unclassified.
 IWM remains context only. Selective Long/Short use the corresponding side's
 selection rules; reduced conviction does not delete otherwise eligible research.
-Neutral/Unclassified do not manufacture a directional list. All themes and
-members remain inspectable.
+Full Bias orders Leading → Improving → Fading. Selective orders Leading → Fading
+→ Improving, preferring established structural themes over below-boundary early
+improvement. This changes priority, never the qualifying membership set. Short
+mirrors Long. No cap or additional score is introduced.
+
+Neutral/Unclassified have no current side or current directional theme state,
+no researchability and no directional list/export. Their default theme context
+orders alphabetically by theme ID and members by ticker. Explicit raw-strength
+sort controls remain context rather than an inferred Long priority.
 
 ## Daily eligibility and order
 
@@ -73,8 +106,8 @@ unchanged. W orders stocks, with higher first for Long and lower first for Short
 Zero, opposite-sign and unavailable W are retained; unavailable values sort last.
 The UI calls this **Peer strength**, in percentage points.
 
-Themes order Leading, Improving, Fading, then directional structural strength,
-then theme ID. Within each theme, peer strength and ticker break ties. There is
+Themes order by the full/Selective state sequence above, then directional
+structural strength and theme ID. Within each theme, peer strength and ticker break ties. There is
 no stock-count cap. Multiple relationships remain visible; combined TradingView
 TXT deduplicates at the highest-priority theme, preserving that same ordering.
 Individual theme exports preserve their own complete member order. Visible UI
@@ -90,8 +123,22 @@ The [rule simulation](../../reports/research-v2-rule-simulation.md) compares
 It is a stability diagnostic with frozen-membership selection bias, not a profit
 backtest. Lists can exceed 250 names; thresholds were not optimized to a count.
 
+Revision 2 of the v2 contract distinguishes `long_state`, `short_state` and
+`current_state`/`current_side`. `policy` holds the full research policy;
+`strength_rank` is the canonical raw-strength competition rank, while
+`research_order_index` is the explicit zero-based theme priority position.
+Recent fields distinguish `raw_score_change` and `directional_score_change`,
+and raw versus directional five-session rank changes. Short-side ranks are
+computed with low scores first, not by negating a raw rank change: competition
+ties do not reverse linearly. No adjacent-session rank appears under a five-session
+label. Older v1/first-v2 snapshots require a current-rules refresh in the UI.
+
 Read-only query functions in `research/queries.py` expose market state/changes,
-themes/history/members, stocks and the research list for future agents. Current
+themes/history/members, stocks and the research list for future agents. They omit
+legacy v1 priority/transition fields from current theme DTOs; older selection is
+explicitly unavailable. `/api/themes/{theme_id}/history` returns separately labelled
+official session observations, not reconstructed current-basket state. Unknown
+theme-member requests return 404, while a known empty theme returns an empty list. Current
 loopback API routes share one committed snapshot. Public projection explicitly
 allowlists the v2 presentation contract; it cannot expose local history inputs,
 provider credentials, runtime databases or unknown nested fields. Failed refresh

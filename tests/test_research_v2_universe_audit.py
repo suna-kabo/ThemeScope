@@ -6,7 +6,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from scripts.research_v2_universe_audit import REQUIRED, audit, markdown, read_base
+from scripts.research_v2_universe_audit import REQUIRED, audit, markdown, read_base, review_completion
 from src.themescope.domain import Configuration, Membership, Role, Theme, ThemeStatus
 
 
@@ -121,6 +121,27 @@ class UniverseAuditTests(unittest.TestCase):
         self.assertEqual(result['counts']['active_calculation_theme_members'], 1)
         self.assertEqual(result['current_membership_industry_reviews'][0]['ticker'], 'AAA')
         self.assertEqual(result['current_membership_industry_reviews'][0]['decision'], 'retain_pending_company_evidence_review')
+
+    def test_screening_and_cohort_triage_never_claim_company_review_for_every_candidate(self):
+        result={'membership_review':[dict(ticker='NEW',theme_id='chips',rule_id='chip'),
+                                      dict(ticker='OTHER',theme_id='chips',rule_id='chip')]}
+        amendment=dict(reviewed_on='2026-11-14',effective_from='2026-11-16',
+            additions=[dict(ticker='NEW',theme_id='chips',evidence=dict(source_url='https://example.org/issuer',support_summary='Reviewed fixture business'))])
+        scope=review_completion(result,configuration(),amendment)
+        self.assertEqual(scope['machine_candidates'],2)
+        self.assertEqual(scope['not_company_evidence_reviewed'],1)
+        self.assertEqual(len(scope['cohort_triage']),1)
+        self.assertEqual(scope['company_decisions'][0]['decision'],'approved_forward_amendment')
+        self.assertFalse(scope['exhaustive_company_review_complete'])
+        self.assertTrue(scope['screening_never_applies_membership'])
+
+    def test_permanent_membership_authorization_is_a_committed_document_reference(self):
+        root=Path(__file__).resolve().parents[1]
+        review=json.loads((root/'config/vnext/research_v2_membership_review.json').read_text(encoding='utf-8'))
+        reference=review['authorization_reference'].split('#')[0]
+        self.assertEqual(reference,'docs/operations/research-v2-membership-authorization.md')
+        self.assertTrue((root/reference).is_file())
+        self.assertNotIn('THEMESCOPE_CODEX_MASTER.md',review['authorization_reference'])
 
 
 if __name__ == '__main__':

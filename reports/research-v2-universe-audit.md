@@ -161,6 +161,38 @@ No existing relationship was removed or reclassified. Broad scanner-rule matches
 Freight/logistics is the clearest coherent coverage gap: 26 unmapped rail, trucking and courier names. Issuer profiles confirm substantial freight businesses at [Union Pacific](https://www.up.com/about-us), [UPS](https://about.ups.com/us/en/our-company.html) and [Old Dominion](https://www.odfl.com/us/en/about.html). A candidate charter would cover freight transport and logistics networks, excluding passenger airlines and marine shipping already covered elsewhere. It spans materially different parcel, rail and less-than-truckload businesses; activating a single broad basket before reviewing all 26 company relationships would obscure those differences. Decision: retain the named investigation queue, create no theme in this amendment. This is a coverage decision, not an assertion that these companies lack thematic value. Banks, packaging, refining and restaurants similarly remain explicit unsupported-area queues rather than forced members of unrelated current charters.
 
 
+## Review scope and deliberately deferred work
+
+Machine screening identified 560 proposed relationships. All 20 theme cohorts received charter/evidence-gap triage; this is not issuer review of every candidate. Company-evidence decisions cover 11 candidate relationships: seven approved forward additions, two rejected proposals, one suitable proposed addition awaiting a separate approval artifact, and one share-class deferral. The remaining 549 proposals have not received company-level evidence review and remain explicitly deferred. No other approval is implied.
+
+| Theme cohort | Machine candidates | Further evidence required |
+| --- | ---: | --- |
+| aerospace-defense | 27 | Verify issuer aerospace/defense activity and segment materiality rather than inferring exposure from general component manufacturing |
+| agribusiness | 17 | Verify principal agricultural/input operations and distinguish general food processing, retail and incidental commodity exposure |
+| airlines | 5 | Verify airline transport operations and distinguish lessors, travel intermediaries and other transport businesses |
+| biotechnology | 47 | Inspect current pipeline and operating activities; resolve biotech/pharma/platform overlap rather than relying on the industry tag |
+| capital-markets | 55 | Establish the operating capital-markets business; distinguish managers/brokers/exchanges from investment vehicles and incidental holdings |
+| construction-infrastructure | 35 | Verify physical infrastructure exposure and charter exclusions, particularly pure homebuilding and generic industrial activity |
+| healthcare-providers | 21 | Establish care delivery or healthcare-service operations; distinguish drug/device businesses and incidental health exposure |
+| homebuilders | 7 | Verify principal residential construction; FTDR fails that relationship, CVCO fits but awaits separate approval, LEN.B needs share-class review |
+| insurance | 53 | Establish insurance underwriting, reinsurance or brokerage operations and the proposed Core/Enabler relationship |
+| leisure-entertainment | 23 | Verify the actual leisure/entertainment operator and resolve media, platform and untracked gaming overlap |
+| marine-shipping | 17 | Verify the commercial shipping business and distinguish operator, leasing, port and shipbuilding relationships |
+| midstream-lng | 4 | Verify pipeline, storage, processing or LNG infrastructure operations and distinguish upstream producers and incidental suppliers |
+| oil-gas-producers | 19 | Verify upstream production exposure and distinguish producing operations from royalty, midstream and refining businesses |
+| oil-services | 7 | Verify drilling/oilfield-service activity and distinguish producers and general industrial suppliers |
+| pharmaceuticals | 69 | Establish principal drug-development/manufacturing exposure and distinguish distributors, service providers and mixed businesses |
+| regional-banks | 80 | Establish actual regional banking operations and geography; distinguish bank operators from other financial issuers |
+| retail | 51 | Distinguish retail operators from brands, wholesalers and manufacturers; verify the principal customer-facing retail activity |
+| semiconductors | 16 | Verify chip design/fabrication/equipment activity; FSLR demonstrates that an industry label can otherwise admit solar manufacturing |
+| timber-forestry | 4 | Verify principal forestry/timber activity and resolve packaging, pulp, general real-estate and mixed-business exposure |
+| water | 3 | Verify principal/material water or wastewater operations; original three screened omissions have issuer-backed approvals in the amendment |
+
+The complete-coverage audit and cohort triage are finished; an exhaustive company-by-company review of all 560 proposals is **not** finished and is not claimed. The release checklist wording “Missing/misaligned memberships reviewed” refers only to the documented scope above, not blanket company approval.
+
+Additional issuer checks: [Cavco](https://investor.cavco.com/) describes a principal manufactured/modular housing business, making CVCO a suitable Homebuilders proposal. It remains unapplied until a separate dated approval artifact; it is not appended retroactively to the November 14 amendment. [Lennar’s issuer filing](https://www.sec.gov/Archives/edgar/data/920760/000162828026003870/len-20251130.htm) identifies LEN.B as another share class of the issuer already represented by LEN. Adding that security is deferred until an explicit duplicate-issuer/share-class policy is reviewed; no new weighting formula is invented here.
+
+
 Full industry coverage, unmapped classifications, absent members, multi-theme relationships and proposed additions are in `research-v2-universe-audit.json`.
 
 ## Reproduce and limits
