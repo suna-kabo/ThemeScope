@@ -21,7 +21,9 @@ node tests/test_dashboard.js
 node tests/test_workspace.js
 ```
 
-On Windows substitute `.venv-vnext\Scripts\python.exe`. Legacy reproduction needs
+On Windows substitute `.venv-vnext\Scripts\python.exe` and use `-X utf8`
+(or process-local `PYTHONUTF8=1`) for the full suite. Symlink tests require a
+symlink-capable account; Linux CI runs their unmodified assertions. Legacy reproduction needs
 the separate hash-pinned `requirements.txt`; do not replace it or its fixtures when
 changing current runtime dependencies. CI installs both legacy and current development
 requirements. `scripts/check_vnext.py` runs the full offline suite plus config checks.
@@ -36,13 +38,14 @@ available, otherwise the installed Playwright browser. Run each program with the
 python tests/smoke_vnext_ui.py
 python tests/smoke_prelaunch_ui.py
 python tests/smoke_research_v2_ui.py
+python tests/smoke_public_snapshot.py
+python tests/smoke_cloudflare_demo.py
 ```
 
 Install the local audit script with `npm install --prefix runtime/ui-v3-tools
 --no-save --package-lock=false axe-core@4.14.0`; the release gate finds it there
-or uses `THEMESCOPE_AXE_SCRIPT`. Historical Lunar, identity and research-context
-smoke programs preserve previous UI checkpoints; current UI coverage is consolidated
-in the v2 release gate. It checks refresh preservation, both research sides,
+or uses `THEMESCOPE_AXE_SCRIPT`. Superseded UI smoke programs remain in Git history; current UI coverage is
+consolidated in the v2 release gate. It checks refresh preservation, both research sides,
 exports, Saved, nested Back/focus/scroll, motion, static isolation, eight device
 widths, 200% text/reflow and accessibility. Pre-launch accounting keeps a separate
 browser regression. Fixture dates are not live chronology.
@@ -67,7 +70,7 @@ The [project map](project-structure.md) distinguishes active code, retained hist
 and private generated state. The original [implementation handoff](../archive/handoff/Codex_vNext_Implementation_Handoff.md)
 and gate documents remain provenance rather than current task instructions.
 
-Latest dated repository check: [productionization verification](verification.md).
+Production publication evidence: [verified main publication](../operations/main-publication.md).
 
 Production publication uses clean main. Future experiments start in
 [feature/ui-v3 or a separate worktree](production-and-ui.md); historical gates are

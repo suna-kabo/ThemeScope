@@ -197,14 +197,9 @@ class LaunchTests(unittest.TestCase):
         with self.assertRaises(ValueError):resolve('NOT_REVIEWED',mapping)
 
     def test_default_launchers_use_vnext_and_legacy_readers_are_explicit(self):
-        for name in ('refresh','open-dashboard'):
-            content=(ROOT/(name+'.cmd')).read_text()
-            self.assertIn('ThemeScope.cmd',content)
-            self.assertNotIn('refresh_local.py',content)
-            self.assertNotIn('serve_local.py',content)
         self.assertIn('bootstrap_dev.py',(ROOT/'setup.cmd').read_text())
         self.assertIn('run_vnext.py',(ROOT/'ThemeScope.cmd').read_text())
-        for name in ('setup','refresh','open-dashboard'):
+        for name in ('setup','refresh','open-dashboard','prepare-site','preview-site'):
             self.assertTrue((ROOT/('legacy-'+name+'.cmd')).is_file())
         for path in ('scripts/serve_local.py','src/themescope/local_history.py','tests/fixtures/v1/latest_snapshot.json'):
             self.assertTrue((ROOT/path).is_file(),path)

@@ -27,7 +27,7 @@ def stage_site(root,target):
     source=root/'site'
     with output_lock(source,timeout=5),output_lock(target/'site',timeout=5):
         recover(source);recover(target/'site');manifest=validate_site(source)
-        if manifest['kind']!='snapshot':raise ValueError('Prepare a dated snapshot with prepare-site.cmd first')
+        if manifest['kind']!='snapshot':raise ValueError('Prepare a dated snapshot with legacy-prepare-site.cmd first')
         with tempfile.TemporaryDirectory(prefix='.themescope-site-',dir=target) as temporary:
             stage=Path(temporary)/'site';stage.mkdir()
             for name in [*manifest['files'],'site_manifest.json']:

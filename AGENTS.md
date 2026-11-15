@@ -76,5 +76,6 @@ not reinstate obsolete blockers. Stable vnext schema/path identifiers remain int
 main is stable production and the only public publishing source. Future visual
 experiments start from main on feature/ui-v3 (or another scoped task branch).
 Production maintenance lands on main only after relevant checks and preserves
-financial/research rules. Keep the old implementation
-branch until the external default/Pages cutover and a real main publication succeed.
+financial/research rules. The main cutover and live publication are verified in
+[the production record](docs/operations/main-publication.md). Preserve historical
+checkpoints through the verified annotated tags.

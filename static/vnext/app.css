@@ -138,7 +138,7 @@ ol,ul {
 .muted,.table-note,.compact-context,.unavailable {
   color:var(--muted);
 }
-.numeric,.metric-value,.market-price,.canonical-rank,.queue-position,.score-value,.movement-value {
+.numeric,.market-price,.canonical-rank,.queue-position,.score-value,.movement-value {
   font-variant-numeric:tabular-nums;
 }
 .icon {
@@ -468,10 +468,6 @@ paired benchmark evidence follows. */ .bias-line {
   font-size:.6875rem;
   margin-bottom:5px;
 }
-.metric-value {
-  font-size:1rem;
-  color:var(--text);
-}
 .ema-context {
   display:flex;
   flex-wrap:wrap;
@@ -501,16 +497,6 @@ paired benchmark evidence follows. */ .bias-line {
   flex:1;
   background:var(--rule);
   min-width:20px;
-}
-.breadth-track i {
-  display:block;
-  height:100%;
-  background:#9caeaa;
-}
-.breadth-value {
-  width:40px;
-  text-align:right;
-  color:var(--secondary);
 }
 .benchmark-breadth>small {
   color:var(--muted);
@@ -1069,15 +1055,6 @@ select {
   background:var(--selected)!important;
   box-shadow:inset 2px 0 var(--accent);
 }
-.qualification-group+.qualification-group {
-  margin-top:28px;
-}
-.group-heading {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin:20px 0 8px;
-}
 .saved-scope {
   font-size:.75rem;
   color:var(--muted);
@@ -1395,14 +1372,10 @@ tr:hover .method-toc {
   height:auto;
   display:block;
 }
-.map-grid {
-  stroke:var(--rule);
-  stroke-width:1;
-}
 .map-zero {
   stroke:var(--border);
 }
-.map-label,.map-axis-label {
+.map-axis-label {
   fill:var(--muted);
   font:11px var(--font);
 }
@@ -1427,11 +1400,6 @@ tr:hover .method-toc {
 .map-readout dt {
   font-size:.6875rem;
   color:var(--muted);
-}
-.map-note {
-  font-size:.6875rem;
-  color:var(--muted);
-  margin-top:12px;
 }
 /* Motion is finite and composited. */
 .page-heading>div{min-width:0;flex:1}
@@ -2565,7 +2533,7 @@ dialog[open] {
   }
 }
 @media(forced-colors:active) {
-  .theme-state:before,.score-rule i,.breadth-track i {
+  .theme-state:before,.score-rule i {
     background:CanvasText;
   }
   .selected-row {

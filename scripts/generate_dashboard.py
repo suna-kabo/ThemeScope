@@ -1414,7 +1414,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.source is None:args.source='live' if args.import_run else 'tradingview-csv'
     if args.source=='live' and not args.import_run and not args.legacy_live:
-        parser.error('Legacy live collection is disabled by default. Use refresh.cmd with five CSVs; --source live --legacy-live explicitly opts into the unsupported diagnostic collector.')
+        parser.error('Legacy live collection is disabled by default. Use legacy-refresh.cmd with five CSVs; --source live --legacy-live explicitly opts into the unsupported diagnostic collector.')
     if args.as_of:
         try:
             datetime.strptime(args.as_of, '%Y-%m-%d')

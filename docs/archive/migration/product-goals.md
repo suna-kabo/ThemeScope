@@ -2,7 +2,7 @@
 
 ThemeScope supports a repeatable Market → Themes → Stocks research workflow using
 completed US sessions. Gate E real chronological acceptance is **CLOSED**; see the
-[closure record](docs/operations/gate-e-closure.md). These remain standing quality goals:
+[closure record](../../operations/gate-e-closure.md). These remain standing quality goals:
 
 1. Custom Core/Enabler themes drive deterministic medians, Strength, synthetic Trend
    and leave-one-out peer comparisons; thematic ETFs have no calculation role.

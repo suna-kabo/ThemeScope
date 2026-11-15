@@ -1,30 +1,13 @@
 # ThemeScope
 
-ThemeScope is a local, end-of-day US equity research workspace. It organizes a
-large stock universe into a practical **Market → Themes → Stocks** workflow:
-understand the market, compare custom equity themes, then research liquid stocks
-against their actual theme peers. It does not place trades or generate entry signals.
+ThemeScope is a local, private, end-of-day US equity research dashboard:
+**Market Bias → Theme Changes → Primary Research**. It ranks custom equity
+themes and organizes eligible stocks for chart review. It does not execute trades.
 
-## Research workflow
+## Windows setup and launch
 
-1. **Market:** SPY and QQQ determine Market Bias; breadth and price/EMA evidence
-   explain the result. IWM supplies small-cap context only.
-2. **Themes:** compare structural strength, five-session change, participation and
-   Leading/Improving/Fading/Lagging states. Synthetic-index Trend remains context.
-3. **Research list:** inspect every daily-eligible member of researchable themes, open a
-   ticker's theme relationships, save research locally, and export TradingView TXT lists.
-
-The charcoal/cream **After Close** interface includes contextual inspectors,
-search and filters, grouped research tables, keyboard navigation, compact/comfortable
-layouts, enlarged text, high contrast and reduced motion. See the
-[UI and workflow guide](docs/getting-started/research-workflow.md) and
-[design system](DESIGN.md). Historical review screenshots are indexed in the
-[design archive](design-plans/README.md); no live market screenshots are bundled.
-
-## Quick start on Windows
-
-Install **Python 3.12 or newer** with the Python launcher, then clone or download
-this repository. Run PowerShell from the repository folder:
+Install Python 3.12+ with the Windows Python launcher, then clone this repository.
+In PowerShell from the repository folder:
 
 ```powershell
 .\setup.cmd
@@ -33,99 +16,43 @@ $env:APCA_API_SECRET_KEY = '<your local Alpaca secret>'
 .\ThemeScope.cmd
 ```
 
-The app opens at **http://127.0.0.1:8766**. After a US session has completed, open
-**Snapshot and refresh** and select **Refresh Data**. Alpaca historical
-**SIP access is required**; ThemeScope never falls back to IEX. Keep keys in your
-local process environment, never in Git, chat, screenshots or published output. Optional `ALPHAVANTAGE_API_KEY`
-enables earnings dates; earnings are not required for refresh or qualification.
+Open **http://127.0.0.1:8766**. Under **Snapshot and refresh**, select **Refresh
+Data**. ThemeScope selects the latest safely completed US session, retrieves
+Alpaca historical SIP data, and atomically saves the snapshot and exports.
+A failed refresh preserves the previous successful snapshot. No daily CSV uploads
+are required. Optional `ALPHAVANTAGE_API_KEY` supplies earnings dates.
 
-To try deterministic fictional data without credentials:
+Keep credentials in the launching process environment. Historical SIP access is
+required; there is no IEX fallback. To explore fictional data in separate storage:
 
 ```powershell
 .\ThemeScope.cmd --fixture
 ```
 
-Fixture mode uses a separate database. Linux/macOS setup, local SIP diagnostics,
-updates and troubleshooting are in the [setup guide](docs/getting-started/setup.md).
-No daily CSV uploads are required.
+Market explains SPY/QQQ bias with IWM context. Themes compares strength and
+five-session changes. Primary includes every eligible Core/Enabler member of
+researchable themes; peer strength orders stocks without filtering by sign.
+Inspect themes/stocks, keep browser-local Saved research, and download full-session
+TradingView TXT lists independently of visible filters.
 
-## What Refresh does
+## Public snapshots
 
-Refresh selects the latest safely completed US session, retrieves historical SIP
-bars and calculates the research snapshot locally. A first run seeds history;
-warm runs fetch missing/new sessions and a bounded repair window using an
-incremental, auditable SQLite cache. Successful results and TXT exports publish
-atomically. A failed refresh leaves the previous successful snapshot available;
-always check the reported session and refresh status.
+After one-time Wrangler authentication and configuration of the existing Cloudflare
+Pages project, run from a clean, up-to-date `main` checkout with the same provider
+variables set:
 
-SPY/QQQ constituent rosters and theme membership are versioned, manually reviewed
-configuration. They are not daily scanner inputs. TradingView CSV market-data
-columns are never runtime prices. See [operations](docs/operations/refresh-and-maintenance.md).
+```powershell
+.\update-public.cmd
+```
 
-## Methodology at a glance
+The helper refreshes locally, validates the exact completed session and uploads a
+frozen static site. Success requires **Refresh PASS**, **Completeness PASS** and
+**Public deployment CONFIRMED**. Public mode has no refresh or provider requests;
+Saved remains browser-local. The local SQLite history stays private.
 
-- **Theme Strength:** 60% of the 21-session cross-theme percentile plus 40% of
-  the 63-session percentile, using median Core/Enabler stock price returns.
-- **Theme Trend:** a chain-linked synthetic theme index versus EMA21/EMA50;
-  holdings drift between approved rebalances.
-- **Peer strength (W):** a 60%/40% blend of 1M/3M stock-minus-peer returns, using
-  leave-one-out theme-peer medians.
-  It measures relative performance, not an expected return or entry signal.
-- **Daily eligibility:** close > $5 and at least $10 million average daily dollar
-  volume over 20 completed sessions. Eligibility does not change membership.
-- **Research priority:** five-session score changes distinguish improving/fading
-  themes. W orders stocks without sign exclusion. One stock can qualify in multiple themes;
-  combined TXT output uses deterministic deduplicated placement.
-
-Thematic ETFs have no calculation role. Breadth does not enter Theme Strength.
-Prices are split/spin-off adjusted, not dividend adjusted. Read the
-[Research Logic v2](docs/methodology/research-v2.md) for exact rules and simulation evidence.
-
-## Optional frozen public snapshots
-
-The local Python/SQLite app remains the live research runtime. A separate workflow
-can freeze an already committed local dashboard into a **read-only static site**;
-it does not host the database, refresh data or call providers. A synthetic static
-demo is also available. Both preserve browser-local Saved and TXT downloads.
-
-Normal daily publication is **temporary keys → `update-public.cmd` → done**. The
-helper starts/reuses the normal local server, waits for a new complete successful
-refresh and publishes exactly the session ThemeScope selected. Closing PowerShell
-removes the temporary keys; neither command writes them into source or CMD files.
-
-Publishing requires initial local setup, an existing Cloudflare Pages project and
-Wrangler authentication. The current publisher deliberately requires a clean
-`main` checkout and a verified Pages production branch of `main`. Disable
-automatic Git deployments before using the real snapshot publisher. See [public snapshot operations](docs/operations/public-snapshots.md). That guide also
-records the external GitHub/Pages settings still needed for the main cutover.
-
-## Project and documentation
-
-| Location | Purpose |
-| --- | --- |
-| [src/themescope](src/themescope/) | Providers, calculations, research, SQLite and local API |
-| [static/vnext](static/vnext/) | Current UI; the directory name is a compatibility identifier |
-| [config](config/) | Methodology, reviewed memberships, manual rosters and evidence provenance |
-| [scripts](scripts/) | Launch, validation, maintenance and explicit snapshot tools |
-| [tests](tests/) | Offline unit, integration, numerical and browser regressions |
-| [docs](docs/README.md) | Setup, methodology, operations, architecture, development and archive |
-| [Gate E closure](docs/operations/gate-e-closure.md) | User-confirmed real Nov 6, Nov 9 and Nov 10 validation |
-
-Developer setup and checks: [development guide](docs/development/README.md).
-The [project map](docs/development/project-structure.md) explains retained legacy
-files and generated/private directories. Historical migration and Gate A–E records
-remain in the [archive](docs/archive/README.md).
-
-## Limits and non-goals
-
-- End-of-day research only: no intraday monitoring, execution, technical entries,
-  stops, position sizes or trade recommendations.
-- Provider access and complete usable inputs are required; unknown missing bars
-  fail closed. Only explicitly approved terminal events may supply holding-accounting values.
-- Saved is local to the browser/origin, not account-synced. Export identifiers must
-  be verified; no venue is guessed.
-- Legacy ETF-based history remains readable but cannot be spliced into the current
-  custom-theme series. Back up runtime data before updates.
-- Public snapshot publication is opt-in. This repository supplies no provider
-  redistribution rights. A project-wide software license has not been declared;
-  bundled Inter retains its [SIL Open Font License](static/Inter-LICENSE.txt).
+[Setup and troubleshooting](docs/getting-started/setup.md) ?
+[Research workflow](docs/getting-started/research-workflow.md) ?
+[Methodology](docs/methodology/research-v2.md) ?
+[Refresh and backups](docs/operations/refresh-and-maintenance.md) ?
+[Publication and manual fallback](docs/operations/public-snapshots.md) ?
+[Development](docs/development/README.md) → [All documentation](docs/README.md)

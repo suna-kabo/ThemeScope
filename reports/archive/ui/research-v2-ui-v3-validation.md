@@ -4,7 +4,7 @@ This is the **initial `cfc1099` checkpoint record**, retained as historical
 evidence. Its passing tests did not establish all product semantics: a subsequent
 adversarial pass confirmed directional/default, Selective-ordering, comparison
 cadence and evidence-scope defects. The current result is the
-[adversarial correction validation](research-v2-adversarial-validation.md).
+[adversarial correction validation](../research-v2/research-v2-adversarial-validation.md).
 In particular, the membership audit did not individually review all 560 machine
 proposals; the updated audit distinguishes cohort triage, company decisions and
 explicit deferrals. Do not use the initial completion table as current proof.
@@ -15,7 +15,7 @@ for browser testing were synthetic; this is not a new live-provider validation.
 
 ## Research and membership
 
-- The [universe audit](research-v2-universe-audit.md) covers all 2,229 supplied
+- The [universe audit](../research-v2/research-v2-universe-audit.md) covers all 2,229 supplied
   Base symbols, sector/industry/theme coverage, effective memberships, unmapped
   classifications, overlaps, absent members and evidence-review proposals.
 - The reviewed amendment adds CCS, GRBK, NVR and MHO to Homebuilders, and AWR,
@@ -23,7 +23,7 @@ for browser testing were synthetic; this is not a new live-provider validation.
   membership remains 667 unique stocks / 725 relationships; after effectiveness
   it becomes 674 / 732. Original launch CSV, evidence package and history remain
   unchanged. Broad industry matches are proposals, not automatic assignments.
-- The [simulation](research-v2-rule-simulation.md) compares 12 state models and
+- The [simulation](../research-v2/research-v2-rule-simulation.md) compares 12 state models and
   eight liquidity models across 194 offline sessions. It documents frozen-member
   selection bias, pullbacks, leader retention, emerging themes, churn, symmetry,
   rank instability and small-sample breadth sensitivity. No P&L was optimized.
@@ -34,15 +34,15 @@ for browser testing were synthetic; this is not a new live-provider validation.
   over 20 completed regular sessions. Every eligible Core/Enabler member enters
   researchable themes; W orders peers and never excludes by sign. Missing W
   sorts last. No stock-count cap was introduced.
-- [Canonical rules](../docs/methodology/research-v2.md) and versioned constants
+- [Canonical rules](../../../docs/methodology/research-v2.md) and versioned constants
   describe the complete current contract. Market Matrix, return/peer formulas,
   launch accounting and corporate-action handling remain protected by regression
   tests. Related relationships remain visible context and do not calculate.
 
 ## UI, interaction and visual verification
 
-The [After Close design specification](../DESIGN.md), [product brief](../PRODUCT.md)
-and [motion grammar](../MOTION.md) cover information architecture, vocabulary,
+The [After Close design specification](../../../DESIGN.md), [product brief](../../../PRODUCT.md)
+and [motion grammar](../../../MOTION.md) cover information architecture, vocabulary,
 tokens, component hierarchy, mobile strategy, density and purposeful motion.
 The existing vanilla presentation/state modules were reused: a framework build
 would add operational cost without improving the native dialog, routing or static
@@ -99,7 +99,7 @@ two-line rows on mobile rather than enlarged desktop cards.
 | Configuration and original membership evidence | Both validators passed; no production blockers |
 | Python compilation | `compileall` for source, scripts and tests passed |
 | Impeccable | Deterministic source detector: only generic Inter-font warning; deliberately retained pinned local font for readable dense tables and offline integrity |
-| Ponytail | [Final review](research-v2-ponytail-review.md), three concrete findings fixed and verified; Verdict: Ship |
+| Ponytail | [Final review](../research-v2/research-v2-ponytail-review.md), three concrete findings fixed and verified; Verdict: Ship |
 | Public boundary | Explicit v2 field allowlist, nested unknown-field stripping, reference/count checks, safe static output and no provider/runtime payloads; regression suite passed |
 | Release hygiene | Diff whitespace check; allowlisted source/docs/tests/config/reports; no raw CSV, DB, credentials, screenshots or plugin setup files staged |
 

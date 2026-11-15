@@ -21,12 +21,10 @@ Before the first main publication:
    disabled**; leave preview Git deployments disabled unless deliberately intended.
    Ensure no queued Git build can overwrite real data with the synthetic demo.
 
-During this maintenance task GitHub rejected the default-branch API mutation with
-HTTP 403 (`Resource not accessible by integration`), and Codex had no authenticated
-Cloudflare session. Those **two external settings remain unverified/unresolved**;
-no setting change or live upload is claimed. Retain `refactor/themescope-vnext`
-until the settings are resolved and the first main publication is confirmed.
-This limitation does not reopen [Gate E](gate-e-closure.md).
+The first successful main publication and live verification are recorded in
+[main publication](main-publication.md). GitHub's default branch and the existing
+Pages production branch were verified as `main`; production Git deployments were
+disabled. Recheck these prerequisites when changing external configuration.
 
 The publisher now reads actual Pages settings through supported Wrangler
 `whoami --json` / `auth token --json` and an authenticated **GET** to the Cloudflare

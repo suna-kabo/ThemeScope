@@ -28,7 +28,7 @@ def main():
     subprocess.run([str(python), '-c', 'import zoneinfo; zoneinfo.reset_tzpath(()); zoneinfo.ZoneInfo.clear_cache(); zoneinfo.ZoneInfo("America/New_York"); zoneinfo.ZoneInfo("Asia/Hong_Kong"); import src.themescope.manual_csv; import scripts.generate_dashboard; print("Runtime imports and timezone package: OK")'], cwd=ROOT, check=True)
     subprocess.run([str(python), str(ROOT / 'scripts/export_collection_lists.py')], cwd=ROOT, check=True)
     print('Setup complete. No CSVs were collected and no dashboard was refreshed or published.')
-    print('Put the five CSVs into inputs/US-SESSION-DATE, then run refresh.cmd.')
+    print('Put the five CSVs into inputs/US-SESSION-DATE, then run legacy-refresh.cmd.')
     return 0
 
 

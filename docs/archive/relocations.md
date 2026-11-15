@@ -35,3 +35,18 @@ stable and explicitly historical. Current guidance starts at [docs](../README.md
 | `reports/current_implementation_report.md` | [reports/archive/v7/implementation_report.md](../../reports/archive/v7/implementation_report.md) |
 | `reports/v7_migration_report.md` | [reports/archive/v7/migration_report.md](../../reports/archive/v7/migration_report.md) |
 | `PLANS.md` diary | [implementation log](migration/implementation-log.md) |
+
+## Post-publication cleanup
+
+| Former location | Preserved location |
+| --- | --- |
+| Root `GOALS.md` | [Archived product goals](migration/product-goals.md) |
+| Root `PLANS.md` | [Main-publication plan](operations/main-publication-plan.md) |
+| `docs/development/verification.md` | [12 November verification](operations/publication-tooling-verification-2026-11-12.md) |
+| Root `design-plans/` | [Historical design review](ui/design-plans/README.md) |
+| Root UI/research report files | [Dated reports](../../reports/README.md) |
+
+The duplicate current-implementation pointer was removed; the original v7 report
+remains archived. Historical command examples and source paths describe their
+recorded commit. Four superseded UI smoke programs remain in Git history; current
+release, static-public, local and pre-launch browser checks replace those interfaces.

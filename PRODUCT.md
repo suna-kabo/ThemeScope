@@ -10,7 +10,6 @@ Core/Enabler memberships drive theme calculations; Related is context. Thematic
 ETFs have no calculation role. Research v2 separates structural theme strength
 from five-session change. Leading, Improving and Fading themes retain all
 daily-eligible members. Peer strength orders stocks; its sign never hides them.
-The Countertrend lens is removed.
 
 The manually supplied TradingView Base Market Universe is a maintenance input,
 not a daily dependency. Daily operation uses swappable market-data providers,

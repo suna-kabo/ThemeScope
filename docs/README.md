@@ -1,22 +1,19 @@
 # Documentation
 
-ThemeScope is the current local research product. Gate E is **CLOSED**: the user
-confirmed real Nov 6, Nov 9 and Nov 10 validation. The [closure record](operations/gate-e-closure.md)
-is authoritative for that milestone; old phase reports are historical.
+ThemeScope is the current local completed-session research product. The approved
+workflow is **Market Bias → Theme Changes → Primary Research**.
 
-| Start here | Read |
+| Audience | Documentation |
 | --- | --- |
-| Install and run | [Setup](getting-started/setup.md) |
-| Use the workspace | [Market → Themes → Stocks](getting-started/research-workflow.md) |
-| Understand the numbers | [Research Logic v2](methodology/research-v2.md), [retained formulas](methodology/README.md) |
-| Operate safely | [Refresh, backup and maintenance](operations/refresh-and-maintenance.md) |
-| Build a read-only public site | [Daily update, frozen snapshots and synthetic demo](operations/public-snapshots.md) |
-| Understand implementation | [Architecture](architecture/README.md), [provider/cache](architecture/provider-and-storage.md), [terminal events](architecture/terminal-actions.md) |
-| Develop and test | [Development](development/README.md), [project map](development/project-structure.md), [stable main / UI work](development/production-and-ui.md) |
-| Review current correction evidence | [Adversarial validation](../reports/research-v2-adversarial-validation.md), [findings](../reports/research-v2-adversarial-review.md) |
-| Trace earlier decisions | [Historical archive](archive/README.md), [relocation map](archive/relocations.md) |
+| Users | [Setup](getting-started/setup.md), [research workflow](getting-started/research-workflow.md) |
+| Methodology | [Research Logic v2](methodology/research-v2.md), [retained formulas](methodology/README.md) |
+| Operations | [Refresh and backups](operations/refresh-and-maintenance.md), [public snapshots](operations/public-snapshots.md) |
+| Production evidence | [Verified main publication](operations/main-publication.md), [Gate E closure](operations/gate-e-closure.md) |
+| Development | [Checks](development/README.md), [project map](development/project-structure.md), [branches](development/production-and-ui.md) |
+| Architecture | [Overview](architecture/README.md), [provider/storage](architecture/provider-and-storage.md), [terminal events](architecture/terminal-actions.md) |
+| Provenance | [Historical archive](archive/README.md), [checkpoint tags](development/branch-checkpoints.md), [dated reports](../reports/README.md) |
 
-The [design system](../DESIGN.md), [motion grammar](../MOTION.md),
-[product boundary](../PRODUCT.md) and [agent instructions](../AGENTS.md) remain at
-the root for contributors. Internal `vnext` paths, schema IDs, routes and storage
-keys are compatibility identifiers, not an experimental-product label.
+Contributor contracts: [AGENTS](../AGENTS.md), [product boundary](../PRODUCT.md),
+[design](../DESIGN.md), [motion](../MOTION.md). Stable `vnext` paths, schema IDs and
+storage keys are compatibility identifiers. Old phase reports do not reopen the
+closed Gate E milestone or describe the current interface.

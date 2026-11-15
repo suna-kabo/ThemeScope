@@ -28,11 +28,11 @@ def console(message):
 
 def snapshot_info(directory,site=False):
     directory=Path(directory).resolve()
-    if pending(directory):raise ValueError('Publication is incomplete. Close locked files and run '+('prepare-site.cmd --recover' if site else 'refresh.cmd --recover')+' before previewing.')
+    if pending(directory):raise ValueError('Publication is incomplete. Close locked files and run '+('legacy-prepare-site.cmd --recover' if site else 'legacy-refresh.cmd --recover')+' before previewing.')
     entry='index.html' if site else 'dashboard.html'
     text=(directory/entry).read_text(encoding='utf-8')
     match=re.search(r'<script id="snapshot-data"[^>]*>(.*?)</script>',text,re.S)
-    if not match:raise ValueError('No dated snapshot in '+str(directory/entry)+'. '+('Run prepare-site.cmd for a successful session.' if site else 'Run refresh.cmd with all five CSVs.'))
+    if not match:raise ValueError('No dated snapshot in '+str(directory/entry)+'. '+('Run legacy-prepare-site.cmd for a successful session.' if site else 'Run legacy-refresh.cmd with all five CSVs.'))
     embedded=json.loads(match.group(1));session=embedded.get('session_date')
     metadata='snapshot_summary.json' if site else 'latest_snapshot.json'
     saved=json.loads((directory/metadata).read_text(encoding='utf-8'))
@@ -48,7 +48,7 @@ def snapshot_info(directory,site=False):
             if files.get(name)!=digest(directory/name):raise ValueError('HTML/metadata do not match the completed publication; refresh or prepare again.')
         allowed=set(files)|{manifest_name}
     else:
-        if site:raise ValueError('Prepared site manifest is missing; run prepare-site.cmd.')
+        if site:raise ValueError('Prepared site manifest is missing; run legacy-prepare-site.cmd.')
         # Compatibility for an intact pre-update run; next refresh seals all files.
         files={};allowed={entry,metadata,'canonical_dashboard_data.json','refresh_status.json','run_audit.json','themes.csv','theme_stocks.csv','market.csv','latest_run.md','run_bundle.zip','Inter-LICENSE.txt','individual_theme_watchlists.zip'}
         allowed.update(row['file'] for row in saved.get('export_manifest',[]));allowed.update(saved.get('export_archives',[]))
@@ -134,7 +134,7 @@ class LoopbackHTTPServer(http.server.ThreadingHTTPServer):
 def create_server(root=ROOT,site=False,port=None):
     directory=Path(root).resolve()/('site' if site else 'output/manual_csv')
     entry=directory/('index.html' if site else 'dashboard.html')
-    if not entry.is_file():raise ValueError('No saved '+str(entry)+'. Run '+('prepare-site.cmd' if site else 'refresh.cmd')+' first.')
+    if not entry.is_file():raise ValueError('No saved '+str(entry)+'. Run '+('legacy-prepare-site.cmd' if site else 'legacy-refresh.cmd')+' first.')
     with output_lock(directory,timeout=.5):info=snapshot_info(directory,site)
     preferred=8001 if site else 8000
     requested=preferred if port is None else port

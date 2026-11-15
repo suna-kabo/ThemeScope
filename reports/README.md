@@ -1,6 +1,15 @@
-# Reports
+# Dated validation reports
 
-Historical implementation/run evidence lives in [archive](archive/ARCHIVE_NOTICE.md).
-Current product operation starts at the [README](../README.md); real chronological
-acceptance is recorded in the [Gate E closure](../docs/operations/gate-e-closure.md).
-Generated local run reports are ignored; they are not current source downloads.
+Current product instructions live in the [README](../README.md) and
+[documentation index](../docs/README.md). Verified production publication is
+recorded in [operations](../docs/operations/main-publication.md).
+
+Historical evidence is organized under:
+
+- [UI validation](archive/ui/): dated rebuilds, acceptance reviews and browser results.
+- [Research v2 validation](archive/research-v2/): simulations, universe audit and adversarial reviews.
+- [Earlier implementations](archive/ARCHIVE_NOTICE.md): v5/v6.2/v7 records.
+
+These are checkpoint evidence, not current operating instructions. Generated
+local reports and real snapshots stay ignored. Historical raw delivery artifacts
+remain on the archival tag, outside the current source tree.

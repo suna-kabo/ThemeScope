@@ -49,7 +49,7 @@ window.ThemeScopeUI = (() => {
     const start=Math.floor(low*100/step),end=Math.ceil(high*100/step);
     return {low:start*step/100,high:end*step/100,ticks:Array.from({length:end-start+1},(_,i)=>Number(((start+i)*step/100).toPrecision(12)))};
   }
-  const reduced = () => document.documentElement.dataset.motion==='reduce'||matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const motion=Object.freeze({shift:180,slide:180,sweep:200,reveal:160,confirm:140,lock:180});
   const ease={enter:'cubic-bezier(.22,1,.36,1)',exit:'cubic-bezier(.4,0,1,1)',travel:'cubic-bezier(.2,.8,.2,1)'};
   const running=new WeakMap(),selections=new WeakMap();
@@ -87,7 +87,7 @@ window.ThemeScopeUI = (() => {
   }
   function indicators() {
     document.querySelectorAll('.table-wrap').forEach(e=>{e.dataset.scroll=String(e.scrollWidth>e.clientWidth+1);});
-    document.querySelectorAll('.segmented,.research-tabs,.main-nav').forEach(g=>indicator(g,g.querySelector('[aria-pressed="true"],[aria-selected="true"],[aria-current="page"]')));
+    document.querySelectorAll('.segmented,.main-nav').forEach(g=>indicator(g,g.querySelector('[aria-pressed="true"],[aria-selected="true"],[aria-current="page"]')));
   }
   function install() {
     const pop=document.getElementById('metric-tooltip');let trigger=null,pinned=false,timer,suppressFocus=false;

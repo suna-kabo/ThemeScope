@@ -15,7 +15,7 @@ Start current work from the [documentation index](../README.md).
 | [Legacy docs](legacy/) | Pre-custom-theme CSV workflow, policies, audits and v5 brief |
 | [Static publishing history](operations/cloudflare_demo.md) | Original demo/publisher implementation and former project setup |
 | [Legacy implementation reports](../../reports/archive/) | Versioned v5/v6.2/v7 reports and diagnostic provenance |
-| [Design exploration](../../design-plans/README.md) | Approved historical fixture review assets and design decisions |
+| [Design exploration](ui/design-plans/README.md) | Approved historical fixture review assets and design decisions |
 | [Relocation map](relocations.md) | Previous source paths and retained locations |
 
 ## Stable inspection inputs
@@ -31,3 +31,8 @@ The `inspection/` tree and original inspection branches remain historical synthe
 checkpoints. They are not regenerated to imply new live evidence. Old full/focused
 counts remain dated results; consult fresh test output for present acceptance.
 Historical local artifact paths may identify outputs no longer shipped in Git.
+
+The [main-publication plan](operations/main-publication-plan.md) and
+[12 November tooling verification](operations/publication-tooling-verification-2026-11-12.md)
+preserve the formerly unresolved cutover state. Current confirmed production
+status is [recorded separately](../operations/main-publication.md).

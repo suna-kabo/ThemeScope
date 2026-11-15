@@ -36,7 +36,7 @@ The 560 machine-identified relationship proposals are a screening queue, not 560
 issuer-reviewed decisions. Cohort-level triage identifies the required further
 company evidence; it does not confer membership. Company-specific approvals,
 rejections and deferrals are separated in the
-[coverage audit](../../reports/research-v2-universe-audit.md).
+[coverage audit](../../reports/archive/research-v2/research-v2-universe-audit.md).
 
 Any later addition requires its own dated evidence decision and future effective
 session. It must not be appended to the November 14 review as if inspected then.

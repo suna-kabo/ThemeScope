@@ -61,7 +61,7 @@ def main():
     for role,path in paths.items():command+=['--'+role+'-csv',str(path)]
     result=subprocess.run(command,cwd=ROOT)
     if result.returncode:return result.returncode
-    print('Refresh complete. Run open-dashboard.cmd and check Data through before using the dashboard.')
+    print('Refresh complete. Run legacy-open-dashboard.cmd and check Data through before using the dashboard.')
     print('site/ was not changed. Nothing was committed, pushed or deployed.')
     return 0
 
