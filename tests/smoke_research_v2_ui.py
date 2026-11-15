@@ -295,6 +295,15 @@ def main():
 
                 page.set_viewport_size(dict(width=1440,height=1000));page.emulate_media(reduced_motion='no-preference')
                 nav('overview');nav('primary')
+                opener=page.locator('#candidates [data-inspect-ticker]').first
+                opener.click()
+                expect(page.locator('#research-inspector')).to_be_visible()
+                page.locator('#inspector-close').click()
+                expect(page.locator('#research-inspector')).not_to_be_visible()
+                expect(opener).to_be_focused()
+                opener.click()
+                expect(page.locator('#research-inspector')).to_be_visible()
+                close_inspector()
                 result['motion']=page.evaluate("({reduced:matchMedia('(prefers-reduced-motion: reduce)').matches,animationCount:document.getAnimations().length})")
                 page.emulate_media(reduced_motion='reduce')
                 nav('themes');assert page.evaluate("document.getAnimations().every(a=>a.playState!=='running')")

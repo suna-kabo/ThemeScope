@@ -203,7 +203,7 @@
     if(!snapshot){$('market-direction').innerHTML=empty('No completed snapshot','Open Snapshot to refresh completed-session data.');$('market-cards').innerHTML='';$('market-continuation').innerHTML='';return;}
     const direction=marketName(snapshot.market_direction),changes=v2().changes||{},decision=snapshot.market?.decision||{};
     const changed=changes.changed?`From ${marketName(changes.previous_market_direction)}`:changes.previous_market_direction?'Unchanged since previous session':'No previous comparison';
-    $('market-direction').innerHTML=`<div class="bias-line"><div class="bias-title"><span class="eyebrow">Market Bias</span><h2 class="direction-name ${tone(direction)}" aria-label="Market Bias: ${esc(direction)}">${esc(direction)}</h2><span class="market-change">${esc(changed)}${v2().conviction==='selective'?' \u00b7 Reduced conviction':''}</span></div><div class="bias-action">${!currentResearch()?'<p>Current research list unavailable \u00b7 previous rules snapshot</p>':currentSide()?`<span>${sideLabel()}</span><a href="#themes">${primaryThemes().length} researchable themes <span aria-hidden="true">\u2192</span></a>`:'<p>No directional research list</p><a href="#themes">Explore theme context \u2192</a>'}</div></div><details class="decision-details"><summary>Decision evidence</summary><p id="decision-path">${esc(decision.reason||'Market context unavailable.')}</p><p id="today-plan">${esc(snapshot.today_plan||'')}</p><p>Breadth: ${esc(snapshot.market?.breadth_consensus||'Unavailable')}</p></details>`;
+    $('market-direction').innerHTML=`<div class="bias-line"><div class="bias-title"><span class="eyebrow">Market Bias</span><h2 class="direction-name ${tone(direction)}" aria-label="Market Bias: ${esc(direction)}">${esc(direction)}</h2><span class="market-change"><span class="${changes.previous_market_direction?'':'comparison-unavailable'}">${esc(changed)}</span>${v2().conviction==='selective'?' \u00b7 Reduced conviction':''}</span></div><div class="bias-action">${!currentResearch()?'<p>Current research list unavailable \u00b7 previous rules snapshot</p>':currentSide()?`<span>${sideLabel()}</span><a href="#themes">${primaryThemes().length} researchable themes <span aria-hidden="true">\u2192</span></a>`:'<p>No directional research list</p><a href="#themes">Explore theme context \u2192</a>'}</div></div><details class="decision-details"><summary>Decision evidence</summary><p id="decision-path">${esc(decision.reason||'Market context unavailable.')}</p><p id="today-plan">${esc(snapshot.today_plan||'')}</p><p>Breadth: ${esc(snapshot.market?.breadth_consensus||'Unavailable')}</p></details>`;
     renderBenchmarks();renderThemeMap();
     const leaders=primaryThemes().slice(0,3);
     $('market-continuation').innerHTML=`<section class="research-next"><div class="section-heading"><h2>Next in research</h2><a href="#themes" class="text-link">Theme changes \u2192</a></div>${leaders.length?`<ol class="next-themes">${leaders.map(t=>`<li><div>${themeLink(t.theme_id)}<small>${themeState(t.theme_id)}</small></div><span>${recentChange(t.theme_id)}</span></li>`).join('')}</ol><a href="#primary" class="queue-entry"><span>Primary research</span><strong>${v2().list?.stock_count??uniqueRows(qualifiedRows()).length} stocks <span aria-hidden="true">\u2192</span></strong></a>`:'<a href="#themes" class="queue-entry">All themes <span aria-hidden="true">\u2192</span></a>'}</section>`;
@@ -601,8 +601,8 @@
     if (button.dataset.remove) { changeSaved(button.dataset.remove,true); return; }
     if (button.dataset.universe) { ui.universe=button.dataset.universe; if(ui.universe!=='active'){$('theme-priority').value='';$('theme-trend').value='';ui.themeSort='name';ui.themeDescending=false;} renderThemes();requestAnimationFrame(UX.indicators);return;}
     if (button.dataset.candidateMode) { const changed=ui.candidateMode!==button.dataset.candidateMode;ui.candidateMode=button.dataset.candidateMode;renderCandidates();UX.indicators();if(changed)UX.move($('candidates'),'sweep');return; }
-    if (button.dataset.reset === 'themes') { $('theme-filters').reset(); renderThemes(); }
-    if (button.dataset.reset === 'candidates') { $('candidate-filters').reset(); renderCandidates(); }
+    if (button.dataset.reset === 'themes') { $('theme-filters').reset(); renderThemes(); UX.move($('theme-table'),'reveal'); }
+    if (button.dataset.reset === 'candidates') { $('candidate-filters').reset(); renderCandidates(); UX.move($('candidates'),'reveal'); }
   });
   function filterChange(event) {
     const id = event.target.id;
@@ -613,6 +613,8 @@
     if (['theme-search','theme-family','theme-priority','theme-trend'].includes(id)) renderThemes();
     if (id === 'theme-sort') { const [key,direction] = event.target.value.split(':'); ui.themeSort = key; ui.themeDescending = direction === 'desc'; renderThemes(); $('theme-sort')?.focus(); }
     if (id.startsWith('candidate-') && id !== 'candidate-filters') renderCandidates();
+    if(event.type==='change'&&id.startsWith('theme-'))UX.move($('theme-table'),'reveal');
+    if(event.type==='change'&&id.startsWith('candidate-'))UX.move($('candidates'),'reveal');
     if (id.startsWith('member-') && ['member-search','member-role','member-eligibility','member-sort'].includes(id)) {
       ui.memberSearch = $('member-search').value; ui.memberRole = $('member-role').value; ui.memberEligibility = $('member-eligibility').value; ui.memberSort = $('member-sort').value; renderMembers(detailId());
     }

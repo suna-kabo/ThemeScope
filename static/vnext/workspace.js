@@ -57,9 +57,9 @@ window.ThemeScopeUI = (() => {
     if(!element)return;
     running.get(element)?.cancel();
     if(reduced())return;
-    const distance=kind==='slide'?14:kind==='sweep'?8:kind==='reveal'?4:kind==='shift'?5:0;
+    const distance=kind==='slide'?14:kind==='sweep'?8:kind==='reveal'?2:kind==='shift'?5:0;
     const transform=kind==='slide'||kind==='sweep'?`translateX(${distance*direction}px)`:`translateY(${distance}px)`;
-    const animation=element.animate([{opacity:kind==='confirm'?.5:.65,transform},{opacity:1,transform:'translate(0,0)'}],{duration:motion[kind]||motion.shift,easing:kind==='sweep'?ease.travel:ease.enter});
+    const animation=element.animate([{opacity:kind==='confirm'?.5:kind==='reveal'?.9:.85,transform},{opacity:1,transform:'translate(0,0)'}],{duration:motion[kind]||motion.shift,easing:kind==='sweep'?ease.travel:ease.enter});
     running.set(element,animation);
   }
   function pulse(ring) {

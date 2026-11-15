@@ -1,4 +1,4 @@
-/* ThemeScope ? charcoal research journal. */
+/* ThemeScope: charcoal research journal. */
 @font-face {
   font-family:Research;
   src:url(Research.woff2) format('woff2');
@@ -2027,7 +2027,11 @@ dialog[open] {
     gap:12px;
     grid-template-columns:1fr 1fr;
   }
-  .benchmark-bread.next-themes {
+  .benchmark-breadth {
+    grid-column:1/-1;
+    max-width:240px;
+  }
+  .next-themes {
     grid-template-columns:1fr;
     gap:0;
   }
@@ -2158,7 +2162,10 @@ dialog[open] {
     grid-template-columns:1fr;
     gap:14px;
   }
-  .benchmark-bread.market-price {
+  .benchmark-breadth {
+    grid-column:auto;
+  }
+  .market-price {
     font-size:1rem;
   }
   .iwm-context {
@@ -2713,4 +2720,88 @@ dialog[open] {
   .theme-ledger-head,.queue-head {
     display:none;
   }
+}
+
+/* Final rhythm: shorter evidence intervals and compact research units. */
+#overview-page .page-heading { margin-bottom:16px; }
+.bias-title { gap:4px; }
+.bias-line { padding:16px 0 14px; }
+.comparison-unavailable { font-size:.6875rem; }
+.decision-details { padding-bottom:4px; }
+.decision-details summary { min-height:28px; }
+.benchmark-evidence { padding-top:14px; margin-bottom:22px; }
+#overview-page .section-heading { margin-bottom:12px; }
+#overview-page .section-heading .text-link { min-height:32px; }
+.benchmark-heading { margin-bottom:12px; }
+.benchmark-extra { margin-top:8px; }
+.benchmark-extra summary { min-height:28px; }
+.iwm-context { padding-top:12px; margin-top:12px; }
+.research-next { padding-top:16px; }
+.queue-entry { margin-top:16px; padding:14px 0; }
+.theme-map-panel { margin-top:20px; }
+.queue-chapter { grid-template-columns:190px minmax(0,1fr); gap:28px; padding:16px 0 18px; }
+.chapter-heading h2 { font-size:1rem; margin:6px 0; max-width:210px; }
+.chapter-peer-label { line-height:20px; margin-bottom:2px; }
+.chapter-queue { column-gap:24px; }
+.chapter-queue .queue-row { min-height:60px; padding:8px 4px; }
+.chapter-heading .text-link { min-height:32px; }
+.chapter-queue .save-button { width:36px; height:36px; }
+.chapter-queue .row-company { line-height:1.4; }
+.queue-chapter+.queue-chapter { border-top-color:var(--rule); }
+.inspector-header { padding:18px 0 12px; }
+.inspector-status { padding:10px 0 14px; }
+.inspector-family { margin-bottom:14px; }
+.relative-evidence { padding-top:12px; }
+.evidence-label { margin-bottom:12px; }
+.relative-summary { padding-bottom:16px; }
+.price-evidence { padding:14px 0 16px; }
+.theme-provenance { margin-bottom:16px; }
+.stock-comparison { margin:18px 0; }
+.stock-relationship .evidence-list>div { padding:10px 0; }
+.inspector-member-list li { min-height:58px; }
+#inspector-close { font-size:1.25rem; }
+button:active:not(:disabled),.button:active:not([aria-disabled=true]) { transform:scale(.97); }
+.save-button:active { transform:scale(.9); }
+.ticker-link { transition:color 140ms,transform 160ms; }
+.ticker-link:hover { transform:translateX(2px); }
+.theme-line:focus-within,.queue-row:focus-within { background:var(--hover); }
+@media(min-width:768px) {
+  .benchmark-breadth .metric-help { min-height:24px; min-width:24px; }
+}
+@media(min-width:1700px) {
+  .app-shell { width:min(1760px,100%); }
+  .chapter-queue { grid-template-columns:repeat(3,minmax(0,1fr)); }
+}
+@media(max-width:1000px) and (min-width:768px) {
+  .queue-chapter { grid-template-columns:170px minmax(0,1fr); gap:24px; }
+}
+@media(max-width:767px) {
+  .queue-chapter { grid-template-columns:1fr; gap:6px; padding:18px 0; }
+  .chapter-heading h2 { margin:0; max-width:none; }
+  .chapter-queue .queue-row { min-height:76px; padding:10px 0; }
+  .chapter-queue .save-button { width:40px; height:44px; }
+  .decision-details summary,.benchmark-extra summary,.iwm-context summary { min-height:40px; }
+  .theme-provenance { margin-bottom:12px; }
+  .relative-summary { gap:10px 12px; }
+}
+@supports (transition-behavior:allow-discrete) {
+  dialog {
+    opacity:0;
+    transform:translateX(12px);
+    transition:opacity 160ms,transform 180ms,overlay 180ms allow-discrete,display 180ms allow-discrete;
+  }
+  dialog[open] { opacity:1; transform:none; animation:none; }
+  dialog::backdrop { background:#090b0d00; transition:background-color 160ms,overlay 180ms allow-discrete,display 180ms allow-discrete; }
+  dialog[open]::backdrop { background:#090b0db3; }
+  @starting-style {
+    dialog[open] { opacity:0; transform:translateX(12px); }
+    dialog[open]::backdrop { background:#090b0d00; }
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  dialog,dialog::backdrop { transition:none!important; }
+  button:active,.button:active,.save-button:active,.ticker-link:hover { transform:none; }
+}
+@media(max-width:359px) {
+  .theme-sort { flex:1 0 100%; }
 }
