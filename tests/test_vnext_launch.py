@@ -66,12 +66,13 @@ class LaunchTests(unittest.TestCase):
 
     def test_approved_configuration_counts_and_no_backdating(self):
         c=self.config
+        launch_members=tuple(m for m in c.memberships if m.active_on(E))
         self.assertEqual((c.methodology['launch_rebalance_session'],c.methodology['production_enabled']),(L,True))
         self.assertEqual(effective_session_after_close(L,DAYS),E)
-        self.assertEqual(Counter(m.role for m in c.memberships),{'Core':659,'Enabler':62,'Related':5})
-        self.assertEqual(len(c.memberships),726)
-        self.assertTrue(all(m.effective_from==E and m.effective_to==('2026-11-10' if m.ticker=='ROKU' else None) for m in c.memberships))
-        self.assertTrue(all(not m.active_on('2026-11-05') and not m.active_on(L) and m.active_on(E) for m in c.memberships))
+        self.assertEqual(Counter(m.role for m in launch_members),{'Core':659,'Enabler':62,'Related':5})
+        self.assertEqual(len(launch_members),726)
+        self.assertTrue(all(m.effective_from==E and m.effective_to==('2026-11-10' if m.ticker=='ROKU' else None) for m in launch_members))
+        self.assertTrue(all(not m.active_on('2026-11-05') and not m.active_on(L) for m in c.memberships))
         self.assertEqual(c.production_blockers(),[])
         self.assertEqual([(r.benchmark,len(r.tickers)) for r in rosters(ROOT)],[('SPY',501),('QQQ',101)])
 
@@ -88,10 +89,10 @@ class LaunchTests(unittest.TestCase):
         self.assertEqual(launched['theme_layer']['state'],'initialized')
         self.assertEqual(launched['theme_layer']['first_earned_session'],E)
         self.assertEqual(launched['production_blockers'],[])
-        expected={(m.ticker,m.theme_id) for m in self.config.memberships if m.calculation_eligible}
+        expected={(m.ticker,m.theme_id) for m in self.config.memberships if m.calculation_eligible and m.active_on(E)}
         self.assertEqual({(r['ticker'],r['theme_id']) for r in launched['relationships']},expected)
         self.assertEqual(len(launched['relationships']),721)
-        self.assertTrue(all(r['relative'].w is not None and r['eligibility'].available for r in launched['relationships']))
+        self.assertTrue(all(r['relative'].w is not None and r['eligibility']['available'] for r in launched['relationships']))
         self.assertEqual(launched['research_membership_basis'],'approved_launch_membership')
         self.assertEqual(launched['research_membership_basis_session'],E)
         self.assertTrue(all(not self.config.members_on(t.theme_id,L) for t in self.config.themes))
@@ -121,7 +122,7 @@ class LaunchTests(unittest.TestCase):
                 self.assertEqual({s for s,w in point['weights']},expected)
         finally:store.close()
         fetched={s for call in self.providers[-1].calls for s in call[0]}
-        expected={m.ticker for m in self.config.memberships if m.calculation_eligible}
+        expected={m.ticker for m in self.config.memberships if m.calculation_eligible and m.active_on(E)}
         expected.update(s for r in rosters(ROOT) for s in r.tickers);expected.update(('SPY','QQQ','IWM'))
         self.assertEqual(fetched,expected)
 
@@ -140,7 +141,9 @@ class LaunchTests(unittest.TestCase):
         self.assertAlmostEqual(D(str(first['themes'][0]['index']['level'])),D(120),places=25)
         self.assertAlmostEqual(D(str(second['themes'][0]['index']['level'])),D(160),places=25)
         self.assertNotEqual(D(str(second['themes'][0]['index']['level'])),D(144))
-        self.assertEqual({r['ticker'] for r in first['relationships']},{m.ticker for m in c.memberships if m.calculation_eligible})
+        self.assertEqual({r['ticker'] for r in first['relationships'] if r['role']!='Related'},
+                         {m.ticker for m in c.memberships if m.calculation_eligible})
+        self.assertFalse(next(r for r in first['relationships'] if r['ticker']=='RELATED')['qualifies'])
         self.assertTrue(first['themes'][0]['history']['signal_eligible'])
         self.assertTrue(all(v is None for v in first['themes'][0]['transition'].values()))
         self.assertIsNotNone(second['themes'][0]['transition']['priority_change'])

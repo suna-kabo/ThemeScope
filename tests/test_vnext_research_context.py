@@ -1,5 +1,6 @@
 """Independent numerical oracles and additive-contract regression tests."""
 from copy import deepcopy
+from contextlib import closing
 from dataclasses import asdict, replace
 from decimal import Decimal as D, localcontext
 from pathlib import Path
@@ -228,8 +229,7 @@ class IntegrationTests(unittest.TestCase):
         from src.themescope.providers.base import FixtureProvider
         from src.themescope.providers.cache import prepare,publish_prepared
         rows=[Bar(s,d,D(100),D(100),D(1000000)) for s in ('SPY','QQQ','A') for d in DATES]
-        with tempfile.TemporaryDirectory() as folder:
-            store=Store(Path(folder)/'test.sqlite');self.addCleanup(store.close)
+        with tempfile.TemporaryDirectory() as folder, closing(Store(Path(folder)/'test.sqlite')) as store:
             provider=FixtureProvider(rows,schedule())
             def publish(plan):publish_prepared(store,plan,DATES[-1],'themescope-vnext-1','test',{'session':DATES[-1]},('SPY','QQQ','A'))
             publish(prepare(store,provider,('SPY','QQQ','A'),DATES))
@@ -246,8 +246,7 @@ class IntegrationTests(unittest.TestCase):
             self.assertEqual(store.connection.execute('PRAGMA user_version').fetchone()[0],SCHEMA_VERSION)
 
     def test_historical_context_is_one_run_and_read_only(self):
-        with tempfile.TemporaryDirectory() as folder:
-            store=Store(Path(folder)/'test.sqlite');self.addCleanup(store.close)
+        with tempfile.TemporaryDirectory() as folder, closing(Store(Path(folder)/'test.sqlite')) as store:
             for count,keys in enumerate((('a','b'),('a',))):
                 with store.refresh(DAYS[-2],'themescope-vnext-1','test') as run:
                     run.bars([Bar('A',DAYS[-2],D(10),D(10),D(1000000))])
@@ -271,5 +270,6 @@ class IntegrationTests(unittest.TestCase):
         self.assertNotIn('private',result['research'])
         self.assertNotIn('secret',result['research']['extension']['indices']['SPY'])
         self.assertEqual(result['research']['ranks'],data['research']['ranks'])
-        data['research']['countertrend']['buckets']['snapback']['rows'].append({'ticker':'UNKNOWN','theme_id':'missing'})
+        self.assertNotIn('countertrend',data['research'])
+        data['research_v2']['list']['rows'].append(dict(data['research_v2']['list']['rows'][0],ticker='UNKNOWN',theme_id='missing'))
         with self.assertRaises(SnapshotError):project_snapshot(data,data['session'])

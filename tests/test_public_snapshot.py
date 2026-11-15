@@ -57,9 +57,12 @@ class PublicSnapshotTests(unittest.TestCase):
 
     def test_countertrend_public_projection_both_sides_and_malformed_files(self):
         from src.themescope.research.countertrend_exports import attach
-        mapping={ticker:{'status':'verified','symbol':symbol} for ticker,symbol in self.source['research']['countertrend']['exports']['symbols'].items()}
+        from src.themescope.research.context import countertrend
+        legacy=copy.deepcopy(self.source);legacy.pop('research_v2',None)
+        legacy['research']['countertrend']=countertrend(legacy)
+        mapping={row['ticker']:{'status':'verified','symbol':'TEST:'+row['ticker']} for row in legacy['relationships']}
         for side,filenames in [('long',{'Countertrend.txt','Strong-Leaders.txt','Relative-Weakness.txt'}),('short',{'Countertrend.txt','Resilient.txt','Snapback.txt'})]:
-            source=copy.deepcopy(self.source);source['research']['countertrend']['side']=side
+            source=copy.deepcopy(legacy);source['research']['countertrend']['side']=side
             source=attach(source,mapping)
             result=builder.project_snapshot(source,'2026-11-06')
             self.assertEqual(result['exports'],source['exports'])

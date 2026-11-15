@@ -1,0 +1,163 @@
+{
+  "schema_version": 1,
+  "review_id": "themescope-research-v2-membership-review-2026-11-14",
+  "status": "reviewed",
+  "reviewed_on": "2026-11-14",
+  "effective_from": "2026-11-16",
+  "authorization_reference": "docs/operations/research-v2-membership-authorization.md#authorized-scope records the project owner's authorization for evidence-reviewed, immutable forward additions.",
+  "base_universe_source": {
+    "sha256": "49e72888c4a029075fc01e2b9f9a28bfcaeddf7e5df960bca52adfff5c9de25f",
+    "security_type_basis": "user_scanner_attestation",
+    "quantitative_policy_validated": true
+  },
+  "evidence_method": "Issuer company profiles inspected with the web reader on the review date. Fingerprints hash the exact short supporting excerpt encoded as UTF-8, not the unavailable full page body. Summaries are paraphrased; no raw page or private market prices are distributed.",
+  "additions": [
+    {
+      "ticker": "CCS",
+      "company": "Century Communities, Inc.",
+      "theme_id": "homebuilders",
+      "role": "Core",
+      "instrument": {
+        "ticker": "CCS",
+        "exchange": "NYSE",
+        "security_type": "common_stock",
+        "security_type_source": "user_scanner_attestation"
+      },
+      "evidence": {
+        "source_url": "https://www.centurycommunities.com/about-us/",
+        "source_type": "issuer_company_profile",
+        "reviewed_on": "2026-11-14",
+        "supporting_excerpt": "One Company. Two Homebuilders.",
+        "support_summary": "Century Communities and Century Complete build single-family homes, townhomes, paired homes and condos. Principal homebuilding matches the existing residential construction charter.",
+        "source_hash_basis": "sha256_utf8_supporting_excerpt",
+        "source_sha256": "67b74aefb8e2277413127d1bb394e9b90ae798e0288d7afb7a09cc2e793e2297"
+      }
+    },
+    {
+      "ticker": "GRBK",
+      "company": "Green Brick Partners, Inc.",
+      "theme_id": "homebuilders",
+      "role": "Core",
+      "instrument": {
+        "ticker": "GRBK",
+        "exchange": "NYSE",
+        "security_type": "common_stock",
+        "security_type_source": "user_scanner_attestation"
+      },
+      "evidence": {
+        "source_url": "https://greenbrickpartners.com/",
+        "source_type": "issuer_company_profile",
+        "reviewed_on": "2026-11-14",
+        "supporting_excerpt": "Land Development & Homebuilding as a Public Company",
+        "support_summary": "The issuer describes a residential land-development and homebuilding company operating consolidated homebuilder brands. Principal residential construction supports Core membership.",
+        "source_hash_basis": "sha256_utf8_supporting_excerpt",
+        "source_sha256": "a28ad4788b5d23ec1f42b804f250bd68a99aa9829048cf49156f7ac54a67063d"
+      }
+    },
+    {
+      "ticker": "NVR",
+      "company": "NVR, Inc.",
+      "theme_id": "homebuilders",
+      "role": "Core",
+      "instrument": {
+        "ticker": "NVR",
+        "exchange": "NYSE",
+        "security_type": "common_stock",
+        "security_type_source": "user_scanner_attestation"
+      },
+      "evidence": {
+        "source_url": "https://www.nvrinc.com/",
+        "source_type": "issuer_company_profile",
+        "reviewed_on": "2026-11-14",
+        "supporting_excerpt": "The homebuilding unit sells and constructs homes under the Ryan Homes, NVHomes and Heartland Homes brands.",
+        "support_summary": "NVR constructs and sells residential homes; its mortgage operations support those homebuyers. Homebuilding is a principal operating business, matching the existing Core charter.",
+        "source_hash_basis": "sha256_utf8_supporting_excerpt",
+        "source_sha256": "e057d7a5976a7c6f3d91e055ca6cd1bfbd786f79f3c201370413631fb4fcb0fc"
+      }
+    },
+    {
+      "ticker": "MHO",
+      "company": "M/I Homes, Inc.",
+      "theme_id": "homebuilders",
+      "role": "Core",
+      "instrument": {
+        "ticker": "MHO",
+        "exchange": "NYSE",
+        "security_type": "common_stock",
+        "security_type_source": "user_scanner_attestation"
+      },
+      "evidence": {
+        "source_url": "https://investors.mihomes.com/investor-relations/corporate-profile/",
+        "source_type": "issuer_company_profile",
+        "reviewed_on": "2026-11-14",
+        "supporting_excerpt": "M/I Homes, Inc. founded in 1976, M/I Homes is one of nation's leading builders of single family homes.",
+        "support_summary": "The issuer identifies its principal business as single-family homebuilding, serving multiple residential buyer segments. This directly matches the existing Homebuilders Core definition.",
+        "source_hash_basis": "sha256_utf8_supporting_excerpt",
+        "source_sha256": "8fc5cc453f3d8a1097810537e748a62b34297b2d816f9f09091a6435fe7395c3"
+      }
+    },
+    {
+      "ticker": "AWR",
+      "company": "American States Water Company",
+      "theme_id": "water",
+      "role": "Core",
+      "instrument": {
+        "ticker": "AWR",
+        "exchange": "NYSE",
+        "security_type": "common_stock",
+        "security_type_source": "user_scanner_attestation"
+      },
+      "evidence": {
+        "source_url": "https://www.aswater.com/",
+        "source_type": "issuer_company_profile",
+        "reviewed_on": "2026-11-14",
+        "supporting_excerpt": "Through its water utility subsidiary, Golden State Water Company, the company provides water service to approximately 265,200 customer connections",
+        "support_summary": "Golden State Water supplies regulated water service; American States Utility Services operates military-base water and wastewater systems. Water is a material operating business, supporting Core rather than incidental exposure.",
+        "source_hash_basis": "sha256_utf8_supporting_excerpt",
+        "source_sha256": "009392a935ee028709577c244018ba942d71841d592dd91ed55a9cbaa6f208f2"
+      }
+    },
+    {
+      "ticker": "CWT",
+      "company": "California Water Service Group",
+      "theme_id": "water",
+      "role": "Core",
+      "instrument": {
+        "ticker": "CWT",
+        "exchange": "NYSE",
+        "security_type": "common_stock",
+        "security_type_source": "user_scanner_attestation"
+      },
+      "evidence": {
+        "source_url": "https://www.calwatergroup.com/investors/company-information",
+        "source_type": "issuer_company_profile",
+        "reviewed_on": "2026-11-14",
+        "supporting_excerpt": "Together, these companies provide regulated and non-regulated water and wastewater service to more than 2 million people",
+        "support_summary": "The group operates regulated water utilities and related water/wastewater services. Principal water distribution and treatment meet the existing Water Core charter.",
+        "source_hash_basis": "sha256_utf8_supporting_excerpt",
+        "source_sha256": "abb1b8667e6e052ed004dcce3ed01219b7af6ccd9e5ca76b926710e4dec42b05"
+      }
+    },
+    {
+      "ticker": "MSEX",
+      "company": "Middlesex Water Company",
+      "theme_id": "water",
+      "role": "Core",
+      "instrument": {
+        "ticker": "MSEX",
+        "exchange": "NASDAQ",
+        "security_type": "common_stock",
+        "security_type_source": "user_scanner_attestation"
+      },
+      "evidence": {
+        "source_url": "https://www.middlesexwater.com/about-us/",
+        "source_type": "issuer_company_profile",
+        "reviewed_on": "2026-11-14",
+        "supporting_excerpt": "Middlesex Water engages in collecting, treating, distributing and selling water for domestic, commercial, municipal, industrial and fire protection purposes.",
+        "support_summary": "Middlesex owns and operates regulated water and wastewater systems and provides contract operations. Principal water utility activities directly support Core membership.",
+        "source_hash_basis": "sha256_utf8_supporting_excerpt",
+        "source_sha256": "8e1456c47dc7d5e226264ef037528e294a09c123875202e7e7c5c317f16ca953"
+      }
+    }
+  ]
+}

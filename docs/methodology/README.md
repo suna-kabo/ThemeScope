@@ -1,6 +1,8 @@
 # ThemeScope methodology
 
-This is the current reading guide to the approved rules, not a new specification.
+Current chart selection follows [Research Logic v2](research-v2.md), which replaces
+the former W-sign filter, daily liquidity and Countertrend lens. This guide also
+records the retained return and accounting formulas.
 Versioned constants remain in [methodology.json](../../config/vnext/methodology.json);
 the full [approved specification](../vnext/ThemeScope_vNext_Product_and_Methodology_Spec.md)
 retains its original inspection-compatible path and dated amendments. The
@@ -63,23 +65,21 @@ Legacy ETF-based history is a distinct series and is never spliced into this one
 Explicitly approved [terminal events](../architecture/terminal-actions.md) may value
 existing holdings without fabricating OHLCV or tradeability.
 
-## Peer delta and Directional candidates
+## Peer strength and chart research
 
 For each stock/theme relationship, exclude the stock and compute peer medians for
 both horizons. At least four other valid peers and 80% coverage of the other
 configured members are required. `ER = stock return − peer median return` and
-`W = 0.60 × ER1M + 0.40 × ER3M`. The UI's **Peer delta (pp)** expresses W in percentage
+`W = 0.60 × ER1M + 0.40 × ER3M`. The UI's **Peer strength (pp)** expresses W in percentage
 points; it is not a return forecast.
 
-Long/Selective Long gives Primary long priority to Strength ≥50 with Bullish/Mixed
-Trend, retaining the valid Newly Bullish one-session exception. Short/Selective
-Short uses Strength <50 with Bearish/Mixed, retaining the valid Newly Bearish
-exception. Neutral/Unclassified gives Watch. Candidate qualification also requires
-passing daily eligibility and **W >0** for long or **W <0** for short; zero/unavailable
-is excluded. Compatible genuine history is required for transition exceptions.
+Leading, Improving and Fading themes are researchable in the market direction.
+Every daily-eligible Core/Enabler member enters the list; W orders peers without
+excluding zero, opposite-sign or unavailable values. Short mirrors Long. Trend
+and breadth remain context. See the v2 specification for exact state boundaries.
 
-Daily eligibility uses raw close ≥$5, latest 10 completed regular-session average
-volume **>500,000**, and target raw close × volume **≥$10 million**. Missing required
+Daily eligibility uses raw close >$5 and average daily dollar volume **≥$10 million**
+over 20 completed sessions, averaging each session's raw close × volume. Missing required
 bars make eligibility unavailable. Membership, theme medians and peer denominators
 do not change because a stock fails daily liquidity. Earnings are optional and
 never affect qualification.
@@ -87,8 +87,7 @@ never affect qualification.
 ## Multiple themes and exports
 
 A stock qualifies independently in each theme. Individual-theme exports retain
-all qualifying relationships. Directional combined placement prefers Core before
-Enabler, stronger directional W, then lexical Theme ID. Verified TradingView
+all qualifying relationships. Combined placement follows theme research priority,
+directional peer strength, then ticker. Verified TradingView
 identifiers are required; no exchange is guessed. Visible UI filters do not rewrite
-published exports. Additive Countertrend files use their own existing ordered
-buckets. See [research context](research-context.md) for ranks, Extension and lenses.
+published exports. Countertrend is removed from current research.

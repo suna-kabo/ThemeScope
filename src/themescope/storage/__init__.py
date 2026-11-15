@@ -109,13 +109,24 @@ class Store:
     def research_at(self, session, methodology):
         """One successful run's entire theme universe and market context, read only."""
         row=self.connection.execute(
-            "SELECT r.id,m.payload FROM refresh_run r JOIN market_snapshot m ON m.run_id=r.id "
+            "SELECT r.id,r.config_hash,m.payload FROM refresh_run r JOIN market_snapshot m ON m.run_id=r.id "
             "WHERE r.session=? AND r.methodology=? AND r.status='success' ORDER BY r.id DESC LIMIT 1",
             (session,methodology)).fetchone()
         if row is None:return None
         themes=[json.loads(t[0]) for t in self.connection.execute(
             'SELECT payload FROM theme_snapshot WHERE run_id=? ORDER BY theme_id',(row['id'],))]
-        return {'session':session,'methodology':methodology,'market':json.loads(row['payload']),'themes':themes}
+        return {'session':session,'methodology':methodology,'configuration_hash':row['config_hash'],
+                'market':json.loads(row['payload']),'themes':themes}
+
+    def theme_history(self,theme_id,methodology):
+        """Latest successful observation per session; never reconstructed research."""
+        rows=self.connection.execute(
+            "SELECT r.session,t.payload FROM theme_snapshot t JOIN refresh_run r ON r.id=t.run_id "
+            "WHERE t.theme_id=? AND r.methodology=? AND r.status='success' AND r.id=("
+            "SELECT MAX(newer.id) FROM refresh_run newer WHERE newer.session=r.session "
+            "AND newer.methodology=r.methodology AND newer.status='success') ORDER BY r.session",
+            (theme_id,methodology))
+        return [{'session':row['session'],'methodology':methodology,'themes':[json.loads(row['payload'])]} for row in rows]
 
     def active_publication(self):
         """Version and payload from ONE committed publication-pointer read."""

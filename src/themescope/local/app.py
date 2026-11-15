@@ -6,6 +6,7 @@ from fastapi.responses import Response,FileResponse,JSONResponse
 from ..storage import canonical
 from ..local_refresh_lock import RefreshBusy
 from .service import RefreshService
+from ..research import queries
 
 
 def create_app(root,service=None):
@@ -46,11 +47,32 @@ def create_app(root,service=None):
         return {'state':'running'}
     @app.get('/api/dashboard-data')
     def data():return Response(canonical(service.snapshot()),media_type='application/json')
+    def query(name, *args):
+        result=getattr(queries,name)(service.snapshot(),*args)
+        if result is None:raise HTTPException(404,'Research unavailable')
+        return Response(canonical(result),media_type='application/json')
+    @app.get('/api/market')
+    def market():return query('get_market_state')
+    @app.get('/api/market/changes')
+    def changes():return query('get_market_changes')
+    @app.get('/api/research-list')
+    def research_list():return query('get_research_list')
+    @app.get('/api/themes/{theme_id}')
+    def theme(theme_id:str):return query('get_theme',theme_id)
+    @app.get('/api/themes/{theme_id}/members')
+    def members(theme_id:str):return query('get_theme_members',theme_id)
+    @app.get('/api/themes/{theme_id}/history')
+    def theme_history(theme_id:str):
+        result=service.theme_history(theme_id)
+        if result is None:raise HTTPException(404,'Theme history unavailable')
+        return Response(canonical(result),media_type='application/json')
+    @app.get('/api/stocks/{ticker}')
+    def stock(ticker:str):return query('get_stock',ticker)
     @app.get('/api/exports/combined.txt')
     def combined():
         snapshot=service.snapshot()
         if not snapshot:raise HTTPException(404,'No successful snapshot')
-        return Response(snapshot['exports']['combined'],media_type='text/plain',headers={'Content-Disposition':'attachment; filename="Primary.txt"'})
+        return Response(snapshot['exports']['combined'],media_type='text/plain',headers={'Content-Disposition':'attachment; filename="Research.txt"'})
     @app.get('/api/exports/countertrend/{filename}')
     def countertrend(filename:str):
         from ..research.countertrend_exports import COMBINED,FILENAMES

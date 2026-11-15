@@ -25,7 +25,7 @@ class ManualCSVTests(unittest.TestCase):
     def _csv(self, text):
         temporary = tempfile.TemporaryDirectory()
         path = Path(temporary.name) / "fixture.csv"
-        path.write_text(text, encoding="utf-8")
+        path.write_text(text, encoding="utf-8", newline="")
         self.addCleanup(temporary.cleanup)
         return path
 

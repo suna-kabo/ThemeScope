@@ -14,10 +14,12 @@ class DomainTests(unittest.TestCase):
         c = self.config
         self.assertEqual(sum(t.status == ThemeStatus.ACTIVE for t in c.themes), 44)
         self.assertEqual(sum(t.status == ThemeStatus.WATCH for t in c.themes), 8)
-        self.assertEqual(len(c.memberships), 726)
-        self.assertEqual(len({m.ticker for m in c.memberships}), 668)
-        self.assertEqual(len(c.universe['instruments']), 1525)
-        self.assertTrue(all(m.effective_from == '2026-11-09' for m in c.memberships))
+        launch_members = [m for m in c.memberships if m.active_on('2026-11-09')]
+        self.assertEqual(len(launch_members), 726)
+        self.assertEqual(len({m.ticker for m in launch_members}), 668)
+        self.assertGreaterEqual(len(c.universe['instruments']), 1525)
+        self.assertTrue(all(m.effective_from == '2026-11-09' for m in launch_members))
+        self.assertTrue(all(not m.active_on('2026-11-09') for m in c.memberships if m.effective_from>'2026-11-09'))
         self.assertEqual(c.members_on('semiconductors', '2026-11-05'), ())
         self.assertEqual(c.production_blockers(),[])
 

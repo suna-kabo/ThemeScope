@@ -36,8 +36,8 @@ def daily_eligibility(bars, ticker, sessions, target, policy=POLICY):
 
 def side(direction):
     # Actual unchanged Market Matrix output labels plus the spec's display names.
-    if direction in ('Long bias','Long','Selective long','Selective Long'):return 'long'
-    if direction in ('Short bias','Short','Selective short','Selective Short'):return 'short'
+    if direction in ('Long bias','Long Bias','Long','Selective long','Selective Long'):return 'long'
+    if direction in ('Short bias','Short Bias','Short','Selective short','Selective Short'):return 'short'
     return None
 
 

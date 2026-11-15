@@ -28,6 +28,7 @@ __pycache__/
 # vNext private runtime. Inspection contains generated synthetic summaries only.
 /.venv-vnext/
 /runtime/
+/Daily_Stock_*.csv
 *.sqlite
 *.sqlite-*
 *.sqlite3

@@ -202,7 +202,7 @@ class SQLiteLifecycleTests(unittest.TestCase):
         def provider(schedule):
             result=factory(schedule);fetch=result.get_daily_bars
             if with_prior:
-                result.bars=tuple(replace(b,volume=Decimal(1)) if b.ticker=='AAA' and b.session==result.get_latest_completed_session() else b for b in result.bars)
+                result.bars=tuple(replace(b,volume=Decimal(1)) if b.ticker=='AAA' else b for b in result.bars)
             def paused(*args):
                 provider_in.set();self.assertTrue(provider_out.wait(4));return fetch(*args)
             result.get_daily_bars=paused;return result

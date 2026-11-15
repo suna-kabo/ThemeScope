@@ -38,15 +38,15 @@ def main():
                 page.locator('[data-nav="themes"]').click()
                 expect(page.locator('#theme-table')).to_contain_text('Trend')
                 expect(page.locator('#theme-table')).to_contain_text('Bullish')
-                page.locator('[data-nav="primary"]').click();page.locator('[data-candidate-lens="directional"]').click()
+                page.locator('[data-nav="primary"]').click()
                 assert page.locator('#candidates tbody tr').count()>0
                 save=page.locator('#candidates [data-save]').first;ticker=save.get_attribute('data-save');save.click()
                 page.locator('[data-nav="saved"]').click()
                 expect(page.locator('#saved')).to_contain_text(ticker)
-                page.locator('[data-nav="primary"]').click();page.locator('[data-candidate-lens="directional"]').click()
+                page.locator('[data-nav="primary"]').click()
                 open_exports(page)
                 with page.expect_download() as item:
-                    page.get_by_role('link',name='Full Directional list').click()
+                    page.get_by_role('link',name='Full research list').click()
                 text=Path(item.value.path()).read_text();assert text and '###' in text
                 identifiers=[line for line in text.splitlines() if not line.startswith('###')]
                 assert len(identifiers)==len(set(identifiers))

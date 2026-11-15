@@ -81,6 +81,9 @@ def calculate_session(configuration, bars, sessions, target, market_direction, i
         themes.append({'theme_id':theme.theme_id,'name':theme.name,'family':theme.family,'status':theme.status,'score':score,
                        'returns':metrics.get(theme.theme_id),'index':observation,'priority':label,
                        'transition':transition,'history':asdict(current),
+                       'breadth_above':tuple(sum(closes[s]>stock_emas[s][i] for s in names
+                                                if closes[s] is not None and stock_emas[s][i] is not None)
+                                             for i in (0,1)),
                        'breadth':tuple(breadth(names,closes,{s:stock_emas[s][i] for s in names},configuration.methodology)
                                        for i in (0,1))})
         for member in sorted(members,key=lambda m:m.ticker):

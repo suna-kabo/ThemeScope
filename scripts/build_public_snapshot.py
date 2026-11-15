@@ -142,7 +142,8 @@ RELATIONSHIP = object_rule(dict(ticker=text, theme_id=text, role=text, qualifies
     assigned_section=optional(text), also_qualifies_in=sequence(text),
     relative=object_rule(dict(w=numeric, er1=numeric, er3=numeric, peer1=METRIC, peer3=METRIC)),
     eligibility=object_rule(dict(available=boolean, eligible=boolean, close=numeric,
-                                average_volume=numeric, turnover=numeric, reasons=sequence(text)))))
+                                average_volume=numeric, turnover=numeric, reasons=sequence(text),
+                                **{'average_dollar_volume?':numeric}))))
 BREADTH = object_rule(dict(above_ema21=numeric, above_ema50=numeric, valid=numeric,
                           configured=numeric, coverage=numeric, state=text))
 CONTEXT = dict(close=numeric, ema21=numeric, ema50=numeric, price_state=text)
@@ -174,8 +175,31 @@ RESEARCH = object_rule(dict(schema=text, policy_version=text, policy_hash=text,
     focus=object_rule(dict(label=text, preferred_mode=text)),
     ema_transitions=object_rule({ticker:object_rule(dict(ema21=EMA_CHANGE, ema50=EMA_CHANGE)) for ticker in ('SPY','QQQ','IWM')}),
     ranks=object_rule(dict(method=text, ranked_total=numeric, active_universe=sequence(text), themes=keyed(RANK_ROW,SLUG))),
-    countertrend=object_rule(dict(available=boolean, side=optional(text), buckets=object_rule(dict(resilient=BUCKET,snapback=BUCKET)), stock_count=numeric, relationship_count=numeric, ordering_note=text)),
+    **{'countertrend?':object_rule(dict(available=boolean, side=optional(text), buckets=object_rule(dict(resilient=BUCKET,snapback=BUCKET)), stock_count=numeric, relationship_count=numeric, ordering_note=text))},
     companies=keyed(text,SYMBOL)))
+
+RECENT = object_rule(dict(available=boolean, comparison_session=optional(text), raw_score_change=numeric,
+    directional_score_change=numeric,raw_rank_change=numeric,directional_rank_change=numeric,
+    breadth_change=numeric, reason=text))
+POPULATION=object_rule(dict(current=sequence(text),previous=sequence(text)))
+COMPARISON=object_rule(dict(version=text,available=boolean,reason=text,basis=text,basis_session=text,
+    current_session=text,previous_session=optional(text),change_sessions=numeric,methodology=text,
+    membership_hash=text,official_history=boolean,
+    horizon_populations=object_rule({'21?':POPULATION,'63?':POPULATION}),ranked_population=sequence(text)))
+V2_THEME = object_rule(dict(long_state=text, short_state=text,current_state=optional(text),
+    structural_score=numeric, recent=RECENT,strength_rank=numeric,research_order_index=numeric,
+    current_side=optional(text), researchable=boolean, reason=text,
+    breadth=object_rule(dict(above=numeric, total=numeric, percent=numeric, small_sample=boolean))))
+V2_ROW = object_rule(dict(ticker=text, theme_id=text, role=text, w=numeric, theme_state=text,
+    research_order_index=numeric, eligible=boolean, eligibility_reasons=sequence(text)))
+V2_POLICY = object_rule(dict(version=text, change_sessions=numeric, structural_boundary=numeric,
+    material_score_change=numeric, liquidity_sessions=numeric, price_floor_exclusive=numeric,
+    average_dollar_volume_floor=numeric, breadth_small_sample=numeric,state_order=sequence(text),selective_state_order=sequence(text)))
+RESEARCH_V2 = object_rule(dict(schema=text,contract_revision=numeric,policy_version=text,
+    current_side=optional(text),conviction=text,themes=keyed(V2_THEME,SLUG),comparison=COMPARISON,
+    theme_order=sequence(text), policy=V2_POLICY,
+    list=object_rule(dict(side=optional(text), rows=sequence(V2_ROW), stock_count=numeric, relationship_count=numeric)),
+    changes=object_rule(dict(market_direction=text, previous_market_direction=optional(text), changed=optional(boolean)))))
 
 def project_snapshot(source, expected):
     if not iso_session(expected):
@@ -210,7 +234,7 @@ def project_snapshot(source, expected):
         theme_layer=LAYER, today_plan=text, refreshed_at=text, production_blockers=sequence(text),
         completeness=object_rule(dict(complete=boolean, required=numeric, valid_target=numeric,
             **{'trading_target?':numeric,'terminal_target?':numeric,'historical_inputs?':numeric})),
-        provider_health=object_rule(dict(status=text)), **{'research?':RESEARCH}))
+        provider_health=object_rule(dict(status=text)), **{'research?':RESEARCH,'research_v2?':RESEARCH_V2}))
     if not re.fullmatch(r'themescope-vnext-\d+', result['methodology']) or not result['themes']:
         raise SnapshotError('A supported vNext methodology and theme list are required.')
     themes = [t['theme_id'] for t in result['themes']]
@@ -222,15 +246,27 @@ def project_snapshot(source, expected):
     if len(set(pairs)) != len(pairs) or any(not SYMBOL.fullmatch(s) or t not in themes for s,t in pairs):
         raise SnapshotError('Invalid or duplicate theme relationships.')
     research = result.get('research')
-    if research and (any(t not in themes for t in research['ranks']['themes']) or any((r['ticker'],r['theme_id']) not in pairs for bucket in research['countertrend']['buckets'].values() for r in [*bucket['rows'],*bucket['stocks']])):
+    if research and (any(t not in themes for t in research['ranks']['themes']) or any((r['ticker'],r['theme_id']) not in pairs for bucket in research.get('countertrend',{}).get('buckets',{}).values() for r in [*bucket['rows'],*bucket['stocks']])):
         raise SnapshotError('Research references an unknown theme relationship.')
-    if research:
+    if research and 'countertrend' in research:
         try:
             countertrend_files=public_exports(source['research']['countertrend'])
         except (ValueError,KeyError,TypeError):
             raise SnapshotError('Countertrend exports do not match the published lens.') from None
         if countertrend_files is not None:
             research['countertrend']['exports']=countertrend_files
+    v2=result.get('research_v2')
+    if v2:
+        listed=[(r['ticker'],r['theme_id']) for r in v2['list']['rows']]
+        selected={(r['ticker'],r['theme_id']) for r in result['relationships'] if r['qualifies']}
+        if (v2['schema']!='themescope-research-v2' or set(v2['themes'])!=set(themes)
+                or len(v2['theme_order'])!=len(themes) or set(v2['theme_order'])!=set(themes)
+                or len(listed)!=len(set(listed)) or set(listed)!=selected
+                or v2['list']['stock_count']!=len({s for s,t in listed})
+                or v2['list']['relationship_count']!=len(listed)):
+            raise SnapshotError('Research v2 references or counts are invalid.')
+        if research and 'countertrend' in research:
+            raise SnapshotError('Research v2 cannot publish the removed research lens.')
     exported = source.get('exports')
     if not isinstance(exported, dict) or not isinstance(exported.get('individual'), dict) or not isinstance(exported.get('assignments'), dict):
         raise SnapshotError('Published exports are missing or malformed.')
@@ -251,6 +287,11 @@ def project_snapshot(source, expected):
         assignments[symbol] = row
     result['exports'] = dict(combined=txt(exported.get('combined'), True),
         individual={t:txt(value) for t,value in exported['individual'].items()}, assignments=assignments)
+    if v2:
+        from scripts.research_v2_projection import validate_v2
+        try:validate_v2(result)
+        except (ValueError,TypeError,KeyError):
+            raise SnapshotError('Research v2 semantics or exports are inconsistent.') from None
     earnings = source.get('earnings', {})
     if not isinstance(earnings, dict):
         raise SnapshotError('Earnings presentation is malformed.')

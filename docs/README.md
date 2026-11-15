@@ -8,11 +8,12 @@ is authoritative for that milestone; old phase reports are historical.
 | --- | --- |
 | Install and run | [Setup](getting-started/setup.md) |
 | Use the workspace | [Market → Themes → Stocks](getting-started/research-workflow.md) |
-| Understand the numbers | [Methodology](methodology/README.md), [research context](methodology/research-context.md) |
+| Understand the numbers | [Research Logic v2](methodology/research-v2.md), [retained formulas](methodology/README.md) |
 | Operate safely | [Refresh, backup and maintenance](operations/refresh-and-maintenance.md) |
 | Build a read-only public site | [Daily update, frozen snapshots and synthetic demo](operations/public-snapshots.md) |
 | Understand implementation | [Architecture](architecture/README.md), [provider/cache](architecture/provider-and-storage.md), [terminal events](architecture/terminal-actions.md) |
 | Develop and test | [Development](development/README.md), [project map](development/project-structure.md), [stable main / UI work](development/production-and-ui.md) |
+| Review current correction evidence | [Adversarial validation](../reports/research-v2-adversarial-validation.md), [findings](../reports/research-v2-adversarial-review.md) |
 | Trace earlier decisions | [Historical archive](archive/README.md), [relocation map](archive/relocations.md) |
 
 The [design system](../DESIGN.md), [motion grammar](../MOTION.md),
