@@ -1,42 +1,31 @@
-# Stable production and future UI work
+# Production and future UI work
 
-- **main**: stable product and daily market-data publication.
-- **feature/ui-v3**: future visual experimentation from current main.
+`main` is authoritative and the only publication source. GitHub's default branch
+and the existing Cloudflare Pages production branch are `main`; automatic
+production Git deployments are disabled. The first main publication and live
+verification are recorded [here](../operations/main-publication.md).
 
-Start future UI work deliberately:
+Create scoped task branches from current main. For a future authorized visual
+experiment, `feature/ui-v3` is an example branch name, not a standing active branch:
 
 ```powershell
 git switch main
-git pull --ff-only
+git pull --ff-only origin main
 git switch -c feature/ui-v3
 ```
 
-Use fictional mode for visual work. Preserve methodology, ranking, qualification,
-Market Matrix, memberships, lifecycle, provider/cache, corporate actions, SQLite,
-export semantics and Saved compatibility unless a separate task explicitly changes
-them. Run relevant regressions, browser/accessibility checks and inspect the rendered
-UI before merging. An unfinished UI branch is never a daily publication source.
+Use `ThemeScope.cmd --fixture --port 8767` for fictional visual work. Preserve
+methodology, membership, market decisions, lifecycle, provider/cache, corporate
+actions, SQLite, exports and Saved compatibility. Do not point fixture storage at
+real history. Keep the approved UI unchanged unless a new task authorizes redesign.
 
-## Separate worktree (optional)
-
-Keep the production checkout clean while another checkout owns UI edits:
+An optional worktree isolates edits from the clean publishing checkout:
 
 ```powershell
-# From clean main; choose a new sibling directory.
 git worktree add -b feature/ui-v3 ..\themescope-ui main
-cd ..\themescope-ui
-.\ThemeScope.cmd --fixture --port 8767
 ```
 
-Each checkout has its own ignored runtime/environment. Port 8767 keeps UI fixtures
-separate from the production publisher's fixed loopback port 8766. Do not point
-experimental/fixture storage at real history or copy it over the production DB.
-Return to the clean main checkout for `update-public.cmd`.
-
-After tests and visual review, merge approved UI work using the usual reviewed
-workflow. Updating source is a deliberate maintenance step; the daily updater never
-runs `git pull`, switches branches, merges code or edits configuration.
-
-The former implementation branch is temporarily retained for external cutover
-recovery only. Its continued existence/default status does not make it an allowed
-publication branch in the new tooling. See [production setup](../operations/public-snapshots.md).
+Run relevant regressions and browser/accessibility checks, push a PR, and merge
+after required CI passes. Retire merged task branches after verifying zero unique
+commits. [Annotated tags](branch-checkpoints.md) preserve historical checkpoints.
+The daily updater never pulls, switches branches, merges or edits configuration.

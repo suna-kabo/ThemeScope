@@ -1,5 +1,5 @@
 > Historical repository productionization record. Later main-publication maintenance
-> is tracked in [current PLANS](../../../PLANS.md); Gate E remains CLOSED.
+> is tracked in [current PLANS](../operations/main-publication-plan.md); Gate E remains CLOSED.
 
 # Repository status
 
@@ -23,10 +23,10 @@ pushing on `refactor/themescope-vnext`, then merging the completed implementatio
 `main` after verification. Deployment is excluded. Original inspection refs stay fixed.
 
 The full earlier diary is preserved in the
-[historical implementation log](../../archive/migration/implementation-log.md).
-Standing rules: [AGENTS.md](../../../AGENTS.md). Ongoing product goals: [GOALS.md](../../../GOALS.md).
+[historical implementation log](implementation-log.md).
+Standing rules: [AGENTS.md](../../../AGENTS.md). Ongoing product goals: [GOALS.md](product-goals.md).
 
 Verification: 391 tests (389 passed, two existing Windows skips), both configuration/
 evidence validators, local and frozen-public fixture browser smokes, JS helpers/
 syntax, compilation, Markdown link/rendering and whitespace checks passed.
-See the [dated verification record](../../development/verification.md).
+See the [dated verification record](../operations/publication-tooling-verification-2026-11-12.md).

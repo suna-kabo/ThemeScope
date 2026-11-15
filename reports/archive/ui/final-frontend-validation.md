@@ -94,13 +94,13 @@ Local Chromium performance review with 435 synthetic stocks:
 
 ## Representative local captures
 
-- [Market](../runtime/final-rebuild-qa/final-market-1440.png)
-- [Themes](../runtime/final-rebuild-qa/final-themes-1440.png)
-- [Primary](../runtime/final-rebuild-qa/final-primary-1440.png)
-- [Mobile Primary](../runtime/final-rebuild-qa/final-primary-390.png)
-- [Mobile theme inspector](../runtime/final-rebuild-qa/final-theme-inspector-390.png)
-- [Mobile stock inspector](../runtime/final-rebuild-qa/final-stock-inspector-390.png)
-- [Full theme](../runtime/final-rebuild-qa/final-full-theme-1280.png)
+- [Market](../../../runtime/final-rebuild-qa/final-market-1440.png)
+- [Themes](../../../runtime/final-rebuild-qa/final-themes-1440.png)
+- [Primary](../../../runtime/final-rebuild-qa/final-primary-1440.png)
+- [Mobile Primary](../../../runtime/final-rebuild-qa/final-primary-390.png)
+- [Mobile theme inspector](../../../runtime/final-rebuild-qa/final-theme-inspector-390.png)
+- [Mobile stock inspector](../../../runtime/final-rebuild-qa/final-stock-inspector-390.png)
+- [Full theme](../../../runtime/final-rebuild-qa/final-full-theme-1280.png)
 
 [Browser results](final-frontend-browser.json) preserve the recorded coverage.
 Screenshots remain local synthetic review artifacts.

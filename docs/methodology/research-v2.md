@@ -17,7 +17,7 @@ Core and Enabler enter calculations; Related remains visible context only.
 Unmapped companies are valid. Scanner proposals never become memberships
 automatically. The original launch package remains immutable; the reviewed
 November 14 amendment adds seven issuer-verified relationships on November 16.
-See the [coverage audit](../../reports/research-v2-universe-audit.md).
+See the [coverage audit](../../reports/archive/research-v2/research-v2-universe-audit.md).
 
 ## Structure and recent change
 
@@ -118,7 +118,7 @@ and screens. Historical helpers and approved old fixtures remain provenance.
 
 ## Evidence and boundaries
 
-The [rule simulation](../../reports/research-v2-rule-simulation.md) compares
+The [rule simulation](../../reports/archive/research-v2/research-v2-rule-simulation.md) compares
 12 state candidates and eight liquidity candidates over 194 offline sessions.
 It is a stability diagnostic with frozen-membership selection bias, not a profit
 backtest. Lists can exceed 250 names; thresholds were not optimized to a count.

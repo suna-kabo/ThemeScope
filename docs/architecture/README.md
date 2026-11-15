@@ -22,7 +22,7 @@ flowchart LR
 | Providers | `providers/` | Historical bars/identity; no ThemeScope formulas or trading endpoints |
 | Market | `market/`, `research_policy.py` | Separate SPY/QQQ breadth, frozen Market Matrix, IWM context |
 | Calculations/history | `themes/`, `relative_performance.py` | Deterministic returns, index and compatible history |
-| Research | `research/` | Independent relationships, eligibility, lenses and deterministic TXT |
+| Research | `research/` | Independent relationships, eligibility, peer ordering and deterministic TXT |
 | Persistence | `storage/` | Immutable data versions, run references and transactional publication |
 | Local application | `local/` | Startup, refresh coordination, guarded status and loopback API |
 | UI | `static/vnext/` | Snapshot presentation; no browser financial-rule reconstruction |

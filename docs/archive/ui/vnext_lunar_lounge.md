@@ -184,13 +184,13 @@ screenshot/report destination. Neither is needed at runtime. No npm package or
 browser-CDN dependency was added to ThemeScope. Screenshots linked below are
 labelled **deterministic test data, not live** and contain no raw provider payload.
 
-[Overview](../../../design-plans/lunar-lounge/overview-1440.png) ·
-[Themes](../../../design-plans/lunar-lounge/themes-1920.png) ·
-[Theme Detail](../../../design-plans/lunar-lounge/theme-detail-1440.png) ·
-[Candidates](../../../design-plans/lunar-lounge/candidates-1440.png) ·
-[Saved](../../../design-plans/lunar-lounge/saved-populated-1440.png) ·
-[Narrow Theme Detail](../../../design-plans/lunar-lounge/theme-detail-320.png) ·
-[Machine-readable browser results](../../../design-plans/lunar-lounge/results.json).
+[Overview](design-plans/lunar-lounge/overview-1440.png) ·
+[Themes](design-plans/lunar-lounge/themes-1920.png) ·
+[Theme Detail](design-plans/lunar-lounge/theme-detail-1440.png) ·
+[Candidates](design-plans/lunar-lounge/candidates-1440.png) ·
+[Saved](design-plans/lunar-lounge/saved-populated-1440.png) ·
+[Narrow Theme Detail](design-plans/lunar-lounge/theme-detail-320.png) ·
+[Machine-readable browser results](design-plans/lunar-lounge/results.json).
 
 ## Frozen boundary and remaining review
 

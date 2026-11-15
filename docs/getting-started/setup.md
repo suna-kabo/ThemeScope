@@ -18,9 +18,7 @@ $env:APCA_API_SECRET_KEY = '<your local Alpaca secret>'
 
 Setup creates `.venv-vnext/` and installs `requirements-vnext.txt`. The launcher
 also bootstraps a missing environment. The browser opens **http://127.0.0.1:8766**;
-open **Snapshot and refresh** and select **Refresh Data**. `refresh.cmd` and
-`open-dashboard.cmd` open the same app; they do not accept legacy CSV/session
-arguments. Stop the server with Ctrl+C in its terminal before updating or switching modes. To choose another local port:
+open **Snapshot and refresh** and select **Refresh Data**. Stop the server with Ctrl+C in its terminal before updating or switching modes. To choose another local port:
 
 ```powershell
 .\ThemeScope.cmd --port 8767
@@ -98,8 +96,7 @@ recovery, rosters and reviewed membership maintenance.
 
 ## Daily public update from main
 
-For publication use a Git clone, not a plain ZIP. Select stable main explicitly
-while the external default-branch change is pending:
+For publication use a Git clone, not a plain ZIP. Use a clean, up-to-date main checkout:
 
 ```powershell
 git switch main

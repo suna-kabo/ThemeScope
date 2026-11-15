@@ -144,7 +144,7 @@ def publish_tree(stage,destination,obsolete=(),validate=None):
     except BaseException:
         try:recover(destination)
         except (OSError,ValueError) as error:
-            raise OSError('Publication interrupted; preview is blocked until recovery succeeds. Close files open in Excel/editors, then run refresh.cmd --recover (and prepare-site.cmd --recover for site). Backups retained at '+str(folder)) from error
+            raise OSError('Publication interrupted; preview is blocked until recovery succeeds. Close files open in Excel/editors, then run legacy-refresh.cmd --recover (and legacy-prepare-site.cmd --recover for site). Backups retained at '+str(folder)) from error
         raise
     try:recover(destination) # Remove committed backups. A killed process can do this later.
     except OSError:

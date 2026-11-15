@@ -1,7 +1,7 @@
 # Main publication maintenance verification — 12 November 2026 (Hong Kong)
 
 This is offline/fixture verification of production tooling, not a new live account
-run. [Gate E closure](../operations/gate-e-closure.md) and its supplied Nov 10 values
+run. [Gate E closure](../../operations/gate-e-closure.md) and its supplied Nov 10 values
 remain unchanged.
 
 | Check | Result |
@@ -33,8 +33,8 @@ native-Windows skipped semantics. Browser fixtures are not real chronological ev
 GitHub's authenticated integration rejected default-branch mutation with HTTP 403;
 Wrangler had no authenticated Cloudflare account. No real SIP refresh or deployment
 is claimed. Retain the old implementation branch until the settings and first main
-publication are resolved. Exact [manual settings and daily workflow](../operations/public-snapshots.md)
-and [branch/tag provenance](branch-checkpoints.md) are documented.
+publication are resolved. Exact [manual settings and daily workflow](../../operations/public-snapshots.md)
+and [branch/tag provenance](../../development/branch-checkpoints.md) are documented.
 
 The unrelated October delivery branch remains intact; archived snapshots/ZIPs are
 not copied into main. No new DB, keys, raw market payload, screenshot or generated
