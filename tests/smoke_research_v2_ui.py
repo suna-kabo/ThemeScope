@@ -291,7 +291,8 @@ def main():
                 page.evaluate("document.documentElement.style.fontSize=''")
                 # A 1440px browser at 200% has a 720 CSS-pixel layout viewport.
                 page.set_viewport_size(dict(width=720,height=500));nav('primary');width_ok('zoom200-layout')
-                page.evaluate("document.documentElement.style.zoom='2'");width_ok('css-zoom200');capture('zoom200-720')
+                page.evaluate("async()=>{document.documentElement.style.zoom='2';await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));}")
+                width_ok('css-zoom200');capture('zoom200-720')
                 page.evaluate("document.documentElement.style.zoom=''")
                 result['workflows'].append('All device widths; touch targets;200% text;200% browser-layout/reflow and CSS zoom')
 
