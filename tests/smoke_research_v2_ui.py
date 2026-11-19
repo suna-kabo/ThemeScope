@@ -156,9 +156,62 @@ def main():
                 expect(page.locator('#research-inspector')).not_to_be_visible()
                 page.go_back();expect(marketTheme).to_be_focused()
                 nav('themes')
-                ranks=page.locator('[data-theme-row]').evaluate_all("els=>Object.fromEntries(els.map(e=>[e.dataset.themeRow,e.querySelector('.priority-cell .numeric').textContent]))")
-                page.locator('#theme-sort').select_option('name:asc')
-                assert page.locator('[data-theme-row]').evaluate_all("els=>Object.fromEntries(els.map(e=>[e.dataset.themeRow,e.querySelector('.priority-cell .numeric').textContent]))")==ranks
+                def landscape():
+                    return page.locator('[data-theme-row]').evaluate_all('''rows=>rows.map(row=>[
+                        row.dataset.themeRow,...['.score-cell strong','.raw-theme-state','.change-cell .numeric,.change-cell .comparison-short']
+                        .map(selector=>row.querySelector(selector).textContent)
+                    ])''')
+                baseline_landscape=landscape()
+                assert all(row[2]==base['research_v2']['themes'][row[0]]['raw_state'] for row in baseline_landscape)
+                expect(page.locator('#theme-results')).to_have_text('44 themes')
+                assert page.locator('.theme-ledger-head span').all_text_contents()==[
+                    'Theme','Theme Score','State','5-session Change','1M / 3M']
+                select=page.locator('#theme-sort')
+                assert select.input_value()=='score:desc'
+                active=[t for t in base['themes'] if t['status']=='active']
+                raw_deltas={key:row['recent']['score_change'] for key,row in base['research_v2']['themes'].items()}
+                scores={t['theme_id']:t['score'] for t in active}
+                def expected_numeric(values, descending):
+                    return sorted(scores,key=lambda key: (values[key] is None, 0 if values[key] is None else
+                        float(values[key])*(-1 if descending else 1), key))
+                for selection_id, values, descending in (
+                    ('score:desc',scores,True),('score:asc',scores,False),
+                    ('recent:desc',raw_deltas,True),('recent:asc',raw_deltas,False),
+                ):
+                    select.select_option(selection_id)
+                    assert [row[0] for row in landscape()]==expected_numeric(values,descending)
+                select.select_option('name:asc')
+                names=page.locator('#theme-table .theme-link')
+                assert names.evaluate_all('''links=>{
+                    const names=links.map(link=>link.textContent);
+                    return names.every((name,i)=>!i||names[i-1].localeCompare(name)<=0);
+                }''')
+                assert {row[0]:row[1:] for row in landscape()}=={row[0]:row[1:] for row in baseline_landscape}
+                select.select_option('score:desc')
+                visible_tones=set()
+                for key, value in raw_deltas.items():
+                    if key not in scores or value is None:continue
+                    delta=float(value)
+                    mark=page.locator(f'[data-theme-row="{key}"] .change-cell .numeric')
+                    tone='positive' if delta>0 else 'negative' if delta<0 else 'neutral'
+                    visible_tones.add(tone)
+                    expect(mark).to_have_class('numeric '+tone)
+                    expect(mark).to_have_text(f"{'+' if delta>0 else ''}{delta:.1f} pts")
+
+                assert {'positive','negative'}<=visible_tones
+                page.locator('#theme-movement summary').click()
+                for index, (direction,title) in enumerate(((1,'Largest gains'),(-1,'Largest declines'))):
+                    group=page.locator('#movement-body section').nth(index)
+                    expect(group.locator('h3')).to_have_text(title)
+                    ids=group.locator('li a').evaluate_all("links=>links.map(link=>link.hash.split('/').at(-1))")
+                    expected=[key for key in expected_numeric(raw_deltas,direction>0)
+                              if raw_deltas[key] is not None and direction*float(raw_deltas[key])>0][:3]
+                    assert ids==expected
+                movement=page.locator('#movement-body a').first
+                movement.click();expect(page.locator('#detail-title')).to_be_focused()
+                page.go_back();expect(movement).to_be_focused()
+                capture('theme-movement-1440')
+                page.locator('#theme-movement summary').click()
                 page.locator('#theme-search').fill('semiconductors')
                 detail=page.locator('#theme-table .theme-link').first
                 detail.focus();page.keyboard.press('Enter')
@@ -193,7 +246,7 @@ def main():
                 result['focus_after_shift_tab']=page.evaluate("({id:document.activeElement.id,tag:document.activeElement.tagName})")
                 assert page.evaluate("document.activeElement.closest('dialog')!==null"),result
                 close_inspector();expect(opener).to_be_focused();page.locator('#theme-search').fill('')
-                result['workflows'].append('Research Priority; keyboard open/focus; nested Back/Forward; dialog containment and return focus')
+                result['workflows'].append('Raw sort and movement; keyboard open/focus; nested Back/Forward; dialog containment and return focus')
 
                 nav('primary')
                 expect(page.locator('#candidate-results')).to_contain_text(str(base['research_v2']['list']['stock_count']))
@@ -263,11 +316,10 @@ def main():
                     rendered=page.locator('#candidates [data-ticker-row]').evaluate_all('els=>els.map(e=>e.dataset.tickerRow)')
                     assert rendered==list(dict.fromkeys(r['ticker'] for r in data['research_v2']['list']['rows']))
                     nav('themes')
-                    expected=[key for key in data['research_v2']['theme_order'] if data['research_v2']['themes'][key]['structural_score'] is not None]
-                    actual=page.locator('[data-theme-row]').evaluate_all('els=>els.map(e=>e.dataset.themeRow)')
-                    assert actual==expected,(direction,actual,expected)
+                    assert landscape()==baseline_landscape, direction
+                    assert not any(word in page.locator('#themes-page').inner_text() for word in
+                                   ('Long-side','Short-side','Research Priority','Price direction'))
                     if side is None:
-                        assert page.locator('#theme-table .theme-state').all_text_contents()==['Unavailable']*44
                         page.locator('#theme-search').fill('semiconductors');page.locator('#theme-table [data-inspect-theme]').first.click()
                         page.locator('#inspector-search').fill('');page.locator('#inspector-view').select_option('All')
                         tickers=page.locator('#inspector-members [data-inspect-ticker]').evaluate_all('els=>els.map(e=>e.dataset.inspectTicker)')
@@ -292,6 +344,14 @@ def main():
                             width_ok(direction+'-inspector');capture(direction.lower().replace(' ','-')+'-inspector-'+str(width))
                             close_inspector()
                         page.set_viewport_size(dict(width=1440,height=1000))
+                unchanged=deepcopy(base)
+                strongest=baseline_landscape[0][0]
+                unchanged['research_v2']['themes'][strongest]['recent']['score_change']=0
+                unchanged['research_v2']['themes'][strongest]['raw_state']='Strong'
+                update(unchanged);nav('themes')
+                zero=page.locator(f'[data-theme-row="{strongest}"] .change-cell .numeric')
+                expect(zero).to_have_class('numeric neutral')
+                expect(zero).to_have_text('0.0 pts')
                 for options,label in ((dict(target_index=67),'Not enough completed history'),
                                       (dict(missing='population'),'Scored theme universe changed'),
                                       (dict(missing='scores'),'Structural strength unavailable')):
@@ -299,10 +359,16 @@ def main():
                     data['market']=deepcopy(base['market']);data['market']['decision']['direction']='Long Bias'
                     update(data);nav('themes')
                     assert page.locator(f'#theme-table .unavailable[title="{label}"]').count()
+                    expect(page.locator('#movement-availability')).to_contain_text('unavailable')
+                    affected=page.locator(f'#theme-table .unavailable[title="{label}"]').first.locator('xpath=ancestor::li')
+                    affected.locator('.theme-link').click()
+                    page.locator('#detail-content .theme-provenance').last.locator('summary').click()
+                    expect(page.locator('#detail-content .theme-provenance').last).to_contain_text(label)
+                    page.go_back()
                     page.set_viewport_size(dict(width=390,height=844));width_ok(label)
                     capture('unavailable-'+data['research_v2']['comparison']['reason']+'-390')
                     page.set_viewport_size(dict(width=1440,height=1000))
-                result['workflows'].append('Six coherent backend states; Selective priority; non-directional alphabetical context and empty list; Short raw score change; unavailable reasons')
+                result['workflows'].append('Six coherent backend states; Selective priority; non-directional alphabetical context and empty list; identical raw landscape across six directions; unavailable reasons')
                 update(base)
 
                 for width in (1920,1440,1280,768,430,390,360,320):
@@ -320,6 +386,13 @@ def main():
                     return x.right<=y.left+1||y.right<=x.left+1||x.bottom<=y.top+1||y.bottom<=x.top+1;
                 }))""")
                 capture('text200-390');audit('text200-390')
+                nav('themes')
+                page.locator('#theme-table [data-inspect-theme]').first.click()
+                width_ok('text200-quick-view')
+                assert page.locator('#research-inspector').evaluate('dialog=>dialog.scrollWidth<=dialog.clientWidth')
+                close_inspector()
+                page.locator('#theme-table .theme-link').first.click()
+                width_ok('text200-full-theme')
                 page.evaluate("document.documentElement.style.fontSize=''")
                 # A 1440px browser at 200% has a 720 CSS-pixel layout viewport.
                 page.set_viewport_size(dict(width=720,height=500));nav('primary');width_ok('zoom200-layout')
@@ -369,7 +442,7 @@ def main():
                 assert not errors,errors
                 assert not outside,outside
                 result['page_errors']=errors;result['external_requests']=outside
-                old=deepcopy(base);old['research_v2']['contract_revision']=2
+                old=deepcopy(base);old['research_v2']['contract_revision']=3
                 update(old);nav('primary')
                 expect(page.locator('#research-version-notice')).to_be_visible()
                 expect(page.locator('#candidates')).to_contain_text('Research update required')

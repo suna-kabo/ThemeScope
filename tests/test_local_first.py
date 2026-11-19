@@ -127,7 +127,7 @@ class LocalFirstTests(unittest.TestCase):
         with TestClient(create_app(ROOT, service), base_url=ORIGIN) as app:
             snapshot = app.get('/api/dashboard-data').json()
             session = snapshot['session']
-            self.assertEqual(snapshot['research_v2']['contract_revision'], 3)
+            self.assertEqual(snapshot['research_v2']['contract_revision'], 4)
             response = app.get('/api/exports/combined.txt')
             self.assertEqual(response.headers['Content-Disposition'],
                              f'attachment; filename="Primary-Research-{session}.txt"')
@@ -137,12 +137,12 @@ class LocalFirstTests(unittest.TestCase):
             self.assertRegex(response.headers['Content-Disposition'], f'filename="[A-Z][A-Za-z-]+-{session}\\.txt"')
             self.assertEqual(response.text, text)
             self.assertEqual(app.get('/api/exports/countertrend/all.txt').status_code, 404)
-            snapshot['research_v2']['contract_revision'] = 2
+            snapshot['research_v2']['contract_revision'] = 3
             with patch.object(service, 'snapshot', side_effect=lambda **kw: (snapshot, 1) if kw else snapshot):
                 self.assertEqual(app.get('/api/status').json()['freshness'], 'previous_rules')
                 self.assertEqual(app.get('/api/research-list').status_code, 404)
                 self.assertEqual(app.get('/api/exports/combined.txt').status_code, 404)
-                self.assertEqual(app.get('/api/dashboard-data').json()['research_v2']['contract_revision'], 2)
+                self.assertEqual(app.get('/api/dashboard-data').json()['research_v2']['contract_revision'], 3)
                 self.assertTrue(app.get(f'/api/themes/{theme}/history').json()['observations'])
 
     def test_launcher_reuses_only_recognized_owner(self):

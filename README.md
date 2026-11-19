@@ -1,8 +1,8 @@
 # ThemeScope
 
 ThemeScope is a private, local-only end-of-day equity research dashboard. It uses
-completed US market sessions to help you decide what side to research, which themes
-to review first, and which eligible stocks to open for chart review.
+completed US market sessions to help you understand the market environment,
+compare raw theme strength, and choose eligible stocks for directional chart review.
 
 ## Windows quick start
 

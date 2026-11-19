@@ -9,7 +9,7 @@ import unittest
 from src.themescope.domain import Configuration,Membership,Role,Theme,ThemeStatus
 from src.themescope.research.comparison import reconstruct
 from src.themescope.research.engine import calculate_session
-from src.themescope.research.v2 import attach,policy,state
+from src.themescope.research.v2 import attach,policy,recent_change,state
 from src.themescope.research import queries
 from src.themescope.themes.calculations import Bar,POLICY
 from test_research_v2_comparison import DAYS
@@ -105,6 +105,29 @@ class DirectionTests(unittest.TestCase):
         for side in ('long','short'):self.assertEqual(state(50,0,side,policy()),'Leading')
         self.assertIsNone(state(50,0,None,policy()))
 
+    def test_raw_landscape_and_exact_deltas_ignore_market_direction(self):
+        raw = lambda data: {key: (row['structural_score'], row['raw_state'], row['recent']['score_change'])
+                           for key, row in data['research_v2']['themes'].items()}
+        baseline = fixture('Long Bias')
+        first = raw(baseline)
+        for direction in DIRECTIONS:
+            with self.subTest(direction=direction):
+                self.assertEqual(raw(fixture(direction)), first)
+
+        prior = deepcopy(baseline)
+        provenance = baseline['research_v2']['comparison']
+        prior['session'] = provenance['previous_session']
+        current_scores = {'a': D(60), 'b': D(30)}
+        prior_scores = {'a': D(45), 'b': D(44)}
+        for data, scores in ((baseline, current_scores), (prior, prior_scores)):
+            for theme in data['themes']:
+                if theme['theme_id'] in scores:
+                    theme['score'] = scores[theme['theme_id']]
+        for direction in ('Long Bias', 'Short Bias'):
+            baseline['market_direction'] = direction
+            rows, _ = recent_change(baseline, prior, DAYS, policy(), provenance)
+            self.assertEqual((rows['a']['score_change'], rows['b']['score_change']), (D(15), D(-14)))
+
     def test_queries_strip_legacy_priority_and_distinguish_unknown_from_empty(self):
         data=fixture('Neutral');theme=queries.get_theme(data,'a')
         for key in ('priority','transition','history'):self.assertNotIn(key,theme)
@@ -112,7 +135,7 @@ class DirectionTests(unittest.TestCase):
         self.assertIsNone(queries.get_theme_members(data,'missing'))
         data['themes'].append(dict(theme_id='watch',status='watch-only',score=None))
         self.assertEqual(queries.get_theme_members(data,'watch'),[])
-        old=deepcopy(data);old['research_v2']['contract_revision']=2
+        old=deepcopy(data);old['research_v2']['contract_revision']=3
         self.assertIsNone(queries.get_research_list(old))
         self.assertIsNone(queries.get_theme_members(old,'a')[0]['qualifies'])
 

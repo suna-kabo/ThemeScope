@@ -9,10 +9,10 @@ from ..themes.calculations import calendar, deterministic, number, usable
 from .context import canonical_ranks, field
 from .exports import Qualification, exports
 from .primary import side
-from .state_rules import state
+from .state_rules import raw_theme_state, state
 
 SCHEMA = 'themescope-research-v2'
-CONTRACT_REVISION = 3
+CONTRACT_REVISION = 4
 
 
 def current_contract(snapshot):
@@ -172,7 +172,8 @@ def attach(snapshot, bars, sessions, mapping, *, previous=None, comparison_prove
             above = (percent*D(str(total))/100).to_integral_value()
         if percent is None and above is not None and total:
             percent = D(above)/D(total)*100
-        output[key] = dict(long_state=long_state, short_state=short_state, current_state=selected,
+        output[key] = dict(raw_state=raw_theme_state(score, change['score_change'], rules),
+                           long_state=long_state, short_state=short_state, current_state=selected,
                            structural_score=score,recent=dict(change), strength_rank=ranks.get(key), current_side=direction,
                            researchable=selected in ('Leading', 'Improving', 'Fading'),
                            reason=state_reason(selected, change['available'],direction,score,result.get('market_direction')),

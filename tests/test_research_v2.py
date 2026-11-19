@@ -4,6 +4,8 @@ from decimal import Decimal as D, localcontext
 from copy import deepcopy
 import unittest
 
+from src.themescope.research.state_rules import raw_theme_state
+
 from src.themescope.domain import Role
 from src.themescope.research.exports import Qualification as Q, exports
 from src.themescope.research.v2 import attach, liquidity, policy, state
@@ -38,6 +40,17 @@ class SelectionTests(unittest.TestCase):
     def snapshot(self, direction='Long bias'):
         return calculate_session(self.config,self.bars,self.days,self.target,direction,self.indices,
                                  {key:'fixture-'+key for key in self.indices},self.mapping)
+
+    def test_raw_theme_state_and_exact_boundaries(self):
+        cases = [
+            (80, 5, 'Strong'), (80, -15, 'Fading'), (40, 15, 'Improving'), (40, -5, 'Weak'),
+            (50, -10, 'Fading'), ('49.999', 10, 'Improving'), (50, 10, 'Strong'),
+            (50, None, 'Strong'), (40, None, 'Weak'), (None, 15, 'Unavailable'),
+            ('NaN', 15, 'Unavailable'),
+        ]
+        for score, change, expected in cases:
+            with self.subTest(score=score, change=change):
+                self.assertEqual(raw_theme_state(score, change, policy()), expected)
 
     def test_states_are_exact_symmetric_and_keep_fading_leaders(self):
         from scripts.research_v2_simulation import classify

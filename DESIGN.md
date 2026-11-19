@@ -6,7 +6,8 @@ local refresh share a disclosure.
 
 Market puts Bias before paired SPY/QQQ evidence and a secondary IWM context row.
 Its continuation leads to theme research. The returns landscape is optional.
-Themes leads with Research Priority, State, raw 5-session Change and returns.
+Themes defaults to descending raw Theme Score and shows raw State, signed 5-session
+Change, and 1M / 3M returns. Five-session movement is a secondary disclosure.
 Primary uses theme chapters and ordered stock queues; explicit global sorts offer
 a flat queue. Filters affect the view, while exports retain the full session list.
 

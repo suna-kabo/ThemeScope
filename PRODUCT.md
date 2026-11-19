@@ -6,9 +6,9 @@ ThemeScope supports chart review through TradingView TXT downloads.
 
 - **Market** identifies the research side from the SPY and QQQ Market Matrix. IWM
   supplies small-cap context.
-- **Themes** lists tracked themes by Research Priority and shows State, raw
-  5-session Change, and 1M / 3M returns. Full Theme and Quick View hold the secondary
-  price, participation, and membership evidence.
+- **Themes** compares tracked themes by raw Theme Score, State, 5-session Change,
+  and 1M / 3M returns. Full Theme and Quick View hold the price, participation,
+  and membership evidence.
 - **Primary** orders daily-eligible Core and Enabler members of researchable themes
   for chart review. Filters affect the view. TXT downloads use the full committed
   session in research order.

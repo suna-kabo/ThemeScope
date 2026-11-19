@@ -65,7 +65,7 @@ its next refresh. The fixture uses its own database, lock and Saved file.
 Status reads the committed run ID and uses cached metadata. The browser fetches
 the snapshot once on load and again when the run ID or commit timestamp changes.
 Status checks the latest eligible session and reviewed-input fingerprint, reusing
-the fingerprint until the source files change. Contract revision 3 requires a
+the fingerprint until the source files change. Contract revision 4 requires a
 compatible refresh for older active snapshots. Existing official history stays in
 SQLite. Windows backups use SQLite's online backup API. Saved is separate
 per-user application state.

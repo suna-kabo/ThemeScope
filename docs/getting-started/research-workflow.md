@@ -5,10 +5,11 @@ that supplied the displayed research. Open **Snapshot and refresh** to see the
 latest safely completed session and refresh details.
 
 1. **Market** shows the current research side and SPY/QQQ evidence. IWM is context.
-2. **Themes** starts in Research Priority order. **State** interprets current Theme
-   Score and the raw **5-session Change** for the current Long or Short side.
+2. **Themes** starts with the highest raw Theme Score. **State** combines that score
+   with the raw **5-session Change** using the same rules in every market environment.
    Click a theme name for Full Theme. **Quick View** opens the secondary preview.
-3. **Primary** lists eligible stocks inside researchable themes for chart review.
+3. **Primary** uses the current Long or Short market side to order eligible stocks
+   inside researchable themes for chart review.
    Peer strength sorts within each theme. Use **Saved** to revisit stocks and their
    remembered theme context.
 

@@ -18,10 +18,10 @@
   const state = value => `<span class="state ${tone(value)}"><span aria-hidden="true">${symbol(value)}</span>${esc(value || 'Unavailable')}</span>`;
   const savedKey = 'themescope-vnext-watchlist';
   const savedContextKey = 'themescope-vnext-saved-context';
-  let snapshot = null, loadedVersion, currentStatus = {}, route = '', origin = '#themes', feedbackTimer, requestError = '';
+  let snapshot = null, loadedVersion, currentStatus = {}, route = '', origin = '#themes', themeOriginFocus, feedbackTimer, requestError = '';
   let initialLoading = true;
   let savedContexts = {}, watched = [];
-  const ui = {universe:'active', themeSort:'priority', themeDescending:false, selectedTheme:'', selectedTicker:'', selectedTickerTheme:'', candidateMode:'unique'};
+  const ui = {universe:'active', themeSort:'score', themeDescending:true, selectedTheme:'', selectedTicker:'', selectedTickerTheme:'', candidateMode:'unique'};
   const positions = new Map(), memberViews = new Map();
   function memberView(id) {
     if (!memberViews.has(id)) memberViews.set(id,{memberSearch:'',memberRole:'',memberEligibility:'',memberSort:'priority'});
@@ -37,7 +37,7 @@
   const themeHref = id => '#themes/' + encodeURIComponent(id);
   const helpButton = key => `<button type="button" class="metric-help" data-help="${key}" data-focus-key="help:${key}" aria-label="About ${esc(UX.help[key]?.[0]||key)}" aria-expanded="false" aria-controls="metric-tooltip">?</button>`;
   const tickerLink = (ticker,themeId='') => `<a class="ticker ticker-link" href="#primary?ticker=${encodeURIComponent(ticker)}${themeId?'&context='+encodeURIComponent(themeId):''}" data-inspect-ticker="${esc(ticker)}" data-context-theme="${esc(themeId)}" data-focus-key="ticker:${esc(ticker)}${themeId?':'+esc(themeId):''}">${esc(ticker)}</a>`;
-  const themeLink = id => `<a class="theme-link" href="${themeHref(id)}" data-focus-key="theme:${esc(id)}">${esc(name(id))}</a>`;
+  const themeLink = (id, focusPrefix='theme') => `<a class="theme-link" href="${themeHref(id)}" data-focus-key="${focusPrefix}:${esc(id)}">${esc(name(id))}</a>`;
   const quickView = id => `<button type="button" class="button quiet small" data-inspect-theme="${esc(id)}" data-focus-key="quick:${esc(id)}" aria-label="Quick View for ${esc(name(id))}">Quick View</button>`;
   const saveButton = (ticker,location,themeId='') => `<button class="save-button" data-save="${esc(ticker)}" data-save-theme="${esc(themeId)}" data-focus-key="${esc(location+':'+ticker)}" aria-pressed="${watched.includes(ticker)}" aria-label="${watched.includes(ticker)?'Saved '+esc(ticker)+'; remove from Saved':'Save '+esc(ticker)}">${icon('saved')}<span class="sr-only">${watched.includes(ticker)?'Saved':'Save'}</span></button>`;
   const empty = (title, message, action = '') => `<div class="empty-state"><h3>${esc(title)}</h3><p>${esc(message)}</p>${action}</div>`;
@@ -54,10 +54,6 @@
   const research = () => snapshot?.research || {};
   const roleName = value => value === 'Core' ? 'Core business' : value === 'Enabler' ? 'Supporting business' : value;
   const roleLabel = value => `<span title="${value === 'Core' ? 'Business directly participates in this theme.' : value === 'Enabler' ? 'Provides products or services that enable this theme.' : ''}">${esc(roleName(value))}</span>`;
-  function rankLabel(id) {
-    const rank=themeResearch(id).strength_rank;
-    return valid(rank) ? '#' + rank : '—';
-  }
   function download(themeId) {
     const text = themeId ? snapshot?.exports?.individual?.[themeId] : snapshot?.exports?.combined;
     if (!currentResearch() || text == null || text === '') return null;
@@ -95,7 +91,12 @@
   const themeResearch = id => v2().themes?.[id] || {};
   const researchState = id => UX.themeState(snapshot,id);
   const stateTone = value => ({Leading:'leader',Improving:'improving',Fading:'fading',Lagging:'lagging'})[value] || 'neutral';
-  const themeState = id => `<span class="theme-state ${stateTone(researchState(id))}">${esc(researchState(id))}</span>`;
+  const primaryThemeState = id => `<span class="theme-state ${stateTone(researchState(id))}">${esc(researchState(id))}</span>`;
+  const rawState = id => themeResearch(id).raw_state || 'Unavailable';
+  const rawStateLabel = id => {
+    const label=rawState(id), tone=({Strong:'positive', Improving:'positive', Fading:'mixed', Weak:'muted'})[label]||'muted';
+    return `<span class="raw-theme-state ${tone}">${esc(label)}</span>`;
+  };
   const researchOrder = id => themeResearch(id).research_order_index ?? null;
   const currentSide = () => UX.currentSide(snapshot);
   const currentResearch = () => UX.currentContract(snapshot);
@@ -104,7 +105,7 @@
   function recentChange(id) {
     const recent=themeResearch(id).recent,value=recentValue(id);
     if(!recent?.available)return `<span class="unavailable" title="${esc(UX.comparisonMessage(recent?.reason))}"><span class="comparison-short" aria-hidden="true">Unavailable</span><span class="comparison-reason">${esc(UX.comparisonMessage(recent?.reason))}</span></span>`;
-    return `<span class="numeric">${Number(value)>0?'+':''}${number(value,1)} pts</span>`;
+    return `<span class="numeric ${signTone(value)}">${Number(value)>0?'+':''}${number(value,1)} pts</span>`;
   }
   function primaryThemes() {
     return (snapshot?.themes || []).filter(t => themeResearch(t.theme_id).researchable).sort((a,b)=>researchOrder(a.theme_id)-researchOrder(b.theme_id)||a.theme_id.localeCompare(b.theme_id));
@@ -143,7 +144,7 @@
   function showMapReadout(id,select=false) {
     const t=mapThemes().find(t=>t.theme_id===id);if(!t||!$('map-readout'))return;
     if(select){mapSelected=id;mapFocusId=id;$('map-selection').value=id;document.querySelectorAll('[data-map-theme]').forEach(n=>{const selected=n.dataset.mapTheme===id;n.classList.toggle('map-selected',selected);n.setAttribute('aria-pressed',String(selected));n.tabIndex=selected?0:-1;});}
-    $('map-readout').innerHTML=`<h3>${esc(name(id))}</h3><dl><div><dt>Theme Score</dt><dd>${number(t.score,1)}</dd></div><div><dt>1M</dt><dd class="${signTone(t.returns[0].value)}">${percent(t.returns[0].value,100,true)}</dd></div><div><dt>3M</dt><dd class="${signTone(t.returns[1].value)}">${percent(t.returns[1].value,100,true)}</dd></div></dl><p>${themeState(t.theme_id)}</p><a class="button secondary" href="${themeHref(id)}" data-focus-key="map-open:${esc(id)}">Open theme</a>`;
+    $('map-readout').innerHTML=`<h3>${esc(name(id))}</h3><dl><div><dt>Theme Score</dt><dd>${number(t.score,1)}</dd></div><div><dt>1M</dt><dd class="${signTone(t.returns[0].value)}">${percent(t.returns[0].value,100,true)}</dd></div><div><dt>3M</dt><dd class="${signTone(t.returns[1].value)}">${percent(t.returns[1].value,100,true)}</dd></div></dl><p>${primaryThemeState(t.theme_id)}</p><a class="button secondary" href="${themeHref(id)}" data-focus-key="map-open:${esc(id)}">Open theme</a>`;
     if(select){UX.move($('map-readout'),'lock');UX.pulse(document.querySelector('[data-map-theme="'+CSS.escape(id)+'"] .point-ring'));}
   }
 
@@ -172,7 +173,7 @@
     $('market-direction').innerHTML=`<div class="bias-line"><div class="bias-title"><span class="eyebrow">Market Bias</span><h2 class="direction-name ${tone(direction)}" aria-label="Market Bias: ${esc(direction)}">${esc(direction)}</h2><span class="market-change"><span class="${changes.previous_market_direction?'':'comparison-unavailable'}">${esc(changed)}</span>${v2().conviction==='selective'?' \u00b7 Reduced conviction':''}</span></div><div class="bias-action">${!currentResearch()?'<p>Current research list unavailable \u00b7 previous rules snapshot</p>':currentSide()?`<span>${sideLabel()}</span><a href="#themes">${primaryThemes().length} researchable themes <span aria-hidden="true">\u2192</span></a>`:'<p>No directional research list</p><a href="#themes">Explore theme context \u2192</a>'}</div></div><details class="decision-details"><summary>Decision evidence</summary><p id="decision-path">${esc(decision.reason||'Market context unavailable.')}</p><p id="today-plan">${esc(snapshot.today_plan||'')}</p><p>Breadth: ${esc(snapshot.market?.breadth_consensus||'Unavailable')}</p></details>`;
     renderBenchmarks();renderThemeMap();
     const leaders=primaryThemes().slice(0,3);
-    $('market-continuation').innerHTML=`<section class="research-next"><div class="section-heading"><h2>Next in research</h2><a href="#themes" class="text-link">All themes \u2192</a></div>${leaders.length?`<ol class="next-themes">${leaders.map(t=>`<li><div>${themeLink(t.theme_id)}<small>${themeState(t.theme_id)}</small></div><span>${recentChange(t.theme_id)}</span></li>`).join('')}</ol><a href="#primary" class="queue-entry"><span>Primary research</span><strong>${v2().list?.stock_count??uniqueRows(qualifiedRows()).length} stocks <span aria-hidden="true">\u2192</span></strong></a>`:'<a href="#themes" class="queue-entry">All themes <span aria-hidden="true">\u2192</span></a>'}</section>`;
+    $('market-continuation').innerHTML=`<section class="research-next"><div class="section-heading"><h2>Next in research</h2><a href="#themes" class="text-link">All themes \u2192</a></div>${leaders.length?`<ol class="next-themes">${leaders.map(t=>`<li><div>${themeLink(t.theme_id)}<small>${primaryThemeState(t.theme_id)}</small></div><span>${recentChange(t.theme_id)}</span></li>`).join('')}</ol><a href="#primary" class="queue-entry"><span>Primary research</span><strong>${v2().list?.stock_count??uniqueRows(qualifiedRows()).length} stocks <span aria-hidden="true">\u2192</span></strong></a>`:'<a href="#themes" class="queue-entry">All themes <span aria-hidden="true">\u2192</span></a>'}</section>`;
   }
 
   function setOptions(id, options) {
@@ -182,7 +183,7 @@
   }
   function themeValue(theme, key) {
     if (key === 'name') return theme.name || theme.theme_id;
-    if (key === 'priority') return researchOrder(theme.theme_id);
+    if (key === 'score') return valid(theme.score) ? Number(theme.score) : null;
     if (key === 'recent') return valid(recentValue(theme.theme_id))?Number(recentValue(theme.theme_id)):null;
     return null;
   }
@@ -194,25 +195,40 @@
   }
   function themeRows() {
     const query = $('theme-search').value.trim().toLowerCase();
-    return (snapshot?.themes || []).filter(t => (ui.universe === 'active' ? t.status === 'active' : t.status !== 'active') && (!query || `${t.name} ${t.theme_id} ${t.family}`.toLowerCase().includes(query)) && (!$('theme-family').value || t.family === $('theme-family').value) && (!$('theme-priority').value || researchState(t.theme_id) === $('theme-priority').value)).sort((a, b) => compareValues(themeValue(a, ui.themeSort), themeValue(b, ui.themeSort), ui.themeDescending) || a.theme_id.localeCompare(b.theme_id));
+    return (snapshot?.themes || []).filter(t => (ui.universe === 'active' ? t.status === 'active' : t.status !== 'active') && (!query || `${t.name} ${t.theme_id} ${t.family}`.toLowerCase().includes(query)) && (!$('theme-family').value || t.family === $('theme-family').value) && (!$('theme-state-filter').value || rawState(t.theme_id) === $('theme-state-filter').value)).sort((a, b) => compareValues(themeValue(a, ui.themeSort), themeValue(b, ui.themeSort), ui.themeDescending) || a.theme_id.localeCompare(b.theme_id));
+  }
+  function renderThemeMovement() {
+    const themes=(snapshot.themes||[]).filter(t=>t.status==='active');
+    const comparable=themes.filter(t=>valid(recentValue(t.theme_id)));
+    const unavailable=themes.length-comparable.length;
+    $('movement-availability').textContent=unavailable?` · ${unavailable} unavailable`:'';
+    $('movement-body').innerHTML=`<div class="movement-groups">${[1,-1].map(direction=>{
+      const entries=comparable.filter(t=>direction*Number(recentValue(t.theme_id))>0)
+        .sort((a,b)=>compareValues(Number(recentValue(a.theme_id)),Number(recentValue(b.theme_id)),direction>0)||a.theme_id.localeCompare(b.theme_id))
+        .slice(0,3);
+      return `<section><h3>${direction>0?'Largest gains':'Largest declines'}</h3>${entries.length?
+        `<ol>${entries.map(t=>`<li>${themeLink(t.theme_id,'movement')}${recentChange(t.theme_id)}</li>`).join('')}</ol>`:
+        `<p class="table-note">${direction>0?'No gains':'No declines'}</p>`}</section>`;
+    }).join('')}</div>${unavailable?'<p class="table-note">Themes with unavailable comparisons stay in the table below.</p>':''}`;
   }
   function renderThemes() {
     if(initialLoading)return;
     const tracked=ui.universe==='active';
+    $('theme-movement').hidden=!tracked||!snapshot;
     $('active-count').textContent=(snapshot?.themes||[]).filter(t=>t.status==='active').length;
     $('watch-count').textContent=(snapshot?.themes||[]).filter(t=>t.status!=='active').length;
     document.querySelectorAll('[data-universe]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.universe===ui.universe)));
-    $('theme-priority').closest('label').hidden=!tracked||!currentSide();
-    const count=['theme-family','theme-priority'].filter(id=>$(id).value).length;
+    $('theme-state-filter').closest('label').hidden=!tracked;
+    const count=['theme-family','theme-state-filter'].filter(id=>$(id).value).length;
     document.querySelector('.theme-filter-menu>summary').textContent='Filters'+(count?' ('+count+')':'');
     const rows=themeRows();
-    $('theme-results').textContent=tracked?`${rows.length} themes \u00b7 ${sideLabel()} \u00b7 ${primaryThemes().length} researchable`:`${rows.length} untracked concepts`;
+    $('theme-results').textContent=tracked ? `${rows.length} ${rows.length===1?'theme':'themes'}` : `${rows.length} untracked concepts`;
     $('theme-sort').value=`${ui.themeSort}:${ui.themeDescending?'desc':'asc'}`;
     if(!rows.length){$('theme-table').innerHTML=empty(snapshot?'No themes match':'Themes are waiting',snapshot?'Try another search or reset the filters.':'Open Snapshot and refresh and select Refresh Data.','<button class="button secondary" data-reset="themes">Reset filters</button>');return;}
     if(!tracked){$('theme-table').innerHTML='<ul class="concept-list">'+rows.map(t=>`<li>${themeLink(t.theme_id)}<span>${esc(t.family)}</span></li>`).join('')+'</ul>';return;}
-    $('theme-table').innerHTML=`<div class="theme-ledger-head" aria-hidden="true"><span>Research Priority</span><span>Theme</span><span>State</span><span>5-session Change</span><span>1M / 3M Return</span></div><ol class="theme-ledger" aria-label="Tracked themes">${rows.map(t=>{
-      const id=t.theme_id, priority=researchOrder(id);
-      return `<li data-theme-row="${esc(id)}" class="theme-line ${ui.selectedTheme===id?'selected-row':''}"><div class="priority-cell"><span class="mobile-label">Priority</span><span class="numeric">${priority==null?'—':priority+1}</span></div><div class="theme-identity"><div>${themeLink(id)}<small>${esc(t.family)}</small><div class="theme-actions">${quickView(id)}${themeDownload(id)}</div></div></div><div class="relative-cell"><span class="mobile-label">State</span>${themeState(id)}</div><div class="change-cell"><span class="mobile-label">5-session Change</span>${recentChange(id)}</div><div class="return-cell"><span class="mobile-label">1M / 3M Return</span><span class="${signTone(t.returns?.[0]?.value)}">${percent(t.returns?.[0]?.value,100,true)}</span><span aria-hidden="true"> / </span><span class="${signTone(t.returns?.[1]?.value)}">${percent(t.returns?.[1]?.value,100,true)}</span></div></li>`;
+    $('theme-table').innerHTML=`<div class="theme-ledger-head" aria-hidden="true"><span>Theme</span><span>Theme Score</span><span>State</span><span>5-session Change</span><span>1M / 3M</span></div><ol class="theme-ledger" aria-label="Tracked themes">${rows.map(t=>{
+      const id=t.theme_id;
+      return `<li data-theme-row="${esc(id)}" class="theme-line ${ui.selectedTheme===id?'selected-row':''}"><div class="theme-identity"><div>${themeLink(id)}<small>${esc(t.family)}</small><div class="theme-actions">${quickView(id)}${themeDownload(id)}</div></div></div><div class="score-cell"><span class="mobile-label">Theme Score</span><strong class="numeric">${number(t.score,1)}</strong></div><div class="state-cell"><span class="mobile-label">State</span>${rawStateLabel(id)}</div><div class="change-cell"><span class="mobile-label">5-session Change</span>${recentChange(id)}</div><div class="return-cell"><span class="mobile-label">1M / 3M</span><span class="${signTone(t.returns?.[0]?.value)}">${percent(t.returns?.[0]?.value,100,true)}</span><span aria-hidden="true"> / </span><span class="${signTone(t.returns?.[1]?.value)}">${percent(t.returns?.[1]?.value,100,true)}</span></div></li>`;
     }).join('')}</ol>`;
   }
 
@@ -262,7 +278,7 @@
     if(!grouped)return `<div class="research-queue ${earningsEnabled()?'has-earnings':''}"><div class="queue-head" aria-hidden="true"><span>#</span><span>Stock</span><span>Theme</span><span>Peer strength (pp)</span>${earningsEnabled()?'<span>Earnings</span>':''}<span>Save</span></div><ol aria-label="${esc(label)}">${rows.map((r,i)=>candidateRow(r,"primary",true,i)).join('')}</ol></div>`;
     const groups=new Map();for(const row of rows){if(!groups.has(row.theme_id))groups.set(row.theme_id,[]);groups.get(row.theme_id).push(row);}
     let position=0;
-    return [...groups].map(([id,members])=>`<section class="queue-chapter" aria-label="${esc(name(id))}"><header class="chapter-heading"><span class="eyebrow">${String([...groups.keys()].indexOf(id)+1).padStart(2,'0')}</span><h2>${themeLink(id)}</h2><div>${themeState(id)}</div><div class="theme-actions">${quickView(id)}${themeDownload(id)}</div></header><div class="chapter-stocks"><span class="chapter-peer-label">Peer strength (pp) ${helpButton('w')}</span><ol class="chapter-queue" aria-label="${esc(name(id))} stocks">${members.map(r=>candidateRow(r,"primary",false,position++)).join('')}</ol></div></section>`).join('');
+    return [...groups].map(([id,members])=>`<section class="queue-chapter" aria-label="${esc(name(id))}"><header class="chapter-heading"><span class="eyebrow">${String([...groups.keys()].indexOf(id)+1).padStart(2,'0')}</span><h2>${themeLink(id)}</h2><div>${primaryThemeState(id)}</div><div class="theme-actions">${quickView(id)}${themeDownload(id)}</div></header><div class="chapter-stocks"><span class="chapter-peer-label">Peer strength (pp) ${helpButton('w')}</span><ol class="chapter-queue" aria-label="${esc(name(id))} stocks">${members.map(r=>candidateRow(r,"primary",false,position++)).join('')}</ol></div></section>`).join('');
   }
 
   function memberRows(themeId) {
@@ -283,7 +299,7 @@
     if(theme.status!=='active'){$('detail-content').innerHTML=`<a href="#themes" class="back-link">← Back to Themes</a><h1 id="detail-title" tabindex="-1">${esc(theme.name||themeId)}</h1>${empty('Not currently tracked','This concept has no reviewed calculation basket.') }`;return;}
     const view = memberView(themeId);
     const originName=origin.startsWith('#primary')?'Primary':origin.startsWith('#saved')?'Saved':origin.startsWith('#overview')?'Market':'Themes';
-    $('detail-content').innerHTML=`<div class="crumbs"><a href="${esc(origin)}" class="back-link" data-return-theme="${esc(themeId)}">&#8592; ${originName}</a>${themeDownload(themeId)}</div><header class="full-theme-heading"><h1 id="detail-title" tabindex="-1">${esc(theme.name||themeId)}</h1><span>${esc(theme.family)}</span></header><div class="full-theme-evidence">${themeEvidence(theme,true)}</div><div class="section-heading"><h2>Member stocks</h2><span id="member-count" class="table-meta"></span></div><form id="member-filters" class="filter-bar" role="search" aria-label="Filter theme members"><label class="search-field">Search members<input id="member-search" type="search" placeholder="Ticker…" value="${esc(view.memberSearch)}"></label><label>Role<select id="member-role"><option value="">All roles</option><option value="Core">Core business</option><option value="Enabler">Supporting business</option><option value="Related">Related context</option></select></label><label>Eligibility<select id="member-eligibility"><option value="">All states</option><option>Liquidity eligible</option><option>Liquidity ineligible</option><option>Unavailable</option></select></label><label>Sort<select id="member-sort"><option value="priority">${currentSide()?'Peer priority':'Context order (A–Z)'}</option><option value="ticker">Ticker A–Z</option><option value="w-desc">Peer strength high to low</option><option value="w-asc">Peer strength low to high</option></select></label></form><div id="member-table" class="table-wrap member-table" role="region" tabindex="0" aria-label="Theme member research"></div>`;
+    $('detail-content').innerHTML=`<div class="crumbs"><a href="${esc(origin)}" class="back-link" data-return-theme="${esc(themeId)}">&#8592; ${originName}</a>${themeDownload(themeId)}</div><header class="full-theme-heading"><h1 id="detail-title" tabindex="-1">${esc(theme.name||themeId)}</h1><span>${esc(theme.family)}</span></header><div class="full-theme-evidence">${themeEvidence(theme)}</div><div class="section-heading"><h2>Member stocks</h2><span id="member-count" class="table-meta"></span></div><form id="member-filters" class="filter-bar" role="search" aria-label="Filter theme members"><label class="search-field">Search members<input id="member-search" type="search" placeholder="Ticker…" value="${esc(view.memberSearch)}"></label><label>Role<select id="member-role"><option value="">All roles</option><option value="Core">Core business</option><option value="Enabler">Supporting business</option><option value="Related">Related context</option></select></label><label>Eligibility<select id="member-eligibility"><option value="">All states</option><option>Liquidity eligible</option><option>Liquidity ineligible</option><option>Unavailable</option></select></label><label>Sort<select id="member-sort"><option value="priority">${currentSide()?'Peer priority':'Context order (A–Z)'}</option><option value="ticker">Ticker A–Z</option><option value="w-desc">Peer strength high to low</option><option value="w-asc">Peer strength low to high</option></select></label></form><div id="member-table" class="table-wrap member-table" role="region" tabindex="0" aria-label="Theme member research"></div>`;
     $('member-role').value=view.memberRole;$('member-eligibility').value=view.memberEligibility;$('member-sort').value=view.memberSort;renderMembers(themeId);
   }
 
@@ -425,9 +441,12 @@
     if (inspector.kind === 'theme') renderThemeInspector(); else renderTickerInspector();
     if (preserve) { dialog.scrollTop = scroll; restoreFocus(focused); if (textSelection != null) $('inspector-search')?.setSelectionRange(textSelection,textSelection); }
   }
-  function themeEvidence(t, showRank=false) {
+  function themeEvidence(t) {
     const id=t.theme_id,r=themeResearch(id);
-    return `<section class="relative-evidence" aria-label="Research State"><div class="evidence-label">State <span>${sideLabel()}</span></div><div class="relative-summary"><div>${themeState(id)}<small>${r.researchable?'Researchable':'Context only'}</small></div><div><span class="metric-label">Theme Score ${helpButton('strength')}</span><strong>${number(t.score,1)}</strong>${showRank?`<small>Theme Score rank ${rankLabel(id)}</small>`:''}</div><div><span class="metric-label">5-session Change</span><strong>${recentChange(id)}</strong></div></div></section><details class="theme-provenance price-evidence"><summary>Price context</summary><dl class="evidence-list"><div><dt>Trend</dt><dd>${state(t.index?.trend)}</dd></div><div><dt>Index / EMA21 / EMA50</dt><dd>${number(t.index?.level)} / ${number(t.index?.ema21)} / ${number(t.index?.ema50)}</dd></div><div><dt>Median 1M / 3M return</dt><dd>${percent(t.returns?.[0]?.value,100,true)} / ${percent(t.returns?.[1]?.value,100,true)}</dd></div></dl></details><details class="theme-provenance"><summary>Evidence &amp; provenance</summary><p>${esc(r.reason||'Comparison unavailable')}</p><dl class="evidence-list"><div><dt>Participation ${helpButton('breadth')}</dt><dd>${participation(id)}</dd></div><div><dt>Current-basket comparison</dt><dd>${esc(r.recent?.comparison_session||UX.comparisonMessage(r.recent?.reason))}</dd></div><div><dt>Basket session</dt><dd>${esc(v2().comparison?.basis_session||snapshot?.session||'Unavailable')}</dd></div><div><dt>Participation change</dt><dd>${valid(r.recent?.breadth_change)?number(r.recent.breadth_change,1)+' pp':'Unavailable'}</dd></div></dl></details>`;
+    const returns=`${percent(t.returns?.[0]?.value,100,true)} / ${percent(t.returns?.[1]?.value,100,true)}`;
+    return `<dl class="raw-theme-summary"><div><dt>Theme Score ${helpButton('strength')}</dt><dd><strong class="numeric">${number(t.score,1)}</strong></dd></div><div><dt>State ${helpButton('raw-state')}</dt><dd>${rawStateLabel(id)}</dd></div><div><dt>5-session Change ${helpButton('score-change')}</dt><dd>${recentChange(id)}</dd></div><div><dt>1M / 3M</dt><dd class="numeric">${returns}</dd></div></dl>
+      <details class="theme-provenance price-evidence"><summary>Price context</summary><dl class="evidence-list"><div><dt>Trend</dt><dd>${state(t.index?.trend)}</dd></div><div><dt>Index / EMA21 / EMA50</dt><dd>${number(t.index?.level)} / ${number(t.index?.ema21)} / ${number(t.index?.ema50)}</dd></div></dl></details>
+      <details class="theme-provenance"><summary>Participation and comparison</summary><dl class="evidence-list"><div><dt>Participation ${helpButton('breadth')}</dt><dd>${participation(id)}</dd></div><div><dt>5-session comparison</dt><dd>${esc(r.recent?.available?r.recent.comparison_session:UX.comparisonMessage(r.recent?.reason))}</dd></div><div><dt>Basket session</dt><dd>${esc(v2().comparison?.basis_session||snapshot?.session||'Unavailable')}</dd></div><div><dt>Participation change</dt><dd>${valid(r.recent?.breadth_change)?number(r.recent.breadth_change,1)+' pp':'Unavailable'}</dd></div></dl></details>`;
   }
   function renderThemeInspector() {
     const t=snapshot?.themes?.find(row=>row.theme_id===inspector.id);
@@ -501,7 +520,12 @@
       if (!initial) view?.querySelector('h1')?.focus({preventScroll:true});
       const pos = positions.get(route); window.scrollTo(0,pos?.scroll || 0);
       if (!isDetail && part === 'themes') $('theme-table').scrollTop = pos?.table || 0;
-      if (previousRoute.startsWith('#themes/') && route === origin) view?.querySelector(`a[href="${CSS.escape(previousRoute)}"]`)?.focus({preventScroll:true});
+      if (previousRoute.startsWith('#themes/') && route === origin) {
+        restoreFocus(themeOriginFocus);
+        if (document.activeElement===view?.querySelector('h1')) {
+          view.querySelector(`a[href="${CSS.escape(previousRoute)}"]`)?.focus({preventScroll:true});
+        }
+      }
     });
   }
   function render(data) {
@@ -511,20 +535,20 @@
     }
     initialLoading=false;$('workspace').setAttribute('aria-busy','false');
     const focused = focusKey(), memberFocused = document.activeElement?.id?.startsWith('member-') ? {id:document.activeElement.id,start:document.activeElement.selectionStart} : null;
-    const scroll = window.scrollY, themeScroll = $('theme-table').scrollTop,previousMarket=snapshot?.market_direction,previousSide=currentSide();
+    const scroll = window.scrollY, themeScroll = $('theme-table').scrollTop,previousMarket=snapshot?.market_direction;
     interactions.closeHelp();snapshot=data;
-    if(!previousMarket||previousSide!==currentSide()){ui.themeSort='priority';ui.themeDescending=false;$('theme-priority').value='';}
     $('research-version-notice').hidden=currentResearch();
     $('research-version-notice').textContent='This snapshot uses previous research rules. Select Refresh Data to calculate current Themes and Primary research.';
     renderLayer(); renderOverview();
     const rules=v2().policy;
     if(rules){
-      $('method-state-rule').textContent=`Structural boundary: ${rules.structural_boundary} points. A change of at least ${rules.material_score_change} points over ${rules.change_sessions} completed sessions is material. Short-side State favors lower scores and falling scores. Exactly 50 is a directional tie for both sides. Selective states keep the same members but place structurally established Fading themes ahead of below-boundary Improving themes.`;
+      const boundary=rules.structural_boundary, threshold=rules.material_score_change;
+      $('method-state-rule').textContent=`At ${boundary} or above, the state is Fading when the score falls by at least ${threshold} points and Strong otherwise. Below ${boundary}, the state is Improving when the score rises by at least ${threshold} points and Weak otherwise. Without a comparison, the score alone determines Strong or Weak. A missing score gives Unavailable.`;
       $('method-liquidity-rule').textContent=`Require a completed-session close above $${number(rules.price_floor_exclusive,0)} and average dollar volume of at least ${money(rules.average_dollar_volume_floor)} over ${rules.liquidity_sessions} completed regular sessions.`;
     }
     if(previousMarket&&previousMarket!==snapshot.market_direction&&route==='#overview')UX.move($('market-direction'),'sweep');
     setOptions('theme-family',[...new Set((snapshot.themes || []).map(t => t.family).filter(Boolean))].sort().map(f => [f,f]));
-    renderThemes(); renderCandidates(); renderSaved();
+    renderThemeMovement(); renderThemes(); renderCandidates(); renderSaved();
     if (inspector) renderInspector(true);
     if (route.startsWith('#themes/')) { renderDetail(detailId()); document.title = name(detailId()) + ' · ThemeScope'; }
     $('target').textContent = snapshot.session || '—';
@@ -613,7 +637,7 @@
     if (link?.getAttribute('href') === '#workspace') { event.preventDefault(); $('workspace').focus(); $('workspace').scrollIntoView(); return; }
     if (link?.getAttribute('aria-disabled') === 'true') { event.preventDefault(); return; }
     if (link?.getAttribute('href')?.startsWith('#themes/')) {
-      if (!route.startsWith('#themes/')) origin = route || '#themes';
+      if (!route.startsWith('#themes/')) { origin = route || '#themes'; themeOriginFocus=link.dataset.focusKey; }
       try { ui.selectedTheme = decodeURIComponent(link.getAttribute('href').split('/')[1]); } catch { ui.selectedTheme = ''; }
     }
     if (link?.getAttribute('href')?.startsWith('#') && link.getAttribute('href') !== '#workspace' && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
@@ -627,9 +651,9 @@
     if (button.dataset.inspectorFilter) { inspectorView().filter = button.dataset.inspectorFilter; renderInspector(true); restoreFocus('inspect-filter:' + button.dataset.inspectorFilter); return; }
     if (button.dataset.save) { changeSaved(button.dataset.save,false,button.dataset.saveTheme||''); return; }
     if (button.dataset.remove) { changeSaved(button.dataset.remove,true); return; }
-    if (button.dataset.universe) { ui.universe=button.dataset.universe; if(ui.universe!=='active')$('theme-priority').value='';ui.themeSort=ui.universe==='active'?'priority':'name';ui.themeDescending=false; renderThemes();requestAnimationFrame(UX.indicators);return;}
+    if (button.dataset.universe) { ui.universe=button.dataset.universe; if(ui.universe!=='active')$('theme-state-filter').value='';ui.themeSort=ui.universe==='active'?'score':'name';ui.themeDescending=ui.universe==='active'; renderThemes();requestAnimationFrame(UX.indicators);return;}
     if (button.dataset.candidateMode) { const changed=ui.candidateMode!==button.dataset.candidateMode;ui.candidateMode=button.dataset.candidateMode;renderCandidates();UX.indicators();if(changed)UX.move($('candidates'),'sweep');return; }
-    if (button.dataset.reset === 'themes') { $('theme-filters').reset();ui.themeSort=ui.universe==='active'?'priority':'name';ui.themeDescending=false;renderThemes(); UX.move($('theme-table'),'reveal'); }
+    if (button.dataset.reset === 'themes') { $('theme-filters').reset();ui.themeSort=ui.universe==='active'?'score':'name';ui.themeDescending=ui.universe==='active';renderThemes(); UX.move($('theme-table'),'reveal'); }
     if (button.dataset.reset === 'candidates') { $('candidate-filters').reset(); renderCandidates(); UX.move($('candidates'),'reveal'); }
   });
   function filterChange(event) {
@@ -638,7 +662,7 @@
     if (id === 'inspector-search') { inspectorView().search = event.target.value; renderInspectorMembers(); return; }
     if(id==='inspector-view'){inspectorView().filter=event.target.value;renderInspectorMembers();return;}
     if (id === 'inspector-sort') { inspectorView().sort = event.target.value; renderInspectorMembers(); return; }
-    if (['theme-search','theme-family','theme-priority'].includes(id)) renderThemes();
+    if (['theme-search','theme-family','theme-state-filter'].includes(id)) renderThemes();
     if (id === 'theme-sort') { const [key,direction] = event.target.value.split(':'); ui.themeSort = key; ui.themeDescending = direction === 'desc'; renderThemes(); $('theme-sort')?.focus(); }
     if (id.startsWith('candidate-') && id !== 'candidate-filters') renderCandidates();
     if(event.type==='change'&&id.startsWith('theme-'))UX.move($('theme-table'),'reveal');

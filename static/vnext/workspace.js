@@ -8,7 +8,8 @@ window.ThemeScopeUI = (() => {
     breadth:['Members above EMA','Members above EMA21, shown with the valid sample count. Small samples remain context; participation never gates research.','breadth'],
     'market-breadth':['Benchmark breadth','SPY and QQQ constituent breadth supplies Market Matrix context. IWM has no breadth roster.','market'],
     iwm:['Small-cap context','IWM supplies small-cap price and EMA context. It does not affect Market Bias or Extension.','market'],
-    priority:['Research Priority','Leading, Improving and Fading themes are researchable for the current market side. Short-side states interpret strength symmetrically.','priority'],
+    'raw-state':['State','Raw theme condition based on Theme Score and its five-session change.','priority'],
+    'score-change':['5-session Change','Current Theme Score minus its value five completed sessions earlier. A positive value means the score rose.','change'],
   };
   const displayRows = (all,representatives,theme) => theme ? [...new Map(all.filter(r=>r.theme_id===theme).map(r=>[r.ticker,r])).values()] : representatives;
   function researchRows(snapshot) {
@@ -30,7 +31,7 @@ window.ThemeScopeUI = (() => {
     const side=snapshot?.research_v2?.current_side;
     return side==='long'||side==='short'?side:null;
   }
-  const currentContract = snapshot => snapshot?.research_v2?.schema==='themescope-research-v2'&&snapshot?.research_v2?.contract_revision===3;
+  const currentContract = snapshot => snapshot?.research_v2?.schema==='themescope-research-v2'&&snapshot?.research_v2?.contract_revision===4;
   function comparisonMessage(reason) {
     return ({insufficient_completed_history:'Not enough completed history',current_basis_mismatch:'Current comparison basis unavailable',
       methodology_or_membership_changed:'Methodology or reviewed membership changed',

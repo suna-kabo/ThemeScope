@@ -57,7 +57,7 @@ def main():
                 expect(page.locator('#lifecycle-detail')).to_contain_text('Launch close: index initialized at 100',timeout=30000)
                 expect(page.locator('#theme-layer')).to_be_hidden()
                 page.locator('[data-nav="themes"]').click()
-                expect(page.locator('#theme-table')).to_contain_text('Research Priority')
+                expect(page.locator('#theme-table')).to_contain_text('Theme Score')
                 assert service.snapshot()['theme_layer']['official_live_history']
                 page.set_viewport_size({'width':390,'height':844})
                 assert page.locator('body').bounding_box()['width']<=390
