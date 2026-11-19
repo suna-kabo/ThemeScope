@@ -1,34 +1,24 @@
-# Market Bias → Theme Changes → Primary Research
+# Daily research
 
-Open ThemeScope after market close. The completed-session date identifies the data
-being researched. A failed refresh preserves the preceding successful snapshot.
+Double-click **ThemeScope.cmd**. The session bar shows the completed US session
+that supplied the displayed research. Open **Snapshot and refresh** to see the
+latest safely completed session and refresh details.
 
-**Market** explains SPY/QQQ Bias, supporting EMA/breadth evidence and the next
-researchable themes. IWM is small-cap context only. Extension and the optional
-returns landscape provide context.
+1. **Market** shows the current research side and SPY/QQQ evidence. IWM is context.
+2. **Themes** starts in Research Priority order. **State** interprets current Theme
+   Score and the raw **5-session Change** for the current Long or Short side.
+   Click a theme name for Full Theme. **Quick View** opens the secondary preview.
+3. **Primary** lists eligible stocks inside researchable themes for chart review.
+   Peer strength sorts within each theme. Use **Saved** to revisit stocks and their
+   remembered theme context.
 
-**Themes** puts five-session gains/losses above the full theme ledger. Leading,
-Improving and Fading states identify researchable themes for the current market
-side. Strength, recent change and price direction remain separate. Search, filters
-and sorting do not recalculate canonical ranks.
+**TradingView TXT** on a theme downloads its full session research watchlist.
+**Primary → Export → Full research list** downloads the combined list. Both use
+the snapshot session in the filename and keep the authoritative order when the
+on-screen filters change.
 
-Open theme/stock inspectors without losing your place. Full Theme provides member
-relationships, daily eligibility, participation and provenance. Back/Forward follows
-nested context; Escape closes the inspector and restores focus.
-
-**Primary** is the chart-review queue. Research priority groups stocks by theme;
-other sorts provide a flat list. Unique stocks deduplicate, while relationship view
-keeps independent memberships. Every daily-eligible Core/Enabler member of a
-researchable theme remains included, regardless of peer-strength sign.
-
-**Export** downloads full-session TradingView TXT in research order, independently
-of visible filters. Combined output deduplicates at the highest-priority theme;
-individual theme files retain their own eligible members. These are watchlists.
-
-**Saved** belongs to the browser/origin. Browser text sizing, forced colors and
-system reduced motion provide accessibility preferences.
-
-In the local app, open **Snapshot and refresh → Refresh Data**. Public snapshots
-show fixed market data and have no Refresh action. Fictional mode is clearly
-marked. See [Research Logic v2](../methodology/research-v2.md) and
-[publication operations](../operations/public-snapshots.md).
+**Current** means the latest safely completed session is loaded. **Update
+available** means a newer session can be refreshed. **Refreshing** keeps committed
+results visible. **Refresh failed** shows a safe diagnostic and keeps the previous
+snapshot if one exists. A configuration or rules change is labelled separately.
+Select **Refresh Data** to retry or to apply reviewed changes within the same session.

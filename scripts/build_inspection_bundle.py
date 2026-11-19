@@ -90,7 +90,7 @@ def build(root=ROOT, *, test_report=None, engine_report=None, provider_report=No
             ui = stage / 'ui'
             ui.mkdir()
             for name in ('index.html', 'app.js', 'app.css'):
-                (ui/name).write_text(safe_file(root/'static/vnext'/name), encoding='utf-8')
+                (ui/name).write_text(safe_file(ROOT/'inspection/ui'/name), encoding='utf-8')
             (ui/'preview.js').write_text('window.FIXTURE_SNAPSHOT='+snapshot_text+';', encoding='utf-8')
             engine_preview += '<h2>Gate D local UI</h2><p><a href="ui/index.html">Open synthetic interactive UI preview</a> · <a href="ui-report.md">Local launch and validation report</a></p>'
         (stage / 'index.html').write_text('<!doctype html><meta charset="utf-8"><title>ThemeScope vNext inspection</title>'

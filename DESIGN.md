@@ -2,18 +2,18 @@
 
 The approved frontend is a charcoal research journal built around **Market ?
 Themes → Primary**. Saved and Methodology are utilities. Snapshot details and
-local refresh share a disclosure; public snapshots expose details only.
+local refresh share a disclosure.
 
 Market puts Bias before paired SPY/QQQ evidence and a secondary IWM context row.
 Its continuation leads to theme research. The returns landscape is optional.
-Themes leads with side-aware five-session movement and a complete sortable ledger.
+Themes leads with Research Priority, State, raw 5-session Change and returns.
 Primary uses theme chapters and ordered stock queues; explicit global sorts offer
 a flat queue. Filters affect the view, while exports retain the full session list.
 
-Theme and stock inspectors preserve the originating research context. Full-theme
-routes, nested Back/Forward, focus restoration, keyboard actions and browser-local
-Saved retain their compatibility contracts. Relative state and price direction
-stay distinct. Financial color is accompanied by text and signs.
+Theme names open Full Theme. Quick View is an explicit secondary action. Stock
+inspectors preserve the originating theme context. Back/Forward restores focus and
+Full Theme keeps per-theme filters. Saved persists in local app state. Price context
+is a secondary disclosure inside the theme. Financial color is accompanied by text and signs.
 
 The shared CSS tokens in `static/vnext/app.css` define the current system:
 charcoal canvas `#191b1d`, light text `#eceeeb`, restrained semantic color,

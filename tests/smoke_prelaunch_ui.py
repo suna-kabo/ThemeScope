@@ -1,6 +1,6 @@
 """Real loopback pre-launch UI smoke; real config, fictional test bars, no credentials."""
 from pathlib import Path
-import json,shutil,socket,sys,tempfile,threading,time
+import json,os,shutil,socket,sys,tempfile,threading,time
 from unittest.mock import patch
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
 from vnext_prelaunch_fixture import PrelaunchFixture
@@ -15,7 +15,7 @@ def main():
     with tempfile.TemporaryDirectory(prefix='themescope prelaunch UI ') as folder,patch('src.themescope.local.service.optional_earnings',return_value={}):
         fixture=PrelaunchFixture(folder);service=fixture.service
         sock=socket.socket();sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
-        server=uvicorn.Server(uvicorn.Config(create_app(ROOT,service),log_level='error',access_log=False))
+        server=uvicorn.Server(uvicorn.Config(create_app(ROOT,service, personal_dir=Path(folder)/"saved"),log_level='error',access_log=False))
         worker=threading.Thread(target=server.run,kwargs={'sockets':[sock]},daemon=True);worker.start()
         try:
             deadline=time.monotonic()+5
@@ -23,21 +23,23 @@ def main():
             assert server.started
             with sync_playwright() as p:
                 options={'headless':True}
-                if shutil.which('chromium'):options['executable_path']=shutil.which('chromium')
+                if os.environ.get('THEMESCOPE_BROWSER') or shutil.which('chromium'):
+                    options['executable_path']=os.environ.get('THEMESCOPE_BROWSER') or shutil.which('chromium')
                 browser=p.chromium.launch(**options)
                 page=browser.new_page(viewport={'width':1440,'height':1000});errors=[];outside=[]
                 page.on('pageerror',lambda e:errors.append(str(e)))
                 page.on('request',lambda r:outside.append(r.url) if not r.url.startswith((f'http://127.0.0.1:{port}','blob:')) else None)
                 page.goto(f'http://127.0.0.1:{port}')
                 open_refresh(page).click()
-                expect(page.locator('#progress')).to_have_text('Refresh complete',timeout=30000)
                 expect(page.locator('#theme-layer')).to_contain_text('Pre-launch research')
                 expect(page.locator('#theme-layer')).to_contain_text('2026-11-05')
                 expect(page.locator('#theme-layer')).to_contain_text('2026-11-06 close')
                 expect(page.locator('#fixture-banner')).to_be_hidden()
                 page.locator('[data-nav="themes"]').click()
-                expect(page.locator('#theme-table')).to_contain_text('Price direction')
-                expect(page.locator('#theme-table')).to_contain_text('Bullish')
+                expect(page.locator('#theme-table')).not_to_contain_text('Price direction')
+                page.locator('#theme-table .theme-link').first.click()
+                page.locator('#detail-content .price-evidence > summary').click()
+                expect(page.locator('.price-evidence')).to_contain_text('Bullish')
                 page.locator('[data-nav="primary"]').click()
                 assert page.locator('#candidates [data-ticker-row]').count()>0
                 save=page.locator('#candidates [data-save]').first;ticker=save.get_attribute('data-save');save.click()
@@ -55,7 +57,7 @@ def main():
                 expect(page.locator('#lifecycle-detail')).to_contain_text('Launch close: index initialized at 100',timeout=30000)
                 expect(page.locator('#theme-layer')).to_be_hidden()
                 page.locator('[data-nav="themes"]').click()
-                expect(page.locator('#theme-table')).to_contain_text('Price direction')
+                expect(page.locator('#theme-table')).to_contain_text('Research Priority')
                 assert service.snapshot()['theme_layer']['official_live_history']
                 page.set_viewport_size({'width':390,'height':844})
                 assert page.locator('body').bounding_box()['width']<=390

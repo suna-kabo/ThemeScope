@@ -2,37 +2,38 @@
 
 ## Daily refresh
 
-Run the private loopback application, open **Snapshot and refresh** and select
-**Refresh Data**. It chooses the latest US session closed at least 20 minutes ago
-using the versioned calendar; there is no intraday mode or daily CSV upload. First refresh seeds the required
-history. Warm refresh retrieves missing/new completed sessions, a bounded repair
-window and adjustment anchors. See [provider/cache design](../architecture/provider-and-storage.md).
+Launch **ThemeScope.cmd**. The app checks the versioned US calendar for a session
+that closed at least 20 minutes ago and starts one automatic attempt when a newer
+snapshot is due. Launching again does not repeat a failed attempt for the same
+session. Open **Snapshot and refresh → Refresh Data** to retry, apply reviewed
+configuration changes, or deliberately recalculate the current session.
 
-Provider completeness, effective membership/rosters and calculation validation
-precede one atomic SQLite publication. The dashboard and TXT routes read one
-committed snapshot. Failure leaves the prior successful snapshot available; an
-older replay cannot replace a newer publication. Check `state`, target session and
-last successful session rather than assuming an opening dashboard proves success.
+First refresh seeds the required history. Warm refresh retrieves missing completed
+sessions, a bounded repair window, and adjustment anchors. The refresh lock
+excludes competing writes. A successful refresh commits provider inputs, research,
+and the active snapshot pointer in one transaction. The browser keeps the previous
+snapshot and downloads usable during refresh. Failure leaves those results intact.
+Optional earnings failures do not block research.
 
-The process/thread refresh lock excludes competing refreshes. Auxiliary status
-metadata is authoritative in memory and best-effort on disk; status-file failure
-does not abort snapshot publication. An interrupted process can recover useful
-persisted status; it does not turn partial calculations into a successful snapshot.
-Missing earnings never block market refresh.
+## Backup and restore
 
-## Private storage and backups
+Double-click **backup-data.cmd**. The command prints the timestamped SQLite backup
+path under `%LOCALAPPDATA%\ThemeScope\Backups\`. You can run it while ThemeScope is
+open. It uses SQLite's online backup operation and checks the resulting database.
+The backup contains the research database. Saved bookmarks and provider credentials
+live separately under the per-user application-data directory. Keep reviewed
+configuration in version control alongside its matching research history.
 
-Live storage: `runtime/vnext/runtime.sqlite`; fictional mode:
-`runtime/vnext-fixture/runtime.sqlite`. Keep them separate. With the app **stopped**,
-back up `runtime/vnext/` together with the corresponding versioned configuration.
-Preserve legacy `output/manual_csv/local_history` independently. Runtime, outputs,
-keys and `.env` files do not belong in Git or public static output.
+To restore deliberately, stop every ThemeScope server and maintenance command
+using this workspace. Move the existing `runtime/vnext/runtime.sqlite` and any
+matching `-wal` and `-shm` files together to a separate recovery folder. Copy the
+chosen backup to `runtime/vnext/runtime.sqlite` and reopen ThemeScope. Retain the
+recovery folder until you've checked the session and history. The current
+configuration is checked on startup and may require a refresh. The backup command
+never restores or overwrites live data.
 
-Update source without resetting local edits, deleting databases or replacing genuine
-history with fixtures. Storage migration is transactional. Sustained lock, corruption
-or provider errors are reported; do not bypass validation to make a refresh green.
-Known older provider corrections may need an explicit full repair through the cache
-integration; there is no daily CLI repair shortcut. Preserve prior observation versions.
+Fixture and legacy research history live separately. See the
+[storage design](../architecture/provider-and-storage.md).
 
 ## SPY and QQQ rosters
 
@@ -71,10 +72,3 @@ normal startup. Do not rewrite earned history or reactivate terminated holdings.
 Unknown missing bars fail closed. Only deliberately approved
 [terminal corporate actions](../architecture/terminal-actions.md) may supply
 existing-holding values; they never create OHLCV or liquidity.
-
-## Current release status
-
-[Gate E is CLOSED](gate-e-closure.md): real Nov 6, Nov 9 and Nov 10 passed per the
-user. Ordinary future refresh failures remain real failures; closure is not a waiver
-of completeness, account access or methodology. The normal public daily command is `update-public.cmd` from clean main, with
-[verified refresh/publication and manual fallback](public-snapshots.md).

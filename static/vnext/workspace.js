@@ -2,8 +2,7 @@
 /* Research presentation and interaction primitives. No financial qualification. */
 window.ThemeScopeUI = (() => {
   const help = {
-    strength:['Strength','Medium-term strength across reviewed themes on a 0–100 scale. Higher means stronger relative price performance.','strength'],
-    rank:['Strength Rank','Rank across all scored Active themes, independent of this table’s filters. Equal scores share ranks.','rank'],
+    strength:['Theme Score','Medium-term relative price performance across reviewed themes on a 0–100 scale.','strength'],
     w:['Peer-relative strength','Weighted 1M/3M excess return versus other Core + Enabler members of the same theme. Positive is stronger, negative weaker. Unit: percentage points.','w'],
     extension:['Market Extension','SPY and QQQ distance from EMA21, scaled by Wilder ATR20. Context for chart review; it does not change market direction or the research list.','extension'],
     breadth:['Members above EMA','Members above EMA21, shown with the valid sample count. Small samples remain context; participation never gates research.','breadth'],
@@ -24,14 +23,14 @@ window.ThemeScopeUI = (() => {
     if(!currentContract(snapshot))return 'Unavailable';
     const row=snapshot?.research_v2?.themes?.[id];
     if(!row)return 'Unavailable';
-    return currentSide(snapshot)?row.current_state||'Unavailable':'Non-directional';
+    return row.current_state||'Unavailable';
   }
   function currentSide(snapshot) {
     if(!currentContract(snapshot))return null;
     const side=snapshot?.research_v2?.current_side;
     return side==='long'||side==='short'?side:null;
   }
-  const currentContract = snapshot => snapshot?.research_v2?.schema==='themescope-research-v2'&&snapshot?.research_v2?.contract_revision===2;
+  const currentContract = snapshot => snapshot?.research_v2?.schema==='themescope-research-v2'&&snapshot?.research_v2?.contract_revision===3;
   function comparisonMessage(reason) {
     return ({insufficient_completed_history:'Not enough completed history',current_basis_mismatch:'Current comparison basis unavailable',
       methodology_or_membership_changed:'Methodology or reviewed membership changed',

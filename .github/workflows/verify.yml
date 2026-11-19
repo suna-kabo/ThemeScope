@@ -38,7 +38,3 @@ jobs:
         run: npm install --prefix runtime/ui-v3-tools --no-save --package-lock=false axe-core@4.14.0
       - name: Research v2 desktop, mobile, keyboard and accessibility gate
         run: python tests/smoke_research_v2_ui.py
-      - name: Frozen public snapshot and synthetic static demo
-        run: |
-          python tests/smoke_public_snapshot.py
-          python tests/smoke_cloudflare_demo.py

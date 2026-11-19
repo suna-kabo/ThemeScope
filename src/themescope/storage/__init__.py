@@ -128,6 +128,10 @@ class Store:
             (theme_id,methodology))
         return [{'session':row['session'],'methodology':methodology,'themes':[json.loads(row['payload'])]} for row in rows]
 
+    def active_version(self):
+        row = self.connection.execute('SELECT run_id FROM publication WHERE id=1').fetchone()
+        return row['run_id'] if row else 0
+
     def active_publication(self):
         """Version and payload from ONE committed publication-pointer read."""
         row = self.connection.execute('SELECT run_id,payload FROM publication WHERE id=1').fetchone()

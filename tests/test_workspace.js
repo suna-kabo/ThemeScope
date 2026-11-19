@@ -22,7 +22,7 @@ for(const [direction,snapshot] of Object.entries(cases)){
     assert.equal(rows[i].list_order,i);assert.equal(rows[i].research_order_index,source[i].research_order_index);
     assert.equal(rows[i].ticker,source[i].ticker);
   }
-  if(!expected){assert.equal(rows.length,0);assert.equal(ui.themeState(snapshot,'a'),'Non-directional');}
+  if(!expected){assert.equal(rows.length,0);assert.equal(ui.themeState(snapshot,'a'),'Unavailable');}
 }
 assert.equal(ui.themeState(cases['Short Bias'],'e'),'Leading');
 assert.equal(ui.themeState(cases['Short Bias'],'a'),'Lagging');

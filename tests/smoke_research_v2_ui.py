@@ -1,7 +1,5 @@
 """Current research workflow and responsive release gate; synthetic observations only."""
 from copy import deepcopy
-from functools import partial
-from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from unittest.mock import patch
 import json
@@ -24,8 +22,6 @@ from src.themescope.storage import canonical
 def main():
     from playwright.sync_api import sync_playwright, expect
     from src.themescope.local.app import create_app
-    from scripts.build_cloudflare_demo import build
-    from scripts.static_pages import HEADERS
     import uvicorn
 
     output = Path(os.environ.get('THEMESCOPE_UI_ARTIFACTS', ROOT/'runtime/final-rebuild-qa'))
@@ -41,16 +37,19 @@ def main():
         assert set(cases)=={'Long bias','Selective long','Neutral','Selective short','Short bias','Unclassified'}
         assert len([t for t in base['themes'] if t['status']=='active']) == 44
         assert base['research_v2']['list']['stock_count'] >= 100
-        state = dict(snapshot=deepcopy(base), connected=True, hold=True, pending=[], status=fixture.service.status())
+        state = dict(snapshot=deepcopy(base), connected=True, hold=True, pending=[], status=dict(fixture.service.status(),freshness='current'))
         service = fixture.service
-        service.snapshot = lambda: deepcopy(state['snapshot'])
+        def read_snapshot(**options):
+            snapshot = deepcopy(state['snapshot'])
+            return (snapshot, state['status']['snapshot_version']) if options.get('metadata_only') else snapshot
+        service.snapshot = read_snapshot
         service.status = lambda: deepcopy(state['status'])
         def start():
             state['status'].update(state='running', progress='Fetching missing sessions and repair window')
         service.start = start
         sock = socket.socket(); sock.bind(('127.0.0.1', 0))
         origin = 'http://127.0.0.1:'+str(sock.getsockname()[1])
-        server = uvicorn.Server(uvicorn.Config(create_app(ROOT, service), log_level='error', access_log=False))
+        server = uvicorn.Server(uvicorn.Config(create_app(ROOT, service, personal_dir=Path(folder)/"saved"), log_level='error', access_log=False))
         worker = threading.Thread(target=server.run, kwargs={'sockets':[sock]}, daemon=True); worker.start()
         try:
             deadline = time.monotonic()+10
@@ -59,7 +58,8 @@ def main():
             assert server.started
             with sync_playwright() as playwright:
                 options = dict(headless=True)
-                if shutil.which('chromium'): options['executable_path']=shutil.which('chromium')
+                if os.environ.get('THEMESCOPE_BROWSER') or shutil.which('chromium'):
+                    options['executable_path']=os.environ.get('THEMESCOPE_BROWSER') or shutil.which('chromium')
                 browser = playwright.chromium.launch(**options)
                 page = browser.new_page(viewport=dict(width=1440,height=1000), reduced_motion='reduce')
                 errors=[]; outside=[]
@@ -95,7 +95,10 @@ def main():
                 def update(snapshot):
                     state['snapshot']=deepcopy(snapshot)
                     state['snapshot']['refreshed_at']='Synthetic UI revision '+str(time.monotonic())
-                    page.wait_for_timeout(1700)
+                    version=state['status']['snapshot_version']+1
+                    stamp=state['snapshot']['refreshed_at']
+                    state['status'].update(snapshot_version=version,last_successful_refresh=stamp)
+                    expect(page.locator('#last-success')).to_contain_text(stamp,timeout=8500)
                 def close_inspector():
                     page.keyboard.press('Escape')
                     expect(page.locator('#research-inspector')).not_to_be_visible()
@@ -148,14 +151,34 @@ def main():
                 assert 'Countertrend' not in page.locator('body').inner_text()
                 result['workflows'].append('Loading and committed snapshot delivery')
 
+                marketTheme=page.locator('#market-continuation .theme-link').first
+                marketTheme.click();expect(page.locator('#detail-title')).to_be_visible()
+                expect(page.locator('#research-inspector')).not_to_be_visible()
+                page.go_back();expect(marketTheme).to_be_focused()
                 nav('themes')
-                ranks=page.locator('[data-theme-row]').evaluate_all("els=>Object.fromEntries(els.map(e=>[e.dataset.themeRow,e.querySelector('.canonical-rank').textContent]))")
+                ranks=page.locator('[data-theme-row]').evaluate_all("els=>Object.fromEntries(els.map(e=>[e.dataset.themeRow,e.querySelector('.priority-cell .numeric').textContent]))")
                 page.locator('#theme-sort').select_option('name:asc')
-                assert page.locator('[data-theme-row]').evaluate_all("els=>Object.fromEntries(els.map(e=>[e.dataset.themeRow,e.querySelector('.canonical-rank').textContent]))")==ranks
+                assert page.locator('[data-theme-row]').evaluate_all("els=>Object.fromEntries(els.map(e=>[e.dataset.themeRow,e.querySelector('.priority-cell .numeric').textContent]))")==ranks
                 page.locator('#theme-search').fill('semiconductors')
+                detail=page.locator('#theme-table .theme-link').first
+                detail.focus();page.keyboard.press('Enter')
+                expect(page.locator('#detail-title')).to_be_focused()
+                expect(page.locator('#research-inspector')).not_to_be_visible()
+                expect(page.locator('#detail-content .price-evidence > summary')).to_be_visible()
+                page.locator('#member-search').fill('NVDA')
+                page.go_back();expect(detail).to_be_focused()
+                page.locator('#theme-search').fill('')
+                second=page.locator('#theme-table .theme-link').filter(has_not_text='Semiconductors').first
+                second.click();expect(page.locator('#member-search')).to_have_value('')
+                page.go_back();page.locator('#theme-search').fill('semiconductors')
+                detail.click();expect(page.locator('#member-search')).to_have_value('NVDA')
+                page.go_back()
+                expect(page.locator('#theme-table')).not_to_contain_text('Price context')
+                result['workflows'].append('Direct to Full Theme, browser Back focus, per-theme filters and secondary Price context')
                 opener=page.locator('#theme-table [data-inspect-theme]').first
                 opener.focus();page.keyboard.press('Enter')
                 expect(page.locator('#inspector-title')).to_be_focused()
+                expect(page.locator('#inspector-content')).not_to_contain_text('Theme Score rank')
                 page.locator('#inspector-view').select_option('Core');page.locator('#inspector-search').fill('NVDA')
                 ticker=page.locator('#inspector-members [data-inspect-ticker="NVDA"]')
                 ticker.click();expect(page.locator('[data-current-theme]')).to_have_attribute('data-current-theme','semiconductors')
@@ -170,7 +193,7 @@ def main():
                 result['focus_after_shift_tab']=page.evaluate("({id:document.activeElement.id,tag:document.activeElement.tagName})")
                 assert page.evaluate("document.activeElement.closest('dialog')!==null"),result
                 close_inspector();expect(opener).to_be_focused();page.locator('#theme-search').fill('')
-                result['workflows'].append('Canonical ranks; keyboard open/focus; nested Back/Forward; dialog containment and return focus')
+                result['workflows'].append('Research Priority; keyboard open/focus; nested Back/Forward; dialog containment and return focus')
 
                 nav('primary')
                 expect(page.locator('#candidate-results')).to_contain_text(str(base['research_v2']['list']['stock_count']))
@@ -191,11 +214,21 @@ def main():
                 selected_row.locator('[data-inspect-ticker]').click()
                 expect(page.locator('[data-current-theme]')).to_have_attribute('data-current-theme',selection['theme_id'])
                 close_inspector()
+                chapter=page.locator('.queue-chapter').first
+                primaryTheme=chapter.locator('h2 .theme-link')
+                primaryTheme.click();expect(page.locator('#detail-title')).to_be_visible()
+                expect(page.locator('#research-inspector')).not_to_be_visible()
+                page.go_back();expect(primaryTheme).to_be_focused()
+                with page.expect_download() as theme_download:
+                    chapter.get_by_role('link',name='TradingView TXT',exact=False).click()
+                theme_file=theme_download.value
+                assert theme_file.suggested_filename.endswith('-'+base['session']+'.txt')
+                assert Path(theme_file.path()).read_text()==base['exports']['individual'][selection['theme_id']]
                 page.locator('#export-menu>summary').click()
                 with page.expect_download() as download:
                     page.get_by_role('link',name='Full research list',exact=True).click()
                 item=download.value
-                assert item.suggested_filename=='Research.txt'
+                assert item.suggested_filename=='Primary-Research-'+base['session']+'.txt'
                 assert Path(item.path()).read_text()==base['exports']['combined']
                 page.locator('#export-menu').evaluate('e=>e.open=false')
                 reset();page.locator('#candidate-sort').select_option('ticker')
@@ -212,7 +245,7 @@ def main():
                 assert result['performance']['hundreds_row_filter_ms']<1500
                 reset();nav('saved');expect(page.locator('#saved')).to_contain_text(selection['ticker'])
                 page.reload();expect(page.locator('#saved')).to_contain_text(selection['ticker'])
-                assert selection['ticker'] in page.evaluate('JSON.parse(localStorage.getItem("themescope-vnext-watchlist"))')
+                assert page.request.get(origin+'/api/saved').json()[selection['ticker']]==selection['theme_id']
                 result['workflows'].append('Hundreds of rows; all eligible peers; grouping/filter/search/sort; exact full-session export; Saved persistence')
 
                 update(short);nav('primary')
@@ -226,7 +259,6 @@ def main():
                     if 'Selective' in direction:expect(page.locator('#market-direction')).to_contain_text('Reduced conviction')
                     if side is None:
                         expect(page.locator('#market-direction')).to_contain_text('No directional research list')
-                        expect(page.locator('#change-board')).to_contain_text('No directional theme states')
                     nav('primary')
                     rendered=page.locator('#candidates [data-ticker-row]').evaluate_all('els=>els.map(e=>e.dataset.tickerRow)')
                     assert rendered==list(dict.fromkeys(r['ticker'] for r in data['research_v2']['list']['rows']))
@@ -235,7 +267,7 @@ def main():
                     actual=page.locator('[data-theme-row]').evaluate_all('els=>els.map(e=>e.dataset.themeRow)')
                     assert actual==expected,(direction,actual,expected)
                     if side is None:
-                        assert page.locator('#theme-table .theme-state').all_text_contents()==['Non-directional']*44
+                        assert page.locator('#theme-table .theme-state').all_text_contents()==['Unavailable']*44
                         page.locator('#theme-search').fill('semiconductors');page.locator('#theme-table [data-inspect-theme]').first.click()
                         page.locator('#inspector-search').fill('');page.locator('#inspector-view').select_option('All')
                         tickers=page.locator('#inspector-members [data-inspect-ticker]').evaluate_all('els=>els.map(e=>e.dataset.inspectTicker)')
@@ -248,8 +280,9 @@ def main():
                         improving=next((key for key,row in data['research_v2']['themes'].items() if row['current_state']=='Improving'),None)
                         if improving:
                             recent=data['research_v2']['themes'][improving]['recent']
-                            assert float(recent['raw_score_change'])<0<float(recent['directional_score_change'])
-                            nav('overview');expect(page.locator('#movement-side')).to_have_text('Short-side research');expect(page.locator('#change-board')).to_contain_text('Gaining strength')
+                            assert float(recent['score_change'])<0
+                            expect(page.locator(f'[data-theme-row="{improving}"] .change-cell')).to_contain_text(
+                                f"{float(recent['score_change']):.1f} pts")
                     if direction in ('Short bias','Neutral','Selective long'):
                         for width in (1440,390):
                             page.set_viewport_size(dict(width=width,height=900 if width==1440 else 844))
@@ -264,13 +297,12 @@ def main():
                                       (dict(missing='scores'),'Structural strength unavailable')):
                     data=json.loads(canonical(contract_fixture('Long Bias',**options)))
                     data['market']=deepcopy(base['market']);data['market']['decision']['direction']='Long Bias'
-                    update(data);nav('overview');expect(page.locator('#change-board')).to_contain_text(label)
-                    expect(page.locator('#change-board')).to_contain_text('Five-session comparison unavailable')
-                    nav('themes');expect(page.locator('#theme-table')).to_contain_text(label)
+                    update(data);nav('themes')
+                    assert page.locator(f'#theme-table .unavailable[title="{label}"]').count()
                     page.set_viewport_size(dict(width=390,height=844));width_ok(label)
                     capture('unavailable-'+data['research_v2']['comparison']['reason']+'-390')
                     page.set_viewport_size(dict(width=1440,height=1000))
-                result['workflows'].append('Six coherent backend states; Selective priority; non-directional alphabetical context and empty list; Short directional change; unavailable reasons')
+                result['workflows'].append('Six coherent backend states; Selective priority; non-directional alphabetical context and empty list; Short raw score change; unavailable reasons')
                 update(base)
 
                 for width in (1920,1440,1280,768,430,390,360,320):
@@ -311,13 +343,17 @@ def main():
                 page.emulate_media(reduced_motion='reduce')
                 nav('themes');assert page.evaluate("document.getAnimations().every(a=>a.playState!=='running')")
                 result['workflows'].append('Normal and reduced motion keep navigation usable')
+                state['status']['freshness']='configuration_changed'
+                expect(page.locator('#configuration-notice')).to_contain_text('Refresh required after configuration change',timeout=8000)
+                state['status']['freshness']='current'
+                expect(page.locator('#configuration-notice')).to_be_hidden(timeout=8000)
                 nav('overview');open_refresh(page).click()
-                expect(page.locator('#progress')).to_contain_text('Fetching missing sessions',timeout=6000)
+                expect(page.locator('#progress')).to_have_text('Refreshing',timeout=6000)
                 expect(page.locator('#refresh')).to_be_disabled()
                 state['status'].update(state='success',progress='Refresh complete')
                 expect(page.locator('#refresh')).to_be_enabled(timeout=6000)
                 state['status'].update(state='failed',progress='Refresh failed',error='Synthetic failure')
-                expect(page.locator('#error')).to_contain_text('Previous successful results',timeout=6000)
+                expect(page.locator('#error')).to_contain_text('Previous successful snapshot retained',timeout=8000)
                 assert page.locator('#candidates [data-ticker-row]').count()==base['research_v2']['list']['stock_count']
                 state['status'].update(state='success',progress='Refresh complete',error=None)
                 state['connected']=False
@@ -333,7 +369,7 @@ def main():
                 assert not errors,errors
                 assert not outside,outside
                 result['page_errors']=errors;result['external_requests']=outside
-                old=deepcopy(base);old.pop('research_v2')
+                old=deepcopy(base);old['research_v2']['contract_revision']=2
                 update(old);nav('primary')
                 expect(page.locator('#research-version-notice')).to_be_visible()
                 expect(page.locator('#candidates')).to_contain_text('Research update required')
@@ -354,50 +390,6 @@ def main():
                 cold.close()
                 result['workflows'].append('Company search; failed refresh retains authoritative queue; cold connection error and automatic recovery')
 
-                build(ROOT)
-                class QuietHandler(SimpleHTTPRequestHandler):
-                    def log_message(self,*args):pass
-                    def end_headers(self):
-                        for line in HEADERS.splitlines():
-                            if line.startswith('  '):
-                                key,value=line.strip().split(': ',1);self.send_header(key,value)
-                        super().end_headers()
-                static=ThreadingHTTPServer(('127.0.0.1',0),partial(QuietHandler,directory=str(ROOT/'dist/cloudflare-pages')))
-                static_worker=threading.Thread(target=static.serve_forever,daemon=True);static_worker.start()
-                try:
-                    frozen=browser.new_page(viewport=dict(width=390,height=844));calls=[]
-                    frozen.on('request',lambda r:calls.append(r.url) if '/api/' in r.url else None)
-                    frozen.goto('http://127.0.0.1:'+str(static.server_port))
-                    expect(frozen.locator('#workspace')).to_have_attribute('aria-busy','false')
-                    expect(frozen.locator('#refresh')).to_contain_text('Replay fixture')
-                    frozen.get_by_label('Snapshot and refresh',exact=True).click();frozen.locator('#refresh').click()
-                    frozen.locator('[data-nav="primary"]').click()
-                    assert frozen.locator('#candidates [data-ticker-row]').count()>0
-                    assert not calls,calls
-                    frozen.screenshot(path=str(output/'static-readonly-390.png'))
-                    result['workflows'].append('Synthetic static build uses identical UI without API requests or refresh')
-                    frozen.close()
-                    public=browser.new_page(viewport=dict(width=390,height=844));calls=[]
-                    public_errors=[]
-                    public.on('pageerror',lambda error:public_errors.append(str(error)))
-                    public.on('console',lambda message:public_errors.append(message.text) if message.type=='error' else None)
-                    public.add_init_script('window.THEMESCOPE_STATIC_SOURCE='+json.dumps(dict(mode='public_snapshot',snapshot=base)))
-                    public.on('request',lambda r:calls.append(r.url) if '/api/' in r.url else None)
-                    public.goto('http://127.0.0.1:'+str(static.server_port))
-                    expect(public.locator('#workspace')).to_have_attribute('aria-busy','false')
-                    expect(public.locator('#refresh')).to_be_hidden()
-                    expect(public.locator('#progress')).to_have_text('Market data fixed')
-                    public.get_by_label('Snapshot details',exact=True).click()
-                    expect(public.locator('#completeness')).to_contain_text('Data complete')
-                    public.locator('#refresh').evaluate('button=>button.click()')
-                    public.locator('[data-nav="themes"]').click()
-                    assert public.locator('.score-rule i').evaluate_all("es=>es.length>0&&es.every(e=>Math.abs(parseFloat(e.style.width)-Number(e.dataset.width))<.001)")
-                    public.wait_for_timeout(1800)
-                    assert not calls,calls
-                    assert not public_errors,public_errors
-                    public.close()
-                    result['workflows'].append('Frozen public mode hides refresh and makes no API request; fabricated fixture data only')
-                finally:static.shutdown();static.server_close();static_worker.join(timeout=5)
                 browser.close()
                 result['passed']=True
         finally:

@@ -1,7 +1,8 @@
 """Local SIP roster compatibility diagnostic; never edits membership or cache."""
 from pathlib import Path
-import argparse,json,os,sys
+import argparse,json,sys
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
+from src.themescope.local.credentials import values, REQUIRED
 from src.themescope.market.rosters import load,effective
 from src.themescope.providers.base import Schedule,ProviderError
 from src.themescope.providers.alpaca import AlpacaMarketDataProvider
@@ -17,7 +18,8 @@ def main(argv=None,*,root=ROOT,factory=AlpacaMarketDataProvider):
         if any(r is None for r in selected.values()):raise ProviderError('effective_roster_missing')
         records=json.loads((Path(root)/'config/calendars/xnys_2020_2035_v1.json').read_text())['sessions']
         schedule=Schedule(records);target=args.session or schedule.latest();schedule.require(target)
-        provider=factory(os.environ.get('APCA_API_KEY_ID'),os.environ.get('APCA_API_SECRET_KEY'),schedule)
+        credentials=values() if factory is AlpacaMarketDataProvider else {}
+        provider=factory(credentials.get(REQUIRED[0]),credentials.get(REQUIRED[1]),schedule)
         symbols=sorted({s for r in selected.values() for s in r.tickers})
         usable=set();pages=0
         for offset in range(0,len(symbols),100):

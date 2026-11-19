@@ -1,7 +1,7 @@
 # ThemeScope methodology
 
 Current chart selection follows [Research Logic v2](research-v2.md), which replaces
-the former W-sign filter, daily liquidity and Countertrend lens. This guide also
+the former W-sign filter and daily liquidity. This guide also
 records the retained return and accounting formulas.
 Versioned constants remain in [methodology.json](../../config/vnext/methodology.json);
 the full [approved specification](../vnext/ThemeScope_vNext_Product_and_Methodology_Spec.md)
@@ -90,4 +90,4 @@ A stock qualifies independently in each theme. Individual-theme exports retain
 all qualifying relationships. Combined placement follows theme research priority,
 directional peer strength, then ticker. Verified TradingView
 identifiers are required; no exchange is guessed. Visible UI filters do not rewrite
-published exports. Countertrend is removed from current research.
+current session exports.

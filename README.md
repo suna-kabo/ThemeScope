@@ -1,58 +1,34 @@
 # ThemeScope
 
-ThemeScope is a local, private, end-of-day US equity research dashboard:
-**Market Bias → Theme Changes → Primary Research**. It ranks custom equity
-themes and organizes eligible stocks for chart review. It does not execute trades.
+ThemeScope is a private, local-only end-of-day equity research dashboard. It uses
+completed US market sessions to help you decide what side to research, which themes
+to review first, and which eligible stocks to open for chart review.
 
-## Windows setup and launch
+## Windows quick start
 
-Install Python 3.12+ with the Windows Python launcher, then clone this repository.
-In PowerShell from the repository folder:
+1. Install Python 3.12 with the Windows Python launcher, then double-click
+   **setup.cmd**. Enter your Alpaca market-data credentials when prompted.
+   Alpha Vantage is optional. The credentials are encrypted for your Windows user.
+2. Double-click **ThemeScope.cmd**. It opens the dashboard at
+   http://127.0.0.1:8766 and automatically starts a refresh when the latest safely
+   completed session is missing.
+3. Open **Market → Themes → Primary**. Click a theme name to open Full Theme or
+   use **Quick View** for a brief review. **TradingView TXT** downloads the session
+   watchlist. **Saved** follows your local app across browsers and ports.
 
-```powershell
-.\setup.cmd
-$env:APCA_API_KEY_ID = '<your local Alpaca key>'
-$env:APCA_API_SECRET_KEY = '<your local Alpaca secret>'
-.\ThemeScope.cmd
-```
+Leave the server console open during use. An additional launch reuses a recognized
+server on the same port. Use **Snapshot and refresh → Refresh Data** for a manual
+retry or after editing reviewed configuration. A failed refresh retains the previous
+successful results.
 
-Open **http://127.0.0.1:8766**. Under **Snapshot and refresh**, select **Refresh
-Data**. ThemeScope selects the latest safely completed US session, retrieves
-Alpaca historical SIP data, and atomically saves the snapshot and exports.
-A failed refresh preserves the previous successful snapshot. No daily CSV uploads
-are required. Optional `ALPHAVANTAGE_API_KEY` supplies earnings dates.
+Use **configure-credentials.cmd** to replace keys and **backup-data.cmd** to back
+up your research database while ThemeScope is running.
 
-Keep credentials in the launching process environment. Historical SIP access is
-required; there is no IEX fallback. To explore fictional data in separate storage:
+- [First-time setup and existing installations](docs/getting-started/setup.md)
+- [Daily research workflow](docs/getting-started/research-workflow.md)
+- [Refresh, backup and restore](docs/operations/refresh-and-maintenance.md)
+- [Research rules](docs/methodology/research-v2.md)
+- [Architecture and development](docs/README.md)
 
-```powershell
-.\ThemeScope.cmd --fixture
-```
-
-Market explains SPY/QQQ bias with IWM context. Themes compares strength and
-five-session changes. Primary includes every eligible Core/Enabler member of
-researchable themes; peer strength orders stocks without filtering by sign.
-Inspect themes/stocks, keep browser-local Saved research, and download full-session
-TradingView TXT lists independently of visible filters.
-
-## Public snapshots
-
-After one-time Wrangler authentication and configuration of the existing Cloudflare
-Pages project, run from a clean, up-to-date `main` checkout with the same provider
-variables set:
-
-```powershell
-.\update-public.cmd
-```
-
-The helper refreshes locally, validates the exact completed session and uploads a
-frozen static site. Success requires **Refresh PASS**, **Completeness PASS** and
-**Public deployment CONFIRMED**. Public mode has no refresh or provider requests;
-Saved remains browser-local. The local SQLite history stays private.
-
-[Setup and troubleshooting](docs/getting-started/setup.md) ?
-[Research workflow](docs/getting-started/research-workflow.md) ?
-[Methodology](docs/methodology/research-v2.md) ?
-[Refresh and backups](docs/operations/refresh-and-maintenance.md) ?
-[Publication and manual fallback](docs/operations/public-snapshots.md) ?
-[Development](docs/development/README.md) → [All documentation](docs/README.md)
+Legacy manual-CSV history and original inspection checkpoints are retained for
+reproduction. Current research uses its separate SQLite history.

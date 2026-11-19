@@ -2,10 +2,10 @@
 
 | Location | Role |
 | --- | --- |
-| `README.md` | Product, Windows setup, launch and public update entry point |
+| `README.md` | Product, Windows setup and local launch |
 | `AGENTS.md`, `PRODUCT.md`, `DESIGN.md`, `MOTION.md` | Contributor and current product contracts |
 | `setup.cmd`, `ThemeScope.cmd` | Current Windows setup and local app |
-| `update-public.cmd`, `publish-public-snapshot.cmd` | Normal verified update and explicit already-refreshed fallback |
+| `configure-credentials.cmd`, `backup-data.cmd` | Per-user encrypted credentials and online research backup |
 | `src/themescope/local/` | Loopback API, refresh coordination and committed snapshot reads |
 | `providers/`, `storage/`, `themes/`, `research/`, `market/` under `src/themescope/` | Current data, calculations and research layers |
 | `config/vnext/`, `config/market_universes/`, `config/calendars/` | Versioned policies, memberships, evidence, rosters and schedule |
@@ -25,8 +25,7 @@
 Preserve `.venv-vnext/`, `.venv/`, `runtime/`, `output/`, `dist/`, `site/`, `inputs/`,
 `cache/` and backups unless a separately reviewed task permits removal.
 `runtime/vnext/` contains real SQLite research history; fixture history is separate.
-Ignored does not mean disposable. Never force-add credentials, raw bars or real
-public projections. Saved is browser-local and must not be cleared during maintenance.
+Ignored does not mean disposable. Never force-add credentials, raw bars or saved personal state. Saved lives under the per-user application-data directory.
 
 ## Compatibility boundaries
 
@@ -34,8 +33,8 @@ Legacy CSV reproduction uses `legacy-setup.cmd`, `legacy-refresh.cmd`,
 `legacy-open-dashboard.cmd`, `legacy-prepare-site.cmd` and `legacy-preview-site.cmd`.
 It retains separate dependencies, data, tests and history; it is not daily operation.
 Historical browser programs for superseded interfaces are recoverable from Git
-history. Current browser acceptance is the research-v2 release gate plus local,
-pre-launch and static-public checks.
+history. Current browser acceptance is the research-v2 release gate plus local
+and pre-launch browser checks.
 
 Inspection tooling still consumes `docs/vnext_preflight.md`, `docs/vnext_local_ui.md`,
 `docs/vnext_provider.md` and the original `docs/vnext/` specification. Their stable

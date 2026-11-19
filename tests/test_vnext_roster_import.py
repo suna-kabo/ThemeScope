@@ -59,6 +59,6 @@ class RosterImportTests(unittest.TestCase):
             def get_daily_bars(self,symbols,start,end):return Batch('fixture',tuple(Bar(s,end,100,100,2000000) for s in symbols),2)
         with patch('builtins.print'):
             self.assertEqual(main(['--roster-date','2026-11-05','--session','2026-11-04'],factory=All),0)
-        with patch.dict('os.environ',{},clear=True),patch('builtins.print') as output:
+        with patch('scripts.check_roster_symbols.values',return_value={}),patch('builtins.print') as output:
             self.assertEqual(main(['--roster-date','2026-11-05','--session','2026-11-04']),1)
             self.assertEqual(json.loads(output.call_args.args[0])['reason'],'credentials_missing')

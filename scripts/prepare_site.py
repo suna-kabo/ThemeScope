@@ -1,4 +1,4 @@
-"""Prepare the explicit website allowlist. Does not commit, push or deploy."""
+"""Prepare an allowlisted local legacy CSV preview."""
 import argparse
 from pathlib import Path
 import sys
@@ -21,7 +21,7 @@ def main():
         session=input('US session of the saved dashboard to prepare (YYYY-MM-DD): ').strip()
     result=prepare_site(ROOT,ROOT/'output/manual_csv',ROOT/'site',session)
     print(f'Prepared site/ for saved US session {session}: {len(result["files"])} assets plus site_manifest.json.')
-    print('Private inputs, audit files, local history and run bundles are excluded. Nothing was pushed or deployed.')
+    print('The prepared preview is ready for legacy-preview-site.cmd.')
     return 0
 
 

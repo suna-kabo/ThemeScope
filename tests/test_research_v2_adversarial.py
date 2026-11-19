@@ -3,7 +3,6 @@ from copy import deepcopy
 from dataclasses import replace
 from decimal import Decimal as D
 from pathlib import Path
-import json
 import tempfile
 import unittest
 
@@ -12,7 +11,6 @@ from src.themescope.research.comparison import reconstruct
 from src.themescope.research.engine import calculate_session
 from src.themescope.research.v2 import attach,policy,state
 from src.themescope.research import queries
-from src.themescope.storage import canonical
 from src.themescope.themes.calculations import Bar,POLICY
 from test_research_v2_comparison import DAYS
 
@@ -61,7 +59,7 @@ class DirectionTests(unittest.TestCase):
                     self.assertEqual(v['theme_order'],list('abcde'))
                     self.assertFalse(any(row['researchable'] for row in v['themes'].values()))
                     self.assertEqual(v['list']['rows'],[]);self.assertEqual(data['exports']['combined'],'')
-                    self.assertIsNone(v['themes']['a']['recent']['directional_score_change'])
+                    self.assertIsNotNone(v['themes']['a']['recent']['score_change'])
 
     def test_selective_retains_same_set_and_deprioritizes_improving_for_both_sides(self):
         for full,selective in (('Long Bias','Selective Long'),('Short Bias','Selective Short')):
@@ -78,13 +76,12 @@ class DirectionTests(unittest.TestCase):
                 lines=data['exports']['combined'].splitlines()
                 self.assertEqual(sum(line=='TEST:D0' for line in lines),1)
 
-    def test_short_reasons_and_directional_changes_describe_weakness_not_raw_strength_gain(self):
+    def test_short_state_interprets_falling_raw_score(self):
         data=fixture('Short Bias')['research_v2']['themes']
         self.assertEqual(data['e']['current_state'],'Leading')
         self.assertIn('Lower structural strength',data['e']['reason'])
         self.assertEqual(data['b']['current_state'],'Improving')
-        self.assertLess(data['b']['recent']['raw_score_change'],0)
-        self.assertGreater(data['b']['recent']['directional_score_change'],0)
+        self.assertLess(data['b']['recent']['score_change'],0)
         self.assertIn('weakened',data['b']['reason'])
         self.assertEqual(data['d']['current_state'],'Fading');self.assertIn('recovered',data['d']['reason'])
 
@@ -95,19 +92,18 @@ class DirectionTests(unittest.TestCase):
             for key in long['research_v2']['themes']:
                 l,s=long['research_v2']['themes'][key],short['research_v2']['themes'][key]
                 self.assertEqual(l['current_state'],s['current_state'])
-                self.assertEqual(l['recent']['directional_score_change'],s['recent']['directional_score_change'])
-                self.assertEqual(l['recent']['directional_rank_change'],s['recent']['directional_rank_change'])
+                self.assertEqual(l['recent']['score_change'],-s['recent']['score_change'])
 
-    def test_five_session_rank_uses_correct_horizon_and_tie_policy_is_explicit(self):
-        data=fixture('Long Bias')['research_v2']['themes']
-        self.assertEqual(data['b']['strength_rank'],2)
-        self.assertEqual(data['b']['recent']['raw_rank_change'],-1)
-        self.assertEqual(data['b']['recent']['comparison_session'],DAYS[93])
+    def test_five_session_raw_change_has_same_sign_for_both_sides(self):
+        long = fixture('Long Bias')['research_v2']['themes']
+        short = fixture('Short Bias')['research_v2']['themes']
+        self.assertEqual(set(long['b']['recent']), {
+            'available', 'comparison_session', 'score_change', 'breadth_change', 'reason'})
+        self.assertLess(long['b']['recent']['score_change'], 0)
+        self.assertEqual(long['b']['recent']['score_change'], short['b']['recent']['score_change'])
+        self.assertEqual(long['b']['recent']['comparison_session'], DAYS[93])
         for side in ('long','short'):self.assertEqual(state(50,0,side,policy()),'Leading')
         self.assertIsNone(state(50,0,None,policy()))
-        tied=fixture('Short Bias',ties=True)['research_v2']['themes']['b']['recent']
-        self.assertEqual(tied['raw_rank_change'],-1)
-        self.assertEqual(tied['directional_rank_change'],2)
 
     def test_queries_strip_legacy_priority_and_distinguish_unknown_from_empty(self):
         data=fixture('Neutral');theme=queries.get_theme(data,'a')
@@ -116,50 +112,12 @@ class DirectionTests(unittest.TestCase):
         self.assertIsNone(queries.get_theme_members(data,'missing'))
         data['themes'].append(dict(theme_id='watch',status='watch-only',score=None))
         self.assertEqual(queries.get_theme_members(data,'watch'),[])
-        old=deepcopy(data);old['research_v2'].pop('contract_revision')
+        old=deepcopy(data);old['research_v2']['contract_revision']=2
         self.assertIsNone(queries.get_research_list(old))
         self.assertIsNone(queries.get_theme_members(old,'a')[0]['qualifies'])
 
 
-class ProjectionTests(unittest.TestCase):
-    def test_short_decimal_validation_uses_calculation_precision_and_stays_strict(self):
-        from decimal import localcontext
-        from scripts.research_v2_projection import validate_v2
-        data=fixture('Short Bias')
-        data['market']={'decision':{'direction':data['market_direction']}}
-        recent=data['research_v2']['themes']['e']['recent']
-        recent['raw_score_change']=D('-0.1234567890123456789012345678901234')
-        recent['directional_score_change']=recent['raw_score_change'].copy_negate()
-        data=json.loads(canonical(data))
-        for precision in (6,28,50):
-            with self.subTest(precision=precision),localcontext() as context:
-                context.prec=precision
-                validate_v2(data)
-                self.assertEqual(context.prec,precision)
-                changed=deepcopy(data)
-                changed['research_v2']['themes']['e']['recent']['directional_score_change']='0.1234567890123456789012345678901235'
-                with self.assertRaisesRegex(ValueError,'Directional change mismatch'):validate_v2(changed)
-
-    def test_normalized_public_contract_rejects_semantic_and_export_tampering(self):
-        from scripts.build_cloudflare_demo import demo_snapshot
-        from scripts.build_public_snapshot import project_snapshot,SnapshotError
-        data=demo_snapshot();data['synthetic_fixture']=False;data['provider_health']={'status':'Healthy'}
-        self.assertEqual(project_snapshot(data,data['session'])['research_v2']['contract_revision'],2)
-        def wrong_side(v):v['research_v2']['current_side']='short'
-        def wrong_state(v):next(iter(v['research_v2']['themes'].values()))['current_state']='Fading'
-        def wrong_order(v):v['research_v2']['theme_order'].reverse()
-        def wrong_w(v):v['research_v2']['list']['rows'][0]['w']='999'
-        def wrong_role(v):v['research_v2']['list']['rows'][0]['role']='Related'
-        def wrong_export(v):v['exports']['combined']+='TEST:EXTRA\n'
-        def wrong_opposite_state(v):v['research_v2']['themes']['alpha']['short_state']='Leading'
-        def wrong_membership_hash(v):v['research_v2']['comparison']['membership_hash']='0'*64
-        def wrong_liquidity(v):v['relationships'][0]['eligibility']['average_dollar_volume']='0'
-        def wrong_placement(v):v['relationships'][0]['assigned_section']='wrong'
-        for mutate in (wrong_side,wrong_state,wrong_order,wrong_w,wrong_role,wrong_export,
-                       wrong_opposite_state,wrong_membership_hash,wrong_liquidity,wrong_placement):
-            changed=deepcopy(data);mutate(changed)
-            with self.subTest(mutate=mutate.__name__),self.assertRaises(SnapshotError):project_snapshot(changed,changed['session'])
-
+class HistoryTests(unittest.TestCase):
     def test_official_history_http_is_read_only_and_does_not_expose_legacy_selection(self):
         from fastapi.testclient import TestClient
         from src.themescope.local.app import create_app

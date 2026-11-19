@@ -7,7 +7,7 @@ __pycache__/
 /ThemeScope-delivery.zip
 /cache/
 
-# First-time local use and explicit deployment preparation
+# Local and historical reproduction outputs
 /.venv/
 /inputs/
 /site/
@@ -39,3 +39,9 @@ __pycache__/
 
 # Playwright/screenshots and local vNext state stay outside inspection unless synthetic.
 /playwright-report/
+
+# Personal state belongs in the per-user application-data directory.
+/Backups/
+/saved.json
+/provider.dpapi
+*.dpapi

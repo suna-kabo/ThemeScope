@@ -11,11 +11,20 @@ from .exports import Qualification, exports
 from .primary import side
 from .state_rules import state
 
+SCHEMA = 'themescope-research-v2'
+CONTRACT_REVISION = 3
+
+
+def current_contract(snapshot):
+    research = (snapshot or {}).get('research_v2', {})
+    return research if research.get('schema') == SCHEMA and research.get('contract_revision') == CONTRACT_REVISION else {}
+
+
 RULES_PATH = Path(__file__).resolve().parents[3] / 'config/vnext/research_v2.json'
 
 
-def policy():
-    return json.loads(RULES_PATH.read_text(encoding='utf-8'))
+def policy(path=RULES_PATH):
+    return json.loads(path.read_text(encoding='utf-8'))
 
 
 @deterministic
@@ -67,11 +76,9 @@ def state_reason(label, comparable, direction, score, market_direction):
 @deterministic
 def recent_change(snapshot, previous, sessions, rules, provenance=None):
     """Compare cross-sectional scores, independently of refresh/accounting history."""
-    direction=side(snapshot.get('market_direction'))
     provenance=dict(provenance or {})
     empty = dict(available=False, comparison_session=provenance.get('previous_session'),
-                 raw_score_change=None, directional_score_change=None, raw_rank_change=None,
-                 directional_rank_change=None, breadth_change=None,
+                 score_change=None, breadth_change=None,
                  reason=provenance.get('reason','no_compatible_prior_basis'))
     end = sessions.index(snapshot['session'])
     horizon = rules['change_sessions']
@@ -99,12 +106,6 @@ def recent_change(snapshot, previous, sessions, rules, provenance=None):
     if (ranks.keys() != prior_ranks.keys() or any(horizon_population(current, i) != horizon_population(old, i)
                                                 for i in (0,1))):
         return {}, dict(empty, reason='ranked_universe_changed')
-    def side_ranks(rows):
-        if direction=='long':return canonical_ranks(tuple(rows.values()))
-        if direction is None:return {}
-        values={key:number(t.get('score')) for key,t in rows.items() if number(t.get('score')) is not None}
-        return {key:1+sum(other<score for other in values.values()) for key,score in values.items()}
-    current_side_ranks,old_side_ranks=side_ranks(current),side_ranks(old)
     result = {}
     for key, theme in current.items():
         before = old[key]
@@ -115,10 +116,7 @@ def recent_change(snapshot, previous, sessions, rules, provenance=None):
         a = number(field(theme.get('breadth', [{}])[0], 'value'))
         b = number(field(before.get('breadth', [{}])[0], 'value'))
         delta=score-prior
-        result[key] = dict(available=True, comparison_session=previous['session'], raw_score_change=delta,
-                           directional_score_change=delta if direction=='long' else -delta if direction=='short' else None,
-                           raw_rank_change=prior_ranks[key]-ranks[key],
-                           directional_rank_change=old_side_ranks[key]-current_side_ranks[key] if direction else None,
+        result[key] = dict(available=True, comparison_session=previous['session'], score_change=delta,
                            breadth_change=a-b if a is not None and b is not None else None, reason='comparable')
     return result, empty
 
@@ -163,8 +161,8 @@ def attach(snapshot, bars, sessions, mapping, *, previous=None, comparison_prove
     for key, theme in themes.items():
         change = changes.get(key, unavailable)
         score = theme.get('score') if theme['status'] == 'active' else None
-        long_state = state(score, change['raw_score_change'], 'long', rules)
-        short_state = state(score, change['raw_score_change'], 'short', rules)
+        long_state = state(score, change['score_change'], 'long', rules)
+        short_state = state(score, change['score_change'], 'short', rules)
         selected = long_state if direction == 'long' else short_state if direction == 'short' else None
         breadth = theme.get('breadth', ())
         sample = breadth[0] if breadth else {}
@@ -211,16 +209,12 @@ def attach(snapshot, bars, sessions, mapping, *, previous=None, comparison_prove
         assignment = result['exports']['assignments'].get(row['ticker'], {})
         row['assigned_section'] = assignment.get('assigned_section')
         row['also_qualifies_in'] = assignment.get('also_qualifies_in', [])
-    # Retain historical context helpers, but never publish the removed research lens.
-    if 'research' in result:
-        result['research'].pop('countertrend', None)
-        result['research']['focus'] = dict(label='Chart review' if direction else 'Observe', preferred_mode='directional')
     result['today_plan']=('Reduced conviction: established structural themes precede early improvement. ' if conviction=='selective' else '')
     result['today_plan']+=(f'Review {direction.title()}-side themes and the Daily Research List.' if direction else
         'Market evidence is unavailable. No directional Daily Research List.' if str(result.get('market_direction','')).lower()=='unclassified' else
         'No directional Daily Research List. Review market and theme context.')
     prior_direction = (previous_day or {}).get('market_direction') or (previous_day or {}).get('market', {}).get('decision', {}).get('direction')
-    result['research_v2'] = dict(schema='themescope-research-v2', contract_revision=2,policy_version=rules['version'],
+    result['research_v2'] = dict(schema=SCHEMA, contract_revision=CONTRACT_REVISION,policy_version=rules['version'],
         current_side=direction,conviction=conviction,themes=output,theme_order=order,policy=rules,
         comparison=dict(comparison_provenance or dict(available=False,reason=unavailable['reason'],official_history=False)),
         list=dict(side=direction, rows=rows, stock_count=len({r['ticker'] for r in rows}), relationship_count=len(rows)),

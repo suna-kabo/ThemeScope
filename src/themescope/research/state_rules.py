@@ -1,4 +1,4 @@
-"""Pure state-contract invariant shared by calculation and publication validation.
+"""Pure Market-side interpretation of Theme Score and its raw change.
 
 Consumes supplied metrics and policy only; no prices, config files or provider IO.
 """

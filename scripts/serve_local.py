@@ -154,7 +154,7 @@ def main(argv=None):
     server,info,url=create_server(ROOT,args.site,args.port)
     with server:
         console('Preview type: '+info['type']+'\nServing directory: '+info['directory']+'\nActual snapshot session: '+info['session']+'\nGenerated: '+info['generated']+'\nHTML SHA256: '+info['html_sha256']+'\nExact URL: '+url+'\nLatest metadata URL: http://127.0.0.1:'+str(server.server_port)+'/'+info['metadata']+'?preview='+root_identity(info['directory'],args.site))
-        print('Server bound successfully on loopback. Leave this console open; Ctrl+C stops it. Refresh and prepare-site are separate; reload this exact URL after updates. Old tabs/other project copies and Cloudflare do not update automatically.',flush=True)
+        print('Server bound successfully on loopback. Leave this console open; Ctrl+C stops it. Refresh and prepare-site are separate; reload this exact URL after updates. Reload the local preview after updates.',flush=True)
         if not args.no_browser:
             try:
                 if not webbrowser.open(url):print('Browser did not open automatically. Paste the exact URL above; the server remains running.',flush=True)

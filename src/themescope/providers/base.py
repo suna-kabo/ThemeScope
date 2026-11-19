@@ -30,7 +30,8 @@ class Schedule:
             raise ProviderError('session_not_safely_completed')
 
     def latest(self):
-        valid=[s for s,c in self.records.items() if c+self.delay<=self.now()]
+        now=self.now()
+        valid=[s for s,c in self.records.items() if c+self.delay<=now]
         if not valid:raise ProviderError('no_completed_session')
         return max(valid)
 

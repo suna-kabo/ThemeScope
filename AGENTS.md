@@ -33,7 +33,7 @@ It is not a trade-execution or signal-execution system.
 - Alpaca integration is market-data only. Never call order/trading endpoints.
 - Never silently fall back from SIP to IEX.
 - Never commit credentials, .env files, local DBs or raw private market data.
-- Never publish market data or deploy a public site without explicit authorization.
+- Keep ThemeScope local-only and market data private.
 - Local web server must bind 127.0.0.1 by default.
 
 ## Branch and compatibility safety
@@ -72,10 +72,7 @@ See [the closure record](docs/operations/gate-e-closure.md) and
 [current docs](docs/README.md). Original gate/phase reports are historical and do
 not reinstate obsolete blockers. Stable vnext schema/path identifiers remain intact.
 
-## Production workflow
-main is stable production and the only public publishing source. Future visual
-experiments start from main on feature/ui-v3 (or another scoped task branch).
-Production maintenance lands on main only after relevant checks and preserves
-financial/research rules. The main cutover and live publication are verified in
-[the production record](docs/operations/main-publication.md). Preserve historical
-checkpoints through the verified annotated tags.
+## Local application workflow
+Keep main usable and implement changes on scoped task branches. Validate current
+UI changes against the loopback app with synthetic data before committing.
+Preserve historical checkpoints through the verified annotated tags.

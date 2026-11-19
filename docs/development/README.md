@@ -38,24 +38,19 @@ available, otherwise the installed Playwright browser. Run each program with the
 python tests/smoke_vnext_ui.py
 python tests/smoke_prelaunch_ui.py
 python tests/smoke_research_v2_ui.py
-python tests/smoke_public_snapshot.py
-python tests/smoke_cloudflare_demo.py
 ```
 
 Install the local audit script with `npm install --prefix runtime/ui-v3-tools
 --no-save --package-lock=false axe-core@4.14.0`; the release gate finds it there
 or uses `THEMESCOPE_AXE_SCRIPT`. Superseded UI smoke programs remain in Git history; current UI coverage is
 consolidated in the v2 release gate. It checks refresh preservation, both research sides,
-exports, Saved, nested Back/focus/scroll, motion, static isolation, eight device
+exports, Saved, nested Back/focus/scroll, motion, loopback isolation, eight device
 widths, 200% text/reflow and accessibility. Pre-launch accounting keeps a separate
 browser regression. Fixture dates are not live chronology.
 Record actual results when running; old checkpoint counts remain archived.
 
-Cross-platform asset checks simulate fresh Git checkouts with Unix and Windows EOL
-settings and compare complete public output. Font/license integrity pins remain
-strict. Linux checks cannot claim native Windows file/byte-lock execution or manual
-screen-reader validation. The user-supplied live milestone is independently recorded
-in [Gate E closure](../operations/gate-e-closure.md).
+Native Windows checks cover the launchers and file locks. The original live
+milestone is recorded in [Gate E closure](../operations/gate-e-closure.md).
 
 ## Change discipline
 
@@ -63,16 +58,8 @@ Follow [AGENTS.md](../../AGENTS.md), [methodology](../methodology/README.md),
 [DESIGN.md](../../DESIGN.md) and [MOTION.md](../../MOTION.md). Work on a task branch;
 keep `main` usable. Changes to formulas, membership, lifecycle or provider behavior
 need their own explicit scope and meaningful tests. UI changes do not reclassify live
-validation. No CI/browser test uses account credentials. No deploy is implied by
-committing or merging. Preserve legacy compatibility and approved audit provenance.
+validation. No CI/browser test uses account credentials. Preserve legacy compatibility and approved audit provenance.
 
 The [project map](project-structure.md) distinguishes active code, retained history
 and private generated state. The original [implementation handoff](../archive/handoff/Codex_vNext_Implementation_Handoff.md)
 and gate documents remain provenance rather than current task instructions.
-
-Production publication evidence: [verified main publication](../operations/main-publication.md).
-
-Production publication uses clean main. Future experiments start in
-[feature/ui-v3 or a separate worktree](production-and-ui.md); historical gates are
-preserved as [annotated checkpoint tags](branch-checkpoints.md). Daily automation
-regressions are `test_update_public.py` and `test_update_public_integration.py`.
