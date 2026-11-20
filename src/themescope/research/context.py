@@ -7,12 +7,16 @@ from decimal import Decimal as D
 from pathlib import Path
 from hashlib import sha256
 import json
-from ..themes.calculations import POLICY, number, usable, deterministic
-from ..themes.history import ThemeHistory, compatible
-from .primary import side
+from ..themes.calculations import number, usable, deterministic
 
 CONTRACT='themescope-research-1'
-RULES=json.loads((Path(__file__).resolve().parents[3]/'config/vnext/research_context.json').read_text(encoding='utf-8'))
+
+
+def load_rules(path):
+    return json.loads(path.read_text(encoding='utf-8'))
+
+
+RULES=load_rules(Path(__file__).resolve().parents[3]/'config/vnext/research_context.json')
 
 
 def field(row,key,default=None):
@@ -40,18 +44,18 @@ def wilder_atr(bars,symbol,sessions,period=None):
 
 
 @deterministic
-def extension_state(distance):
+def extension_state(distance, rules=RULES):
     distance=number(distance)
     if distance is None:return {'state':'Unavailable','side':None,'magnitude':None}
     magnitude=abs(distance)
     direction='Upside' if distance>0 else 'Downside' if distance<0 else None
-    label='Extended' if magnitude>=D(RULES['extended_at']) else 'Stretched' if magnitude>=D(RULES['stretched_at']) else 'Normal'
+    label='Extended' if magnitude>=D(rules['extended_at']) else 'Stretched' if magnitude>=D(rules['stretched_at']) else 'Normal'
     return {'state':label if label=='Normal' else direction+' '+label,
             'side':direction,'magnitude':label}
 
 
-def aggregate_extension(spy,qqq):
-    a,b=extension_state(spy),extension_state(qqq)
+def aggregate_extension(spy,qqq,rules=RULES):
+    a,b=extension_state(spy,rules),extension_state(qqq,rules)
     if 'Unavailable' in (a['state'],b['state']):return 'Unavailable'
     if a['side']==b['side'] and a['side'] and all(x['magnitude'] in ('Stretched','Extended') for x in (a,b)):
         return a['side']+(' Extended' if a['magnitude']==b['magnitude']=='Extended' else ' Stretched')
@@ -59,27 +63,16 @@ def aggregate_extension(spy,qqq):
 
 
 @deterministic
-def market_extension(market,bars,sessions):
+def market_extension(market,bars,sessions,rules=RULES):
     indices={}
     for ticker in ('SPY','QQQ'):
-        atr=wilder_atr(bars,ticker,sessions)
+        atr=wilder_atr(bars,ticker,sessions,rules['atr_period'])
         row=market.get('context',{}).get(ticker,{})
         close,average=number(row.get('close')),number(row.get('ema21'))
         distance=(close-average)/atr if atr and close is not None and average is not None else None
-        indices[ticker]={'atr20':atr,'distance':distance,**extension_state(distance)}
-    return {'state':aggregate_extension(indices['SPY']['distance'],indices['QQQ']['distance']),
-            'indices':indices,'history_start':sessions[0] if sessions else None,'atr_period':RULES['atr_period']}
-
-
-def research_focus(direction,extension):
-    bias=side(direction)
-    caution='Downside' if bias=='short' else 'Upside' if bias=='long' else None
-    label='Directional' if bias else 'Observe'
-    if caution and extension==caution+' Stretched':
-        label='Directional + Countertrend Watch' if bias=='short' else 'Directional + Pullback-Risk Watch'
-    elif caution and extension==caution+' Extended':
-        label='Countertrend Highlighted' if bias=='short' else 'Pullback-Risk Highlighted'
-    return {'label':label,'preferred_mode':'countertrend' if 'Highlighted' in label else 'directional'}
+        indices[ticker]={'atr20':atr,'distance':distance,**extension_state(distance,rules)}
+    return {'state':aggregate_extension(indices['SPY']['distance'],indices['QQQ']['distance'],rules),
+            'indices':indices,'history_start':sessions[0] if sessions else None,'atr_period':rules['atr_period']}
 
 
 def relation(close,average):
@@ -123,68 +116,12 @@ def canonical_ranks(themes):
     return {key:1+sum(v>value for v in valid.values()) for key,value in sorted(valid.items(),key=lambda pair:(-pair[1],pair[0]))}
 
 
-def rank_changes(snapshot,previous,sessions):
-    themes=snapshot.get('themes',());prior=(previous or {}).get('themes',())
-    ranks=canonical_ranks(themes);old=canonical_ranks(prior)
-    universe=sorted(t['theme_id'] for t in themes if t.get('status')=='active')
-    prior_universe=sorted(t['theme_id'] for t in prior if t.get('status')=='active')
-    old_rows={t['theme_id']:t for t in prior};rows={}
-    for theme in themes:
-        key=theme['theme_id'];rank=ranks.get(key);old_rank=old.get(key);change=None
-        reason='unavailable_score' if rank is None else 'no_compatible_previous_session'
-        if theme.get('status')!='active':reason='untracked_concept'
-        elif rank is not None and previous_compatible(snapshot,previous,sessions):
-            if key not in prior_universe:reason='newly_active_theme'
-            elif old_rank is None:reason='newly_available_score'
-            elif universe!=prior_universe:reason='active_universe_changed'
-            elif ranks.keys()!=old.keys():reason='ranked_universe_changed'
-            else:
-                try:allowed=compatible(ThemeHistory(**old_rows[key]['history']),ThemeHistory(**theme['history']),sessions)
-                except (TypeError,KeyError,ValueError):allowed=False
-                if allowed:change=old_rank-rank;reason='comparable'
-        rows[key]={'rank':rank,'previous_rank':old_rank,'change':change,'reason':reason,
-                   'previous_session':previous['session'] if previous else None}
-    return {'method':RULES['rank_method'],'ranked_total':len(ranks),'active_universe':universe,'themes':rows}
-
-
-@deterministic
-def countertrend(snapshot):
-    bias=side(snapshot.get('market_direction'))
-    themes={t['theme_id']:t for t in snapshot.get('themes',())}
-    buckets={'resilient':[],'snapback':[]};boundary=D(str(POLICY['score_boundary']))
-    if bias:
-        for row in snapshot.get('relationships',()):
-            theme=themes.get(row['theme_id'],{});score=number(theme.get('score'));w=number(field(row.get('relative',{}),'w'))
-            eligible=row.get('eligibility',{})
-            if (theme.get('status')!='active' or score is None or not D(0)<=score<=D(100) or w is None or w==0
-                    or row.get('role') not in ('Core','Enabler') or not field(eligible,'available',False) or not field(eligible,'eligible',False)):
-                continue
-            trend=theme.get('index',{}).get('trend')
-            if not ((bias=='short' and score<boundary and trend in ('Bearish','Mixed')) or
-                    (bias=='long' and score>=boundary and trend in ('Bullish','Mixed'))):continue
-            buckets['resilient' if w>0 else 'snapback'].append((row,w,score))
-    output={}
-    for key,values in buckets.items():
-        values.sort(key=lambda item:((-item[1],-item[2]) if key=='resilient' else (item[1],item[2]))+(item[0]['ticker'],item[0]['theme_id']))
-        rows=[{'ticker':r['ticker'],'theme_id':r['theme_id']} for r,w,score in values]
-        seen=set();stocks=[]
-        for row in rows:
-            if row['ticker'] not in seen:seen.add(row['ticker']);stocks.append(row)
-        label=('Resilient' if key=='resilient' else 'Snapback') if bias=='short' else ('Strong Leaders / Pullback Watch' if key=='resilient' else 'Relative Weakness')
-        output[key]={'label':label,'rows':rows,'stocks':stocks,'stock_count':len(stocks),'relationship_count':len(rows)}
-    symbols={r['ticker'] for b in output.values() for r in b['rows']}
-    return {'available':bool(bias),'side':bias,'buckets':output,'stock_count':len(symbols),
-            'relationship_count':sum(b['relationship_count'] for b in output.values()),
-            'ordering_note':'Ordering reflects relative strength or weakness, not reversal probability.'}
-
-
-def enrich(snapshot,bars,sessions,previous=None,companies=None):
+def enrich(snapshot,bars,sessions,previous=None,companies=None,*,rules=RULES):
     """Attach new research fields; all existing snapshot fields remain identical."""
-    context=market_extension(snapshot.get('market',{}),bars,sessions)
+    context=market_extension(snapshot.get('market',{}),bars,sessions,rules)
     result=dict(snapshot)
-    result['research']={'schema':CONTRACT,'policy_version':RULES['version'],
-        'policy_hash':sha256(json.dumps(RULES,sort_keys=True).encode()).hexdigest(),
-        'extension':context,'focus':research_focus(snapshot.get('market_direction'),context['state']),
-        'ema_transitions':ema_transitions(snapshot,previous,sessions),'ranks':rank_changes(snapshot,previous,sessions),
-        'countertrend':countertrend(snapshot),'companies':dict(companies or {})}
+    result['research']={'schema':CONTRACT,'policy_version':rules['version'],
+        'policy_hash':sha256(json.dumps(rules,sort_keys=True).encode()).hexdigest(),
+        'extension':context,'ema_transitions':ema_transitions(snapshot,previous,sessions),
+        'companies':dict(companies or {})}
     return result

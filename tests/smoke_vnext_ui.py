@@ -1,6 +1,6 @@
-"""Real loopback browser smoke, synthetic inputs only. Run explicitly at Gate D."""
+"""Browser smoke for the current loopback app using synthetic inputs."""
 from pathlib import Path
-import json,shutil,socket,sys,tempfile,threading,time
+import json,os,shutil,socket,sys,tempfile,threading,time
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
 from ui_smoke_helpers import open_exports,open_filters,open_refresh
 
@@ -8,6 +8,7 @@ from ui_smoke_helpers import open_exports,open_filters,open_refresh
 def main():
     from src.themescope.local.service import fixture_service
     from src.themescope.local.app import create_app
+    from src.themescope.providers.base import ProviderError
     import uvicorn
     from playwright.sync_api import sync_playwright,expect
     with tempfile.TemporaryDirectory() as folder:
@@ -21,14 +22,26 @@ def main():
             assert server.started
             with sync_playwright() as p:
                 options={'headless':True}
-                if shutil.which('chromium'):options['executable_path']=shutil.which('chromium')
+                if os.environ.get('THEMESCOPE_BROWSER') or shutil.which('chromium'):
+                    options['executable_path']=os.environ.get('THEMESCOPE_BROWSER') or shutil.which('chromium')
                 browser=p.chromium.launch(**options)
                 page=browser.new_page(viewport={'width':1440,'height':1000});errors=[];outside=[]
                 page.on('pageerror',lambda e:errors.append(str(e)))
                 page.on('request',lambda r:outside.append(r.url) if not r.url.startswith(f'http://127.0.0.1:{port}') and not r.url.startswith('blob:') else None)
+                counts = {'status': 0, 'dashboard-data': 0}
+                def record(request):
+                    key = request.url.rsplit('/', 1)[-1]
+                    if key in counts:counts[key] += 1
+                page.on('request',record)
                 page.goto(f'http://127.0.0.1:{port}')
+                expect(page.locator('#workspace')).to_have_attribute('aria-busy','false')
+                assert counts['dashboard-data'] == 1
                 open_refresh(page).click()
-                expect(page.locator('#progress')).to_have_text('Refresh complete')
+                expect(page.locator('#progress')).to_have_text('Current')
+                assert counts['dashboard-data'] == 2
+                status_polls=counts['status']
+                page.wait_for_timeout(10500)
+                assert counts['status'] >= status_polls + 2 and counts['dashboard-data'] == 2, counts
                 page.locator('[data-nav="primary"]').click()
                 expect(page.locator('#candidates')).to_contain_text('AAA')
                 open_filters(page)
@@ -41,6 +54,8 @@ def main():
                 open_exports(page)
                 with page.expect_download() as download:
                     page.get_by_role('link',name='Full research list').click()
+                committed=service.snapshot()
+                assert download.value.suggested_filename=='Primary-Research-'+committed['session']+'.txt'
                 text=Path(download.value.path()).read_text()
                 assert text.count('NASDAQ:AAA')==1 and text.count('NASDAQ:BBB')==1
                 page.locator('#candidates [data-inspect-ticker]').first.click()
@@ -51,34 +66,20 @@ def main():
                 assert page.url.endswith('#methodology')
                 page.set_viewport_size({'width':390,'height':844})
                 assert page.locator('body').bounding_box()['width']<=390
+                def failed_provider(_):
+                    raise ProviderError('private fixture diagnostic')
+                service.provider_factory=failed_provider
+                open_refresh(page).click()
+                expect(page.locator('#progress')).to_have_text('Refresh failed, previous snapshot retained')
+                expect(page.locator('#error')).to_contain_text('The market-data provider was unavailable')
+                assert 'private fixture diagnostic' not in page.locator('#error').inner_text()
+                page.locator('[data-nav="primary"]').click()
+                expect(page.locator('#candidates')).to_contain_text('AAA')
+                assert counts['dashboard-data'] == 2, counts
+                assert service.snapshot() == committed
                 assert not errors,errors
                 assert not outside,outside
                 print(json.dumps({'browser':'passed','refresh':True,'combined_download':True,'watchlist':True,'mobile_no_overflow':True,'external_requests':0,'page_errors':0,'performance':service.status().get('elapsed_seconds')}))
-                static_preview=ROOT/'inspection/ui/index.html'
-                if static_preview.exists():
-                    from http.server import ThreadingHTTPServer,SimpleHTTPRequestHandler
-                    from functools import partial
-                    class Quiet(SimpleHTTPRequestHandler):
-                        def log_message(self,*args):pass
-                    static_server=ThreadingHTTPServer(('127.0.0.1',0),partial(Quiet,directory=str(static_preview.parent)))
-                    static_thread=threading.Thread(target=static_server.serve_forever,daemon=True);static_thread.start()
-                    try:
-                        preview=browser.new_page();preview_errors=[];network=[]
-                        static_origin='http://127.0.0.1:'+str(static_server.server_port)
-                        preview.on('pageerror',lambda e:preview_errors.append(str(e)))
-                        preview.on('request',lambda r:network.append(r.url) if r.url.startswith(('http:','https:')) and not r.url.startswith(static_origin) else None)
-                        preview.goto(static_origin)
-                        expect(preview.locator('#fixture-banner')).to_be_visible()
-                        preview.get_by_role('button',name='Replay fixture').click()
-                        expect(preview.locator('#candidates')).to_contain_text('AAA')
-                        with preview.expect_download() as item:
-                            preview.get_by_text('Download combined Primary TXT',exact=True).click()
-                        assert Path(item.value.path()).read_text().count('NASDAQ:AAA')==1
-                        assert not preview_errors,preview_errors
-                        assert not network,network
-                        print(json.dumps({'static_preview_over_loopback':'passed','external_requests':0,'page_errors':0}))
-                    finally:
-                        static_server.shutdown();static_server.server_close();static_thread.join(2)
                 browser.close()
         finally:
             server.should_exit=True;worker.join(5);sock.close()

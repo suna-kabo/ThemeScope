@@ -1,4 +1,4 @@
-"""Pure state-contract invariant shared by calculation and publication validation.
+"""Pure interpretations of Theme Score and its raw change.
 
 Consumes supplied metrics and policy only; no prices, config files or provider IO.
 """
@@ -11,6 +11,16 @@ def _number(value):
         result=Decimal(str(value))
         return result if result.is_finite() else None
     except (InvalidOperation,ValueError):return None
+
+
+def raw_theme_state(score, change, rules):
+    score, change = _number(score), _number(change)
+    if score is None or not 0 <= score <= 100:
+        return 'Unavailable'
+    threshold = Decimal(str(rules['material_score_change']))
+    if score >= Decimal(str(rules['structural_boundary'])):
+        return 'Fading' if change is not None and change <= threshold.copy_negate() else 'Strong'
+    return 'Improving' if change is not None and change >= threshold else 'Weak'
 
 
 def state(score,change,direction,rules):

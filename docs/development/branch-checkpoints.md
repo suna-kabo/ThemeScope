@@ -29,39 +29,3 @@ Merged historical heads identified for retirement:
 `inspection/vnext-a-domain`, `inspection/vnext-b-engine`,
 `inspection/vnext-c-provider`, `inspection/vnext-d-ui` heads.
 Their commits remain reachable through main and, for gates, their annotated tags.
-
-## Post-publication retirement
-
-GitHub's default branch and the existing Pages production branch were verified as
-`main`, with automatic production Git deployments disabled. The first main
-publication passed live desktop/mobile verification; see the
-[production record](../operations/main-publication.md).
-
-After verifying zero unique commits against main, the following heads were
-removed locally and remotely:
-
-| Branch | Inspected tip |
-| --- | --- |
-| `feature/ui-ground-up` | `dd298a68b7701a0d517dd11b24c9f156ccb0b467` |
-| `feature/research-v2-ui-v3` | `0fbe4f8693c4fc20747483d3599fb53198e4004b` |
-| `refactor/themescope-vnext` | `b9a0fb90227f45b61f394979eac0d0b2650f88be` |
-| `fix/public-validator-precision` | `6974c0694cc8e2a9b361d724d5b6af689f073a85` |
-| `fix/frozen-public-rendering` | `470bae4df538ff1477309561459dc5a93c500089` |
-
-Deletion leases required each remote tip to match its inspected SHA. Remote refs
-were pruned. Task branches follow the same checks after their PR merges.
-
-## Unrelated October delivery archive
-
-`themescope-downloads-2026-10-24` had no common ancestor with main. Its four-commit
-history preserves a v7 delivery dashboard, snapshots, CSV exports, reports,
-configuration extracts, screenshots and a run bundle. It is an archival artifact
-series, not an unmerged source feature.
-
-The annotated tag **`archive/themescope-downloads-2026-10-24`** preserves tip
-`1624315edbfae0118144035e377588425582710b`. The remote tag object and dereferenced
-commit were verified before deleting the branch. Browse its original tree at the
-[immutable delivery commit](https://github.com/suna-kabo/ThemeScope/tree/1624315edbfae0118144035e377588425582710b).
-No artifacts were copied into main, no existing tag was moved, and no history was
-rewritten. Old branch-based download URLs inside that historical README remain
-checkpoint text; use the immutable commit/tag when inspecting the archive.

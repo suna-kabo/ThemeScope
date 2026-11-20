@@ -19,7 +19,7 @@ def main():
         raise SystemExit('Existing .venv-vnext is incomplete. Preserve it and repair explicitly.')
     subprocess.run([str(python), '-m', 'pip', 'install', '-r', str(ROOT / 'requirements-vnext.txt')], check=True)
     subprocess.run([str(python), '-c', 'import fastapi,uvicorn,httpx; from zoneinfo import ZoneInfo; ZoneInfo("America/New_York")'], check=True)
-    print('vNext runtime ready. Production membership remains gated; no data fetched.')
+    print('ThemeScope local runtime ready.')
 
 
 if __name__ == '__main__':

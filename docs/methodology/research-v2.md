@@ -53,23 +53,41 @@ population, the entire comparison remains unavailable; no one-week app warm-up
 is imposed. Insufficient completed history, unavailable score, incompatible basis
 and changed percentile population have distinct readable explanations.
 
-For Long, directional strength is Score and change is current minus prior Score.
-For Short, strength is 100−Score and change is the reverse. Both use:
+## Themes landscape
 
-| Condition | State | Researchable |
+Themes defaults to highest raw Theme Score first in every market environment.
+The 5-session Change is the current score minus the score exactly five completed
+sessions earlier. A plus sign means the score rose. A minus sign means it fell.
+
+| Raw Theme Score | Raw 5-session Change | State |
 | --- | --- | --- |
-| Strength ≥50 and change ≤−10 points | Fading | Yes |
-| Strength ≥50, otherwise | Leading | Yes |
-| Strength <50 and change ≥10 points | Improving | Yes |
-| Strength <50, otherwise | Lagging | No |
-| Missing structural score | Unavailable | No |
+| ≥50 | ≤−10 points | Fading |
+| ≥50 | All other cases, including unavailable | Strong |
+| <50 | ≥+10 points | Improving |
+| <50 | All other cases, including unavailable | Weak |
+| Unavailable | Any | Unavailable |
+
+The movement disclosure ranks the largest positive and negative raw changes and
+reports unavailable comparisons. Full Theme and Quick View explain comparison
+availability and keep price context separate from State.
+
+## Primary directional theme selection
+
+The thresholds below use the raw Theme Score and raw 5-session Change.
+
+| Long condition | Short condition | State | Researchable |
+| --- | --- | --- | --- |
+| Score ≥50 and change ≤−10 points | Score ≤50 and change ≥+10 points | Fading | Yes |
+| Score ≥50 in other cases | Score ≤50 in other cases | Leading | Yes |
+| Score <50 and change ≥+10 points | Score >50 and change ≤−10 points | Improving | Yes |
+| Score <50 in other cases | Score >50 in other cases | Lagging | No |
+| Missing score | Missing score | Unavailable | No |
 
 Exactly 50 is included at the structural boundary for either research side.
 This inclusive midpoint tie policy preserves mirrored Long/Short semantics; it
 does not imply either market bias. Only the actual market side selects a list.
 Reasons describe raw weakness as support for Short research, and raw strength
-as support for Long research. Short research improvement is a decline in raw
-Theme Score, not a gain in raw structural strength.
+as support for Long research. Falling Theme Score can support Short research.
 
 Without a comparable five-session change, structural strength still distinguishes
 Leading and Lagging, with an explicit comparison-unavailable explanation.
@@ -88,9 +106,7 @@ improvement. This changes priority, never the qualifying membership set. Short
 mirrors Long. No cap or additional score is introduced.
 
 Neutral/Unclassified have no current side or current directional theme state,
-no researchability and no directional list/export. Their default theme context
-orders alphabetically by theme ID and members by ticker. Explicit raw-strength
-sort controls remain context rather than an inferred Long priority.
+no researchability and no directional list/export. The Themes landscape uses the same raw ordering and states in these environments.
 
 ## Daily eligibility and order
 
@@ -106,15 +122,12 @@ unchanged. W orders stocks, with higher first for Long and lower first for Short
 Zero, opposite-sign and unavailable W are retained; unavailable values sort last.
 The UI calls this **Peer strength**, in percentage points.
 
-Themes order by the full/Selective state sequence above, then directional
-structural strength and theme ID. Within each theme, peer strength and ticker break ties. There is
+Primary orders themes by the full/Selective state sequence above, then by the
+Theme Score in the appropriate direction and by theme ID. Within each theme, peer strength and ticker break ties. There is
 no stock-count cap. Multiple relationships remain visible; combined TradingView
 TXT deduplicates at the highest-priority theme, preserving that same ordering.
 Individual theme exports preserve their own complete member order. Visible UI
 filters do not alter the full-session download.
-
-Countertrend and its reversal-like buckets are removed from current snapshots
-and screens. Historical helpers and approved old fixtures remain provenance.
 
 ## Evidence and boundaries
 
@@ -123,15 +136,10 @@ The [rule simulation](../../reports/archive/research-v2/research-v2-rule-simulat
 It is a stability diagnostic with frozen-membership selection bias, not a profit
 backtest. Lists can exceed 250 names; thresholds were not optimized to a count.
 
-Revision 2 of the v2 contract distinguishes `long_state`, `short_state` and
-`current_state`/`current_side`. `policy` holds the full research policy;
-`strength_rank` is the canonical raw-strength competition rank, while
-`research_order_index` is the explicit zero-based theme priority position.
-Recent fields distinguish `raw_score_change` and `directional_score_change`,
-and raw versus directional five-session rank changes. Short-side ranks are
-computed with low scores first, not by negating a raw rank change: competition
-ties do not reverse linearly. No adjacent-session rank appears under a five-session
-label. Older v1/first-v2 snapshots require a current-rules refresh in the UI.
+Contract revision 4 includes the market-independent `raw_state` field. The
+existing `score_change` remains raw. Primary uses its existing directional states
+and `research_order_index`. Older stored versions require a refresh to populate
+the current Themes and Primary views.
 
 Read-only query functions in `research/queries.py` expose market state/changes,
 themes/history/members, stocks and the research list for future agents. They omit
@@ -139,8 +147,5 @@ legacy v1 priority/transition fields from current theme DTOs; older selection is
 explicitly unavailable. `/api/themes/{theme_id}/history` returns separately labelled
 official session observations, not reconstructed current-basket state. Unknown
 theme-member requests return 404, while a known empty theme returns an empty list. Current
-loopback API routes share one committed snapshot. Public projection explicitly
-allowlists the v2 presentation contract; it cannot expose local history inputs,
-provider credentials, runtime databases or unknown nested fields. Failed refresh
-still preserves the preceding successful snapshot. No publication is authorized
-by this development work.
+loopback API routes share one committed snapshot. A failed refresh preserves the
+preceding successful snapshot and exports.

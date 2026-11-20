@@ -1,0 +1,581 @@
+{
+  "source_commit": "cf4fdb1e4784ff6fbc7183d5e709ffae044ec2fe",
+  "cases": [
+    {
+      "spy": "Bullish",
+      "qqq": "Bullish",
+      "breadth": "Positive",
+      "direction": "Long bias",
+      "rule_id": "unanimous-bullish",
+      "reason": "SPY and QQQ are both Bullish: Long bias. SPY/QQQ Breadth Consensus is Positive (Confirming); breadth does not overturn unanimous price direction.",
+      "breadth_qualifier": "Confirming"
+    },
+    {
+      "spy": "Bullish",
+      "qqq": "Bullish",
+      "breadth": "Mixed",
+      "direction": "Long bias",
+      "rule_id": "unanimous-bullish",
+      "reason": "SPY and QQQ are both Bullish: Long bias. SPY/QQQ Breadth Consensus is Mixed (Mixed); breadth does not overturn unanimous price direction.",
+      "breadth_qualifier": "Mixed"
+    },
+    {
+      "spy": "Bullish",
+      "qqq": "Bullish",
+      "breadth": "Negative",
+      "direction": "Long bias",
+      "rule_id": "unanimous-bullish",
+      "reason": "SPY and QQQ are both Bullish: Long bias. SPY/QQQ Breadth Consensus is Negative (Diverging); breadth does not overturn unanimous price direction.",
+      "breadth_qualifier": "Diverging"
+    },
+    {
+      "spy": "Bullish",
+      "qqq": "Bullish",
+      "breadth": null,
+      "direction": "Long bias",
+      "rule_id": "unanimous-bullish",
+      "reason": "SPY and QQQ are both Bullish: Long bias. SPY/QQQ Breadth Consensus is Unavailable (N/A); breadth does not overturn unanimous price direction.",
+      "breadth_qualifier": "N/A"
+    },
+    {
+      "spy": "Bullish",
+      "qqq": "Mixed",
+      "breadth": "Positive",
+      "direction": "Selective long",
+      "rule_id": "bullish-mixed",
+      "reason": "SPY is Bullish, QQQ is Mixed, and SPY/QQQ Breadth Consensus is Positive: Selective long.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Bullish",
+      "qqq": "Mixed",
+      "breadth": "Mixed",
+      "direction": "Neutral",
+      "rule_id": "bullish-mixed",
+      "reason": "SPY is Bullish, QQQ is Mixed, and SPY/QQQ Breadth Consensus is Mixed: Neutral.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Bullish",
+      "qqq": "Mixed",
+      "breadth": "Negative",
+      "direction": "Neutral",
+      "rule_id": "bullish-mixed",
+      "reason": "SPY is Bullish, QQQ is Mixed, and SPY/QQQ Breadth Consensus is Negative: Neutral.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Bullish",
+      "qqq": "Mixed",
+      "breadth": null,
+      "direction": "Unclassified",
+      "rule_id": "breadth-unavailable",
+      "reason": "SPY/QQQ Breadth Consensus is unavailable; the required non-unanimous Market cell cannot be resolved.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Bullish",
+      "qqq": "Bearish",
+      "breadth": "Positive",
+      "direction": "Selective long",
+      "rule_id": "opposed-prices",
+      "reason": "SPY is Bullish, QQQ is Bearish, and SPY/QQQ Breadth Consensus is Positive: Selective long.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Bullish",
+      "qqq": "Bearish",
+      "breadth": "Mixed",
+      "direction": "Neutral",
+      "rule_id": "opposed-prices",
+      "reason": "SPY is Bullish, QQQ is Bearish, and SPY/QQQ Breadth Consensus is Mixed: Neutral.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Bullish",
+      "qqq": "Bearish",
+      "breadth": "Negative",
+      "direction": "Selective short",
+      "rule_id": "opposed-prices",
+      "reason": "SPY is Bullish, QQQ is Bearish, and SPY/QQQ Breadth Consensus is Negative: Selective short.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Bullish",
+      "qqq": "Bearish",
+      "breadth": null,
+      "direction": "Unclassified",
+      "rule_id": "breadth-unavailable",
+      "reason": "SPY/QQQ Breadth Consensus is unavailable; the required non-unanimous Market cell cannot be resolved.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Bullish",
+      "qqq": null,
+      "breadth": "Positive",
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Bullish",
+      "qqq": null,
+      "breadth": "Mixed",
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Bullish",
+      "qqq": null,
+      "breadth": "Negative",
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Bullish",
+      "qqq": null,
+      "breadth": null,
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Mixed",
+      "qqq": "Bullish",
+      "breadth": "Positive",
+      "direction": "Selective long",
+      "rule_id": "bullish-mixed",
+      "reason": "SPY is Mixed, QQQ is Bullish, and SPY/QQQ Breadth Consensus is Positive: Selective long.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Mixed",
+      "qqq": "Bullish",
+      "breadth": "Mixed",
+      "direction": "Neutral",
+      "rule_id": "bullish-mixed",
+      "reason": "SPY is Mixed, QQQ is Bullish, and SPY/QQQ Breadth Consensus is Mixed: Neutral.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Mixed",
+      "qqq": "Bullish",
+      "breadth": "Negative",
+      "direction": "Neutral",
+      "rule_id": "bullish-mixed",
+      "reason": "SPY is Mixed, QQQ is Bullish, and SPY/QQQ Breadth Consensus is Negative: Neutral.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Mixed",
+      "qqq": "Bullish",
+      "breadth": null,
+      "direction": "Unclassified",
+      "rule_id": "breadth-unavailable",
+      "reason": "SPY/QQQ Breadth Consensus is unavailable; the required non-unanimous Market cell cannot be resolved.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Mixed",
+      "qqq": "Mixed",
+      "breadth": "Positive",
+      "direction": "Selective long",
+      "rule_id": "both-mixed",
+      "reason": "SPY is Mixed, QQQ is Mixed, and SPY/QQQ Breadth Consensus is Positive: Selective long.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Mixed",
+      "qqq": "Mixed",
+      "breadth": "Mixed",
+      "direction": "Neutral",
+      "rule_id": "both-mixed",
+      "reason": "SPY is Mixed, QQQ is Mixed, and SPY/QQQ Breadth Consensus is Mixed: Neutral.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Mixed",
+      "qqq": "Mixed",
+      "breadth": "Negative",
+      "direction": "Selective short",
+      "rule_id": "both-mixed",
+      "reason": "SPY is Mixed, QQQ is Mixed, and SPY/QQQ Breadth Consensus is Negative: Selective short.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Mixed",
+      "qqq": "Mixed",
+      "breadth": null,
+      "direction": "Unclassified",
+      "rule_id": "breadth-unavailable",
+      "reason": "SPY/QQQ Breadth Consensus is unavailable; the required non-unanimous Market cell cannot be resolved.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Mixed",
+      "qqq": "Bearish",
+      "breadth": "Positive",
+      "direction": "Neutral",
+      "rule_id": "bearish-mixed",
+      "reason": "SPY is Mixed, QQQ is Bearish, and SPY/QQQ Breadth Consensus is Positive: Neutral.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Mixed",
+      "qqq": "Bearish",
+      "breadth": "Mixed",
+      "direction": "Neutral",
+      "rule_id": "bearish-mixed",
+      "reason": "SPY is Mixed, QQQ is Bearish, and SPY/QQQ Breadth Consensus is Mixed: Neutral.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Mixed",
+      "qqq": "Bearish",
+      "breadth": "Negative",
+      "direction": "Selective short",
+      "rule_id": "bearish-mixed",
+      "reason": "SPY is Mixed, QQQ is Bearish, and SPY/QQQ Breadth Consensus is Negative: Selective short.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Mixed",
+      "qqq": "Bearish",
+      "breadth": null,
+      "direction": "Unclassified",
+      "rule_id": "breadth-unavailable",
+      "reason": "SPY/QQQ Breadth Consensus is unavailable; the required non-unanimous Market cell cannot be resolved.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Mixed",
+      "qqq": null,
+      "breadth": "Positive",
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Mixed",
+      "qqq": null,
+      "breadth": "Mixed",
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Mixed",
+      "qqq": null,
+      "breadth": "Negative",
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Mixed",
+      "qqq": null,
+      "breadth": null,
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Bearish",
+      "qqq": "Bullish",
+      "breadth": "Positive",
+      "direction": "Selective long",
+      "rule_id": "opposed-prices",
+      "reason": "SPY is Bearish, QQQ is Bullish, and SPY/QQQ Breadth Consensus is Positive: Selective long.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Bearish",
+      "qqq": "Bullish",
+      "breadth": "Mixed",
+      "direction": "Neutral",
+      "rule_id": "opposed-prices",
+      "reason": "SPY is Bearish, QQQ is Bullish, and SPY/QQQ Breadth Consensus is Mixed: Neutral.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Bearish",
+      "qqq": "Bullish",
+      "breadth": "Negative",
+      "direction": "Selective short",
+      "rule_id": "opposed-prices",
+      "reason": "SPY is Bearish, QQQ is Bullish, and SPY/QQQ Breadth Consensus is Negative: Selective short.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Bearish",
+      "qqq": "Bullish",
+      "breadth": null,
+      "direction": "Unclassified",
+      "rule_id": "breadth-unavailable",
+      "reason": "SPY/QQQ Breadth Consensus is unavailable; the required non-unanimous Market cell cannot be resolved.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Bearish",
+      "qqq": "Mixed",
+      "breadth": "Positive",
+      "direction": "Neutral",
+      "rule_id": "bearish-mixed",
+      "reason": "SPY is Bearish, QQQ is Mixed, and SPY/QQQ Breadth Consensus is Positive: Neutral.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Bearish",
+      "qqq": "Mixed",
+      "breadth": "Mixed",
+      "direction": "Neutral",
+      "rule_id": "bearish-mixed",
+      "reason": "SPY is Bearish, QQQ is Mixed, and SPY/QQQ Breadth Consensus is Mixed: Neutral.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Bearish",
+      "qqq": "Mixed",
+      "breadth": "Negative",
+      "direction": "Selective short",
+      "rule_id": "bearish-mixed",
+      "reason": "SPY is Bearish, QQQ is Mixed, and SPY/QQQ Breadth Consensus is Negative: Selective short.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Bearish",
+      "qqq": "Mixed",
+      "breadth": null,
+      "direction": "Unclassified",
+      "rule_id": "breadth-unavailable",
+      "reason": "SPY/QQQ Breadth Consensus is unavailable; the required non-unanimous Market cell cannot be resolved.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Bearish",
+      "qqq": "Bearish",
+      "breadth": "Positive",
+      "direction": "Short bias",
+      "rule_id": "unanimous-bearish",
+      "reason": "SPY and QQQ are both Bearish: Short bias. SPY/QQQ Breadth Consensus is Positive (Diverging); breadth does not overturn unanimous price direction.",
+      "breadth_qualifier": "Diverging"
+    },
+    {
+      "spy": "Bearish",
+      "qqq": "Bearish",
+      "breadth": "Mixed",
+      "direction": "Short bias",
+      "rule_id": "unanimous-bearish",
+      "reason": "SPY and QQQ are both Bearish: Short bias. SPY/QQQ Breadth Consensus is Mixed (Mixed); breadth does not overturn unanimous price direction.",
+      "breadth_qualifier": "Mixed"
+    },
+    {
+      "spy": "Bearish",
+      "qqq": "Bearish",
+      "breadth": "Negative",
+      "direction": "Short bias",
+      "rule_id": "unanimous-bearish",
+      "reason": "SPY and QQQ are both Bearish: Short bias. SPY/QQQ Breadth Consensus is Negative (Confirming); breadth does not overturn unanimous price direction.",
+      "breadth_qualifier": "Confirming"
+    },
+    {
+      "spy": "Bearish",
+      "qqq": "Bearish",
+      "breadth": null,
+      "direction": "Short bias",
+      "rule_id": "unanimous-bearish",
+      "reason": "SPY and QQQ are both Bearish: Short bias. SPY/QQQ Breadth Consensus is Unavailable (N/A); breadth does not overturn unanimous price direction.",
+      "breadth_qualifier": "N/A"
+    },
+    {
+      "spy": "Bearish",
+      "qqq": null,
+      "breadth": "Positive",
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Bearish",
+      "qqq": null,
+      "breadth": "Mixed",
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Bearish",
+      "qqq": null,
+      "breadth": "Negative",
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": "Bearish",
+      "qqq": null,
+      "breadth": null,
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": null,
+      "qqq": "Bullish",
+      "breadth": "Positive",
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": null,
+      "qqq": "Bullish",
+      "breadth": "Mixed",
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": null,
+      "qqq": "Bullish",
+      "breadth": "Negative",
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": null,
+      "qqq": "Bullish",
+      "breadth": null,
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": null,
+      "qqq": "Mixed",
+      "breadth": "Positive",
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": null,
+      "qqq": "Mixed",
+      "breadth": "Mixed",
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": null,
+      "qqq": "Mixed",
+      "breadth": "Negative",
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": null,
+      "qqq": "Mixed",
+      "breadth": null,
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": null,
+      "qqq": "Bearish",
+      "breadth": "Positive",
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": null,
+      "qqq": "Bearish",
+      "breadth": "Mixed",
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": null,
+      "qqq": "Bearish",
+      "breadth": "Negative",
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": null,
+      "qqq": "Bearish",
+      "breadth": null,
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": null,
+      "qqq": null,
+      "breadth": "Positive",
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": null,
+      "qqq": null,
+      "breadth": "Mixed",
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": null,
+      "qqq": null,
+      "breadth": "Negative",
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    },
+    {
+      "spy": null,
+      "qqq": null,
+      "breadth": null,
+      "direction": "Unclassified",
+      "rule_id": "price-unavailable",
+      "reason": "A required SPY/QQQ price classification is unavailable.",
+      "breadth_qualifier": null
+    }
+  ]
+}

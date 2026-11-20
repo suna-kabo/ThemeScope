@@ -7,12 +7,10 @@ config/vnext/membership_master_review.json text eol=lf
 config/vnext/membership_review_provenance.json text eol=lf
 
 # Hash-pinned bundled assets must have identical bytes on Windows and Unix.
-static/Inter-LICENSE.txt text eol=lf
-static/InterVariable.woff2 binary
 static/Research-LICENSE.txt text eol=lf
 static/Research.woff2 binary
 
-# Static source is copied verbatim into both public build modes.
+# Keep loopback UI assets consistent across platforms.
 static/vnext/*.html text eol=lf
 static/vnext/*.css text eol=lf
 static/vnext/*.js text eol=lf

@@ -215,7 +215,7 @@ class SQLiteLifecycleTests(unittest.TestCase):
             def commit(db):
                 commit_in.set();return super().commit()
             def execute(db,sql,*args):
-                if sql.startswith('SELECT run_id,payload FROM publication'):read_in.set()
+                if sql.startswith('SELECT run_id FROM publication'):read_in.set()
                 return super().execute(sql,*args)
         def observed(*args,**kwargs):return connect(*args,**kwargs,factory=ObservedConnection)
         held=None
@@ -305,7 +305,7 @@ class SQLiteLifecycleTests(unittest.TestCase):
         service=fixture_service(self.root)
         for code in (sqlite3.SQLITE_ERROR,sqlite3.SQLITE_IOERR,sqlite3.SQLITE_CORRUPT):
             error=sqlite3.OperationalError('Synthetic non-busy failure');error.sqlite_errorcode=code
-            with self.subTest(code=code),patch.object(Store,'active_publication',side_effect=error):
+            with self.subTest(code=code),patch.object(Store,'active_version',side_effect=error):
                 with self.assertRaises(sqlite3.OperationalError):service.status()
 
     def test_simultaneous_process_initializers(self):

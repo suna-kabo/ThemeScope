@@ -103,7 +103,7 @@ class LocalTests(unittest.TestCase):
         self.assertEqual(client.get('/app.css').status_code,200)
         self.assertEqual(client.get('/Research.woff2').content,(ROOT/'static/Research.woff2').read_bytes())
         self.assertIn('SIL OPEN FONT LICENSE',client.get('/Research-LICENSE.txt').text)
-        self.assertEqual(client.get('/preview.js').status_code,200)
+        self.assertEqual(client.get('/preview.js').status_code,404)
         self.assertEqual(client.get('/api/refresh/status').status_code,200)
         self.assertEqual(client.get('/api/status').json()['completeness']['complete'],True)
 
@@ -217,7 +217,7 @@ class LocalTests(unittest.TestCase):
             self.assertEqual(self.service.snapshot(),current)
             self.assertEqual(self.service.snapshot()['exports'],current['exports'])
             self.assertEqual(self.service.status()['state'],'failed')
-            self.assertEqual(self.service.status()['error'],'test_actual_provider_failure')
+            self.assertEqual(self.service.status()['error'],'provider_unavailable')
             uncaught.assert_not_called()
             self.assertGreater(replace.call_count,0)
             self.assertEqual(replace.call_count%4,0)

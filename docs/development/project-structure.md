@@ -2,42 +2,30 @@
 
 | Location | Role |
 | --- | --- |
-| `README.md` | Product, Windows setup, launch and public update entry point |
-| `AGENTS.md`, `PRODUCT.md`, `DESIGN.md`, `MOTION.md` | Contributor and current product contracts |
-| `setup.cmd`, `ThemeScope.cmd` | Current Windows setup and local app |
-| `update-public.cmd`, `publish-public-snapshot.cmd` | Normal verified update and explicit already-refreshed fallback |
-| `src/themescope/local/` | Loopback API, refresh coordination and committed snapshot reads |
-| `providers/`, `storage/`, `themes/`, `research/`, `market/` under `src/themescope/` | Current data, calculations and research layers |
-| `config/vnext/`, `config/market_universes/`, `config/calendars/` | Versioned policies, memberships, evidence, rosters and schedule |
-| `static/vnext/`, `static/Research*` | Approved frontend and pinned current font/license |
-| `static/dashboard*`, `static/Inter*`, other legacy modules/config | Separate historical dashboard reproduction |
-| `legacy-*.cmd` | Explicit legacy CSV setup, refresh, dashboard, site preparation and preview |
-| `scripts/`, `tests/`, `.github/workflows/` | Current/legacy maintenance, offline regression and release gates |
-| `requirements-vnext.txt` | Current runtime pins |
-| `requirements.txt`, `requirements-dev.txt` | Legacy hashed pins and development/browser dependencies |
-| `docs/getting-started/`, `methodology/`, `operations/` | Current user, methodology and operations guides |
-| `docs/development/`, `architecture/` | Current contributor documentation |
-| `docs/archive/`, `reports/archive/` | Historical plans, design captures and dated validation |
-| `inspection/`, `tests/fixtures/` | Immutable synthetic checkpoint and compatibility provenance |
+| `ThemeScope.cmd`, `setup.cmd` | Launch and install the loopback dashboard |
+| `configure-credentials.cmd`, `backup-data.cmd` | Windows credential setup and online SQLite backup |
+| `src/themescope/local/` | API, refresh coordination, committed snapshots, and per-user state |
+| `src/themescope/providers/`, `storage/`, `themes/`, `research/`, `market/` | Provider access, storage, calculations, and research selection |
+| `config/vnext/`, `config/market_universes/`, `config/calendars/` | Versioned policy, membership, rosters, and completed-session calendar |
+| `static/vnext/`, `static/Research*` | Current frontend and bundled font with license |
+| `requirements-vnext.txt` | Runtime dependencies |
+| `requirements-dev.txt` | Runtime dependencies plus Playwright for development and CI |
+| `scripts/`, `tests/`, `.github/workflows/` | Maintenance tools, fixture checks, and CI |
+| `docs/archive/`, `reports/archive/`, `inspection/` | Historical documentation, dated evidence, and the original synthetic inspection checkpoint |
+| `tests/fixtures/market_matrix.json` | Frozen 64-case Market Matrix reference used by current tests |
 
-## Private/generated state
+## Private local data
 
-Preserve `.venv-vnext/`, `.venv/`, `runtime/`, `output/`, `dist/`, `site/`, `inputs/`,
-`cache/` and backups unless a separately reviewed task permits removal.
-`runtime/vnext/` contains real SQLite research history; fixture history is separate.
-Ignored does not mean disposable. Never force-add credentials, raw bars or real
-public projections. Saved is browser-local and must not be cleared during maintenance.
+The app stores SQLite history in `runtime/vnext/` and synthetic fixture state
+in `runtime/vnext-fixture/`. Saved and encrypted credentials live under
+the current user’s local application data directory. Keep existing databases,
+inputs, backups, virtual environments, and generated outputs during upgrades.
+See [maintenance and backups](../operations/refresh-and-maintenance.md).
 
-## Compatibility boundaries
+## History and compatibility
 
-Legacy CSV reproduction uses `legacy-setup.cmd`, `legacy-refresh.cmd`,
-`legacy-open-dashboard.cmd`, `legacy-prepare-site.cmd` and `legacy-preview-site.cmd`.
-It retains separate dependencies, data, tests and history; it is not daily operation.
-Historical browser programs for superseded interfaces are recoverable from Git
-history. Current browser acceptance is the research-v2 release gate plus local,
-pre-launch and static-public checks.
-
-Inspection tooling still consumes `docs/vnext_preflight.md`, `docs/vnext_local_ui.md`,
-`docs/vnext_provider.md` and the original `docs/vnext/` specification. Their stable
-paths and the `inspection/` fixture remain intact. See the
-[relocation map](../archive/relocations.md).
+The current app uses its own versioned storage and supports its SQLite schema
+migrations. Earlier ETF dashboard code and test fixtures are available through
+Git history. The approved specification, build evidence, permanent tags, and
+original inspection copy are listed in the [historical archive](../archive/README.md)
+and [checkpoint index](branch-checkpoints.md).

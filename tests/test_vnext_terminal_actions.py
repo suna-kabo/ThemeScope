@@ -227,13 +227,13 @@ class TerminalRefreshTests(unittest.TestCase):
         prior=self.refresh(L)
         self.target=E;del self.data['NEXT',E]
         self.assertIsNone(self.service.refresh())
-        self.assertIn('NEXT',self.service.status()['error']);self.assertEqual(self.service.snapshot(),json.loads(canonical(prior)))
+        self.assertEqual('required_data_incomplete',self.service.status()['error']);self.assertEqual(self.service.snapshot(),json.loads(canonical(prior)))
         self.data=prices();self.config=replace(self.config,corporate_actions=())
         self.assertIsNone(self.service.refresh())
-        self.assertIn('TAKE',self.service.status()['error']);self.assertEqual(self.service.snapshot(),json.loads(canonical(prior)))
+        self.assertEqual('required_data_incomplete',self.service.status()['error']);self.assertEqual(self.service.snapshot(),json.loads(canonical(prior)))
         self.config=configuration(self.event);self.data['TAKE',E]=Bar('TAKE',E,100,100,2000000)
         self.assertIsNone(self.service.refresh())
-        self.assertIn('terminal_trading_bar_conflict:TAKE',self.service.status()['error'])
+        self.assertEqual('calculation_validation_failed',self.service.status()['error'])
         self.assertEqual(self.service.snapshot(),json.loads(canonical(prior)))
 
     def test_storage_revalidates_economic_proof_and_cannot_bypass_unknown_symbol(self):

@@ -7,7 +7,7 @@ __pycache__/
 /ThemeScope-delivery.zip
 /cache/
 
-# First-time local use and explicit deployment preparation
+# Protect prior local outputs and virtual environments
 /.venv/
 /inputs/
 /site/
@@ -16,11 +16,11 @@ __pycache__/
 .env.*
 .env*
 
-# Local publication recovery stays private, outside the served site.
+# Protect any remaining historical recovery files.
 /.site-publication.lock
 /.site-publication/
 
-# Generated delivery archives and diagnostic reports stay local.
+# Protect local archives and reports from earlier checkouts.
 /downloads/*.zip
 /reports/latest_run.md
 /reports/v7_browser_verification.json
@@ -39,3 +39,9 @@ __pycache__/
 
 # Playwright/screenshots and local vNext state stay outside inspection unless synthetic.
 /playwright-report/
+
+# Personal state belongs in the per-user application-data directory.
+/Backups/
+/saved.json
+/provider.dpapi
+*.dpapi

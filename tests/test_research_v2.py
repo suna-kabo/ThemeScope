@@ -4,6 +4,8 @@ from decimal import Decimal as D, localcontext
 from copy import deepcopy
 import unittest
 
+from src.themescope.research.state_rules import raw_theme_state
+
 from src.themescope.domain import Role
 from src.themescope.research.exports import Qualification as Q, exports
 from src.themescope.research.v2 import attach, liquidity, policy, state
@@ -38,6 +40,17 @@ class SelectionTests(unittest.TestCase):
     def snapshot(self, direction='Long bias'):
         return calculate_session(self.config,self.bars,self.days,self.target,direction,self.indices,
                                  {key:'fixture-'+key for key in self.indices},self.mapping)
+
+    def test_raw_theme_state_and_exact_boundaries(self):
+        cases = [
+            (80, 5, 'Strong'), (80, -15, 'Fading'), (40, 15, 'Improving'), (40, -5, 'Weak'),
+            (50, -10, 'Fading'), ('49.999', 10, 'Improving'), (50, 10, 'Strong'),
+            (50, None, 'Strong'), (40, None, 'Weak'), (None, 15, 'Unavailable'),
+            ('NaN', 15, 'Unavailable'),
+        ]
+        for score, change, expected in cases:
+            with self.subTest(score=score, change=change):
+                self.assertEqual(raw_theme_state(score, change, policy()), expected)
 
     def test_states_are_exact_symmetric_and_keep_fading_leaders(self):
         from scripts.research_v2_simulation import classify
@@ -112,7 +125,7 @@ class SelectionTests(unittest.TestCase):
         import json
         data=attach(self.snapshot(),self.bars,self.days,self.mapping)
         data['market']={'decision':{'direction':'Long bias'}}
-        with TestClient(create_app(Path('.'),SimpleNamespace(snapshot=lambda:data)),base_url='http://127.0.0.1') as client:
+        with TestClient(create_app(Path('.'),SimpleNamespace(snapshot=lambda:data,mode="fixture",runtime=Path("."))),base_url='http://127.0.0.1') as client:
             self.assertEqual(client.get('/api/research-list').json(),json.loads(canonical(data['research_v2']['list'])))
             self.assertEqual(client.get('/api/themes/alpha').status_code,200)
             self.assertEqual(client.get('/api/themes/alpha/members').status_code,200)
@@ -121,20 +134,6 @@ class SelectionTests(unittest.TestCase):
             self.assertEqual(client.get('/api/market/changes').status_code,200)
             self.assertEqual(client.get('/api/stocks/UNKNOWN').status_code,404)
             self.assertEqual(client.post('/api/research-list').status_code,403)
-
-
-class PublicTests(unittest.TestCase):
-    def test_v2_public_projection_allowlists_fields_and_checks_references(self):
-        from scripts.build_cloudflare_demo import demo_snapshot
-        from scripts.build_public_snapshot import project_snapshot,SnapshotError
-        data=demo_snapshot();data['synthetic_fixture']=False;data['provider_health']={'status':'Healthy'}
-        data['research_v2']['private']='discard'
-        result=project_snapshot(data,data['session'])
-        self.assertNotIn('private',result['research_v2'])
-        self.assertEqual(result['research_v2']['list'],data['research_v2']['list'])
-        self.assertNotIn('countertrend',result['research'])
-        data['research_v2']['list']['rows'][0]['ticker']='UNKNOWN'
-        with self.assertRaises(SnapshotError):project_snapshot(data,data['session'])
 
 
 if __name__ == '__main__':

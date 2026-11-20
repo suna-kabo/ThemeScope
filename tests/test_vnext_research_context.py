@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from src.themescope.research.context import (
     wilder_atr, extension_state, aggregate_extension, market_extension,
-    research_focus, ema_transitions, canonical_ranks, rank_changes, countertrend, enrich)
+    ema_transitions, canonical_ranks, enrich)
 from src.themescope.themes.calculations import Bar
 from src.themescope.themes.history import ThemeHistory
 from src.themescope.storage import Store, canonical, SCHEMA_VERSION
@@ -28,12 +28,6 @@ def snapshot(session=DAYS[-1],scores=(90,70,70,40)):
     return dict(session=session,methodology='themescope-vnext-1',market_direction='Short bias',
         themes=[theme(chr(97+i),str(s),session) for i,s in enumerate(scores)],relationships=[],
         market={'context':{s:dict(close='100',ema21='99',ema50='101') for s in ('SPY','QQQ','IWM')}},theme_layer={'state':'live'})
-
-
-def relationship(ticker,w,theme_id='a',**extra):
-    row=dict(ticker=ticker,theme_id=theme_id,role='Core',relative={'w':str(w)},eligibility={'available':True,'eligible':True},qualifies=False)
-    row.update(extra)
-    return row
 
 
 class ExtensionTests(unittest.TestCase):
@@ -89,14 +83,6 @@ class ExtensionTests(unittest.TestCase):
         self.assertEqual(first,market_extension(market,bars,days))
         self.assertEqual(set(first['indices']),{'SPY','QQQ'})
 
-    def test_focus_is_side_aware_and_never_changes_bias(self):
-        for direction,prefix,caution in [('Short bias','Downside','Countertrend'),('Long bias','Upside','Pullback-Risk')]:
-            self.assertEqual(research_focus(direction,'Normal')['label'],'Directional')
-            self.assertEqual(research_focus(direction,prefix+' Stretched')['label'],'Directional + '+caution+' Watch')
-            self.assertEqual(research_focus(direction,prefix+' Extended')['preferred_mode'],'countertrend')
-            self.assertEqual(research_focus(direction,('Upside' if prefix=='Downside' else 'Downside')+' Extended')['label'],'Directional')
-        self.assertEqual(research_focus('Observe','Downside Extended'),{'label':'Observe','preferred_mode':'directional'})
-
 
 class ComparisonTests(unittest.TestCase):
     def test_ema_unchanged_crossed_at_and_missing(self):
@@ -119,83 +105,16 @@ class ComparisonTests(unittest.TestCase):
             if bad=='not_adjacent':previous['session']=DAYS[0]
             if bad=='methodology':previous['methodology']='legacy'
             self.assertIsNone(ema_transitions(now,previous,DAYS)['SPY']['ema21']['changed'],bad)
-            self.assertTrue(all(r['change'] is None for r in rank_changes(now,previous,DAYS)['themes'].values()))
 
     def test_competition_ties_filter_and_order_independent(self):
         rows=snapshot()['themes']+[theme('watch','100',status='watch_only'),theme('missing',None)]
         expected={'a':1,'b':2,'c':2,'d':4}
         self.assertEqual(canonical_ranks(rows),expected)
         self.assertEqual(canonical_ranks(list(reversed(rows))),expected)
-        self.assertEqual(rank_changes(dict(snapshot(),themes=rows),None,DAYS)['themes']['d']['rank'],4)
         self.assertEqual(rows[3]['score'],'40') # no rewriting scores to ranks
 
-    def test_comparable_rank_gain_loss_and_ties(self):
-        now=snapshot(scores=(70,90,70,40));prior=snapshot(DAYS[-2])
-        result=rank_changes(now,prior,DAYS)['themes']
-        self.assertEqual(result['a']['change'],-1)
-        self.assertEqual(result['b']['change'],1)
-        self.assertEqual(result['c']['change'],0)
-        self.assertEqual(result['a']['previous_session'],DAYS[-2])
-        now['themes'][0]['history']['series_id']='new-series'
-        self.assertIsNone(rank_changes(now,prior,DAYS)['themes']['a']['change'])
-
-    def test_new_activation_missing_score_changed_universe_no_invented_change(self):
-        now=snapshot();prior=snapshot(DAYS[-2])
-        now['themes'].append(theme('new','80'))
-        result=rank_changes(now,prior,DAYS)['themes']
-        self.assertEqual(result['new']['reason'],'newly_active_theme')
-        self.assertTrue(all(r['change'] is None for r in result.values()))
-        now=snapshot();prior['themes'][1]['score']=None
-        result=rank_changes(now,prior,DAYS)['themes']
-        self.assertEqual(result['b']['reason'],'newly_available_score')
-        self.assertTrue(all(r['change'] is None for r in result.values()))
-        now['themes'][0]['score']=None
-        self.assertEqual(rank_changes(now,prior,DAYS)['themes']['a']['reason'],'unavailable_score')
-
-
-class CountertrendTests(unittest.TestCase):
-    def setup_short(self):
-        now=snapshot(scores=(40,30,60,20));now['themes'][3]['index']['trend']='Bullish'
-        now['relationships']=[relationship('Z','.03'),relationship('A','.03'),relationship('B','.02','b'),relationship('C','-.03'),relationship('D','-.04','b'),relationship('ZERO',0),relationship('BAD','.9',eligibility={'available':True,'eligible':False}),relationship('REL','.9',role='Related'),relationship('STRONG','.9','c'),relationship('WRONG','.9','d')]
-        return now
-
-    def test_short_filters_zero_and_ordering_without_directional_mutation(self):
-        now=self.setup_short();old=deepcopy(now);result=countertrend(now)
-        self.assertEqual([r['ticker'] for r in result['buckets']['resilient']['rows']],['A','Z','B'])
-        self.assertEqual([r['ticker'] for r in result['buckets']['snapback']['rows']],['D','C'])
-        self.assertEqual((result['stock_count'],result['relationship_count']),(5,5))
-        self.assertEqual(now,old)
-        self.assertFalse(any(r['qualifies'] for r in now['relationships']))
-        now['relationships'].append(relationship('MISSING','.9',eligibility={'available':False,'eligible':True}))
-        self.assertEqual(countertrend(now),result)
-
-    def test_ties_score_order_multitheme_dedup_and_extension_independence(self):
-        now=self.setup_short();now['relationships']=[relationship('Z','.03','b'),relationship('A','.03'),relationship('A','.03','b'),relationship('Z','-.03'),relationship('A','-.03','b')]
-        result=countertrend(now)
-        self.assertEqual(result['buckets']['resilient']['rows'],[{'ticker':'A','theme_id':'a'},{'ticker':'A','theme_id':'b'},{'ticker':'Z','theme_id':'b'}])
-        self.assertEqual(result['buckets']['snapback']['rows'][0]['theme_id'],'b')
-        self.assertEqual(result['buckets']['resilient']['stock_count'],2)
-        now['research']={'extension':{'state':'Normal'}}
-        self.assertEqual(countertrend(now),result)
-        now['research']['extension']['state']='Downside Extended'
-        self.assertEqual(countertrend(now),result)
-
-    def test_approved_long_symmetry_boundary_and_nondirectional_conservative(self):
-        now=snapshot(scores=(50,75,49,90));now['market_direction']='Long bias'
-        for t in now['themes']:t['index']['trend']='Bullish'
-        now['themes'][3]['index']['trend']='Bearish'
-        now['relationships']=[relationship('UP','.03'),relationship('UP2','.04','b'),relationship('DOWN','-.05'),relationship('WEAK','-.99','c'),relationship('BAD','.9','d')]
-        result=countertrend(now)
-        self.assertEqual(result['buckets']['resilient']['label'],'Strong Leaders / Pullback Watch')
-        self.assertEqual(result['buckets']['snapback']['label'],'Relative Weakness')
-        self.assertEqual([r['ticker'] for r in result['buckets']['resilient']['rows']],['UP2','UP'])
-        self.assertEqual(result['buckets']['snapback']['rows'],[{'ticker':'DOWN','theme_id':'a'}])
-        now['market_direction']='Observe'
-        self.assertFalse(countertrend(now)['available'])
-        self.assertEqual(countertrend(now)['relationship_count'],0)
-
     def test_enrichment_only_adds_research_does_not_mutate_core(self):
-        now=self.setup_short();now['exports']={'combined':'NASDAQ:A\n'};old=deepcopy(now)
+        now=snapshot();now['exports']={'combined':'NASDAQ:A\n'};old=deepcopy(now)
         enriched=enrich(now,{},DAYS,companies={'A':'Example Company'})
         self.assertEqual(now,old)
         self.assertEqual({k:v for k,v in enriched.items() if k!='research'},old)
@@ -259,17 +178,3 @@ class IntegrationTests(unittest.TestCase):
             self.assertEqual(result['market']['context']['SPY']['close'],'1')
             self.assertIsNone(store.research_at(DAYS[0],'themescope-vnext-1'))
             self.assertEqual(store.connection.total_changes,before)
-
-    def test_public_contract_whitelists_research_and_rejects_bad_references(self):
-        from scripts.build_cloudflare_demo import demo_snapshot
-        from scripts.build_public_snapshot import project_snapshot,SnapshotError
-        data=demo_snapshot();data['synthetic_fixture']=False
-        data['provider_health']={'status':'Healthy'};data['refreshed_at']=data['session']+'T22:00:00+00:00'
-        data['research']['private']='discard';data['research']['extension']['indices']['SPY']['secret']='discard'
-        result=project_snapshot(data,data['session'])
-        self.assertNotIn('private',result['research'])
-        self.assertNotIn('secret',result['research']['extension']['indices']['SPY'])
-        self.assertEqual(result['research']['ranks'],data['research']['ranks'])
-        self.assertNotIn('countertrend',data['research'])
-        data['research_v2']['list']['rows'].append(dict(data['research_v2']['list']['rows'][0],ticker='UNKNOWN',theme_id='missing'))
-        with self.assertRaises(SnapshotError):project_snapshot(data,data['session'])
