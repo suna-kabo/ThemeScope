@@ -7,6 +7,7 @@ latest safely completed session and refresh details.
 1. **Market** shows the current research side and SPY/QQQ evidence. IWM is context.
 2. **Themes** starts with the highest raw Theme Score. **State** combines that score
    with the raw **5-session Change** using the same rules in every market environment.
+   Open **Five-session movement** to see the largest raw gains and declines.
    Click a theme name for Full Theme. **Quick View** opens the secondary preview.
 3. **Primary** uses the current Long or Short market side to order eligible stocks
    inside researchable themes for chart review.

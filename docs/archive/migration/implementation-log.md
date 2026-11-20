@@ -37,7 +37,7 @@ The user authorizes Phases 2–4 with separate tested commits, then stop at Gate
 ## Completed work
 
 - Read all 14 initial bundle files and compared them with live GitHub main before
-  code changes. Full comparison: [preflight](../../vnext_preflight.md).
+  code changes. Full comparison: [preflight](../gates/vnext_preflight.md).
 - Captured an unchanged-main synthetic manual-runtime regression fixture:
   January 3, 2024; 563 stocks, 53 anchors; all theme scores/ranks, Primary exports,
   legacy history identifiers and the complete 64-case Market Matrix.

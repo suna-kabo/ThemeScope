@@ -1,4 +1,4 @@
-"""Offline vNext session orchestration; legacy runtime remains untouched.
+"""Offline vNext session orchestration.
 
 Consumes explicit completed sessions, typed price data and index histories. No
 provider, launch-date selection, evidence approval, or Market Matrix calculation.

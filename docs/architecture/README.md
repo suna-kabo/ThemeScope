@@ -32,5 +32,5 @@ flowchart LR
 See [provider/storage](provider-and-storage.md), [terminal actions](terminal-actions.md),
 [methodology](../methodology/README.md), and [project map](../development/project-structure.md).
 `vnext` identifiers remain stable for configuration, history, schema and Saved
-compatibility. Legacy modules/fixtures are retained for reproduction, not used to
-splice old ETF-based history into the current series.
+compatibility. Earlier ETF dashboard code is preserved in Git history. Its data
+and the current research series use separate formats.

@@ -39,14 +39,14 @@ It is not a trade-execution or signal-execution system.
 ## Branch and compatibility safety
 - main must stay usable.
 - Use a task branch for changes; keep main usable. Merge only within user-authorized scope.
-- Preserve legacy history.
+- Preserve existing local history and archived Git checkpoints.
 - Old ETF history and vNext history are incompatible.
 - Failed refresh must preserve the prior successful snapshot.
 - Use fixtures before live-provider tests.
 
 ## Engineering expectations
 - Python 3.12.
-- Prefer small modules over expanding generate_dashboard.py.
+- Keep runtime, provider, and research responsibilities in small modules.
 - SQLite is standard-library sqlite3 unless a strong reason requires otherwise.
 - Provider calls must be mockable.
 - Every calculation has unit tests with edge cases.
@@ -58,8 +58,8 @@ Permanent annotated gate-a, gate-b, gate-c, gate-d and gate-e-closed tags preser
 the original reviewed checkpoints. Do not move or replace them. The historical
 inspection/ fixture remains unchanged provenance. Merged inspection heads may be
 retired only after tag verification and an explicit branch-cleanup authorization.
-New inspection bundles must be allowlisted and explicitly requested; never include
-secrets, runtime DB, raw market data or absolute personal paths.
+Generate inspection bundles only on explicit request and from an allowlist. Exclude
+secrets, runtime databases, raw market data, and absolute personal paths.
 
 ## Current milestone and documentation
 Research Logic v2 and UI v3 follow the authorized master contract. Current research
@@ -73,6 +73,9 @@ See [the closure record](docs/operations/gate-e-closure.md) and
 not reinstate obsolete blockers. Stable vnext schema/path identifiers remain intact.
 
 ## Local application workflow
+The supported Windows commands are `ThemeScope.cmd`, `setup.cmd`,
+`configure-credentials.cmd`, and `backup-data.cmd`. Use the current
+[development checks](docs/development/README.md).
 Keep main usable and implement changes on scoped task branches. Validate current
 UI changes against the loopback app with synthetic data before committing.
 Preserve historical checkpoints through the verified annotated tags.

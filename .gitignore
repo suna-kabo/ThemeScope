@@ -7,7 +7,7 @@ __pycache__/
 /ThemeScope-delivery.zip
 /cache/
 
-# Local and historical reproduction outputs
+# Protect prior local outputs and virtual environments
 /.venv/
 /inputs/
 /site/
@@ -16,11 +16,11 @@ __pycache__/
 .env.*
 .env*
 
-# Local publication recovery stays private, outside the served site.
+# Protect any remaining historical recovery files.
 /.site-publication.lock
 /.site-publication/
 
-# Generated delivery archives and diagnostic reports stay local.
+# Protect local archives and reports from earlier checkouts.
 /downloads/*.zip
 /reports/latest_run.md
 /reports/v7_browser_verification.json

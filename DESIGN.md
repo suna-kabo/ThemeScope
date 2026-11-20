@@ -19,8 +19,7 @@ is a secondary disclosure inside the theme. Financial color is accompanied by te
 The shared CSS tokens in `static/vnext/app.css` define the current system:
 charcoal canvas `#191b1d`, light text `#eceeeb`, restrained semantic color,
 ruled rows and aligned tabular numbers. Self-hosted Figtree is bundled as
-`Research.woff2` with its pinned SIL OFL license. Historical Inter belongs to the
-separate legacy dashboard.
+`Research.woff2` with its pinned SIL OFL license.
 
 Desktop width supports comparison; mobile uses labeled research rows, wrapping
 navigation and deliberate filter disclosures. Browser text sizing, forced colors

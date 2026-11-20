@@ -196,10 +196,8 @@ class LaunchTests(unittest.TestCase):
         self.assertNotIn('AAL',original)
         with self.assertRaises(ValueError):resolve('NOT_REVIEWED',mapping)
 
-    def test_default_launchers_use_vnext_and_legacy_readers_are_explicit(self):
+    def test_windows_launchers_use_current_entry_points(self):
         self.assertIn('bootstrap_dev.py',(ROOT/'setup.cmd').read_text())
         self.assertIn('run_vnext.py',(ROOT/'ThemeScope.cmd').read_text())
-        for name in ('setup','refresh','open-dashboard','prepare-site','preview-site'):
-            self.assertTrue((ROOT/('legacy-'+name+'.cmd')).is_file())
-        for path in ('scripts/serve_local.py','src/themescope/local_history.py','tests/fixtures/v1/latest_snapshot.json'):
-            self.assertTrue((ROOT/path).is_file(),path)
+        self.assertIn('local_tools.py credentials',(ROOT/'configure-credentials.cmd').read_text())
+        self.assertIn('local_tools.py backup',(ROOT/'backup-data.cmd').read_text())

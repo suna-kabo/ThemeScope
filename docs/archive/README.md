@@ -18,13 +18,13 @@ Start current work from the [documentation index](../README.md).
 | [Design exploration](ui/design-plans/README.md) | Approved historical fixture review assets and design decisions |
 | [Relocation map](relocations.md) | Previous source paths and retained locations |
 
-## Stable inspection inputs
+## Original inspection references
 
-These historical documents keep their old paths because inspection tooling uses them:
+These documents describe the original inspection checkpoints:
 
-- [Gate A preflight](../vnext_preflight.md)
-- [Gate C provider report](../vnext_provider.md)
-- [Gate D UI report](../vnext_local_ui.md)
+- [Gate A preflight](gates/vnext_preflight.md)
+- [Gate C provider report](gates/vnext_provider.md)
+- [Gate D UI report](gates/vnext_local_ui.md)
 - [Approved product/methodology specification and dated amendments](../vnext/ThemeScope_vNext_Product_and_Methodology_Spec.md)
 
 The `inspection/` tree and original inspection branches remain historical synthetic
@@ -34,5 +34,5 @@ Historical local artifact paths may identify outputs no longer shipped in Git.
 
 The [main-publication plan](operations/main-publication-plan.md) and
 [12 November tooling verification](operations/publication-tooling-verification-2026-11-12.md)
-preserve the formerly unresolved cutover state. Current confirmed production
-status is [recorded separately](../operations/main-publication.md).
+record the cutover planning and verification. The
+[first deployment record](operations/main-publication.md) is also archived.

@@ -2,7 +2,8 @@
 
 ThemeScope is an end-of-day equity research application that runs on the user's
 computer. Market data, reviewed research, and personal bookmarks stay local.
-ThemeScope supports chart review through TradingView TXT downloads.
+The Windows workflow is Market → Themes → Primary. TradingView TXT downloads
+support chart review.
 
 - **Market** identifies the research side from the SPY and QQQ Market Matrix. IWM
   supplies small-cap context.

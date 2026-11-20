@@ -1,4 +1,4 @@
-"""Real loopback browser smoke, synthetic inputs only. Run explicitly at Gate D."""
+"""Browser smoke for the current loopback app using synthetic inputs."""
 from pathlib import Path
 import json,os,shutil,socket,sys,tempfile,threading,time
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))

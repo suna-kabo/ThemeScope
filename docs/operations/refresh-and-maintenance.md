@@ -32,7 +32,7 @@ recovery folder until you've checked the session and history. The current
 configuration is checked on startup and may require a refresh. The backup command
 never restores or overwrites live data.
 
-Fixture and legacy research history live separately. See the
+Fixture data uses a separate database under `runtime/vnext-fixture/`. See the
 [storage design](../architecture/provider-and-storage.md).
 
 ## SPY and QQQ rosters

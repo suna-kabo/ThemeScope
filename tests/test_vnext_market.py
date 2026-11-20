@@ -1,13 +1,21 @@
+import json
 import unittest,tempfile,subprocess,sys
 from pathlib import Path
 from src.themescope.domain import MarketRoster
 from src.themescope.market.rosters import load,update,effective,warnings
 from src.themescope.market.layer import market_layer,index_breadth
+from src.themescope.research_policy import market_truth_table
 from src.themescope.local_refresh_lock import RefreshLock,RefreshBusy
 from src.themescope.themes.calculations import bar_map
 from test_vnext_calculations import bar,SESSIONS
 
 class MarketTests(unittest.TestCase):
+    def test_all_market_matrix_cells_match_frozen_baseline(self):
+        fixture = Path(__file__).parent / 'fixtures/market_matrix.json'
+        expected = json.loads(fixture.read_text(encoding='utf-8'))['cases']
+        self.assertEqual(len(expected), 64)
+        self.assertEqual(market_truth_table(), expected)
+
     def test_separate_rosters_same_valid_set_coverage_and_iwm_context(self):
         names='ABCDE';sessions=SESSIONS[:60]
         bars=bar_map(bar(s,d,100+i) for s in (*names,'Z','SPY','QQQ','IWM') for i,d in enumerate(sessions))

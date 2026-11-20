@@ -20,7 +20,7 @@ IWM supplies context only. SPY and QQQ each require an effective approved consti
 roster; missing either blocks theme activation/Directional outputs. Stale rosters
 are advisory. Index breadth requires valid price/EMA data and at least 80% coverage;
 IWM has no constituent roster or breadth vote. The 64 frozen Matrix cases remain
-in [the regression suite](../../tests/test_research_policy.py).
+in [the regression suite](../../tests/test_vnext_market.py).
 
 ## Theme Strength and breadth
 

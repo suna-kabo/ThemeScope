@@ -7,7 +7,6 @@ must not require real Alpaca keys or make trading calls.
 
 ```sh
 python3 scripts/bootstrap_dev.py
-.venv-vnext/bin/python -m pip install --require-hashes --only-binary=:all: -r requirements.txt
 .venv-vnext/bin/python -m pip install -r requirements-dev.txt
 .venv-vnext/bin/python -m playwright install chromium
 .venv-vnext/bin/python -m unittest discover -s tests -v
@@ -16,17 +15,13 @@ python3 scripts/bootstrap_dev.py
 .venv-vnext/bin/python -m compileall -q src scripts tests
 node --check static/vnext/app.js
 node --check static/vnext/workspace.js
-node --check static/dashboard.js
-node tests/test_dashboard.js
 node tests/test_workspace.js
 ```
 
 On Windows substitute `.venv-vnext\Scripts\python.exe` and use `-X utf8`
-(or process-local `PYTHONUTF8=1`) for the full suite. Symlink tests require a
-symlink-capable account; Linux CI runs their unmodified assertions. Legacy reproduction needs
-the separate hash-pinned `requirements.txt`; do not replace it or its fixtures when
-changing current runtime dependencies. CI installs both legacy and current development
-requirements. `scripts/check_vnext.py` runs the full offline suite plus config checks.
+(or process-local `PYTHONUTF8=1`) for the full suite. `requirements-vnext.txt` pins the runtime. Development and CI use
+`requirements-dev.txt`, which includes the runtime pins and Playwright.
+`scripts/check_vnext.py` runs the full offline suite and config checks.
 
 ## Browser checks
 
@@ -58,7 +53,7 @@ Follow [AGENTS.md](../../AGENTS.md), [methodology](../methodology/README.md),
 [DESIGN.md](../../DESIGN.md) and [MOTION.md](../../MOTION.md). Work on a task branch;
 keep `main` usable. Changes to formulas, membership, lifecycle or provider behavior
 need their own explicit scope and meaningful tests. UI changes do not reclassify live
-validation. No CI/browser test uses account credentials. Preserve legacy compatibility and approved audit provenance.
+validation. No CI/browser test uses account credentials. Preserve storage compatibility and approved audit provenance.
 
 The [project map](project-structure.md) distinguishes active code, retained history
 and private generated state. The original [implementation handoff](../archive/handoff/Codex_vNext_Implementation_Handoff.md)
